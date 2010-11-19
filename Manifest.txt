@@ -1,0 +1,8 @@
+.autotest
+History.txt
+Manifest.txt
+README.txt
+Rakefile
+bin/kronk
+lib/kronk.rb
+test/test_kronk.rb
