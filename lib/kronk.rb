@@ -12,6 +12,7 @@ class Kronk
   VERSION = '1.0.0'
 
 
+  require 'kronk/file_response'
   require 'kronk/parser'
   require 'kronk/json_parser'
   require 'kronk/plist_parser'
@@ -22,26 +23,22 @@ class Kronk
   DEFAULT_CONFIG_FILE = File.expand_path "~/.kronk"
 
 
+  # Default cache file.
+  DEFAULT_CACHE_FILE = File.expand_path "~/.kronk_cache"
+
+
   # Default Content-Type header to parser mapping.
   DEFAULT_CONTENT_TYPES = {
-    /xml/i     => XMLParser,
-    /json|js/i => JSONParser,
-    /plist/i   => PLISTParser
-  }
-
-
-  # Default file type extension to parser mapping.
-  DEFAULT_FILE_TYPES = {
-    /\.xml$/i       => XMLParser,
-    /\.(json|js)$/i => JSONParser,
-    /\.plist$/i     => PLISTParser
+    'xml'     => 'XMLParser',
+    'json'    => 'JSONParser',
+    'js'      => 'JSONParser',
+    'plist'   => 'PLISTParser'
   }
 
 
   # Default config to use.
   DEFAULT_CONFIG = {
     :content_types => DEFAULT_CONTENT_TYPES,
-    :file_types    => DEFAULT_FILE_TYPES
   }
 
 
@@ -57,6 +54,11 @@ class Kronk
   # Load a config file and apply to Kronk.config.
 
   def self.load_config filepath=DEFAULT_CONFIG_FILE
+    conf          = YAML.load_file DEFAULT_CONFIG_FILE
+    content_types = conf.delete :content_types
+
+    conf[:content_types].merge!(content_types) if content_types
+    self.config.merge! conf
   end
 
 
@@ -90,7 +92,7 @@ class Kronk
   # Supports the following options:
   # :http_method:: String - the http method to use; defaults to GET
   # :data:: Hash/String - the data to pass to the http request
-  # :ignore_headers:: Bool - should headers be ignored; defaults to false
+  # :ignore_headers:: Bool/String/Array - defines which headers to exclude
   #
   # Returns a standard diff string with the non-matching attributes:
   #
@@ -112,5 +114,25 @@ class Kronk
   # :data:: Hash/String - the data to pass to the http request
 
   def self.retrieve query, options={}
+  end
+
+
+  ##
+  # Read http response from a file and return a HTTPResponse instance.
+
+  def self.retrieve_file path, options={}
+    path = DEFAULT_CACHE_FILE         if path == :cache
+    b_io = Net::BufferedIO.new        File.open(path, "r")
+    resp = Net::HTTPResponse.read_new b_io
+
+    resp.reading_body b_io, true do;end
+    resp
+  end
+
+
+  ##
+  # Make an http request to the given url and return an HTTPResponse instance.
+
+  def self.retrieve_url url, options={}
   end
 end
