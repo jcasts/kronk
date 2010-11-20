@@ -1,26 +1,68 @@
 = kronk
 
-* FIX (url)
+* https://github.com/yaksnrainbows/kronk
 
 == DESCRIPTION:
 
-FIX (describe your package)
+Run diffs against data from http responses. 
 
 == FEATURES/PROBLEMS:
 
-* FIX (list of features or problems)
+* Parse and diff data from http response body and/or headers.
+
+* Include or exclude particular data points.
+
+* Auto-queryer with optional param randomizing.
+
+* Supports json, basic xml, and plist.
+
+* Support for custom data parsers.
+
+* Support for test suites.
 
 == SYNOPSIS:
 
-  FIX (code sample of usage)
+Check if your json response returns the same data as your xml variety:
 
+  $ kronk http://host.com/path.json http://host.com/path.xml
+
+Compare headers only but exclude content type:
+
+  $ kronk -I -Content-Type http://host.com/path.json http://host.com/path.xml
+
+Compare both body and headers excluding content type:
+
+  $ kronk -i -Content-Type http://host.com/path.json http://host.com/path.xml
+
+Compare response with the previous call:
+
+  $ kronk --prev http://host.com/path
+
+Compare response with a local file:
+
+  $ kronk http://host.com/path.json ./saved_response.json
+
+Do a simple text diff on the http response, including headers:
+
+  $ kronk --raw -i http://host.com/A/path.json http://host.com/B/path.json
+
+Run it to display formatted data:
+
+  $ kronk http://host.com/path.json
+
+  $ kronk -i http://host.com/path.json
+
+Run it to display raw data with headers:
+
+  $ kronk --raw -i http://host.com/path.json
+  
 == REQUIREMENTS:
 
 * FIX (list of requirements)
 
 == INSTALL:
 
-* FIX (sudo gem install, anything else)
+* sudo gem install kronk
 
 == DEVELOPERS:
 
@@ -35,7 +77,7 @@ and generate the RDoc.
 
 (The MIT License)
 
-Copyright (c) 2010 FIX
+Copyright (c) 2010 Jeremie Castagna
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
