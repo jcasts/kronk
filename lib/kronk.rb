@@ -3,8 +3,7 @@ require 'plist'
 require 'json'
 require 'nokogiri'
 require 'differ'
-
-require 'net/http'
+require 'httpclient'
 
 class Kronk
 
@@ -69,8 +68,10 @@ class Kronk
   # request will compare against nil.
   #
   # Supports the following options:
-  # :http_method:: String - the http method to use; defaults to GET
   # :data:: Hash/String - the data to pass to the http request
+  # :headers:: Hash - extra headers to pass to the request
+  # :http_method:: Symbol - the http method to use; defaults to :get
+  # :query:: Hash/String - data to append to url query
   # :ignore:: String/Array - defines which data points to exclude
   # :ignore_headers:: Bool/String/Array - defines which headers to exclude
   #
@@ -90,8 +91,10 @@ class Kronk
   # request will compare against empty string.
   #
   # Supports the following options:
-  # :http_method:: String - the http method to use; defaults to GET
   # :data:: Hash/String - the data to pass to the http request
+  # :headers:: Hash - extra headers to pass to the request
+  # :http_method:: Symbol - the http method to use; defaults to :get
+  # :query:: Hash/String - data to append to url query
   # :ignore_headers:: Bool/String/Array - defines which headers to exclude
   #
   # Returns a standard diff string with the non-matching attributes:
@@ -110,29 +113,38 @@ class Kronk
   ##
   # Returns the value from a url, file, or cache as a String.
   # Options supported are:
-  # :http_method:: String - the http method to use; defaults to GET
   # :data:: Hash/String - the data to pass to the http request
+  # :headers:: Hash - extra headers to pass to the request
+  # :http_method:: Symbol - the http method to use; defaults to :get
+  # :query:: Hash/String - data to append to url query
 
   def self.retrieve query, options={}
   end
 
 
   ##
-  # Read http response from a file and return a HTTPResponse instance.
+  # Read http response from a file and return a HTTP::Message instance.
 
   def self.retrieve_file path, options={}
-    path = DEFAULT_CACHE_FILE         if path == :cache
-    b_io = Net::BufferedIO.new        File.open(path, "r")
-    resp = Net::HTTPResponse.read_new b_io
-
-    resp.reading_body b_io, true do;end
-    resp
+    path = DEFAULT_CACHE_FILE if path == :cache
+    HTTP::Message.new_response File.read(path)
   end
 
 
   ##
-  # Make an http request to the given url and return an HTTPResponse instance.
+  # Make an http request to the given uri and return a HTTP::Message instance.
+  # Supports the following options:
+  # :data:: Hash/String - the data to pass to the http request
+  # :headers:: Hash - extra headers to pass to the request
+  # :http_method:: Symbol - the http method to use; defaults to :get
+  # :query:: Hash/String - data to append to url query
 
-  def self.retrieve_url url, options={}
+  def self.retrieve_uri uri, options={}
+    data        = options[:data]
+    headers     = options[:headers]
+    http_method = options[:http_method] || :get
+    query       = options[:query]
+
+    HTTPClient.new.request http_method, uri, query, data
   end
 end
