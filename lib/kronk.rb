@@ -3,7 +3,9 @@ require 'plist'
 require 'json'
 require 'nokogiri'
 require 'differ'
-require 'httpclient'
+
+require 'net/http'
+
 
 class Kronk
 
@@ -11,6 +13,7 @@ class Kronk
   VERSION = '1.0.0'
 
 
+  require 'kronk/response_diff'
   require 'kronk/parser'
   require 'kronk/json_parser'
   require 'kronk/plist_parser'
@@ -36,7 +39,8 @@ class Kronk
 
   # Default config to use.
   DEFAULT_CONFIG = {
-    :content_types => DEFAULT_CONTENT_TYPES,
+    :content_types  => DEFAULT_CONTENT_TYPES,
+    :ignore_headers => ["Date", "Age"]
   }
 
 
@@ -57,6 +61,16 @@ class Kronk
 
     conf[:content_types].merge!(content_types) if content_types
     self.config.merge! conf
+  end
+
+
+  ##
+  # Creates the default config file at the given path.
+
+  def self.make_config_file filepath=DEFAULT_CONFIG_FILE
+    File.open filepath, "w+" do |file|
+      file << DEFAULT_CONFIG.to_yaml
+    end
   end
 
 

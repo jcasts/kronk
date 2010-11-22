@@ -48,7 +48,11 @@ class Kronk
 
     def self.retrieve_file path
       path = DEFAULT_CACHE_FILE if path == :cache
-      fix_response HTTP::Message.new_response(File.read(path))
+      b_io = Net::BufferedIO.new File.open(path, "r")
+      resp = Net::HTTPResponse.read_new b_io
+
+      resp.reading_body b_io, true do;end
+      resp
     end
 
 
@@ -56,17 +60,19 @@ class Kronk
     # Make an http request to the given uri and return a HTTP::Message instance.
     # Supports the following options:
     # :data:: Hash/String - the data to pass to the http request
+    # :follow_redirects:: Integer/Bool - number of times to follow redirects
     # :headers:: Hash - extra headers to pass to the request
     # :http_method:: Symbol - the http method to use; defaults to :get
+    # :proxy:: String - the proxy host and port
     # :query:: Hash/String - data to append to url query
-    #
-    # TODO: ignore ssl cert option
 
     def self.retrieve_uri uri, options={}
-      data        = options[:data]
-      headers     = options[:headers]
-      http_method = options[:http_method] || :get
-      query       = options[:query]
+      data              = options[:data]
+      headers           = options[:headers]
+      http_method       = options[:http_method] || :get
+      query             = options[:query]
+      proxy             = options[:proxy]
+      follow_redirects  = options[:follow_redirects]
 
       fix_response HTTPClient.new.request(http_method, uri, query, data)
     end
