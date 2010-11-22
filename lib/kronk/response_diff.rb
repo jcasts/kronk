@@ -48,11 +48,7 @@ class Kronk
 
     def self.retrieve_file path
       path = DEFAULT_CACHE_FILE if path == :cache
-      b_io = Net::BufferedIO.new File.open(path, "r")
-      resp = Net::HTTPResponse.read_new b_io
-
-      resp.reading_body b_io, true do;end
-      resp
+      Response.read_new File.open(path, "r")
     end
 
 
@@ -74,7 +70,7 @@ class Kronk
       proxy             = options[:proxy]
       follow_redirects  = options[:follow_redirects]
 
-      fix_response HTTPClient.new.request(http_method, uri, query, data)
+      
     end
 
 

@@ -13,11 +13,12 @@ class Kronk
   VERSION = '1.0.0'
 
 
+  require 'kronk/response'
   require 'kronk/response_diff'
-  require 'kronk/parser'
-  require 'kronk/json_parser'
-  require 'kronk/plist_parser'
-  require 'kronk/xml_parser'
+  #require 'kronk/parser'
+  #require 'kronk/json_parser'
+  #require 'kronk/plist_parser'
+  #require 'kronk/xml_parser'
 
 
   # Default config file to load. Defaults to ~/.kronk.
