@@ -11,7 +11,6 @@ class Kronk
   VERSION = '1.0.0'
 
 
-  require 'kronk/file_response'
   require 'kronk/parser'
   require 'kronk/json_parser'
   require 'kronk/plist_parser'
@@ -72,15 +71,18 @@ class Kronk
   # :headers:: Hash - extra headers to pass to the request
   # :http_method:: Symbol - the http method to use; defaults to :get
   # :query:: Hash/String - data to append to url query
-  # :ignore:: String/Array - defines which data points to exclude
+  # :ignore_data:: String/Array - defines which data points to exclude
   # :ignore_headers:: Bool/String/Array - defines which headers to exclude
   #
-  # Returns an Array with the non-matching attributes:
+  # Returns a diff Array:
   #
   #   compare "http://host.com/test.json", :cache
-  #   [{'foo' => 'bar'},{'foo' => 'baz'}]
+  #   [[:deleted, {'foo' => 'bar'},{'foo' => 'baz'}]]
 
   def self.compare query1, query2=:cache, options={}
+    resp1 = retrieve query1, options
+    resp2 = retrieve query2, options
+
   end
 
 
@@ -97,10 +99,10 @@ class Kronk
   # :query:: Hash/String - data to append to url query
   # :ignore_headers:: Bool/String/Array - defines which headers to exclude
   #
-  # Returns a standard diff string with the non-matching attributes:
+  # Returns a diff Array:
   #
   #   diff "http://host.com/test.json", :cache
-  #   '- "foo":"bar"\n+ "foo":"baz"'
+  #   ["same line 1\n", ['- "foo":"bar"\n','+ "foo":"baz"'], "same line 3\n"]
 
   def self.diff query1, query2=:cache, options={}
     resp1 = retrieve query1, options
@@ -125,67 +127,5 @@ class Kronk
       end
 
     Differ.diff_by_line str2, str1
-  end
-
-
-  ##
-  # Returns the value from a url, file, or cache as a String.
-  # Options supported are:
-  # :data:: Hash/String - the data to pass to the http request
-  # :headers:: Hash - extra headers to pass to the request
-  # :http_method:: Symbol - the http method to use; defaults to :get
-  # :query:: Hash/String - data to append to url query
-  #
-  # TODO: Log request speed.
-
-  def self.retrieve query, options={}
-    if query =~ %r{^\w+://}
-      retrieve_uri query, options
-    else
-      retrieve_file query
-    end
-  end
-
-
-  ##
-  # Read http response from a file and return a HTTP::Message instance.
-
-  def self.retrieve_file path
-    path = DEFAULT_CACHE_FILE if path == :cache
-    fix_response HTTP::Message.new_response(File.read(path))
-  end
-
-
-  ##
-  # Make an http request to the given uri and return a HTTP::Message instance.
-  # Supports the following options:
-  # :data:: Hash/String - the data to pass to the http request
-  # :headers:: Hash - extra headers to pass to the request
-  # :http_method:: Symbol - the http method to use; defaults to :get
-  # :query:: Hash/String - data to append to url query
-  #
-  # TODO: ignore ssl cert option
-
-  def self.retrieve_uri uri, options={}
-    data        = options[:data]
-    headers     = options[:headers]
-    http_method = options[:http_method] || :get
-    query       = options[:query]
-
-    fix_response HTTPClient.new.request(http_method, uri, query, data)
-  end
-
-
-  private
-
-  ##
-  # Workaround for bug in httpclient.
-
-  def self.fix_response resp
-    http_version = resp.header.http_version
-    return resp unless http_version && http_version =~ /^\d+(\.\d+)*$/
-
-    resp.header.http_version = resp.header.http_version.to_f
-    resp
   end
 end
