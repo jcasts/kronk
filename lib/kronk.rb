@@ -103,9 +103,27 @@ class Kronk
   #   '- "foo":"bar"\n+ "foo":"baz"'
 
   def self.diff query1, query2=:cache, options={}
-    str1 = retrieve query1, options
-    str2 = retrieve query2, options
-    # TODO: remove http headers if specified
+    resp1 = retrieve query1, options
+    resp2 = retrieve query2, options
+
+    str1, str2 =
+      case options[:ignore_headers]
+
+      when nil, false
+        [resp1.dump, resp2.dump]
+
+      when true
+        [resp1.body, resp2.body]
+
+      when Array, String
+        ignores = [*options[:ignore_headers]]
+        [resp1, resp2].each do |resp|
+          resp.header.all.delete_if{|h| ignores.include? h[0] }
+        end
+
+        [resp1.dump, resp2.dump]
+      end
+
     Differ.diff_by_line str2, str1
   end
 
@@ -117,17 +135,24 @@ class Kronk
   # :headers:: Hash - extra headers to pass to the request
   # :http_method:: Symbol - the http method to use; defaults to :get
   # :query:: Hash/String - data to append to url query
+  #
+  # TODO: Log request speed.
 
   def self.retrieve query, options={}
+    if query =~ %r{^\w+://}
+      retrieve_uri query, options
+    else
+      retrieve_file query
+    end
   end
 
 
   ##
   # Read http response from a file and return a HTTP::Message instance.
 
-  def self.retrieve_file path, options={}
+  def self.retrieve_file path
     path = DEFAULT_CACHE_FILE if path == :cache
-    HTTP::Message.new_response File.read(path)
+    fix_response HTTP::Message.new_response(File.read(path))
   end
 
 
@@ -138,6 +163,8 @@ class Kronk
   # :headers:: Hash - extra headers to pass to the request
   # :http_method:: Symbol - the http method to use; defaults to :get
   # :query:: Hash/String - data to append to url query
+  #
+  # TODO: ignore ssl cert option
 
   def self.retrieve_uri uri, options={}
     data        = options[:data]
@@ -145,6 +172,20 @@ class Kronk
     http_method = options[:http_method] || :get
     query       = options[:query]
 
-    HTTPClient.new.request http_method, uri, query, data
+    fix_response HTTPClient.new.request(http_method, uri, query, data)
+  end
+
+
+  private
+
+  ##
+  # Workaround for bug in httpclient.
+
+  def self.fix_response resp
+    http_version = resp.header.http_version
+    return resp unless http_version && http_version =~ /^\d+(\.\d+)*$/
+
+    resp.header.http_version = resp.header.http_version.to_f
+    resp
   end
 end
