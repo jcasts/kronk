@@ -17,55 +17,10 @@ class Kronk
     # :ignore_headers:: Bool/String/Array - defines which headers to exclude
 
     def self.retrieve_new uri1, uri2=:cache, options={}
-      resp1 = retrieve uri1, options
-      resp2 = retrieve uri2, options
+      resp1 = Request.retrieve uri1, options
+      resp2 = Request.retrieve uri2, options
 
       new resp1, resp2, options
-    end
-
-
-    ##
-    # Returns the value from a url, file, or cache as a String.
-    # Options supported are:
-    # :data:: Hash/String - the data to pass to the http request
-    # :headers:: Hash - extra headers to pass to the request
-    # :http_method:: Symbol - the http method to use; defaults to :get
-    # :query:: Hash/String - data to append to url query
-    #
-    # TODO: Log request speed.
-
-    def self.retrieve query, options={}
-      if query =~ %r{^\w+://}
-        retrieve_uri query, options
-      else
-        retrieve_file query
-      end
-    end
-
-
-    ##
-    # Read http response from a file and return a HTTPResponse instance.
-
-    def self.retrieve_file path
-      path = DEFAULT_CACHE_FILE if path == :cache
-      Response.read_new File.open(path, "r")
-    end
-
-
-    ##
-    # Make an http request to the given uri and return a HTTPResponse instance.
-    # Supports the following options:
-    # :data:: Hash/String - the data to pass to the http request
-    # :follow_redirects:: Integer/Bool - number of times to follow redirects
-    # :headers:: Hash - extra headers to pass to the request
-    # :http_method:: Symbol - the http method to use; defaults to :get
-    # :proxy:: String - the proxy host and port
-
-    def self.retrieve_uri uri, options={}
-      options     = options.dup
-      http_method = options.delete(:http_method) || :get
-
-      Request.call http_method, uri, options
     end
 
 
