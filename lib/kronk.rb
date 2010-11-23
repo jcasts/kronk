@@ -16,10 +16,8 @@ class Kronk
   require 'kronk/response'
   require 'kronk/request'
   require 'kronk/response_diff'
-  #require 'kronk/parser'
-  #require 'kronk/json_parser'
-  #require 'kronk/plist_parser'
-  #require 'kronk/xml_parser'
+  require 'kronk/plist_parser'
+  require 'kronk/xml_parser'
 
 
   # Default config file to load. Defaults to ~/.kronk.
@@ -33,9 +31,9 @@ class Kronk
   # Default Content-Type header to parser mapping.
   DEFAULT_CONTENT_TYPES = {
     'xml'     => 'XMLParser',
-    'json'    => 'JSONParser',
-    'js'      => 'JSONParser',
-    'plist'   => 'PLISTParser'
+    'json'    => 'JSON',
+    'js'      => 'JSON',
+    'plist'   => 'PlistParser'
   }
 
 
