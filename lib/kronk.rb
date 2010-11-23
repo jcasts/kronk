@@ -4,7 +4,12 @@ require 'json'
 require 'nokogiri'
 require 'differ'
 
-# TODO: Require activesupport or add pluralize method.
+# Support for new and old versions of ActiveSupport
+begin
+  require 'active_support/inflector'
+rescue LoadError
+  require 'activesupport'
+end
 
 require 'net/http'
 
@@ -42,7 +47,8 @@ class Kronk
   # Default config to use.
   DEFAULT_CONFIG = {
     :content_types  => DEFAULT_CONTENT_TYPES,
-    :ignore_headers => ["Date", "Age"]
+    :ignore_headers => ["Date", "Age"],
+    :diff_formater  => 'DiffFormatter'
   }
 
 
@@ -63,6 +69,14 @@ class Kronk
 
     conf[:content_types].merge!(content_types) if content_types
     self.config.merge! conf
+  end
+
+
+  ##
+  # Returns the formatter to use for the diff.
+
+  def self.diff_formatter
+    const_get config[:diff_formatter]
   end
 
 
