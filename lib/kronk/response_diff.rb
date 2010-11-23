@@ -62,13 +62,10 @@ class Kronk
     # :proxy:: String - the proxy host and port
 
     def self.retrieve_uri uri, options={}
-      data              = options[:data]
-      headers           = options[:headers]
-      http_method       = options[:http_method] || :get
-      proxy             = options[:proxy]
-      follow_redirects  = options[:follow_redirects]
+      options     = options.dup
+      http_method = options.delete(:http_method) || :get
 
-      
+      Request.call http_method, uri, options
     end
 
 
@@ -76,6 +73,10 @@ class Kronk
 
     attr_accessor :ignore_data, :ignore_headers
 
+
+    ##
+    # Create a ResponseDiff object based on two http responses.
+    # Response objects must respond to :raw, :raw_header, and :body.
 
     def initialize resp1, resp2, options={}
       @resp1 = resp1
@@ -98,7 +99,6 @@ class Kronk
     def raw_diff
       Differ.diff_by_line raw_response(@resp2), raw_response(@resp1)
     end
-
 
 
     ##
