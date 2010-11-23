@@ -49,6 +49,25 @@ class Kronk
 
 
     ##
+    # Returns a parsed response body as a data object.
+    # If a parser is given, it must respond to :parse with a single argument.
+
+    def parse_data resp, parser=nil
+      parser ||=
+        Kronk.config[:content_types].select do |key, value|
+          (resp['Content-Type'] =~ key) && value
+        end
+
+      parser = Kernel.const_get value if String === parser
+
+      raise MissingParser,
+        "No parser for Content-Type: #{resp['Content-Type']}" unless parser
+
+      parser.parse resp.body
+    end
+
+
+    ##
     # Returns a diff Array from the raw response Strings.
 
     def raw_diff
