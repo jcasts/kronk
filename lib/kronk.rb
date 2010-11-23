@@ -4,6 +4,8 @@ require 'json'
 require 'nokogiri'
 require 'differ'
 
+# TODO: Require activesupport or add pluralize method.
+
 require 'net/http'
 
 
