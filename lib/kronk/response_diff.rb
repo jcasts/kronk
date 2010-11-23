@@ -2,6 +2,8 @@ class Kronk
 
   class ResponseDiff
 
+    class MissingParser < Exception; end
+
     ##
     # Make requests, parse the responses return a ResponseDiff object.
     # If the second argument is omitted or is passed :cache, will
@@ -44,7 +46,9 @@ class Kronk
     ##
     # Returns a diff Array based on the responses' parsed data.
 
-    def data_diff
+    def data_diff exclude_headers=@ignore_headers
+      data_response(@resp2, exclude_headers)
+      data_response(@resp1, exclude_headers)
     end
 
 
@@ -52,26 +56,52 @@ class Kronk
     # Returns a parsed response body as a data object.
     # If a parser is given, it must respond to :parse with a single argument.
 
-    def parse_data resp, parser=nil
-      parser ||=
-        Kronk.config[:content_types].select do |key, value|
-          (resp['Content-Type'] =~ key) && value
-        end
-
-      parser = Kernel.const_get value if String === parser
+    def data_response resp, parser=nil, exclude_headers=@ignore_headers
+      parser ||= Kronk.parser_for resp['Content-Type']
 
       raise MissingParser,
         "No parser for Content-Type: #{resp['Content-Type']}" unless parser
 
-      parser.parse resp.body
+      body_data = parser.parse resp.body
+      head_data = data_response_header resp, exclude_headers
+
+      output = {}
+      output['body']   = body_data
+      output['header'] = head_data if head_data
+
+      output
+    end
+
+
+    ##
+    # Takes a http response instance and returns the parsed header part of the
+    # response without the specified headers.
+
+    def data_response_header resp, exclude_headers=@ignore_headers
+      header = resp.header.to_hash
+
+      case exclude_headers
+      when nil, false
+        header
+
+      when Array, String
+        [*exclude_headers].each do |excluded_header|
+          header.delete excluded_header
+         end
+         header
+
+      when true
+        nil
+      end
     end
 
 
     ##
     # Returns a diff Array from the raw response Strings.
 
-    def raw_diff
-      Differ.diff_by_line raw_response(@resp2), raw_response(@resp1)
+    def raw_diff exclude_headers=@ignore_headers
+      Differ.diff_by_line raw_response(@resp2, exclude_headers),
+                          raw_response(@resp1, exclude_headers)
     end
 
 

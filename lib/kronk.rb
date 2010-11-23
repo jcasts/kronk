@@ -32,10 +32,10 @@ class Kronk
 
   # Default Content-Type header to parser mapping.
   DEFAULT_CONTENT_TYPES = {
-    'xml'     => 'XMLParser',
-    'json'    => 'JSON',
     'js'      => 'JSON',
-    'plist'   => 'PlistParser'
+    'json'    => 'JSON',
+    'plist'   => 'PlistParser',
+    'xml'     => 'XMLParser'
   }
 
 
@@ -63,6 +63,23 @@ class Kronk
 
     conf[:content_types].merge!(content_types) if content_types
     self.config.merge! conf
+  end
+
+
+  ##
+  # Returns the config-defined parser class for a given content type.
+
+  def self.parser_for content_type
+    parser_pair =
+      config[:content_types].select do |key, value|
+        (content_type =~ %r{#{key}}) && value
+      end
+
+    return if parser_pair.empty?
+
+    parser = parser_pair[0][1]
+    parser = const_get parser if String === parser || Symbol === parser
+    parser
   end
 
 
