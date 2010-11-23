@@ -9,8 +9,12 @@ class Kronk
     # Takes an xml string and returns a data hash.
 
     def self.parse str
-      root_node = Nokogiri.parse str
-      build_hash root_node.children
+      root_node = Nokogiri.XML str do |config|
+        config.default_xml.noblanks
+      end
+
+      hash = build_hash root_node.children
+      hash.values.first
     end
 
 
@@ -21,13 +25,21 @@ class Kronk
       case xml_node
 
       when Nokogiri::XML::Element
-        name = xml_node.name
-        data = build_hash xml_node.children
+        name     = xml_node.name
+        datatype = xml_node.attr :type
+        data     = build_hash xml_node.children
 
+        data = case datatype
+               when 'symbol'  then data.to_sym
+               when 'integer' then data.to_i
+               when 'float'   then data.to_f
+               else
+                 data
+               end
 
         data = [*data.values[0]] if
           Hash === data && data.keys.length == 1 &&
-            data.keys.first.pluralize == name
+            (data.keys.first.pluralize == name || data.keys.first == name)
 
         if hash.has_key?(name)
           parent_depth = get_depth hash[name]
@@ -40,14 +52,14 @@ class Kronk
           hash[name] = data
         end
 
+        return hash
 
       when Nokogiri::XML::NodeSet
         return if xml_node.empty?
-        return xml_node[0].to_s if xml_node.length == 1 &&
-          Nokogiri::XML::Text === xml_node.first
+        return xml_node[0].text if xml_node.length == 1 &&
+          Nokogiri::XML::Text === xml_node[0]
 
         xml_node.each do |node|
-          name = node.name
           build_hash node, hash
         end
 
