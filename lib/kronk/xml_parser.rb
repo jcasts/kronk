@@ -26,15 +26,16 @@ class Kronk
 
 
         data = [*data.values[0]] if
-              Hash === data && data.keys.length == 1 &&
-                data.keys.first.pluralize == name
+          Hash === data && data.keys.length == 1 &&
+            data.keys.first.pluralize == name
 
         if hash.has_key?(name)
-          if Array === data
-            hash[name] = [*hash[name]].concat data
-          else
-            hash[name] = [*hash[name]] << data
-          end
+          parent_depth = get_depth hash[name]
+          child_depth  = get_depth data
+
+          hash[name] = [hash[name]] unless parent_depth > child_depth
+          hash[name] << data
+
         else
           hash[name] = data
         end
@@ -52,6 +53,21 @@ class Kronk
 
         return hash
       end
+    end
+
+
+    ##
+    # Returns the depth of an array.
+
+    def self.get_depth ary
+      depth = 0
+      curr  = [ary]
+      while Array === curr.first
+        curr = curr.first
+        depth = depth.next
+      end
+
+      depth
     end
   end
 end
