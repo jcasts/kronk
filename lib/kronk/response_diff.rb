@@ -44,7 +44,7 @@ class Kronk
 
 
     ##
-    # Read http response from a file and return a HTTP::Message instance.
+    # Read http response from a file and return a HTTPResponse instance.
 
     def self.retrieve_file path
       path = DEFAULT_CACHE_FILE if path == :cache
@@ -53,36 +53,22 @@ class Kronk
 
 
     ##
-    # Make an http request to the given uri and return a HTTP::Message instance.
+    # Make an http request to the given uri and return a HTTPResponse instance.
     # Supports the following options:
     # :data:: Hash/String - the data to pass to the http request
     # :follow_redirects:: Integer/Bool - number of times to follow redirects
     # :headers:: Hash - extra headers to pass to the request
     # :http_method:: Symbol - the http method to use; defaults to :get
     # :proxy:: String - the proxy host and port
-    # :query:: Hash/String - data to append to url query
 
     def self.retrieve_uri uri, options={}
       data              = options[:data]
       headers           = options[:headers]
       http_method       = options[:http_method] || :get
-      query             = options[:query]
       proxy             = options[:proxy]
       follow_redirects  = options[:follow_redirects]
 
       
-    end
-
-
-    ##
-    # Workaround for bug in httpclient.
-
-    def self.fix_response resp
-      http_version = resp.header.http_version
-      return resp unless http_version && http_version =~ /^\d+(\.\d+)*$/
-
-      resp.header.http_version = resp.header.http_version.to_f
-      resp
     end
 
 
@@ -110,37 +96,33 @@ class Kronk
     # Returns a diff Array from the raw response Strings.
 
     def raw_diff
+      Differ.diff_by_line raw_response(@resp2), raw_response(@resp1)
     end
 
 
 
     ##
-    # Takes a HTTP::Message instance and returns a raw http response String
+    # Takes a http response instance and returns a raw http response String
     # without the specified headers.
 
     def raw_response resp, exclude_headers=@ignore_headers
-      case exclude_headers
-
-      when nil, false
-        resp.dump
-
-      when true
-        resp.body
-
-      when Array, String
-        ignores = [*excluded_headers]
-        resp.header.all.delete_if{|h| ignores.include? h[0] }
-        resp.dump
-      end
+      raw_headers = raw_response_header resp, exclude_headers
+      [raw_headers, resp.body].compact.join "\r\n\r\n"
     end
 
+
+    ##
+    # Takes a http response instance and returns the raw header part of the
+    # response without the specified headers.
 
     def raw_response_header resp, exclude_headers=@ignore_headers
       case exclude_headers
       when nil, false
+        resp.raw_header
 
       when Array, String
-        ignores = [*excluded_headers]
+        ignores = [*exclude_headers]
+        resp.raw_header.gsub %r{^(#{ignores.join("|")}).*$}im, ''
 
       when true
         nil

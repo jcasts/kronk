@@ -10,12 +10,47 @@ class Kronk
 
     def self.read_new io
       io   = Net::BufferedIO.new io unless Net::BufferedIO === io
+      io.debug_output = socket_io = StringIO.new
+
       resp = super io
-
       resp.reading_body io, true do;end
-      resp.instance_variable_set "@socket", io
-
       resp.extend Helpers
+
+      r_req, r_resp, r_bytes = read_raw_from socket_io
+      resp.instance_variable_set "@raw", r_resp
+
+      resp
+    end
+
+
+    ##
+    # Read the raw response from a debug_output instance and return an array
+    # containing the raw request, response, and number of bytes received.
+
+    def self.read_raw_from debug_io
+      req = nil
+      resp = ""
+      bytes = nil
+
+      debug_io.rewind
+      output = debug_io.read.split "\n"
+
+      if output.first =~ %r{<-\s(.*)}
+        req = instance_eval $1
+        output.delete_at 0
+      end
+
+      if output.last =~ %r{read (\d+) bytes}
+        bytes = $1.to_i
+        output.delete_at -1
+      end
+
+      output.map do |line|
+        next unless line[0..2] == "-> "
+        resp << instance_eval(line[2..-1])
+      end
+
+      [req, resp, bytes]
     end
 
 
@@ -25,28 +60,10 @@ class Kronk
     module Helpers
 
       ##
-      # Returns the IO object used for the socket.
-
-      def socket_io
-        @socket.instance_variable_get "@io"
-      end
-
-
-      ##
       # Returns the raw http response.
 
       def raw
-        io       = socket_io.dup
-        raw_resp = ""
-        max_pos  = io.pos
-
-        io.rewind
-
-        while io.pos < max_pos
-          raw_resp << io.getc
-        end
-
-        raw_resp
+        @raw
       end
 
 

@@ -14,6 +14,7 @@ class Kronk
 
 
   require 'kronk/response'
+  require 'kronk/request'
   require 'kronk/response_diff'
   #require 'kronk/parser'
   #require 'kronk/json_parser'
@@ -95,9 +96,8 @@ class Kronk
   #   [[:deleted, {'foo' => 'bar'},{'foo' => 'baz'}]]
 
   def self.compare query1, query2=:cache, options={}
-    resp1 = retrieve query1, options
-    resp2 = retrieve query2, options
-
+    diff = ResponseDiff.retrieve_new query1, query2, options
+    diff.data_diff
   end
 
 
@@ -120,27 +120,7 @@ class Kronk
   #   ["same line 1\n", ['- "foo":"bar"\n','+ "foo":"baz"'], "same line 3\n"]
 
   def self.diff query1, query2=:cache, options={}
-    resp1 = retrieve query1, options
-    resp2 = retrieve query2, options
-
-    str1, str2 =
-      case options[:ignore_headers]
-
-      when nil, false
-        [resp1.dump, resp2.dump]
-
-      when true
-        [resp1.body, resp2.body]
-
-      when Array, String
-        ignores = [*options[:ignore_headers]]
-        [resp1, resp2].each do |resp|
-          resp.header.all.delete_if{|h| ignores.include? h[0] }
-        end
-
-        [resp1.dump, resp2.dump]
-      end
-
-    Differ.diff_by_line str2, str1
+    diff = ResponseDiff.retrieve_new query1, query2, options
+    diff.raw_diff
   end
 end
