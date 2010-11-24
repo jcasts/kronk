@@ -45,10 +45,15 @@ class Kronk
 
     ##
     # Returns a diff Array based on the responses' parsed data.
+    # Supports the following options:
+    # :parser:: Parser class or instance that responds to :parse
+    # :ignore_data:: Ignore specific data points in the body
+    # :ignore_headers:: Array of header Strings or Boolean
 
-    def data_diff exclude_headers=@ignore_headers
-      data_response(@resp2, exclude_headers)
-      data_response(@resp1, exclude_headers)
+    def data_diff options={}
+      str1 = ordered_data_string data_response(@resp1, options)
+      str2 = ordered_data_string data_response(@resp2, options)
+      Differ.diff_by_line str2, str1
     end
 
 
@@ -56,14 +61,22 @@ class Kronk
     # Returns a parsed response body as a data object.
     # If a parser is given, it must respond to :parse with a single argument.
 
-    def data_response resp, parser=nil, exclude_headers=@ignore_headers
-      parser ||= Kronk.parser_for resp['Content-Type']
+    def data_response resp, options={}
+      parser = options[:parser] || Kronk.parser_for resp['Content-Type']
+
+      options = {:ignore_headers => @ignore_headers,
+                 :ignore_data    => @ignore_data}.merge options
+
+      ignore_headers = options[:ignore_headers]
+      ignore_data    = options[:ignore_data]
 
       raise MissingParser,
         "No parser for Content-Type: #{resp['Content-Type']}" unless parser
 
+      head_data = data_response_header resp, ignore_headers
+
       body_data = parser.parse resp.body
-      head_data = data_response_header resp, exclude_headers
+      body_data = exclude_data body_data, ignore_data
 
       output = {}
       output['body']   = body_data
@@ -93,6 +106,13 @@ class Kronk
       when true
         nil
       end
+    end
+
+
+    ##
+    # Remove specific data points from a hash or array.
+
+    def exclude_data data, data_points
     end
 
 
