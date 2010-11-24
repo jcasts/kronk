@@ -5,7 +5,6 @@ class Kronk
 
   class Request
 
-
     ##
     # Follows the redirect from a 30X response object and decrease the
     # number of redirects left if it's an Integer.
@@ -22,7 +21,7 @@ class Kronk
     # Check the rdir value to figure out if redirect should be followed.
 
     def self.follow_redirect? resp, rdir
-      resp.status =~ /^30\d$/ &&
+      resp.code =~ /^30\d$/ &&
       (rdir == true || Integer === rdir && rdir > 0)
     end
 
