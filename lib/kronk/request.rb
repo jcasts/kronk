@@ -41,7 +41,7 @@ class Kronk
       if query =~ %r{^\w+://}
         retrieve_uri query, options
       else
-        retrieve_file query
+        retrieve_file query, options
       end
     end
 
