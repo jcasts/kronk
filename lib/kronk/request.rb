@@ -1,11 +1,37 @@
 class Kronk
 
+  ##
+  # Request wrapper class for net/http.
+
   class Request
+
+
+    ##
+    # Follows the redirect from a 30X response object and decrease the
+    # number of redirects left if it's an Integer.
+
+    def self.follow_redirect resp, options={}
+      rdir = options[:follow_redirects]
+      rdir = rdir - 1 if Integer === rdir && rdir > 0
+
+      retrieve_uri resp['Location'], options.merge(:follow_redirects => rdir)
+    end
+
+
+    ##
+    # Check the rdir value to figure out if redirect should be followed.
+
+    def self.follow_redirect? resp, rdir
+      resp.status =~ /^30\d$/ &&
+      (rdir == true || Integer === rdir && rdir > 0)
+    end
+
 
     ##
     # Returns the value from a url, file, or cache as a String.
     # Options supported are:
     # :data:: Hash/String - the data to pass to the http request
+    # :follow_redirects:: Integer/Bool - number of times to follow redirects
     # :headers:: Hash - extra headers to pass to the request
     # :http_method:: Symbol - the http method to use; defaults to :get
     # :query:: Hash/String - data to append to url query
@@ -24,9 +50,14 @@ class Kronk
     ##
     # Read http response from a file and return a HTTPResponse instance.
 
-    def self.retrieve_file path
+    def self.retrieve_file path, options={}
       path = DEFAULT_CACHE_FILE if path == :cache
-      Response.read_new File.open(path, "r")
+      resp = Response.read_new File.open(path, "r")
+
+      resp = follow_redirect resp, options if
+        follow_redirect? resp, options[:follow_redirects]
+
+      resp
     end
 
 
@@ -43,7 +74,12 @@ class Kronk
       options     = options.dup
       http_method = options.delete(:http_method) || :get
 
-      self.call http_method, uri, options
+      resp = self.call http_method, uri, options
+
+      resp = follow_redirect resp, options if
+        follow_redirect? resp, options[:follow_redirects]
+
+      resp
     end
 
 
