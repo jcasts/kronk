@@ -33,7 +33,7 @@ class Kronk
 
     ##
     # Create a ResponseDiff object based on two http responses.
-    # Response objects must respond to :raw, :raw_header, and :body.
+    # Response objects must respond to :raw, :raw_header, :header, and :body.
 
     def initialize resp1, resp2, options={}
       @resp1 = resp1
@@ -92,6 +92,48 @@ class Kronk
 
       when true
         nil
+      end
+    end
+
+
+    ##
+    # Returns a data string that is diff-able, meaning sorted by
+    # Hash keys when available.
+
+    def ordered_data_string data, indent=0
+      case data
+
+      when Hash
+        output = "{\n"
+
+        key_width = 0
+        data.keys.each do |k|
+          key_width = k.inspect.length if k.inspect.length > key_width
+        end
+
+        data_values =
+          data.map do |key, value|
+            pad = " " * indent
+            subdata = ordered_data_string value, indent + 1
+            "#{pad}#{key.inspect.ljust key_width} => #{subdata}"
+          end
+
+        output << data_values.sort.join(",\n") << "\n"
+
+        output << "#{" " * indent}}"
+
+      when Array
+        output = "[\n"
+
+        data.each do |value|
+          pad = " " * indent
+          output << "#{pad}#{ordered_data_string value, indent + 1},\n"
+        end
+
+        output << "#{" " * indent}]"
+
+      else
+        data.inspect
       end
     end
 
