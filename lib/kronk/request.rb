@@ -21,7 +21,7 @@ class Kronk
     # Check the rdir value to figure out if redirect should be followed.
 
     def self.follow_redirect? resp, rdir
-      resp.code =~ /^30\d$/ &&
+      resp.code.to_s =~ /^30\d$/ &&
       (rdir == true || Integer === rdir && rdir > 0)
     end
 
@@ -67,11 +67,14 @@ class Kronk
     # :follow_redirects:: Integer/Bool - number of times to follow redirects
     # :headers:: Hash - extra headers to pass to the request
     # :http_method:: Symbol - the http method to use; defaults to :get
-    # :proxy:: String - the proxy host and port
+    #
+    # Note: if no http method is specified and data is given, will default
+    # to using a post request.
 
     def self.retrieve_uri uri, options={}
       options     = options.dup
-      http_method = options.delete(:http_method) || :get
+      http_method = options.delete(:http_method)
+      http_method ||= options[:data] ? :post : :get
 
       resp = self.call http_method, uri, options
 
@@ -89,7 +92,6 @@ class Kronk
     # :follow_redirects:: Integer/Bool - number of times to follow redirects
     # :headers:: Hash - extra headers to pass to the request
     # :http_method:: Symbol - the http method to use; defaults to :get
-    # :proxy:: String - the proxy host and port
 
     def self.call http_method, uri, options={}
       uri  = URI.parse uri unless URI === uri

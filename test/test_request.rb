@@ -3,6 +3,56 @@ require 'test/test_helper'
 class TestRequest < Test::Unit::TestCase
 
 
+  def test_retrieve_uri
+    expect_request "GET", "http://example.com/request/path?foo=bar"
+    Kronk::Request.retrieve_uri "http://example.com/request/path?foo=bar"
+  end
+
+
+  def test_retrieve_uri_redirect
+    resp = expect_request "GET", "http://example.com/request/path?foo=bar",
+            :status => '301'
+
+    Kronk::Request.expects(:follow_redirect).
+      with resp, :follow_redirects => true
+
+    Kronk::Request.retrieve_uri "http://example.com/request/path?foo=bar",
+      :follow_redirects => true
+  end
+
+
+  def test_retrieve_uri_redirect_3_times
+    resp = expect_request "POST", "http://example.com/request/path?foo=bar",
+              :status => '301', :data => "foo=bar"
+
+    Kronk::Request.expects(:follow_redirect).
+      with resp, :follow_redirects => 3, :data => {:foo => "bar"}
+
+    Kronk::Request.retrieve_uri "http://example.com/request/path?foo=bar",
+      :follow_redirects => 3, :data => {:foo => "bar"}
+  end
+
+
+  def test_retrieve_uri_redirect_none
+    expect_request "GET", "http://example.com/request/path?foo=bar",
+      :status => 301
+
+    Kronk::Request.expects(:follow_redirect).never
+
+    Kronk::Request.retrieve_uri "http://example.com/request/path?foo=bar"
+  end
+
+  def test_retrieve_uri_post
+    expect_request "POST", "http://example.com/request/path?foo=bar",
+      :data => 'test=thing', :headers => {'X-THING' => 'thing'}
+
+    Kronk::Request.retrieve_uri "http://example.com/request/path?foo=bar",
+      :http_method => :post,
+      :data => {:test => "thing"},
+      :headers => {'X-THING' => 'thing'}
+  end
+
+
   def test_call_post
     expect_request "POST", "http://example.com/request/path?foo=bar",
       :data => {'test' => 'thing'}, :headers => {'X-THING' => 'thing'}
@@ -50,6 +100,8 @@ class TestRequest < Test::Unit::TestCase
     uri  = URI.parse url
 
     resp = mock 'resp'
+    resp.stubs(:code).returns(options[:status] || '200')
+
     http = mock 'http'
     socket = mock 'socket'
 
@@ -64,8 +116,10 @@ class TestRequest < Test::Unit::TestCase
 
     http.expects(:instance_variable_get).with("@socket").returns socket
 
-    Net::HTTP.expects(:start).with(uri.host, uri.port).yields http
+    Net::HTTP.expects(:start).with(uri.host, uri.port).yields(http).returns resp
 
     Kronk::Response.expects(:read_raw_from).returns ["", mock_200_response, 0]
+
+    resp
   end
 end
