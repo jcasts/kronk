@@ -119,6 +119,8 @@ class Kronk
         when Array then obj.delete_at k
         end
       end
+
+      data
     end
 
 
