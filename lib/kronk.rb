@@ -20,6 +20,7 @@ class Kronk
   VERSION = '1.0.0'
 
 
+  require 'kronk/data_set'
   require 'kronk/response'
   require 'kronk/request'
   require 'kronk/response_diff'

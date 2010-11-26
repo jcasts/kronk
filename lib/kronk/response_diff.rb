@@ -76,7 +76,7 @@ class Kronk
       head_data = data_response_header resp, ignore_headers
 
       body_data = parser.parse resp.body
-      body_data = exclude_data body_data, ignore_data
+      body_data = delete_data_points body_data, ignore_data if ignore_data
 
       output = {}
       output['body']   = body_data
@@ -113,7 +113,7 @@ class Kronk
     # Remove specific data points from an embedded data structure.
 
     def delete_data_points data, data_paths
-      find_data data_paths do |obj, k|
+      DataSet.new(data).find_data data_paths do |obj, k|
         case obj
         when Hash then obj.delete k
         when Array then obj.delete_at k
@@ -121,131 +121,6 @@ class Kronk
       end
 
       data
-    end
-
-
-    ##
-    # Find specific data points from a nested hash or array data structure.
-    # If a block is given, will pass it any matched parent data object path,
-    # key, and value.
-    #
-    # Data points must be an Array or String with a glob-like format.
-    # Special characters are: / * = | \ and are interpreted as follows:
-    # :key/ - walk down tree by one level from key
-    # :*/key - walk down tree from any parent with key as a child
-    # :key1|key2 - return elements with key value of key1 or key2
-    # :key=val - return elements where key has a value of val
-    # :key\* - return root-level element with key "key*"
-    #
-    # Other examples:
-    #   find_data data, root/**=invalid|
-    #   # Returns an Array of grand-children key/value pairs
-    #   # where the value is 'invalid' or blank
-
-    def find_data data, data_paths, &block
-      [*data_paths].each do |data_path|
-
-        while data_path do
-          key, value, recursive, data_path = parse_data_path data_path
-          yield_data_points data, key, value, recursive, &block
-        end
-      end
-    end
-
-
-    ##
-    # Parses a given data point and returns an array with the following:
-    # - Key to match
-    # - Value to match
-    # - Recursive matching
-    # - New data path value
-
-    def parse_data_path data_path
-      data_path  = data_path.dup
-      key        = nil
-      value      = nil
-      recursive  = false
-
-      until key && key != "**" || value || data_path.empty? do
-        value = data_path.slice!(%r{((.*?[^\\])+?/)})
-        (value ||= data_path).sub! /\/$/, ''
-        data_path = nil if value == data_path
-
-        key   = value.slice! %r{((.*?[^\\])+?=)}
-        key, value = value, nil if key.nil?
-        key.sub! /\=$/, ''
-
-        value = parse_path_item value if value
-
-        if key =~ /^\*{2,}$/
-          key = /.*/
-          recursive = true
-        else
-          parse_path_item key
-        end
-      end
-
-      [key, value, recursive, data_path]
-    end
-
-
-    ##
-    # Decide whether to make path item a regex or not.
-
-    def parse_path_item str
-      if str =~ /(^|[^\\])(\*|\?|\|)/
-        str.gsub!(/(^|[^\\])(\*|\?)/, '\1.\2')
-        str = /#{str}/
-      else
-        str.gsub! "\\", ""
-      end
-
-      str
-    end
-
-
-    ##
-    # Yield data object and key, if a specific key or value matches
-    # the given data.
-
-    def yield_data_points data, mkey, mvalue=nil, recursive=false, &block
-      return unless Hash === data || Array === data
-
-      each_data_item data do |key, value|
-        found = match_data_item(mkey, key) &&
-                match_data_item(mvalue, value)
-
-        yield data, key if found
-        yield_data_points data[key], mkey, mvalue, true, &block if recursive
-      end
-    end
-
-
-    ##
-    # Check if data key or value is a match for nested data searches.
-
-    def match_data_item item1, item2
-      if Regexp === item1
-        item2.to_s =~ item1
-      elsif item1.nil?
-        true
-      else
-        item2.to_s == item1.to_s
-      end
-    end
-
-
-    ##
-    # Universal iterator for Hash and Array objects.
-
-    def each_data_item data, &block
-      if Hash === data
-        data.each &block
-      elsif Array === data
-        data.each_with_index do |val, i|
-          block.call i, val
-        end
-      end
     end
 
 
