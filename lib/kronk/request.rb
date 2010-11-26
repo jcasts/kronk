@@ -136,7 +136,7 @@ class Kronk
         out.join "&"
 
       when Hash
-        out = data.map do |key, value|
+        out = data.sort.map do |key, value|
           key = param.nil? ? key : "#{param}[#{key}]"
           build_query value, key
         end
