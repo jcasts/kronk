@@ -47,7 +47,7 @@ class Kronk
 
   # Default config to use.
   DEFAULT_CONFIG = {
-    :content_types  => DEFAULT_CONTENT_TYPES,
+    :content_types  => DEFAULT_CONTENT_TYPES.dup,
     :ignore_headers => ["Date", "Age"],
     :diff_formater  => 'DiffFormatter'
   }
@@ -68,7 +68,14 @@ class Kronk
     conf          = YAML.load_file DEFAULT_CONFIG_FILE
     content_types = conf.delete :content_types
 
-    conf[:content_types].merge!(content_types) if content_types
+    if conf[:requires]
+      requires = [*conf.delete(:requires)]
+      self.config[:requires] ||= []
+      requires.each{|lib| require lib }
+      self.config[:requires].concat requires
+    end
+
+    self.config[:content_types].merge!(content_types) if content_types
     self.config.merge! conf
   end
 
