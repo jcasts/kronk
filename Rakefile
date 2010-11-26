@@ -13,6 +13,8 @@ Hoe.spec 'kronk' do
   self.extra_deps << ['nokogiri',      '>=1.3.3']
   self.extra_deps << ['differ',        '>=0.1.1']
   self.extra_deps << ['activesupport', '>=2.0.0']
+
+  self.extra_dev_deps << ['mocha', '>=0.9.10']
 end
 
 # vim: syntax=ruby

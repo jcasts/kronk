@@ -49,7 +49,7 @@ class Kronk
   DEFAULT_CONFIG = {
     :content_types  => DEFAULT_CONTENT_TYPES.dup,
     :ignore_headers => ["Date", "Age"],
-    :diff_formater  => 'DiffFormatter'
+    :diff_formatter => 'Differ::Format::Ascii'
   }
 
 
@@ -81,10 +81,35 @@ class Kronk
 
 
   ##
+  # Creates the default config file at the given path.
+
+  def self.make_config_file filepath=DEFAULT_CONFIG_FILE
+    File.open filepath, "w+" do |file|
+      file << DEFAULT_CONFIG.to_yaml
+    end
+  end
+
+
+  ##
   # Returns the formatter to use for the diff.
 
   def self.diff_formatter
-    const_get config[:diff_formatter]
+    find_const config[:diff_formatter]
+  end
+
+
+  ##
+  # Find a fully qualified ruby namespace/constant.
+
+  def self.find_const namespace
+    consts = namespace.split "::"
+    curr = self
+
+    until consts.empty? do
+      curr = curr.const_get consts.shift
+    end
+
+    curr
   end
 
 
@@ -100,18 +125,8 @@ class Kronk
     return if parser_pair.empty?
 
     parser = parser_pair[0][1]
-    parser = const_get parser if String === parser || Symbol === parser
+    parser = find_const parser if String === parser || Symbol === parser
     parser
-  end
-
-
-  ##
-  # Creates the default config file at the given path.
-
-  def self.make_config_file filepath=DEFAULT_CONFIG_FILE
-    File.open filepath, "w+" do |file|
-      file << DEFAULT_CONFIG.to_yaml
-    end
   end
 
 

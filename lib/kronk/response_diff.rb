@@ -62,7 +62,7 @@ class Kronk
     # If a parser is given, it must respond to :parse with a single argument.
 
     def data_response resp, options={}
-      parser = options[:parser] || Kronk.parser_for resp['Content-Type']
+      parser = options[:parser] || Kronk.parser_for(resp['Content-Type'])
 
       options = {:ignore_headers => @ignore_headers,
                  :ignore_data    => @ignore_data}.merge options

@@ -10,7 +10,7 @@ Run diffs against data from http responses.
 
 * Parse and diff data from http response body and/or headers.
 
-* Exclude particular data points.
+* Include or exclude particular data points.
 
 * Auto-queryer with optional param randomizing.
 
