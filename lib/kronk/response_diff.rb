@@ -110,6 +110,19 @@ class Kronk
 
 
     ##
+    # Remove specific data points from an embedded data structure.
+
+    def delete_data_points data, data_paths
+      find_data data_paths do |obj, k|
+        case obj
+        when Hash then obj.delete k
+        when Array then obj.delete_at k
+        end
+      end
+    end
+
+
+    ##
     # Find specific data points from a nested hash or array data structure.
     # If a block is given, will pass it any matched parent data object path,
     # key, and value.
