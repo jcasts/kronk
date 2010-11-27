@@ -2,6 +2,60 @@ require 'test/test_helper'
 
 class TestRequest < Test::Unit::TestCase
 
+  def test_follow_redirect
+    resp = mock "resp"
+    resp.expects(:[]).with("Location").returns "http://example.com"
+
+    options = {:follow_redirects => true}
+    Kronk::Request.expects(:retrieve_uri).with("http://example.com", options)
+
+    Kronk::Request.follow_redirect resp, options
+  end
+
+
+  def test_num_follow_redirect
+    resp = mock "resp"
+    resp.expects(:[]).with("Location").returns "http://example.com"
+
+    options = {:follow_redirects => 1}
+    Kronk::Request.expects(:retrieve_uri).
+      with "http://example.com", :follow_redirects => 0
+
+    Kronk::Request.follow_redirect resp, options
+  end
+
+
+  def test_follow_redirect?
+    resp = mock "resp"
+    resp.expects(:code).returns "300"
+
+    assert Kronk::Request.follow_redirect?(resp, true)
+
+    resp = mock "resp"
+    resp.expects(:code).returns "300"
+
+    assert Kronk::Request.follow_redirect?(resp, 1)
+  end
+
+
+  def test_dont_follow_redirect?
+    resp = mock "resp"
+    resp.expects(:code).returns "300"
+
+    assert !Kronk::Request.follow_redirect?(resp, false)
+
+    resp = mock "resp"
+    resp.expects(:code).returns "300"
+
+    assert !Kronk::Request.follow_redirect?(resp, 0)
+
+    resp = mock "resp"
+    resp.expects(:code).returns "200"
+
+    assert !Kronk::Request.follow_redirect?(resp, true)
+  end
+
+
   def test_retrieve_live
     query   = "http://example.com"
     options = {:foo => "bar"}
