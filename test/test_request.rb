@@ -2,6 +2,52 @@ require 'test/test_helper'
 
 class TestRequest < Test::Unit::TestCase
 
+  def test_retrieve_live
+    query   = "http://example.com"
+    options = {:foo => "bar"}
+    Kronk::Request.expects(:retrieve_uri).with query, options
+
+    Kronk::Request.retrieve query, options
+  end
+
+
+  def test_retrieve_cached
+    query   = "path/to/file.txt"
+    options = {:foo => "bar"}
+    Kronk::Request.expects(:retrieve_file).with query, options
+
+    Kronk::Request.retrieve query, options
+  end
+
+
+  def test_retrieve_file
+    resp = Kronk::Request.retrieve_file "test/mocks/200_response.txt"
+    assert_equal mock_200_response, resp.raw
+    assert_equal "200", resp.code
+  end
+
+
+  def test_retrieve_file_cache
+    File.expects(:open).with(Kronk::DEFAULT_CACHE_FILE, "r").
+      returns StringIO.new(mock_200_response)
+
+    resp = Kronk::Request.retrieve_file :cache
+    assert_equal mock_200_response, resp.raw
+    assert_equal "200", resp.code
+  end
+
+
+  def test_retrieve_file_redirect
+    resp2 = Kronk::Request.retrieve_file "test/mocks/200_response.txt"
+    Kronk::Request.expects(:follow_redirect).returns resp2
+
+    resp = Kronk::Request.retrieve_file "test/mocks/301_response.txt",
+            :follow_redirects => true
+
+    assert_equal mock_200_response, resp.raw
+    assert_equal "200", resp.code
+  end
+
 
   def test_retrieve_uri
     expect_request "GET", "http://example.com/request/path?foo=bar"

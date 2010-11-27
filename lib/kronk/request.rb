@@ -51,7 +51,9 @@ class Kronk
 
     def self.retrieve_file path, options={}
       path = DEFAULT_CACHE_FILE if path == :cache
-      resp = Response.read_new File.open(path, "r")
+      file = File.open(path, "r")
+      resp = Response.read_new file
+      file.close
 
       resp = follow_redirect resp, options if
         follow_redirect? resp, options[:follow_redirects]

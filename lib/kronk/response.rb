@@ -9,11 +9,15 @@ class Kronk
     # Create a new Response instance from an IO object.
 
     def self.read_new io
-      io   = Net::BufferedIO.new io unless Net::BufferedIO === io
+      io = Net::BufferedIO.new io unless Net::BufferedIO === io
       io.debug_output = socket_io = StringIO.new
 
-      resp = super io
-      resp.reading_body io, true do;end
+      begin
+        resp = super io
+        resp.reading_body io, true do;end
+      rescue EOFError
+      end
+
       resp.extend Helpers
 
       r_req, r_resp, r_bytes = read_raw_from socket_io
