@@ -19,10 +19,28 @@ class TestDataSet < Test::Unit::TestCase
         456,
         {:findme => 123456}
       ],
-      :key2 => "foobar"
+      :key2 => "foobar",
+      :key3 => {
+        :key3a => ["val1", "val2", "val3"]
+      }
     }
 
     @dataset = Kronk::DataSet.new @data
+  end
+
+
+  def test_find_data_index
+    keys = []
+    data_points = []
+
+    @dataset.find_data "*/*/0|1" do |data, key|
+      keys << key
+      data_points << data
+    end
+
+    assert_equal [0,1,0,1], keys
+    assert_equal 2, data_points.count(@data[:key1][:key1a])
+    assert_equal 2, data_points.count(@data[:key3][:key3a])
   end
 
 
@@ -42,6 +60,20 @@ class TestDataSet < Test::Unit::TestCase
     assert data_points.include?(@data)
     assert data_points.include?(@data[:key1][:key1a].last)
     assert data_points.include?(@data['findme'].last)
+  end
+
+
+  def test_find_data_wildcard
+    keys = []
+    data_points = []
+
+    @dataset.find_data "*/key1?" do |data, key|
+      keys << key.to_s
+      data_points << data
+    end
+
+    assert_equal ['key1a', 'key1b'], keys
+    assert_equal [@data[:key1], @data[:key1]], data_points
   end
 
 
@@ -65,6 +97,16 @@ class TestDataSet < Test::Unit::TestCase
     assert_equal "value", value
     assert !rec, "Should not return recursive = true"
     assert_equal "key*=*value/**=value2/key\\=thing", data_path
+  end
+
+
+  def test_parse_data_path_wildcard
+    key, value, rec, data_path = Kronk::DataSet.parse_data_path "*/key1?"
+
+    assert_equal /.*/, key
+    assert_nil value
+    assert !rec, "Should not return recursive = true"
+    assert_equal "key1?", data_path
   end
 
 
@@ -155,7 +197,7 @@ class TestDataSet < Test::Unit::TestCase
       assert_equal @data, data
     end
 
-    assert_equal ['key1', 'key2'], keys.sort
+    assert_equal ['key1', 'key2', 'key3'], keys.sort
   end
 
 

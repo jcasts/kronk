@@ -42,7 +42,7 @@ class Kronk
 
         yield_data_points data, key, value, rec do |d, k|
           if data_path
-            find_data d, data_path, &block
+            find_data d[k], data_path, &block
           else
             yield d, k
           end
