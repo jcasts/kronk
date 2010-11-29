@@ -31,13 +31,21 @@ class Kronk
     #   # where the value is 'invalid' or blank
 
     def find_data data_paths, &block
+      self.class.find_data @data, data_paths, &block
+    end
+
+
+    def self.find_data data, data_paths, &block
       [*data_paths].each do |data_path|
 
-        while data_path do
-          key, value, recursive, data_path =
-            self.class.parse_data_path data_path
+        key, value, rec, data_path = parse_data_path data_path
 
-          self.yield_data_points @data, key, value, recursive, &block
+        yield_data_points data, key, value, rec do |d, k|
+          if data_path
+            find_data d, data_path, &block
+          else
+            yield d, k
+          end
         end
       end
     end
@@ -59,6 +67,7 @@ class Kronk
       until key && key != "**" || value || data_path.empty? do
         value = data_path.slice!(%r{((.*?[^\\])+?/)})
         (value ||= data_path).sub! /\/$/, ''
+
         data_path = nil if value == data_path
 
         key   = value.slice! %r{((.*?[^\\])+?=)}
@@ -68,12 +77,19 @@ class Kronk
         value = parse_path_item value if value
 
         if key =~ /^\*{2,}$/
-          key = /.*/
+          if data_path && !value
+            key, value, rec, data_path = parse_data_path(data_path)
+          else
+            key = /.*/
+          end
+
           recursive = true
         else
-          parse_path_item key
+          key = parse_path_item key
         end
       end
+
+      data_path = nil if data_path && data_path.empty?
 
       [key, value, recursive, data_path]
     end
@@ -129,9 +145,10 @@ class Kronk
     # Universal iterator for Hash and Array objects.
 
     def self.each_data_item data, &block
-      if Hash === data
+      case data
+      when Hash
         data.each &block
-      elsif Array === data
+      when Array
         data.each_with_index do |val, i|
           block.call i, val
         end
