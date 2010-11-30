@@ -29,6 +29,59 @@ class TestXmlParser < Test::Unit::TestCase
   </acks>
 </root>
     STR
+
+    @ary_xml = <<-STR
+<root>
+  <tests>
+    <test>A1</test>
+    <test>A2</test>
+  </tests>
+  <tests>
+    <test>B1</test>
+    <test>B2</test>
+  </tests>
+  <tests>
+    <test>C1</test>
+    <test>C2</test>
+    <test>
+      <test>C3a</test>
+      <test>C3b</test>
+    </test>
+  </tests>
+  <tests>
+    <test>
+      <test>D1a
+Content goes here</test>
+      <test>D1b</test>
+    </test>
+    <test>D2</test>
+    <tests>
+      <test>D3a</test>
+      <test>D3b</test>
+    </tests>
+  </tests>
+</root>
+    STR
+  end
+
+
+  def test_node_value_arrays
+    expected = {
+      "root" => [
+        ["A1", "A2"],
+        ["B1", "B2"],
+        ["C1", "C2", ["C3a", "C3b"]],
+        {"tests"=>["D3a", "D3b"],
+          "test"=>[["D1a\nContent goes here", "D1b"], "D2"]}
+      ]
+    }
+
+    root_node = Nokogiri.XML @ary_xml do |config|
+      config.default_xml.noblanks
+    end
+
+    results = Kronk::XMLParser.node_value(root_node.children)
+    assert_equal expected, results
   end
 
 
