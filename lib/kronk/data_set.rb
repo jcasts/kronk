@@ -66,13 +66,13 @@ class Kronk
 
       until key && key != "**" || value || data_path.empty? do
         value = data_path.slice!(%r{((.*?[^\\])+?/)})
-        (value ||= data_path).sub! /\/$/, ''
+        (value ||= data_path).sub!(/\/$/, '')
 
         data_path = nil if value == data_path
 
         key   = value.slice! %r{((.*?[^\\])+?=)}
         key, value = value, nil if key.nil?
-        key.sub! /\=$/, ''
+        key.sub!(/\=$/, '')
 
         value = parse_path_item value if value
 
@@ -147,7 +147,7 @@ class Kronk
     def self.each_data_item data, &block
       case data
       when Hash
-        data.each &block
+        data.each(&block)
       when Array
         data.each_with_index do |val, i|
           block.call i, val

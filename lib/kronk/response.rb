@@ -46,7 +46,7 @@ class Kronk
 
       if output.last =~ %r{read (\d+) bytes}
         bytes = $1.to_i
-        output.delete_at -1
+        output.delete_at(-1)
       end
 
       output.map do |line|
