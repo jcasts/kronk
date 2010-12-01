@@ -72,7 +72,7 @@ class TestDataSet < Test::Unit::TestCase
       data_points << data
     end
 
-    assert_equal ['key1a', 'key1b'], keys
+    assert_equal ['key1a', 'key1b'], keys.sort
     assert_equal [@data[:key1], @data[:key1]], data_points
   end
 

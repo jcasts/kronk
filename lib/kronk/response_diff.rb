@@ -14,7 +14,6 @@ class Kronk
     # :data:: Hash/String - the data to pass to the http request
     # :headers:: Hash - extra headers to pass to the request
     # :http_method:: Symbol - the http method to use; defaults to :get
-    # :query:: Hash/String - data to append to url query
     # :ignore_data:: String/Array - defines which data points to exclude
     # :ignore_headers:: Bool/String/Array - defines which headers to exclude
 
@@ -196,7 +195,7 @@ class Kronk
 
       when Array, String
         ignores = [*exclude_headers]
-        resp.raw_header.gsub %r{^(#{ignores.join("|")}).*$}im, ''
+        resp.raw_header.gsub(%r{^(#{ignores.join("|")}): [^\n]*$}im, '')
 
       when true
         nil
