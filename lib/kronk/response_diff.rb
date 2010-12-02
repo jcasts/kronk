@@ -52,7 +52,7 @@ class Kronk
     def data_diff options={}
       str1 = ordered_data_string data_response(@resp1, options)
       str2 = ordered_data_string data_response(@resp2, options)
-      Differ.diff_by_line str2, str1
+      Diff.new(str1, str2).to_a
     end
 
 
@@ -169,9 +169,10 @@ class Kronk
     # Returns a diff Array from the raw response Strings.
 
     def raw_diff exclude_headers=@ignore_headers
-      Differ.diff raw_response(@resp2, exclude_headers),
-                  raw_response(@resp1, exclude_headers),
-                  /\r?$/m
+      diff = Diff.new raw_response(@resp2, exclude_headers),
+                      raw_response(@resp1, exclude_headers)
+
+      diff.to_a
     end
 
 

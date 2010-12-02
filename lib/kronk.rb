@@ -2,7 +2,6 @@ require 'rubygems'
 require 'plist'
 require 'json'
 require 'nokogiri'
-require 'differ'
 
 # Support for new and old versions of ActiveSupport
 begin
@@ -13,8 +12,6 @@ end
 
 require 'net/http'
 
-
-Differ.format = :color
 class Kronk
 
   # This gem's version.
@@ -22,6 +19,7 @@ class Kronk
 
 
   require 'kronk/data_set'
+  require 'kronk/diff'
   require 'kronk/response'
   require 'kronk/request'
   require 'kronk/response_diff'

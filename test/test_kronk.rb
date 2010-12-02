@@ -59,11 +59,6 @@ class TestKronk < Test::Unit::TestCase
   end
 
 
-  def test_diff_formatter
-    assert_equal Differ::Format::Ascii, Kronk.diff_formatter
-  end
-
-
   def test_parser_for
     assert_equal JSON, Kronk.parser_for('json')
     assert_equal Kronk::XMLParser, Kronk.parser_for('xml')
