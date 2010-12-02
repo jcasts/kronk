@@ -33,9 +33,6 @@ class Kronk
       until arr1.empty? && arr2.empty?
         item1, item2 = arr1.shift, arr2.shift
 
-        match1 = arr1.index item2
-        match2 = arr2.index item1
-
         if item1 == item2
           if sub_diff
             diff_ary << sub_diff
@@ -45,6 +42,9 @@ class Kronk
           diff_ary << item1
           next
         end
+
+        match1 = arr1.index item2
+        match2 = arr2.index item1
 
         if match1
           index   = match1 - 2

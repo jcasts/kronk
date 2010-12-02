@@ -46,7 +46,7 @@ class TestResponseDiff < Test::Unit::TestCase
     rdiff = Kronk::ResponseDiff.retrieve_new "test/mocks/301_response.txt",
                                              "test/mocks/302_response.txt"
 
-    puts rdiff.raw_diff.to_s
+    puts rdiff.raw_diff.inspect
   end
 
 
