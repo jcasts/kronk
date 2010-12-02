@@ -14,6 +14,7 @@ end
 require 'net/http'
 
 
+Differ.format = :color
 class Kronk
 
   # This gem's version.

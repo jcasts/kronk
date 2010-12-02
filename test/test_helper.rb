@@ -8,6 +8,11 @@ def mock_200_response
 end
 
 
-def mock_300_response
-  @mock_300 ||= File.read 'test/mocks/301_response.txt'
+def mock_301_response
+  @mock_301 ||= File.read 'test/mocks/301_response.txt'
+end
+
+
+def mock_302_response
+  @mock_302 ||= File.read 'test/mocks/302_response.txt'
 end

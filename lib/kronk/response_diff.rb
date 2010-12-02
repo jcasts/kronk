@@ -169,8 +169,9 @@ class Kronk
     # Returns a diff Array from the raw response Strings.
 
     def raw_diff exclude_headers=@ignore_headers
-      Differ.diff_by_line raw_response(@resp2, exclude_headers),
-                          raw_response(@resp1, exclude_headers)
+      Differ.diff raw_response(@resp2, exclude_headers),
+                  raw_response(@resp1, exclude_headers),
+                  /\r?$/m
     end
 
 

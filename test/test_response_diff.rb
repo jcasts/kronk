@@ -42,6 +42,44 @@ class TestResponseDiff < Test::Unit::TestCase
   end
 
 
+  def test_raw_diff
+    rdiff = Kronk::ResponseDiff.retrieve_new "test/mocks/301_response.txt",
+                                             "test/mocks/302_response.txt"
+
+    puts rdiff.raw_diff.to_s
+  end
+
+
+  def test_raw_response
+    assert_equal mock_200_response, @rdiff.raw_response(@rdiff.resp1)
+  end
+
+
+  def test_raw_response_no_headers
+    body = mock_200_response.split("\r\n\r\n", 2)[1]
+    assert_equal body, @rdiff.raw_response(@rdiff.resp1, true)
+  end
+
+
+  def test_raw_response_ignore_one_header
+    expected = mock_200_response.gsub!(%r{^Content-Type: [^\n]*$}im, '')
+    returned = @rdiff.raw_response @rdiff.resp1, 'Content-Type'
+
+    assert_equal expected, returned
+    assert !(returned =~ /^Content-Type: /)
+  end
+
+
+  def test_raw_response_ignore_multiple_headers
+    expected = mock_200_response.gsub!(%r{^(Content-Type|Date): [^\n]*$}im, '')
+    returned = @rdiff.raw_response @rdiff.resp1, ['Content-Type', 'Date']
+
+    assert_equal expected, returned
+    assert !(returned =~ /^Content-Type: /)
+    assert !(returned =~ /^Date: /)
+  end
+
+
   def test_raw_response_header
     headers = @rdiff.raw_response_header @rdiff.resp1
     assert_equal mock_200_response.split("\r\n\r\n")[0], headers

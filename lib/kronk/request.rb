@@ -33,7 +33,6 @@ class Kronk
     # :follow_redirects:: Integer/Bool - number of times to follow redirects
     # :headers:: Hash - extra headers to pass to the request
     # :http_method:: Symbol - the http method to use; defaults to :get
-    # :query:: Hash/String - data to append to url query
     #
     # TODO: Log request speed.
 

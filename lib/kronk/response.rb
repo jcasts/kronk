@@ -22,6 +22,11 @@ class Kronk
 
       r_req, r_resp, r_bytes = read_raw_from socket_io
       resp.instance_variable_set "@raw", r_resp
+      resp.instance_variable_set "@read", true
+      resp.instance_variable_set "@socket", true
+
+      resp.instance_variable_set "@body", resp.raw.split("\r\n\r\n",2)[1] if
+        !resp.body
 
       resp
     end
