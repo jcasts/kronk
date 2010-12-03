@@ -12,11 +12,15 @@ Run diffs against data from http responses.
 
 * Include or exclude particular data points.
 
-* Auto-queryer with optional param randomizing.
-
 * Supports json, basic xml, and plist.
 
 * Support for custom data parsers.
+
+== FUTURE:
+
+* Line numbered and colored output.
+
+* Auto-queryer with optional param randomizing.
 
 * Support for test suites.
 
