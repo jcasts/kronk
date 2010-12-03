@@ -1,0 +1,28 @@
+HTTP/1.1 200 OK
+Server: nginx/0.6.39
+Date: Fri, 03 Dec 2010 21:49:00 GMT
+Content-Type: application/json; charset=utf-8
+Connection: keep-alive
+Keep-Alive: timeout=20
+Status: 200 OK
+ETag: "mock_etag"
+X-Runtime: 45
+Cache-Control: private, max-age=0, must-revalidate
+
+{"original_request":{"id":"1234"},"request_id":"mock_rid",
+"business":{"improvable":true,"longitude":-85.759586,"headings":["Pottery"],
+"website":"http://example.com",
+"listing_type":"free",
+"description":{"general_info":"<p>A Paint Your Own Pottery Studios..</p>",
+"payment_text":"DISCOVER, AMEX, VISA, MASTERCARD",
+"slogan":"<p>Pottery YOU dress up</p>",
+"additional_urls":[{"destination":"http://example.com",
+"url_click":"http://example.com"}],
+"op_hours":"Fri 1pm-7pm, Sat 10am-6pm, Sun 1pm-4pm, Appointments Available"},
+"listing_id":"1234","phone":"6168055326",
+"address":"3845 Rivertown Pkwy SW Ste 500",
+"mappable":true,"rating_count":0,"rateable":true,
+"impression_id":"mock_iid","zip":"49418","red_listing":false,"omit_phone":false,
+"state":"MI","distance":0.0,"year_established":"1996","city":"Grandville",
+"name":"Naked Plates","latitude":42.882561,"omit_address":false,"id":"1234",
+"has_detail_page":true}}

@@ -1,0 +1,97 @@
+HTTP/1.1 200 OK
+Server: nginx/0.6.39
+Date: Fri, 03 Dec 2010 21:49:00 GMT
+Content-Type: application/x-plist; charset=utf-8
+Connection: keep-alive
+Keep-Alive: timeout=20
+Status: 200 OK
+ETag: "mock_etag"
+X-Runtime: 45
+Cache-Control: private, max-age=0, must-revalidate
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>business</key>
+	<dict>
+		<key>address</key>
+		<string>3845 Rivertown Pkwy SW Ste 500</string>
+		<key>city</key>
+		<string>Grandville</string>
+		<key>description</key>
+		<dict>
+			<key>additional_urls</key>
+			<array>
+				<dict>
+					<key>destination</key>
+					<string>http://example.com</string>
+					<key>url_click</key>
+					<string>http://example.com</string>
+				</dict>
+			</array>
+			<key>general_info</key>
+			<string>&lt;p&gt;A Paint Your Own Pottery Studios..&lt;/p&gt;</string>
+			<key>op_hours</key>
+			<string>Fri 1pm-7pm, Sat 10am-6pm, Sun 1pm-4pm, Appointments Available</string>
+			<key>payment_text</key>
+			<string>DISCOVER, AMEX, VISA, MASTERCARD</string>
+			<key>slogan</key>
+			<string>&lt;p&gt;Pottery YOU dress up&lt;/p&gt;</string>
+		</dict>
+		<key>distance</key>
+		<real>0.0</real>
+		<key>has_detail_page</key>
+		<true/>
+		<key>headings</key>
+		<array>
+			<string>Pottery</string>
+		</array>
+		<key>id</key>
+		<string>1234</string>
+		<key>impression_id</key>
+		<string>mock_iid</string>
+		<key>improvable</key>
+		<true/>
+		<key>latitude</key>
+		<real>42.882561</real>
+		<key>listing_id</key>
+		<string>1234</string>
+		<key>listing_type</key>
+		<string>free</string>
+		<key>longitude</key>
+		<real>-85.759586</real>
+		<key>mappable</key>
+		<true/>
+		<key>name</key>
+		<string>Naked Plates</string>
+		<key>omit_address</key>
+		<false/>
+		<key>omit_phone</key>
+		<false/>
+		<key>phone</key>
+		<string>6168055326</string>
+		<key>rateable</key>
+		<true/>
+		<key>rating_count</key>
+		<integer>0</integer>
+		<key>red_listing</key>
+		<false/>
+		<key>state</key>
+		<string>MI</string>
+		<key>website</key>
+		<string>http://example.com</string>
+		<key>year_established</key>
+		<string>1996</string>
+		<key>zip</key>
+		<string>49418</string>
+	</dict>
+	<key>original_request</key>
+	<dict>
+		<key>id</key>
+		<string>1234</string>
+	</dict>
+	<key>request_id</key>
+	<string>mock_rid</string>
+</dict>
+</plist>

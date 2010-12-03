@@ -1,0 +1,58 @@
+HTTP/1.1 200 OK
+Server: nginx/0.6.39
+Date: Fri, 03 Dec 2010 21:49:00 GMT
+Content-Type: application/xml; charset=utf-8
+Connection: keep-alive
+Keep-Alive: timeout=20
+Status: 200 OK
+ETag: "mock_etag"
+X-Runtime: 45
+Cache-Control: private, max-age=0, must-revalidate
+
+<?xml version="1.0" encoding="UTF-8"?>
+<business_result>
+  <original_request>
+    <id>1234</id>
+  </original_request>
+  <request_id>mock_rid</request_id>
+  <business id="1234">
+    <description>
+      <general_info>&lt;p&gt;A Paint Your Own Pottery Studios..&lt;/p&gt;</general_info>
+      <payment_text>DISCOVER, AMEX, VISA, MASTERCARD</payment_text>
+      <slogan>&lt;p&gt;Pottery YOU dress up&lt;/p&gt;</slogan>
+      <additional_urls>
+        <additional_url>
+          <destination>http://example.com</destination>
+          <url_click>http://example.com</url_click>
+        </additional_url>
+      </additional_urls>
+      <op_hours>Fri 1pm-7pm, Sat 10am-6pm, Sun 1pm-4pm, Appointments Available</op_hours>
+    </description>
+    <improvable type="boolean">true</improvable>
+    <longitude type="float">-85.759586</longitude>
+    <headings>
+      <heading>Pottery</heading>
+    </headings>
+    <website>http://example.com</website>
+    <listing_type>free</listing_type>
+    <listing_id>1234</listing_id>
+    <phone>6168055326</phone>
+    <address>3845 Rivertown Pkwy SW Ste 500</address>
+    <mappable type="boolean">true</mappable>
+    <rating_count type="integer">0</rating_count>
+    <rateable type="boolean">true</rateable>
+    <impression_id>mock_iid</impression_id>
+    <zip>49418</zip>
+    <red_listing type="boolean">false</red_listing>
+    <omit_phone type="boolean">false</omit_phone>
+    <state>MI</state>
+    <distance type="float">0.0</distance>
+    <year_established>1996</year_established>
+    <city>Grandville</city>
+    <name>Naked Plates</name>
+    <latitude type="float">42.882561</latitude>
+    <omit_address type="boolean">false</omit_address>
+    <id>1234</id>
+    <has_detail_page type="boolean">true</has_detail_page>
+  </business>
+</business_result>

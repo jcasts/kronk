@@ -3,6 +3,9 @@ require 'test/test_helper'
 class TestResponseDiff < Test::Unit::TestCase
 
   def setup
+    @ddiff = Kronk::ResponseDiff.retrieve_new "test/mocks/200_response.json",
+                                              "test/mocks/200_response.xml"
+
     @rdiff = Kronk::ResponseDiff.retrieve_new "test/mocks/200_response.txt",
                                               "test/mocks/301_response.txt"
   end
@@ -39,6 +42,107 @@ class TestResponseDiff < Test::Unit::TestCase
     assert_equal resp2, rdiff.resp2
     assert_equal "foo", rdiff.ignore_data
     assert_equal "bar", rdiff.ignore_headers
+  end
+
+
+  def test_data_response_json
+    raw = File.read "test/mocks/200_response.json"
+    data = JSON.parse raw.split("\r\n\r\n", 2)[1]
+    head = @ddiff.resp1.header.to_hash
+
+    assert_equal [head, data], @ddiff.data_response(@ddiff.resp1)
+
+    head.delete 'content-type'
+
+    assert_equal [head, data],
+      @ddiff.data_response(@ddiff.resp2, :ignore_headers => "Content-Type")
+  end
+
+
+  def test_data_response_xml
+    raw = File.read "test/mocks/200_response.xml"
+    data = Kronk::XMLParser.parse raw.split("\r\n\r\n", 2)[1]
+
+    assert_equal [@ddiff.resp2.header.to_hash, data],
+                  @ddiff.data_response(@ddiff.resp2)
+  end
+
+
+  def test_data_response_plist
+    @ddiff = Kronk::ResponseDiff.retrieve_new "test/mocks/200_response.json",
+                                              "test/mocks/200_response.plist"
+
+    raw = File.read "test/mocks/200_response.plist"
+    data = Kronk::PlistParser.parse raw.split("\r\n\r\n", 2)[1]
+    head = @ddiff.resp2.header.to_hash
+
+    assert_equal [head, data], @ddiff.data_response(@ddiff.resp2)
+
+    head.delete 'content-type'
+
+    assert_equal [head, data],
+      @ddiff.data_response(@ddiff.resp1, :ignore_headers => "Content-Type")
+  end
+
+
+  def test_data_response_missing_parser
+    assert_raises Kronk::ResponseDiff::MissingParser do
+      @rdiff.data_response @rdiff.resp1
+    end
+  end
+
+
+  def test_data_response_header_keep_all
+    expected = {
+      "expires"         =>["-1"],
+      "content-type"    =>["text/html; charset=ISO-8859-1"],
+      "date"            =>["Fri, 26 Nov 2010 16:16:08 GMT"],
+      "server"          =>["gws"],
+      "x-xss-protection"=>["1; mode=block"],
+      "set-cookie"      =>
+        ["PREF=ID=99d644506f26d85e:FF=0:TM=1290788168:LM=1290788168:S=VSMemgJxlmlToFA3; expires=Sun, 25-Nov-2012 16:16:08 GMT; path=/; domain=.google.com", "NID=41=CcmNDE4SfDu5cdTOYVkrCVjlrGO-oVbdo1awh_p8auk2gI4uaX1vNznO0QN8nZH4Mh9WprRy3yI2yd_Fr1WaXVru6Xq3adlSLGUTIRW8SzX58An2nH3D2PhAY5JfcJrl; expires=Sat, 28-May-2011 16:16:08 GMT; path=/; domain=.google.com; HttpOnly"],
+      "cache-control"   =>["private, max-age=0"],
+      "transfer-encoding"=>["chunked"]
+    }
+
+    assert_equal expected, @rdiff.data_response_header(@rdiff.resp1)
+    assert_equal expected, @rdiff.data_response_header(@rdiff.resp1, false)
+  end
+
+
+  def test_data_response_header_delete_one
+    expected = {
+      "expires"         =>["-1"],
+      "content-type"    =>["text/html; charset=ISO-8859-1"],
+      "server"          =>["gws"],
+      "x-xss-protection"=>["1; mode=block"],
+      "set-cookie"      =>
+        ["PREF=ID=99d644506f26d85e:FF=0:TM=1290788168:LM=1290788168:S=VSMemgJxlmlToFA3; expires=Sun, 25-Nov-2012 16:16:08 GMT; path=/; domain=.google.com", "NID=41=CcmNDE4SfDu5cdTOYVkrCVjlrGO-oVbdo1awh_p8auk2gI4uaX1vNznO0QN8nZH4Mh9WprRy3yI2yd_Fr1WaXVru6Xq3adlSLGUTIRW8SzX58An2nH3D2PhAY5JfcJrl; expires=Sat, 28-May-2011 16:16:08 GMT; path=/; domain=.google.com; HttpOnly"],
+      "cache-control"   =>["private, max-age=0"],
+      "transfer-encoding"=>["chunked"]
+    }
+
+    assert_equal expected, @rdiff.data_response_header(@rdiff.resp1, :Date)
+  end
+
+
+  def test_data_response_header_delete_many
+    expected = {
+      "content-type"    =>["text/html; charset=ISO-8859-1"],
+      "x-xss-protection"=>["1; mode=block"],
+      "set-cookie"      =>
+        ["PREF=ID=99d644506f26d85e:FF=0:TM=1290788168:LM=1290788168:S=VSMemgJxlmlToFA3; expires=Sun, 25-Nov-2012 16:16:08 GMT; path=/; domain=.google.com", "NID=41=CcmNDE4SfDu5cdTOYVkrCVjlrGO-oVbdo1awh_p8auk2gI4uaX1vNznO0QN8nZH4Mh9WprRy3yI2yd_Fr1WaXVru6Xq3adlSLGUTIRW8SzX58An2nH3D2PhAY5JfcJrl; expires=Sat, 28-May-2011 16:16:08 GMT; path=/; domain=.google.com; HttpOnly"],
+      "cache-control"   =>["private, max-age=0"],
+      "transfer-encoding"=>["chunked"]
+    }
+
+    assert_equal expected,
+      @rdiff.data_response_header(@rdiff.resp1, [:Date, 'expires', "Server"])
+  end
+
+
+  def test_data_response_header_delete_all
+    assert_nil @rdiff.data_response_header(@rdiff.resp1, true)
   end
 
 

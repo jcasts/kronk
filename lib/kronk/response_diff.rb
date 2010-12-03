@@ -77,9 +77,9 @@ class Kronk
       body_data = parser.parse resp.body
       body_data = delete_data_points body_data, ignore_data if ignore_data
 
-      output = {}
-      output['body']   = body_data
-      output['header'] = head_data if head_data
+      output = []
+      output << head_data if head_data
+      output << body_data
 
       output
     end
@@ -96,9 +96,9 @@ class Kronk
       when nil, false
         header
 
-      when Array, String
+      when Array, String, Symbol
         [*exclude_headers].each do |excluded_header|
-          header.delete excluded_header
+          header.delete excluded_header.to_s.downcase
          end
          header
 

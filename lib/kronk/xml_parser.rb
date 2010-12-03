@@ -77,9 +77,12 @@ class Kronk
       data     = node_value xml_node.children, is_array
 
       data = case datatype
+             when 'array'   then data.to_a
              when 'symbol'  then data.to_sym
              when 'integer' then data.to_i
              when 'float'   then data.to_f
+             when 'boolean'
+               data == 'true' ? true : false
              else
                data
              end
