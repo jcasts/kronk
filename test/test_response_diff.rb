@@ -45,6 +45,74 @@ class TestResponseDiff < Test::Unit::TestCase
   end
 
 
+  def test_data_response_ignore_data_all
+    assert_equal [],
+      @ddiff.data_response(@ddiff.resp1, :ignore_data => true,
+                                         :ignore_headers => true)
+  end
+
+
+  def test_data_response_ignore_data_single
+    raw = File.read "test/mocks/200_response.json"
+    data = JSON.parse raw.split("\r\n\r\n", 2)[1]
+
+    data['business'].delete 'website'
+    data['business'].delete 'phone'
+
+    assert_equal [@ddiff.resp1.header.to_hash, data],
+      @ddiff.data_response(@ddiff.resp1, :ignore_data => "*/website|phone")
+  end
+
+
+  def test_data_response_ignore_data_many
+    raw = File.read "test/mocks/200_response.json"
+    data = JSON.parse raw.split("\r\n\r\n", 2)[1]
+
+    data['business'].delete 'website'
+    data['business'].delete 'phone'
+    data['business']['description'].delete 'op_hours'
+
+    assert_equal [@ddiff.resp1.header.to_hash, data],
+      @ddiff.data_response(@ddiff.resp1,
+        :ignore_data => ["*/website|phone", "**/op_hours"])
+  end
+
+
+  def test_data_response_ignore_headers_all
+    raw = File.read "test/mocks/200_response.json"
+    data = JSON.parse raw.split("\r\n\r\n", 2)[1]
+
+    assert_equal [data],
+      @ddiff.data_response(@ddiff.resp1, :ignore_headers => true)
+  end
+
+
+  def test_data_response_ignore_headers_single
+    raw = File.read "test/mocks/200_response.json"
+    data = JSON.parse raw.split("\r\n\r\n", 2)[1]
+    head = @ddiff.resp1.header.to_hash
+
+    head.delete 'date'
+
+    assert_equal [head, data],
+      @ddiff.data_response(@ddiff.resp1, :ignore_headers => :date)
+  end
+
+
+  def test_data_response_ignore_headers_multiple
+    raw = File.read "test/mocks/200_response.json"
+    data = JSON.parse raw.split("\r\n\r\n", 2)[1]
+    head = @ddiff.resp1.header.to_hash
+
+    head.delete 'date'
+    head.delete 'content-type'
+
+    assert_equal [head, data],
+      @ddiff.data_response(@ddiff.resp1,
+        :ignore_headers => [:date, 'Content-Type'])
+  end
+
+
   def test_data_response_json
     raw = File.read "test/mocks/200_response.json"
     data = JSON.parse raw.split("\r\n\r\n", 2)[1]
@@ -143,6 +211,11 @@ class TestResponseDiff < Test::Unit::TestCase
 
   def test_data_response_header_delete_all
     assert_nil @rdiff.data_response_header(@rdiff.resp1, true)
+  end
+
+
+  def test_delete_data_points_all
+    assert_nil @rdiff.delete_data_points mock_data, true
   end
 
 

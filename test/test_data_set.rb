@@ -116,7 +116,7 @@ class TestDataSet < Test::Unit::TestCase
   def test_parse_data_path_wildcard
     key, value, rec, data_path = Kronk::DataSet.parse_data_path "*/key1?"
 
-    assert_equal(/^.*$/, key)
+    assert_equal(/^(.*)$/, key)
     assert_nil value
     assert !rec, "Should not return recursive = true"
     assert_equal "key1?", data_path
@@ -169,7 +169,7 @@ class TestDataSet < Test::Unit::TestCase
   def test_parse_data_path_last
     key, value, rec, data_path = Kronk::DataSet.parse_data_path "key*"
 
-    assert_equal(/^key.*$/, key)
+    assert_equal(/^(key.*)$/, key)
     assert_nil value
     assert !rec, "Should not return recursive = true"
     assert_equal nil, data_path
@@ -189,12 +189,12 @@ class TestDataSet < Test::Unit::TestCase
   def test_parse_path_item
     assert_equal "foo", Kronk::DataSet.parse_path_item("foo")
 
-    assert_equal(/^foo.*bar$/, Kronk::DataSet.parse_path_item("foo*bar"))
-    assert_equal(/^foo|bar$/, Kronk::DataSet.parse_path_item("foo|bar"))
-    assert_equal(/^foo.?bar$/, Kronk::DataSet.parse_path_item("foo?bar"))
+    assert_equal(/^(foo.*bar)$/, Kronk::DataSet.parse_path_item("foo*bar"))
+    assert_equal(/^(foo|bar)$/, Kronk::DataSet.parse_path_item("foo|bar"))
+    assert_equal(/^(foo.?bar)$/, Kronk::DataSet.parse_path_item("foo?bar"))
 
-    assert_equal(/^foo.?\?bar$/, Kronk::DataSet.parse_path_item("foo?\\?bar"))
-    assert_equal(/^key.*$/, Kronk::DataSet.parse_path_item("key*"))
+    assert_equal(/^(foo.?\?bar)$/, Kronk::DataSet.parse_path_item("foo?\\?bar"))
+    assert_equal(/^(key.*)$/, Kronk::DataSet.parse_path_item("key*"))
 
     assert_equal "foo*bar", Kronk::DataSet.parse_path_item("foo\\*bar")
     assert_equal "foo|bar", Kronk::DataSet.parse_path_item("foo\\|bar")

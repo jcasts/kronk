@@ -79,7 +79,7 @@ class Kronk
 
       output = []
       output << head_data if head_data
-      output << body_data
+      output << body_data if body_data
 
       output
     end
@@ -112,6 +112,8 @@ class Kronk
     # Remove specific data points from an embedded data structure.
 
     def delete_data_points data, data_paths
+      return if data_paths == true
+
       DataSet.new(data).find_data data_paths do |obj, k|
         case obj
         when Hash then obj.delete k

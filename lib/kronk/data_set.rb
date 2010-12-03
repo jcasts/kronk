@@ -101,7 +101,7 @@ class Kronk
     def self.parse_path_item str
       if str =~ /(^|[^\\])(\*|\?|\|)/
         str.gsub!(/(^|[^\\])(\*|\?)/, '\1.\2')
-        str = /^#{str}$/
+        str = /^(#{str})$/
       else
         str.gsub! "\\", ""
       end
