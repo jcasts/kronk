@@ -132,10 +132,10 @@ class Kronk
   # :ignore_data:: String/Array - defines which data points to exclude
   # :ignore_headers:: Bool/String/Array - defines which headers to exclude
   #
-  # Returns a diff Array:
+  # Returns a formatted diff string:
   #
   #   compare "http://host.com/test.json", :cache
-  #   [[:deleted, {'foo' => 'bar'},{'foo' => 'baz'}]]
+  #   "val1\n- val11\n+ val12"
 
   def self.compare query1, query2=:cache, options={}
     diff = ResponseDiff.retrieve_new query1, query2, options
@@ -155,10 +155,10 @@ class Kronk
   # :http_method:: Symbol - the http method to use; defaults to :get
   # :ignore_headers:: Bool/String/Array - defines which headers to exclude
   #
-  # Returns a diff Array:
+  # Returns a formatted diff string:
   #
   #   diff "http://host.com/test.json", :cache
-  #   ["same line 1\n", ['- "foo":"bar"\n','+ "foo":"baz"'], "same line 3\n"]
+  #   "val1\n- val11\n+ val12"
 
   def self.diff query1, query2=:cache, options={}
     diff = ResponseDiff.retrieve_new query1, query2, options
