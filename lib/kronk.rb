@@ -129,7 +129,6 @@ class Kronk
   # :data:: Hash/String - the data to pass to the http request
   # :headers:: Hash - extra headers to pass to the request
   # :http_method:: Symbol - the http method to use; defaults to :get
-  # :query:: Hash/String - data to append to url query
   # :ignore_data:: String/Array - defines which data points to exclude
   # :ignore_headers:: Bool/String/Array - defines which headers to exclude
   #
@@ -140,7 +139,7 @@ class Kronk
 
   def self.compare query1, query2=:cache, options={}
     diff = ResponseDiff.retrieve_new query1, query2, options
-    diff.data_diff
+    diff.data_diff.formatted
   end
 
 
@@ -154,7 +153,6 @@ class Kronk
   # :data:: Hash/String - the data to pass to the http request
   # :headers:: Hash - extra headers to pass to the request
   # :http_method:: Symbol - the http method to use; defaults to :get
-  # :query:: Hash/String - data to append to url query
   # :ignore_headers:: Bool/String/Array - defines which headers to exclude
   #
   # Returns a diff Array:
@@ -164,6 +162,6 @@ class Kronk
 
   def self.diff query1, query2=:cache, options={}
     diff = ResponseDiff.retrieve_new query1, query2, options
-    diff.raw_diff
+    diff.raw_diff.formatted
   end
 end
