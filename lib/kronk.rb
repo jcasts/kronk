@@ -46,9 +46,7 @@ class Kronk
 
   # Default config to use.
   DEFAULT_CONFIG = {
-    :content_types  => DEFAULT_CONTENT_TYPES.dup,
-    :ignore_headers => ["Date", "Age"],
-    :diff_formatter => 'Differ::Format::Ascii'
+    :content_types  => DEFAULT_CONTENT_TYPES.dup
   }
 
 
@@ -86,14 +84,6 @@ class Kronk
     File.open filepath, "w+" do |file|
       file << DEFAULT_CONFIG.to_yaml
     end
-  end
-
-
-  ##
-  # Returns the formatter to use for the diff.
-
-  def self.diff_formatter
-    find_const config[:diff_formatter]
   end
 
 
