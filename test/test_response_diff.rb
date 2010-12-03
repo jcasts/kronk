@@ -42,8 +42,55 @@ class TestResponseDiff < Test::Unit::TestCase
   end
 
 
-  def test_delete_data_points
-    
+  def test_delete_data_points_single
+    data = @rdiff.delete_data_points mock_data, "subs/1"
+
+    expected = mock_data
+    expected['subs'].delete_at 1
+
+    assert_equal expected, data
+  end
+
+
+  def test_delete_data_points_single_wildcard
+    data = @rdiff.delete_data_points mock_data, "root/*/tests"
+
+    expected = mock_data
+    expected['root'][3].delete :tests
+
+    assert_equal expected, data
+  end
+
+
+  def test_delete_data_points_single_wildcard_qmark
+    data = @rdiff.delete_data_points mock_data, "subs/?"
+
+    expected = mock_data
+    expected['subs'].clear
+
+    assert_equal expected, data
+  end
+
+
+  def test_delete_data_points_recursive_wildcard
+    data = @rdiff.delete_data_points mock_data, "**/test?"
+
+    expected = mock_data
+    expected['root'][3].delete :tests
+    expected['root'][3].delete 'test'
+    expected.delete "tests"
+
+    assert_equal expected, data
+  end
+
+
+  def test_delete_data_points_recursive_wildcard_value
+    data = @rdiff.delete_data_points mock_data, "**=A?"
+
+    expected = mock_data
+    expected['root'][1].clear
+
+    assert_equal expected, data
   end
 
 

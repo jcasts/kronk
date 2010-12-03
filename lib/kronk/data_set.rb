@@ -101,7 +101,7 @@ class Kronk
     def self.parse_path_item str
       if str =~ /(^|[^\\])(\*|\?|\|)/
         str.gsub!(/(^|[^\\])(\*|\?)/, '\1.\2')
-        str = /#{str}/
+        str = /^#{str}$/
       else
         str.gsub! "\\", ""
       end
@@ -131,6 +131,8 @@ class Kronk
     # Check if data key or value is a match for nested data searches.
 
     def self.match_data_item item1, item2
+      return if !item1.nil? && (Array === item2 || Hash === item2)
+
       if Regexp === item1
         item2.to_s =~ item1
       elsif item1.nil?
@@ -146,11 +148,26 @@ class Kronk
 
     def self.each_data_item data, &block
       case data
+
       when Hash
         data.each(&block)
+
       when Array
-        data.each_with_index do |val, i|
-          block.call i, val
+        i = 0
+
+        # We need to iterate through the array this way
+        # in case items in it get deleted.
+
+        while i < data.length do
+          index = i
+          old_length = data.length
+
+          block.call index, data[index]
+
+          adj = old_length - data.length
+          adj = 0 if adj < 0
+
+          i = i.next - adj
         end
       end
     end

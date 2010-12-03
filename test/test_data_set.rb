@@ -44,6 +44,19 @@ class TestDataSet < Test::Unit::TestCase
   end
 
 
+  def test_find_data_recursive_wildcard_value
+    keys = []
+    data_points = []
+
+    @dataset.find_data "**=foo*" do |data, key|
+      keys << key
+      data_points << data
+    end
+
+    assert_equal [0,2,:key2], ([0,2,:key2] | keys)
+  end
+
+
   def test_find_data_recursive
     keys = []
     data_points = []
@@ -103,7 +116,7 @@ class TestDataSet < Test::Unit::TestCase
   def test_parse_data_path_wildcard
     key, value, rec, data_path = Kronk::DataSet.parse_data_path "*/key1?"
 
-    assert_equal(/.*/, key)
+    assert_equal(/^.*$/, key)
     assert_nil value
     assert !rec, "Should not return recursive = true"
     assert_equal "key1?", data_path
@@ -156,7 +169,7 @@ class TestDataSet < Test::Unit::TestCase
   def test_parse_data_path_last
     key, value, rec, data_path = Kronk::DataSet.parse_data_path "key*"
 
-    assert_equal(/key.*/, key)
+    assert_equal(/^key.*$/, key)
     assert_nil value
     assert !rec, "Should not return recursive = true"
     assert_equal nil, data_path
@@ -176,12 +189,12 @@ class TestDataSet < Test::Unit::TestCase
   def test_parse_path_item
     assert_equal "foo", Kronk::DataSet.parse_path_item("foo")
 
-    assert_equal(/foo.*bar/, Kronk::DataSet.parse_path_item("foo*bar"))
-    assert_equal(/foo|bar/, Kronk::DataSet.parse_path_item("foo|bar"))
-    assert_equal(/foo.?bar/, Kronk::DataSet.parse_path_item("foo?bar"))
+    assert_equal(/^foo.*bar$/, Kronk::DataSet.parse_path_item("foo*bar"))
+    assert_equal(/^foo|bar$/, Kronk::DataSet.parse_path_item("foo|bar"))
+    assert_equal(/^foo.?bar$/, Kronk::DataSet.parse_path_item("foo?bar"))
 
-    assert_equal(/foo.?\?bar/, Kronk::DataSet.parse_path_item("foo?\\?bar"))
-    assert_equal(/key.*/, Kronk::DataSet.parse_path_item("key*"))
+    assert_equal(/^foo.?\?bar$/, Kronk::DataSet.parse_path_item("foo?\\?bar"))
+    assert_equal(/^key.*$/, Kronk::DataSet.parse_path_item("key*"))
 
     assert_equal "foo*bar", Kronk::DataSet.parse_path_item("foo\\*bar")
     assert_equal "foo|bar", Kronk::DataSet.parse_path_item("foo\\|bar")
