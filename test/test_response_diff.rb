@@ -47,7 +47,27 @@ class TestResponseDiff < Test::Unit::TestCase
     rdiff = Kronk::ResponseDiff.retrieve_new "test/mocks/301_response.txt",
                                              "test/mocks/302_response.txt"
 
-    #puts rdiff.raw_diff.inspect
+    expected = [
+      [["HTTP/1.1 301 Moved Permanently", "Location: http://www.google.com/"],
+       ["HTTP/1.1 302 Found", "Location: http://igoogle.com/"]],
+      "Content-Type: text/html; charset=UTF-8",
+      "Date: Fri, 26 Nov 2010 16:14:45 GMT",
+      "Expires: Sun, 26 Dec 2010 16:14:45 GMT",
+      "Cache-Control: public, max-age=2592000",
+      "Server: gws",
+      [["Content-Length: 219"], ["Content-Length: 260"]],
+      "X-XSS-Protection: 1; mode=block",
+      "",
+      "<HTML><HEAD><meta http-equiv=\"content-type\" content=\"text/html;charset=utf-8\">",
+      [["<TITLE>301 Moved</TITLE></HEAD><BODY>", "<H1>301 Moved</H1>"],
+       ["<TITLE>302 Found</TITLE></HEAD><BODY>", "<H1>302 Found</H1>"]],
+      "The document has moved",
+      "<A HREF=\"http://www.google.com/\">here</A>.",
+      [[], ["<A HREF=\"http://igoogle.com/\">here</A>."]],
+      "</BODY></HTML>"
+    ]
+
+    assert_equal expected, rdiff.raw_diff.to_a
   end
 
 

@@ -188,7 +188,7 @@ class TestDiff < Test::Unit::TestCase
     "Expires: Sun, 26 Dec 2010 16:14:45 GMT",
     "Cache-Control: public, max-age=2592000",
     "Server: gws",
-    "Content-Length: 219",
+    [["Content-Length: 260"], ["Content-Length: 219"]],
     "X-XSS-Protection: 1; mode=block",
     "",
     "<HTML><HEAD><meta http-equiv=\"content-type\" content=\"text/html;charset=utf-8\">",
@@ -207,7 +207,7 @@ class TestDiff < Test::Unit::TestCase
     "Expires: Sun, 26 Dec 2010 16:14:45 GMT",
     "Cache-Control: public, max-age=2592000",
     "Server: gws",
-    "Content-Length: 219",
+    [["Content-Length: 219"], ["Content-Length: 260"]],
     "X-XSS-Protection: 1; mode=block",
     "",
     "<HTML><HEAD><meta http-equiv=\"content-type\" content=\"text/html;charset=utf-8\">",
@@ -230,7 +230,8 @@ Date: Fri, 26 Nov 2010 16:14:45 GMT
 Expires: Sun, 26 Dec 2010 16:14:45 GMT
 Cache-Control: public, max-age=2592000
 Server: gws
-Content-Length: 219
+- Content-Length: 260
++ Content-Length: 219
 X-XSS-Protection: 1; mode=block
 
 <HTML><HEAD><meta http-equiv="content-type" content="text/html;charset=utf-8">
