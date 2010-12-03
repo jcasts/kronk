@@ -47,41 +47,35 @@ class Kronk
         match2 = arr2.index item1
 
         if match1
-          sub_diff ||= [[],[]]
-
-          index   = match1 - 1
-          removed = [item1]
-          removed.concat arr1.slice!(0..index) if index >= 0
-
-          sub_diff[0].concat(removed)
-
-          diff_ary << sub_diff
-          diff_ary << arr1.shift
+          diff_ary.concat diff_match(item1, match1, arr1, 0, sub_diff)
           sub_diff = nil
 
         elsif match2
-          sub_diff ||= [[],[]]
-
-          index = match2 - 1
-          added = [item2]
-          added.concat arr2.slice!(0..index) if index >= 0
-
-          sub_diff[1].concat(added)
-
-          diff_ary << sub_diff
-          diff_ary << arr2.shift
+          diff_ary.concat diff_match(item2, match2, arr2, 1, sub_diff)
           sub_diff = nil
 
-        elsif !item1.nil? && !item2.nil?
+        elsif !item1.nil? || !item2.nil?
           sub_diff ||= [[],[]]
-          sub_diff[0] << item1
-          sub_diff[1] << item2
+          sub_diff[0] << item1 if item1
+          sub_diff[1] << item2 if item2
         end
       end
 
       diff_ary << sub_diff if sub_diff
 
       diff_ary
+    end
+
+
+    def diff_match item, match, arr, side, sub_diff
+      sub_diff ||= [[],[]]
+
+      index = match - 1
+      added = [item]
+      added.concat arr.slice!(0..index) if index >= 0
+
+      sub_diff[side].concat(added)
+      [sub_diff, arr.shift]
     end
 
 

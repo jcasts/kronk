@@ -94,6 +94,62 @@ class TestDiff < Test::Unit::TestCase
   end
 
 
+  def test_create_diff_long_end_diff
+    str1 = "this str\nis done"
+    str2 = "this str\nthat should\nmatch\nall of\nthe\nlines"
+
+    expected = [
+      "this str",
+      [["is done"], ["that should", "match", "all of", "the", "lines"]],
+    ]
+
+    diff = Kronk::Diff.new str1, str2
+    assert_equal expected, diff.create_diff
+  end
+
+
+  def test_create_diff_long_end_diff_inverted
+    str1 = "this str\nthat should\nmatch\nall of\nthe\nlines"
+    str2 = "this str\nis done"
+
+    expected = [
+      "this str",
+      [["that should", "match", "all of", "the", "lines"], ["is done"]],
+    ]
+
+    diff = Kronk::Diff.new str1, str2
+    assert_equal expected, diff.create_diff
+  end
+
+
+  def test_create_diff_long
+    str1 = "this str"
+    str2 = "this str\nthat should\nmatch\nall of\nthe\nlines"
+
+    expected = [
+      "this str",
+      [[], ["that should", "match", "all of", "the", "lines"]],
+    ]
+
+    diff = Kronk::Diff.new str1, str2
+    assert_equal expected, diff.create_diff
+  end
+
+
+  def test_create_diff_long_inverted
+    str1 = "this str\nthat should\nmatch\nall of\nthe\nlines"
+    str2 = "this str"
+
+    expected = [
+      "this str",
+      [["that should", "match", "all of", "the", "lines"], []],
+    ]
+
+    diff = Kronk::Diff.new str1, str2
+    assert_equal expected, diff.create_diff
+  end
+
+
   def test_formatted
     assert_equal diff_302_301_str, @diff.formatted
   end
