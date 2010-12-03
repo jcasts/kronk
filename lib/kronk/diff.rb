@@ -52,18 +52,22 @@ class Kronk
 
           diff_ary << [removed, []]
           diff_ary << item2
+
         elsif match2
           index = match2 - 2
           added = arr2.slice(0..index).unshift item2
 
           diff_ary << [[], added]
           diff_ary << item1
-        else
+
+        elsif !item1.nil? && !item2.nil?
           sub_diff ||= [[],[]]
           sub_diff[0] << item1
           sub_diff[1] << item2
         end
       end
+
+      diff_ary << sub_diff if sub_diff
 
       diff_ary
     end

@@ -41,12 +41,13 @@ class TestResponseDiff < Test::Unit::TestCase
     assert_equal "bar", rdiff.ignore_headers
   end
 
+  # TODO: test data diffs
 
   def test_raw_diff
     rdiff = Kronk::ResponseDiff.retrieve_new "test/mocks/301_response.txt",
                                              "test/mocks/302_response.txt"
 
-    puts rdiff.raw_diff.inspect
+    #puts rdiff.raw_diff.inspect
   end
 
 
