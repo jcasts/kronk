@@ -41,7 +41,76 @@ class TestResponseDiff < Test::Unit::TestCase
     assert_equal "bar", rdiff.ignore_headers
   end
 
-  # TODO: test data diffs
+
+  def test_delete_data_points
+    
+  end
+
+
+  def test_ordered_data_string
+    expected = <<STR
+{
+"acks"  => [
+ [
+  56,
+  78,
+  ],
+ [
+  "12",
+  "34",
+  ],
+ ],
+"root"  => [
+ [
+  "B1",
+  "B2",
+  ],
+ [
+  "A1",
+  "A2",
+  ],
+ [
+  "C1",
+  "C2",
+  [
+   "C3a",
+   "C3b",
+   ],
+  ],
+ {
+  "test" => [
+   [
+    "D1a\\nContent goes here",
+    "D1b",
+    ],
+   "D2",
+   ],
+  :tests => [
+   "D3a",
+   "D3b",
+   ]
+  },
+ ],
+"subs"  => [
+ "a",
+ "b",
+ ],
+"tests" => {
+ "test" => [
+  [
+   1,
+   2,
+   ],
+  2.123,
+  ],
+ :foo   => :bar
+ }
+}
+STR
+
+    assert_equal expected.strip, @rdiff.ordered_data_string(mock_data)
+  end
+
 
   def test_raw_diff
     rdiff = Kronk::ResponseDiff.retrieve_new "test/mocks/301_response.txt",
