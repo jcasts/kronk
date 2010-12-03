@@ -58,6 +58,21 @@ class TestDiff < Test::Unit::TestCase
 
 
   def test_create_diff_all_removed
+    str1 = "this is str\nmore stuff\nthat should\nmatch\nall of\nthe\nold lines"
+    str2 = "this is str\nthat should\nmatch\nall of\nthe\nlines"
+
+    expected = [
+      "this is str",
+      [["more stuff"], []],
+      "that should",
+      "match",
+      "all of",
+      "the",
+      [["old lines"], ["lines"]]
+    ]
+
+    diff = Kronk::Diff.new str1, str2
+    assert_equal expected, diff.create_diff
   end
 
 

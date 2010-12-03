@@ -47,18 +47,20 @@ class Kronk
         match2 = arr2.index item1
 
         if match1
-          index   = match1 - 2
-          removed = arr1.slice(0..index).unshift item1
+          index   = match1 - 1
+          removed = [item1]
+          removed.concat arr1.slice(0..index) if index > 0
 
           diff_ary << [removed, []]
-          diff_ary << item2
+          diff_ary << arr1.shift
 
         elsif match2
-          index = match2 - 2
-          added = arr2.slice(0..index).unshift item2
+          index = match2 - 1
+          added = [item2]
+          added.concat arr2.slice(0..index) if index > 0
 
           diff_ary << [[], added]
-          diff_ary << item1
+          diff_ary << arr2.shift
 
         elsif !item1.nil? && !item2.nil?
           sub_diff ||= [[],[]]
