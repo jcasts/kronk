@@ -33,7 +33,7 @@ class TestDataSet < Test::Unit::TestCase
     keys = []
     data_points = []
 
-    @dataset.find_data "*/*/0|1" do |data, key|
+    @dataset.find_data "*/*/0|1" do |data, key, path|
       keys << key
       data_points << data
     end
@@ -46,25 +46,34 @@ class TestDataSet < Test::Unit::TestCase
 
   def test_find_data_recursive_wildcard_value
     keys = []
+    paths = []
     data_points = []
 
-    @dataset.find_data "**=foo*" do |data, key|
+    @dataset.find_data "**=foo*" do |data, key, path|
       keys << key
       data_points << data
+      paths << path
     end
 
+    expected_paths = %w{/:key1/:key1a/0 /:key1/:key1a/2 /:key2}
+
     assert_equal [0,2,:key2], ([0,2,:key2] | keys)
+    assert_equal expected_paths, (expected_paths | paths)
   end
 
 
   def test_find_data_recursive
     keys = []
+    paths = []
     data_points = []
 
-    @dataset.find_data "**/findme" do |data, key|
+    @dataset.find_data "**/findme" do |data, key, path|
       keys << key.to_s
       data_points << data
+      paths << path
     end
+
+    expected_paths = %w{/:key1/:key1a/3/:findme /"findme" /"findme"/2/:findme}
 
     assert_equal 3, keys.length
     assert_equal 1, keys.uniq.length
@@ -73,6 +82,8 @@ class TestDataSet < Test::Unit::TestCase
     assert data_points.include?(@data)
     assert data_points.include?(@data[:key1][:key1a].last)
     assert data_points.include?(@data['findme'].last)
+
+    assert_equal expected_paths, (expected_paths | paths)
   end
 
 
@@ -80,7 +91,7 @@ class TestDataSet < Test::Unit::TestCase
     keys = []
     data_points = []
 
-    @dataset.find_data "*/key1?" do |data, key|
+    @dataset.find_data "*/key1?" do |data, key, path|
       keys << key.to_s
       data_points << data
     end

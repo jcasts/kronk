@@ -30,21 +30,25 @@ class Kronk
     #   # Returns an Array of grand-children key/value pairs
     #   # where the value is 'invalid' or blank
 
-    def find_data data_paths, &block
-      self.class.find_data @data, data_paths, &block
+    def find_data data_paths, curr_path=nil, &block
+      self.class.find_data @data, data_paths, curr_path, &block
     end
 
 
-    def self.find_data data, data_paths, &block
+    ##
+    # See DataSet#find_data
+
+    def self.find_data data, data_paths, curr_path=nil, &block
       [*data_paths].each do |data_path|
 
         key, value, rec, data_path = parse_data_path data_path
 
-        yield_data_points data, key, value, rec do |d, k|
+        yield_data_points data, key, value, rec, curr_path do |d, k, p|
+
           if data_path
-            find_data d[k], data_path, &block
+            find_data d[k], data_path, p, &block
           else
-            yield d, k
+            yield d, k, p
           end
         end
       end
@@ -114,15 +118,20 @@ class Kronk
     # Yield data object and key, if a specific key or value matches
     # the given data.
 
-    def self.yield_data_points data, mkey, mvalue=nil, recursive=false, &block
+    def self.yield_data_points data, mkey, mvalue=nil,
+                               recursive=false, path=nil, &block
+
       return unless Hash === data || Array === data
 
       each_data_item data do |key, value|
+        curr_path = "#{path}/#{key.inspect}"
+
         found = match_data_item(mkey, key) &&
                 match_data_item(mvalue, value)
 
-        yield data, key if found
-        yield_data_points data[key], mkey, mvalue, true, &block if recursive
+        yield data, key, curr_path if found
+        yield_data_points data[key], mkey, mvalue, true, curr_path, &block if
+          recursive
       end
     end
 
