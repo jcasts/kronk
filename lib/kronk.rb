@@ -11,6 +11,7 @@ rescue LoadError
 end
 
 require 'net/http'
+require 'optparse'
 
 class Kronk
 
@@ -164,5 +165,92 @@ class Kronk
   def self.diff query1, query2=:cache, options={}
     diff = ResponseDiff.retrieve_new query1, query2, options
     diff.raw_diff.formatted
+  end
+
+
+  ##
+  # Runs the kronk command with the given terminal args.
+
+  def self.run argv=ARGV
+    parse_args argv
+  end
+
+
+  ##
+  # Parse ARGV
+
+  def self.parse_args argv
+    options = {
+      :with_headers => false,
+      :with_body    => true,
+    }
+
+
+    # TODO: Parse out - and + data paths
+
+    opts = OptionParser.new do |opt|
+      opt.program_name = File.basename $0
+      opt.version = VERSION
+      opt.release = nil
+
+      opt.banner = <<-STR
+Kronk runs diffs against data from live and cached http responses.
+      STR
+
+      opt.on('-i', '--include [header1,header2]', Array,
+             'Include all or given headers in response') do |value|
+        options[:with_headers] = value && !value.empty? ? value : true
+      end
+
+      opt.on('-I', '--head [header1,header2]', Array,
+             'Use all or given headers only in the response') do |value|
+        options[:with_headers] = value || true
+        options[:with_body]    = false
+      end
+
+      opt.on('-d', '--data STR', String,
+             'Post data with the request') do |value|
+        options[:data] = value
+        options[:http_method] ||= 'POST'
+      end
+
+      opt.on('-H', '--header STR', String,
+             'Header to pass to the server request') do |value|
+        options[:headers] ||= []
+        options[:headers] << value
+      end
+
+      opt.on('-L', '--location [NUM]', Integer,
+             'Follow the location header always or num times') do |value|
+        options[:follow_redirects] = value || true
+      end
+
+      opt.on('-X', '--request STR', String,
+             'The request method to use') do |value|
+        options[:http_method] = value
+      end
+
+      opt.on('-r', '--require lib1,lib2', Array,
+             'Require a library or gem') do |value|
+        options[:require] ||= []
+        options[:require].concat value
+      end
+
+      opt.on('--raw', 'Run diff on the raw data returned') do
+        options[:raw] == true
+      end
+
+      opt.on('-v', '--verbose', 'Make the operation more talkative') do
+        options[:verbose] = true
+      end
+    end
+
+    opts.parse! argv
+
+    puts options.inspect
+    puts "----"
+    puts argv.inspect
+
+    options
   end
 end

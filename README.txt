@@ -4,7 +4,7 @@
 
 == DESCRIPTION:
 
-Run diffs against data from http responses. 
+Kronk runs diffs against data from live and cached http responses. 
 
 == FEATURES/PROBLEMS:
 
@@ -18,11 +18,13 @@ Run diffs against data from http responses.
 
 == FUTURE:
 
-* Line numbered and colored output.
+* Line numbered and custom diff output.
 
 * Auto-queryer with optional param randomizing.
 
 * Support for test suites.
+
+* Support for proxies, ssl, and http auth.
 
 == SYNOPSIS:
 
