@@ -156,7 +156,7 @@ class TestDiff < Test::Unit::TestCase
 
 
   def test_formatted_join_char
-    expected = diff_302_301_str.gsub /\n/, "\r\n"
+    expected = diff_302_301_str.gsub(/\n/, "\r\n")
     assert_equal expected, @diff.formatted("\r\n")
   end
 
@@ -172,8 +172,8 @@ class TestDiff < Test::Unit::TestCase
       end
     end
 
-    expected = diff_302_301_str.gsub /^\+/, ">>>301>>>"
-    expected = expected.gsub /^\-/, "<<<302<<<"
+    expected = diff_302_301_str.gsub(/^\+/, ">>>301>>>")
+    expected = expected.gsub(/^\-/, "<<<302<<<")
 
     assert_equal expected, str_diff
   end

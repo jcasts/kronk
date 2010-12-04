@@ -124,9 +124,9 @@ class TestResponseDiff < Test::Unit::TestCase
 
     assert_equal expected_ary, diff.to_a
     assert_equal \
-      @ddiff.ordered_data_string([@ddiff.resp1.header.to_hash, data]), diff.str1
+      @ddiff.ordered_data_string([@ddiff.resp1.to_hash, data]), diff.str1
     assert_equal \
-      @ddiff.ordered_data_string([@ddiff.resp2.header.to_hash, data]), diff.str2
+      @ddiff.ordered_data_string([@ddiff.resp2.to_hash, data]), diff.str2
   end
 
 
@@ -155,7 +155,7 @@ class TestResponseDiff < Test::Unit::TestCase
     data['business'].delete 'website'
     data['business'].delete 'phone'
 
-    assert_equal [@ddiff.resp1.header.to_hash, data],
+    assert_equal [@ddiff.resp1.to_hash, data],
       @ddiff.data_response(@ddiff.resp1, :ignore_data => "*/website|phone")
   end
 
@@ -168,7 +168,7 @@ class TestResponseDiff < Test::Unit::TestCase
     data['business'].delete 'phone'
     data['business']['description'].delete 'op_hours'
 
-    assert_equal [@ddiff.resp1.header.to_hash, data],
+    assert_equal [@ddiff.resp1.to_hash, data],
       @ddiff.data_response(@ddiff.resp1,
         :ignore_data => ["*/website|phone", "**/op_hours"])
   end
@@ -186,7 +186,7 @@ class TestResponseDiff < Test::Unit::TestCase
   def test_data_response_ignore_headers_single
     raw = File.read "test/mocks/200_response.json"
     data = JSON.parse raw.split("\r\n\r\n", 2)[1]
-    head = @ddiff.resp1.header.to_hash
+    head = @ddiff.resp1.to_hash
 
     head.delete 'date'
 
@@ -198,7 +198,7 @@ class TestResponseDiff < Test::Unit::TestCase
   def test_data_response_ignore_headers_multiple
     raw = File.read "test/mocks/200_response.json"
     data = JSON.parse raw.split("\r\n\r\n", 2)[1]
-    head = @ddiff.resp1.header.to_hash
+    head = @ddiff.resp1.to_hash
 
     head.delete 'date'
     head.delete 'content-type'
@@ -212,7 +212,7 @@ class TestResponseDiff < Test::Unit::TestCase
   def test_data_response_json
     raw = File.read "test/mocks/200_response.json"
     data = JSON.parse raw.split("\r\n\r\n", 2)[1]
-    head = @ddiff.resp1.header.to_hash
+    head = @ddiff.resp1.to_hash
 
     assert_equal [head, data], @ddiff.data_response(@ddiff.resp1)
 
@@ -227,7 +227,7 @@ class TestResponseDiff < Test::Unit::TestCase
     raw = File.read "test/mocks/200_response.xml"
     data = Kronk::XMLParser.parse raw.split("\r\n\r\n", 2)[1]
 
-    assert_equal [@ddiff.resp2.header.to_hash, data],
+    assert_equal [@ddiff.resp2.to_hash, data],
                   @ddiff.data_response(@ddiff.resp2)
   end
 
@@ -238,7 +238,7 @@ class TestResponseDiff < Test::Unit::TestCase
 
     raw = File.read "test/mocks/200_response.plist"
     data = Kronk::PlistParser.parse raw.split("\r\n\r\n", 2)[1]
-    head = @ddiff.resp2.header.to_hash
+    head = @ddiff.resp2.to_hash
 
     assert_equal [head, data], @ddiff.data_response(@ddiff.resp2)
 

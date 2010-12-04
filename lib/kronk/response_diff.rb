@@ -90,7 +90,7 @@ class Kronk
     # response without the specified headers.
 
     def data_response_header resp, exclude_headers=@ignore_headers
-      header = resp.header.to_hash
+      header = resp.to_hash
 
       case exclude_headers
       when nil, false
