@@ -2,13 +2,14 @@ class Kronk
 
   class Diff
 
-    attr_accessor :str1, :str2, :char
+    attr_accessor :str1, :str2, :char, :format
 
     def initialize str1, str2, char=/\r?\n/
       @str1 = str1
       @str2 = str2
       @char = char
       @diff_ary = nil
+      @format = Kronk.config[:diff_format] || :ascii_diff
     end
 
 
@@ -67,6 +68,9 @@ class Kronk
     end
 
 
+    ##
+    # Create a diff from a match.
+
     def diff_match item, match, arr, side, sub_diff
       sub_diff ||= [[],[]]
 
@@ -83,7 +87,7 @@ class Kronk
     # Returns a formatted output as a string.
     # Custom formats may be achieved by passing a block.
 
-    def formatted format=:ascii_diff, join_char="\n", &block
+    def formatted format=@format, join_char="\n", &block
       block ||= method format
 
       diff_array.map do |item|

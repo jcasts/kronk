@@ -9,7 +9,8 @@ class TestKronk < Test::Unit::TestCase
         'json'    => 'JSON',
         'plist'   => 'PlistParser',
         'xml'     => 'XMLParser'
-      }
+      },
+      :diff_format => :ascii_diff
     }
 
     assert_equal expected, Kronk::DEFAULT_CONFIG
@@ -39,6 +40,7 @@ class TestKronk < Test::Unit::TestCase
         'plist' => "PlistParser",
         'xml'   => "XMLParser"
       },
+      :diff_format => :ascii_diff,
       :ignore_headers => ["Content-Type"],
       :foo => :bar
     }
