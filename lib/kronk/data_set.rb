@@ -14,8 +14,8 @@ class Kronk
 
     ##
     # Find specific data points from a nested hash or array data structure.
-    # If a block is given, will pass it any matched parent data object path,
-    # key, and value.
+    # If a block is given, will pass it any matched parent data object,
+    # key, and full path.
     #
     # Data points must be an Array or String with a glob-like format.
     # Special characters are: / * = | \ and are interpreted as follows:
@@ -39,6 +39,8 @@ class Kronk
     # See DataSet#find_data
 
     def self.find_data data, data_paths, curr_path=nil, &block
+      curr_path ||= []
+
       [*data_paths].each do |data_path|
 
         key, value, rec, data_path = parse_data_path data_path
@@ -122,9 +124,10 @@ class Kronk
                                recursive=false, path=nil, &block
 
       return unless Hash === data || Array === data
+      path ||= []
 
       each_data_item data do |key, value|
-        curr_path = "#{path}/#{key.inspect}"
+        curr_path = path.dup << key
 
         found = match_data_item(mkey, key) &&
                 match_data_item(mvalue, value)

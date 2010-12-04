@@ -55,7 +55,7 @@ class TestDataSet < Test::Unit::TestCase
       paths << path
     end
 
-    expected_paths = %w{/:key1/:key1a/0 /:key1/:key1a/2 /:key2}
+    expected_paths = [[:key1,:key1a,0], [:key1,:key1a,2], [:key2]]
 
     assert_equal [0,2,:key2], ([0,2,:key2] | keys)
     assert_equal expected_paths, (expected_paths | paths)
@@ -73,7 +73,8 @@ class TestDataSet < Test::Unit::TestCase
       paths << path
     end
 
-    expected_paths = %w{/:key1/:key1a/3/:findme /"findme" /"findme"/2/:findme}
+    expected_paths =
+      [[:key1,:key1a,3,:findme], ["findme"], ["findme",2,:findme]]
 
     assert_equal 3, keys.length
     assert_equal 1, keys.uniq.length
