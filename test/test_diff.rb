@@ -157,7 +157,7 @@ class TestDiff < Test::Unit::TestCase
 
   def test_formatted_join_char
     expected = diff_302_301_str.gsub(/\n/, "\r\n")
-    assert_equal expected, @diff.formatted("\r\n")
+    assert_equal expected, @diff.formatted(:ascii_diff, "\r\n")
   end
 
 

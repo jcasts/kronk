@@ -83,11 +83,11 @@ class Kronk
     # Returns a formatted output as a string.
     # Custom formats may be achieved by passing a block.
 
-    def formatted join_char="\n", &block
-      block ||= method :default_item_format
+    def formatted format=:ascii_diff, join_char="\n", &block
+      block ||= method format
 
       diff_array.map do |item|
-        block.call item
+        block.call item.dup
       end.flatten.join join_char
     end
 
@@ -95,13 +95,30 @@ class Kronk
     ##
     # Formats a single diff element to the default diff format.
 
-    def default_item_format item
+    def ascii_diff item
       case item
       when String
         item
       when Array
-        item[0].map!{|str| "- #{str}"}
-        item[1].map!{|str| "+ #{str}"}
+        item[0] = item[0].map{|str| "- #{str}"}
+        item[1] = item[1].map{|str| "+ #{str}"}
+        item
+      else
+        item.inspect
+      end
+    end
+
+
+    ##
+    # Formats a single diff element with colors.
+
+    def color_diff item
+      case item
+      when String
+        item
+      when Array
+        item[0] = item[0].map{|str| "\033[31m#{str}\033[0m"}
+        item[1] = item[1].map{|str| "\033[32m#{str}\033[0m"}
         item
       else
         item.inspect
