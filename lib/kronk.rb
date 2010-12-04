@@ -186,8 +186,6 @@ class Kronk
     }
 
 
-    # TODO: Parse out - and + data paths
-
     opts = OptionParser.new do |opt|
       opt.program_name = File.basename $0
       opt.version = VERSION
@@ -195,6 +193,22 @@ class Kronk
 
       opt.banner = <<-STR
 Kronk runs diffs against data from live and cached http responses.
+
+  Usage:
+    #{opt.program_name} --help
+    #{opt.program_name} --version
+    #{opt.program_name} [options...] uri1 [uri2] [-- data-paths]
+
+  Examples:
+    #{opt.program_name} http://example.com/A
+    #{opt.program_name} --raw --prev http://example.com/B
+    #{opt.program_name} http://example.com/B.xml local/file/B.json
+    #{opt.program_name} file1.json file2.json -- **/key1=val1 -root/key?
+
+  Arguments after -- will be used to focus the diff on specific data points.
+  If the data paths start with a '-' the matched data points will be removed.
+
+  Options:
       STR
 
       opt.on('-i', '--include [header1,header2]', Array,
@@ -212,6 +226,11 @@ Kronk runs diffs against data from live and cached http responses.
              'Post data with the request') do |value|
         options[:data] = value
         options[:http_method] ||= 'POST'
+      end
+
+
+      opt.on('--prev', 'Use last response to diff against') do
+        options[:use_cached] = true
       end
 
       opt.on('-H', '--header STR', String,
@@ -243,6 +262,8 @@ Kronk runs diffs against data from live and cached http responses.
       opt.on('-v', '--verbose', 'Make the operation more talkative') do
         options[:verbose] = true
       end
+
+      opt.separator nil
     end
 
     opts.parse! argv
