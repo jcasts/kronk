@@ -30,28 +30,25 @@ class Kronk
     #   # Returns an Array of grand-children key/value pairs
     #   # where the value is 'invalid' or blank
 
-    def find_data data_paths, curr_path=nil, &block
-      self.class.find_data @data, data_paths, curr_path, &block
+    def find_data data_path, curr_path=nil, &block
+      self.class.find_data @data, data_path, curr_path, &block
     end
 
 
     ##
     # See DataSet#find_data
 
-    def self.find_data data, data_paths, curr_path=nil, &block
+    def self.find_data data, data_path, curr_path=nil, &block
       curr_path ||= []
 
-      [*data_paths].each do |data_path|
+      key, value, rec, data_path = parse_data_path data_path
 
-        key, value, rec, data_path = parse_data_path data_path
+      yield_data_points data, key, value, rec, curr_path do |d, k, p|
 
-        yield_data_points data, key, value, rec, curr_path do |d, k, p|
-
-          if data_path
-            find_data d[k], data_path, p, &block
-          else
-            yield d, k, p
-          end
+        if data_path
+          find_data d[k], data_path, p, &block
+        else
+          yield d, k, p
         end
       end
     end

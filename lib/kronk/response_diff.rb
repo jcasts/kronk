@@ -109,15 +109,38 @@ class Kronk
 
 
     ##
+    # Retrieve specific data points from an embedded data structure
+    # and return them as a path => value hash.
+
+    def collect_data_points data, data_paths
+      collected = {}
+
+      data_set = DataSet.new data
+
+      [*data_paths].each do |data_path|
+        dataset.find_data data_path do |obj, k, path|
+          collected[path] = obj[k]
+        end
+      end
+
+      collected
+    end
+
+
+    ##
     # Remove specific data points from an embedded data structure.
 
     def delete_data_points data, data_paths
       return if data_paths == true
 
-      DataSet.new(data).find_data data_paths do |obj, k|
-        case obj
-        when Hash then obj.delete k
-        when Array then obj.delete_at k
+      dataset = DataSet.new data
+
+      [*data_paths].each do |data_path|
+        dataset.find_data data_path do |obj, k, p|
+          case obj
+          when Hash  then obj.delete k
+          when Array then obj.delete_at k
+          end
         end
       end
 
