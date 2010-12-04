@@ -32,13 +32,17 @@ Check if your json response returns the same data as your xml variety:
 
   $ kronk http://host.com/path.json http://host.com/path.xml
 
-Compare headers only but exclude content type:
+Compare headers only but only content type and date:
 
-  $ kronk -I -Content-Type http://host.com/path.json http://host.com/path.xml
+  $ kronk -I Content-Type,Date http://host.com/path1 http://host.com/path2
 
-Compare both body and headers excluding content type:
+Compare body and headers:
 
-  $ kronk -i -Content-Type http://host.com/path.json http://host.com/path.xml
+  $ kronk -i http://host.com/path.json http://host.com/path.xml
+
+Compare body and content type header:
+
+  $ kronk -i Content-Type http://host.com/path.json http://host.com/path.xml
 
 Compare response with the previous call:
 
