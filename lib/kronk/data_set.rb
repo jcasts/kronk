@@ -13,6 +13,40 @@ class Kronk
 
 
     ##
+    # Retrieve specific data points from an embedded data structure
+    # and return them as a path => value hash.
+
+    def collect_data_points data_paths
+      collected = {}
+
+      [*data_paths].each do |data_path|
+        find_data data_path do |obj, k, path|
+          collected[path] = obj[k]
+        end
+      end
+
+      collected
+    end
+
+
+    ##
+    # Remove specific data points from an embedded data structure.
+
+    def delete_data_points data_paths
+      [*data_paths].each do |data_path|
+        find_data data_path do |obj, k, p|
+          case obj
+          when Hash  then obj.delete k
+          when Array then obj.delete_at k
+          end
+        end
+      end
+
+      data
+    end
+
+
+    ##
     # Find specific data points from a nested hash or array data structure.
     # If a block is given, will pass it any matched parent data object,
     # key, and full path.

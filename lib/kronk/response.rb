@@ -77,10 +77,61 @@ class Kronk
 
 
       ##
+      # Returns the body data parsed according to the content type.
+      # If no parser is given will look for the default parser based on
+      # the Content-Type, or will return the cached parsed body if available.
+
+      def parsed_body parser=nil
+        return @parsed_body if @parsed_body && !parser
+        parser ||= Kronk.parser_for self['Content-Type']
+
+        raise MissingParser,
+          "No parser for Content-Type: #{self['Content-Type']}" unless parser
+
+        @parsed_body = parser.parse self.body
+      end
+
+
+      ##
+      # Returns the parsed header hash.
+
+      def parsed_header include_headers=true
+        headers = self.to_hash.dup
+
+        case include_headers
+        when nil, false
+          nil
+
+        when Array, String
+          [*include_headers].each do |h|
+            headers.delete h
+          end
+
+          headers
+
+        when true
+          headers
+        end
+      end
+
+
+      ##
       # Returns the header portion of the raw http response.
 
-      def raw_header
-        raw.split("\r\n\r\n", 2)[0]
+      def raw_header include_headers=true
+        headers = raw.split("\r\n\r\n", 2)[0]
+
+        case include_headers
+        when nil, false
+          nil
+
+        when Array, String
+          includes = [*include_headers]
+          headers.scan(%r{^((?:#{ignores.join("|")}): [^\n]*\n)}im).flatten.join
+
+        when true
+          headers
+        end
       end
     end
   end

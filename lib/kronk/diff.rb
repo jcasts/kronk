@@ -1,6 +1,62 @@
 class Kronk
 
+
+  ##
+  # Creates simple diffs as formatted strings or arrays, from two strings or
+  # data objects.
+
   class Diff
+
+
+    ##
+    # Creates a new diff from two data objects.
+
+    def self.new_from_data data1, data2
+      new ordered_data_string(data1), ordered_data_string(data2)
+    end
+
+
+    ##
+    # Returns a data string that is diff-able, meaning sorted by
+    # Hash keys when available.
+
+    def self.ordered_data_string data, indent=0
+      case data
+
+      when Hash
+        output = "{\n"
+
+        key_width = 0
+        data.keys.each do |k|
+          key_width = k.inspect.length if k.inspect.length > key_width
+        end
+
+        data_values =
+          data.map do |key, value|
+            pad = " " * indent
+            subdata = ordered_data_string value, indent + 1
+            "#{pad}#{key.inspect.ljust key_width} => #{subdata}"
+          end
+
+        output << data_values.sort.join(",\n") << "\n"
+
+        output << "#{" " * indent}}"
+
+      when Array
+        output = "[\n"
+
+        data.each do |value|
+          pad = " " * indent
+          output << "#{pad}#{ordered_data_string value, indent + 1},\n"
+        end
+
+        output << "#{" " * indent}]"
+
+      else
+        data.inspect
+      end
+    end
+
 
     attr_accessor :str1, :str2, :char, :format
 

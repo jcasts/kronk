@@ -7,6 +7,81 @@ class TestDiff < Test::Unit::TestCase
   end
 
 
+  def test_new_from_data
+    other_data = {:foo => :bar}
+
+    diff = Kronk::Diff.new_from_data mock_data, other_data
+
+    assert_equal Kronk::Diff.ordered_data_string(mock_data), diff.str1
+    assert_equal Kronk::Diff.ordered_data_string(other_data), diff.str2
+  end
+
+
+  def test_ordered_data_string
+    expected = <<STR
+{
+"acks"  => [
+ [
+  56,
+  78,
+  ],
+ [
+  "12",
+  "34",
+  ],
+ ],
+"root"  => [
+ [
+  "B1",
+  "B2",
+  ],
+ [
+  "A1",
+  "A2",
+  ],
+ [
+  "C1",
+  "C2",
+  [
+   "C3a",
+   "C3b",
+   ],
+  ],
+ {
+  "test" => [
+   [
+    "D1a\\nContent goes here",
+    "D1b",
+    ],
+   "D2",
+   ],
+  :tests => [
+   "D3a",
+   "D3b",
+   ]
+  },
+ ],
+"subs"  => [
+ "a",
+ "b",
+ ],
+"tests" => {
+ "test" => [
+  [
+   1,
+   2,
+   ],
+  2.123,
+  ],
+ :foo   => :bar
+ }
+}
+STR
+
+    assert_equal expected.strip, Kronk::Diff.ordered_data_string(mock_data)
+  end
+
+
   def test_create_diff_inverted
     @diff = Kronk::Diff.new mock_301_response, mock_302_response
     assert_equal diff_301_302, @diff.create_diff

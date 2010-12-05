@@ -26,6 +26,60 @@ class TestDataSet < Test::Unit::TestCase
     }
 
     @dataset = Kronk::DataSet.new @data
+
+    @dataset_mock = Kronk::DataSet.new mock_data
+  end
+
+
+  def test_delete_data_points_single
+    data = @dataset_mock.delete_data_points "subs/1"
+
+    expected = mock_data
+    expected['subs'].delete_at 1
+
+    assert_equal expected, data
+  end
+
+
+  def test_delete_data_points_single_wildcard
+    data = @dataset_mock.delete_data_points "root/*/tests"
+
+    expected = mock_data
+    expected['root'][3].delete :tests
+
+    assert_equal expected, data
+  end
+
+
+  def test_delete_data_points_single_wildcard_qmark
+    data = @dataset_mock.delete_data_points "subs/?"
+
+    expected = mock_data
+    expected['subs'].clear
+
+    assert_equal expected, data
+  end
+
+
+  def test_delete_data_points_recursive_wildcard
+    data = @dataset_mock.delete_data_points "**/test?"
+
+    expected = mock_data
+    expected['root'][3].delete :tests
+    expected['root'][3].delete 'test'
+    expected.delete "tests"
+
+    assert_equal expected, data
+  end
+
+
+  def test_delete_data_points_recursive_wildcard_value
+    data = @dataset_mock.delete_data_points "**=A?"
+
+    expected = mock_data
+    expected['root'][1].clear
+
+    assert_equal expected, data
   end
 
 
