@@ -274,4 +274,29 @@ Kronk runs diffs against data from live and cached http responses.
 
     options
   end
+
+
+  ##
+  # Searches ARGV and returns data paths to add or exclude in the diff.
+  # Returns the array [only_paths, except_paths]
+
+  def self.parse_data_paths_args argv
+    return unless argv.include? "--"
+
+    data_paths = argv.slice! argv.index("--")..-1
+    data_paths.shift
+
+    only_paths   = nil
+    except_paths = nil
+
+    data_paths.each do |path|
+      if path[0,1] == "-"
+        (except_paths ||= []) << path[1..-1]
+      else
+        (only_paths ||= []) << path
+      end
+    end
+
+    [only_paths, except_paths]
+  end
 end

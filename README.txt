@@ -12,7 +12,7 @@ Kronk runs diffs against data from live and cached http responses.
 
 * Include or exclude particular data points.
 
-* Supports json, basic xml, and plist.
+* Supports json, rails-ish xml, and plist.
 
 * Support for custom data parsers.
 
