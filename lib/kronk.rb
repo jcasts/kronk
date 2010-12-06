@@ -262,6 +262,33 @@ Kronk runs diffs against data from live and cached http responses.
   Options:
       STR
 
+      opt.on('-d', '--data STR', String,
+             'Post data with the request') do |value|
+        options[:data] = value
+        options[:http_method] ||= 'POST'
+      end
+
+
+      opt.on('--prev', 'Use last response to diff against') do
+        options[:uris] << :cache
+      end
+
+
+      opt.on('--suff STR', String,
+             'Add common path items to the end of each URI') do |value|
+        options[:suffix] = value
+      end
+
+
+      opt.on('-H', '--header STR', String,
+             'Header to pass to the server request') do |value|
+        options[:headers] ||= {}
+
+        key, value = value.split ": ", 2
+        options[:headers][key] = value
+      end
+
+
       opt.on('-i', '--include [header1,header2]', Array,
              'Include all or given headers in response') do |value|
         options[:with_headers] ||= []
@@ -287,27 +314,6 @@ Kronk runs diffs against data from live and cached http responses.
         end
 
         options[:no_body] = true
-      end
-
-
-      opt.on('-d', '--data STR', String,
-             'Post data with the request') do |value|
-        options[:data] = value
-        options[:http_method] ||= 'POST'
-      end
-
-
-      opt.on('--prev', 'Use last response to diff against') do
-        options[:uris] << :cache
-      end
-
-
-      opt.on('-H', '--header STR', String,
-             'Header to pass to the server request') do |value|
-        options[:headers] ||= {}
-
-        key, value = value.split ": ", 2
-        options[:headers][key] = value
       end
 
 
@@ -361,6 +367,10 @@ Kronk runs diffs against data from live and cached http responses.
 
     options[:uris].concat argv
     options[:uris].slice!(2..-1)
+
+    options[:uris].map! do |uri|
+      Request.local?(uri) ? uri : "#{uri}#{options[:suffix]}"
+    end if options[:suffix]
 
     if options[:uris].empty?
       $stderr << "\nError: You must enter at least one URI\n\n"

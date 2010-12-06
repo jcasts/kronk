@@ -40,7 +40,7 @@ class Kronk
 
     def self.retrieve query, options={}
       resp =
-        if query =~ %r{^\w+://}
+        if !local?(query)
           retrieve_uri query, options
         else
           retrieve_file query, options
@@ -57,6 +57,14 @@ class Kronk
       resp
     rescue SocketError, Errno::ENOENT
       raise NotFoundError, "#{query} could not be found"
+    end
+
+
+    ##
+    # Check if a URI should be treated as a local file.
+
+    def self.local? uri
+      !(uri =~ %r{^\w+://})
     end
 
 
