@@ -135,4 +135,36 @@ class Kronk
       end
     end
   end
+
+
+  ##
+  # Mock response object without a header for body-only http responses.
+
+  class HeadlessResponse
+
+    include Response::Helpers
+
+    attr_accessor :body, :code
+
+    def initialize body
+      @body = body
+      @raw  = body
+    end
+
+
+    ##
+    # Interface method only. Returns nil.
+
+    def [] key
+      nil
+    end
+
+
+    ##
+    # Interface method only. Returns empty hash.
+
+    def to_hash
+      Hash.new
+    end
+  end
 end

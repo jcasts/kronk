@@ -49,10 +49,18 @@ class Kronk
     # Read http response from a file and return a HTTPResponse instance.
 
     def self.retrieve_file path, options={}
-      path = DEFAULT_CACHE_FILE if path == :cache
-      file = File.open(path, "r")
-      resp = Response.read_new file
-      file.close
+      path = Kronk::DEFAULT_CACHE_FILE if path == :cache
+      resp = nil
+
+      File.open(path, "r") do |file|
+        begin
+          resp = Response.read_new file
+
+        rescue Net::HTTPBadResponse
+          file.rewind
+          resp = HeadlessResponse.new file.read
+        end
+      end
 
       resp = follow_redirect resp, options if
         follow_redirect? resp, options[:follow_redirects]

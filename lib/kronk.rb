@@ -140,8 +140,8 @@ class Kronk
   #   "val1\n- val11\n+ val12"
 
   def self.compare query1, query2=:cache, options={}
-    diff = ResponseDiff.retrieve_new query1, query2, options
-    diff.data_diff.formatted
+    resp1 = Request.retrieve query1, options
+    resp2 = Request.retrieve query2, options
   end
 
 
