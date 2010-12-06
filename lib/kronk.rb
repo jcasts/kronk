@@ -182,9 +182,9 @@ class Kronk
     rescue Errno::ENOENT
       make_config_file
 
-      puts "\nNo config file was found.\n\n"
-      puts "Created default config in #{DEFAULT_CONFIG_FILE}"
-      puts "Edit file if necessary and try again."
+      $stderr << "\nNo config file was found.\n\n"
+      $stderr << "Created default config in #{DEFAULT_CONFIG_FILE}\n"
+      $stderr << "Edit file if necessary and try again.\n"
       exit 1
     end
 
