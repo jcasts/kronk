@@ -235,7 +235,7 @@ Kronk runs diffs against data from live and cached http responses.
 
   Examples:
     #{opt.program_name} http://example.com/A
-    #{opt.program_name} --raw --prev http://example.com/B
+    #{opt.program_name} http://example.com/B --prev --raw
     #{opt.program_name} http://example.com/B.xml local/file/B.json
     #{opt.program_name} file1.json file2.json -- **/key1=val1 -root/key?
 
