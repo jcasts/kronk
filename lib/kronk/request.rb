@@ -46,9 +46,13 @@ class Kronk
           retrieve_file query, options
         end
 
-      File.open(options[:cache_response], "w+") do |file|
-        file.write resp.raw
-      end if options[:cache_response]
+      begin
+        File.open(options[:cache_response], "w+") do |file|
+          file.write resp.raw
+        end if options[:cache_response]
+      rescue => e
+        $stderr << "#{e.class}: #{e.message}"
+      end
 
       resp
     rescue SocketError, Errno::ENOENT

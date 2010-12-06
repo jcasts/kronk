@@ -206,7 +206,7 @@ class Kronk
     end
 
   rescue Request::NotFoundError, Response::MissingParser => e
-    puts "\nError: #{e.message}"
+    $stderr << "\nError: #{e.message}\n"
     exit 2
   end
 
