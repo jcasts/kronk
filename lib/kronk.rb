@@ -138,14 +138,11 @@ class Kronk
   # Returns a diff object.
 
   def self.compare query1, query2=:cache, options={}
-    resp1 = Request.retrieve query1, options
-    resp2 = Request.retrieve query2, options
-
     diff =
       if options[:raw]
-        raw_diff resp1, resp2, options
+        raw_diff query1, query2, options
       else
-        data_diff resp1, resp2, options
+        data_diff query1, query2, options
       end
 
     diff
@@ -155,27 +152,36 @@ class Kronk
   ##
   # Return a diff object from two responses' raw data.
 
-  def self.raw_diff resp1, resp2, options={}
-    str1 = resp1.body
-    str2 = resp2.body
+  def self.raw_diff query1, query2, options={}
+    resp1 = Request.retrieve query1, options
+    resp2 = Request.retrieve query2, options
 
-    if !options[:with_body]
-      str1 = str2 = ""
-    end
-
-    if options[:compare_headers]
-      str1 = "#{resp1.raw_header(options[:compare_headers])}\r\n\r\n#{str1}"
-      str2 = "#{resp2.raw_header(options[:compare_headers])}\r\n\r\n#{str2}"
-    end
+    str1 = response_str resp1
+    str2 = response_str resp2
 
     Diff.new str1, str2
+  end
+
+
+  def self.response_str resp, options={}
+    str = resp.body unless options[:no_body]
+
+    if options[:compare_headers]
+      header = resp.raw_header(options[:compare_headers])
+      str = [header, str].compact.join "\r\n\r\n"
+    end
+
+    str
   end
 
 
   ##
   # Return a diff object from two parsed responses.
 
-  def self.data_diff resp1, resp2, options={}
+  def self.data_diff query1, query2, options={}
+    resp1 = Request.retrieve query1, options
+    resp2 = Request.retrieve query2, options
+
     data1 = response_data resp1, options
     data2 = response_data resp2, options
 
@@ -186,7 +192,7 @@ class Kronk
   def self.response_data resp, options={}
     data = nil
 
-    if options[:with_body]
+    unless options[:no_body]
       dataset = DataSet.new resp.parsed_body
 
       dataset.collect_data_points options[:only_data]  if options[:only_data]
@@ -210,8 +216,17 @@ class Kronk
     options = parse_args argv
     uri1, uri2 = options.delete :uris
 
-    diff = compare uri1, uri2, options
-    puts diff.formatted(config[:diff_format])
+    if uri1 && uri2
+      diff = compare uri1, uri2, options
+      puts diff.formatted(config[:diff_format])
+
+    elsif options[:raw]
+      puts response_str(Request.retrieve(uri1), options)
+
+    else
+      data = response_data Request.retrieve(uri1), options
+      puts Diff.ordered_data_string(data)
+    end
   end
 
 
@@ -221,7 +236,7 @@ class Kronk
   def self.parse_args argv
     options = {
       :compare_headers => false,
-      :with_body       => true,
+      :no_body         => false,
       :uris            => []
     }
 
@@ -260,7 +275,7 @@ Kronk runs diffs against data from live and cached http responses.
       opt.on('-I', '--head [header1,header2]', Array,
              'Use all or given headers only in the response') do |value|
         options[:compare_headers] = value || true
-        options[:with_body]    = false
+        options[:no_body]         = true
       end
 
       opt.on('-d', '--data STR', String,
@@ -312,9 +327,11 @@ Kronk runs diffs against data from live and cached http responses.
     options[:uris].concat argv
     options[:uris].slice!(2..-1)
 
-    puts options.inspect
-    puts "----"
-    puts argv.inspect
+    if options[:uris].empty?
+      $stderr << "\nError: You must enter at least one URI\n\n"
+      $stderr << opts.to_s
+      exit 1
+    end
 
     options
   end
