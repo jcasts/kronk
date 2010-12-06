@@ -149,14 +149,19 @@ class Kronk
     def initialize body
       @body = body
       @raw  = body
+      @header = {}
     end
 
 
     ##
-    # Interface method only. Returns nil.
+    # Interface method only. Returns nil for all but content type.
 
     def [] key
-      nil
+      @header[key]
+    end
+
+    def []= key, value
+      @header[key] = value
     end
 
 

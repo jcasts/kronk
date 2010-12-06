@@ -48,7 +48,7 @@ class Kronk
   # Default config to use.
   DEFAULT_CONFIG = {
     :content_types  => DEFAULT_CONTENT_TYPES.dup,
-    :diff_format    => :ascii_diff
+    :diff_format    => :color_diff
   }
 
 
@@ -133,38 +133,73 @@ class Kronk
   # :http_method:: Symbol - the http method to use; defaults to :get
   # :ignore_data:: String/Array - defines which data points to exclude
   # :compare_headers:: Bool/String/Array - defines which headers to exclude
+  # :raw:: Bool - run diff on raw strings
   #
-  # Returns a formatted diff string:
-  #
-  #   compare "http://host.com/test.json", :cache
-  #   "val1\n- val11\n+ val12"
+  # Returns a diff object.
 
   def self.compare query1, query2=:cache, options={}
     resp1 = Request.retrieve query1, options
     resp2 = Request.retrieve query2, options
+
+    diff =
+      if options[:raw]
+        raw_diff resp1, resp2, options
+      else
+        data_diff resp1, resp2, options
+      end
+
+    diff
   end
 
 
   ##
-  # Make requests, parse and compare the response strings.
-  # If the second argument is omitted or is passed :cache, will
-  # attempt to compare with the last made request. If there was no last
-  # request will compare against empty string.
-  #
-  # Supports the following options:
-  # :data:: Hash/String - the data to pass to the http request
-  # :headers:: Hash - extra headers to pass to the request
-  # :http_method:: Symbol - the http method to use; defaults to :get
-  # :ignore_headers:: Bool/String/Array - defines which headers to exclude
-  #
-  # Returns a formatted diff string:
-  #
-  #   diff "http://host.com/test.json", :cache
-  #   "val1\n- val11\n+ val12"
+  # Return a diff object from two responses' raw data.
 
-  def self.diff query1, query2=:cache, options={}
-    diff = ResponseDiff.retrieve_new query1, query2, options
-    diff.raw_diff.formatted
+  def self.raw_diff resp1, resp2, options={}
+    str1 = resp1.body
+    str2 = resp2.body
+
+    if !options[:with_body]
+      str1 = str2 = ""
+    end
+
+    if options[:compare_headers]
+      str1 = "#{resp1.raw_header(options[:compare_headers])}\r\n\r\n#{str1}"
+      str2 = "#{resp2.raw_header(options[:compare_headers])}\r\n\r\n#{str2}"
+    end
+
+    Diff.new str1, str2
+  end
+
+
+  ##
+  # Return a diff object from two parsed responses.
+
+  def self.data_diff resp1, resp2, options={}
+    data1 = response_data resp1, options
+    data2 = response_data resp2, options
+
+    Diff.new_from_data data1, data2
+  end
+
+
+  def self.response_data resp, options={}
+    data = nil
+
+    if options[:with_body]
+      dataset = DataSet.new resp.parsed_body
+
+      dataset.collect_data_points options[:only_data]  if options[:only_data]
+      dataset.delete_data_points options[:ignore_data] if options[:ignore_data]
+
+      data = dataset.data
+    end
+
+    if options[:compare_headers]
+      data = [resp.parsed_header(options[:compare_headers]), data].compact
+    end
+
+    data
   end
 
 
@@ -172,7 +207,11 @@ class Kronk
   # Runs the kronk command with the given terminal args.
 
   def self.run argv=ARGV
-    parse_args argv
+    options = parse_args argv
+    uri1, uri2 = options.delete :uris
+
+    diff = compare uri1, uri2, options
+    puts diff.formatted(config[:diff_format])
   end
 
 
@@ -182,7 +221,8 @@ class Kronk
   def self.parse_args argv
     options = {
       :compare_headers => false,
-      :with_body    => true,
+      :with_body       => true,
+      :uris            => []
     }
 
     options[:only_data], options[:ignore_data] = parse_data_path_args argv
@@ -231,7 +271,7 @@ Kronk runs diffs against data from live and cached http responses.
 
 
       opt.on('--prev', 'Use last response to diff against') do
-        options[:use_cached] = true
+        options[:uris] << :cache
       end
 
       opt.on('-H', '--header STR', String,
@@ -257,17 +297,20 @@ Kronk runs diffs against data from live and cached http responses.
       end
 
       opt.on('--raw', 'Run diff on the raw data returned') do
-        options[:raw] == true
+        options[:raw] = true
       end
 
-      opt.on('-v', '--verbose', 'Make the operation more talkative') do
-        options[:verbose] = true
-      end
+      #opt.on('-v', '--verbose', 'Make the operation more talkative') do
+      #  options[:verbose] = true
+      #end
 
       opt.separator nil
     end
 
     opts.parse! argv
+
+    options[:uris].concat argv
+    options[:uris].slice!(2..-1)
 
     puts options.inspect
     puts "----"

@@ -59,6 +59,7 @@ class Kronk
         rescue Net::HTTPBadResponse
           file.rewind
           resp = HeadlessResponse.new file.read
+          resp['Content-Type'] = File.extname path
         end
       end
 
