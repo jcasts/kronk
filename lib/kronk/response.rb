@@ -141,7 +141,7 @@ class Kronk
       # Returns the raw response with selective headers and/or the body of
       # the response. Supports the following options:
       # :no_body:: Bool - Don't return the body; default nil
-      # :with_headers:: Bool/String/Array - Return headerd; default nil
+      # :with_headers:: Bool/String/Array - Return headers; default nil
 
       def selective_string options={}
         str = self.body unless options[:no_body]
@@ -154,6 +154,12 @@ class Kronk
         str
       end
 
+
+      ##
+      # Returns the parsed response with selective headers and/or the body of
+      # the response. Supports the following options:
+      # :no_body:: Bool - Don't return the body; default nil
+      # :with_headers:: Bool/String/Array - Return headers; default nil
 
       def selective_data options={}
         data = nil

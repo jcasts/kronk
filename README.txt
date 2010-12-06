@@ -34,19 +34,19 @@ Check if your json response returns the same data as your xml variety:
 
 Compare headers only but only content type and date:
 
-  $ kronk -I Content-Type,Date http://host.com/path1 http://host.com/path2
+  $ kronk http://host.com/path1 http://host.com/path2 -I Content-Type,Date
 
 Compare body and headers:
 
-  $ kronk -i http://host.com/path.json http://host.com/path.xml
+  $ kronk http://host.com/path.json http://host.com/path.xml -i
 
 Compare body and content type header:
 
-  $ kronk -i Content-Type http://host.com/path.json http://host.com/path.xml
+  $ kronk http://host.com/path.json http://host.com/path.xml -i Content-Type
 
 Compare response with the previous call:
 
-  $ kronk --prev http://host.com/path
+  $ kronk http://host.com/path --prev
 
 Compare response with a local file:
 
@@ -54,17 +54,17 @@ Compare response with a local file:
 
 Do a simple text diff on the http response, including headers:
 
-  $ kronk --raw -i http://host.com/A/path.json http://host.com/B/path.json
+  $ kronk http://host.com/A/path.json http://host.com/B/path.json --raw -i
 
 Run it to display formatted data:
 
   $ kronk http://host.com/path.json
 
-  $ kronk -i http://host.com/path.json
+  $ kronk http://host.com/path.json -i
 
 Run it to display raw data with headers:
 
-  $ kronk --raw -i http://host.com/path.json
+  $ kronk http://host.com/path.json --raw -i
   
 == REQUIREMENTS:
 
