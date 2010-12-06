@@ -77,7 +77,11 @@ Run it to display raw data with headers:
   
 == REQUIREMENTS:
 
-* FIX (list of requirements)
+* nokogiri gem
+
+* plist gem
+
+* json gem
 
 == INSTALL:
 
