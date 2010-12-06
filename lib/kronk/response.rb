@@ -105,8 +105,11 @@ class Kronk
           nil
 
         when Array, String
-          [*include_headers].each do |h|
-            headers.delete h
+          include_headers = [*include_headers].map{|h| h.to_s.downcase}
+
+          headers.each do |key, value|
+            headers.delete key unless
+              include_headers.include? key.to_s.downcase
           end
 
           headers
@@ -148,7 +151,7 @@ class Kronk
 
         if options[:with_headers]
           header = raw_header(options[:with_headers])
-          str = [header, str].compact.join "\r\n\r\n"
+          str = [header, str].compact.join "\r\n"
         end
 
         str
