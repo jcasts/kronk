@@ -195,10 +195,10 @@ class Kronk
       puts diff.formatted(config[:diff_format])
 
     elsif options[:raw]
-      puts Request.retrieve(uri1).selective_string(options)
+      puts Request.retrieve(uri1, options).selective_string(options)
 
     else
-      data = Request.retrieve(uri1).selective_data options
+      data = Request.retrieve(uri1, options).selective_data options
       puts Diff.ordered_data_string(data)
     end
 
