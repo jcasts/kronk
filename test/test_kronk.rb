@@ -10,6 +10,7 @@ class TestKronk < Test::Unit::TestCase
         'plist'   => 'PlistParser',
         'xml'     => 'XMLParser'
       },
+      :cache_file  => Kronk::DEFAULT_CACHE_FILE,
       :diff_format => :ascii_diff
     }
 
@@ -24,6 +25,7 @@ class TestKronk < Test::Unit::TestCase
         'js'   => "JsEngine"
       },
       :ignore_headers => ["Content-Type"],
+      :cache_file  => Kronk::DEFAULT_CACHE_FILE,
       :foo => :bar
     }
 
@@ -41,6 +43,7 @@ class TestKronk < Test::Unit::TestCase
         'xml'   => "XMLParser"
       },
       :diff_format => :ascii_diff,
+      :cache_file  => Kronk::DEFAULT_CACHE_FILE,
       :ignore_headers => ["Content-Type"],
       :foo => :bar
     }

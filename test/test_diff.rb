@@ -23,55 +23,55 @@ class TestDiff < Test::Unit::TestCase
 "acks"  => [
  [
   56,
-  78,
+  78
   ],
  [
   "12",
-  "34",
-  ],
+  "34"
+  ]
  ],
 "root"  => [
  [
   "B1",
-  "B2",
+  "B2"
   ],
  [
   "A1",
-  "A2",
+  "A2"
   ],
  [
   "C1",
   "C2",
   [
    "C3a",
-   "C3b",
-   ],
+   "C3b"
+   ]
   ],
  {
   "test" => [
    [
     "D1a\\nContent goes here",
-    "D1b",
+    "D1b"
     ],
-   "D2",
+   "D2"
    ],
   :tests => [
    "D3a",
-   "D3b",
+   "D3b"
    ]
-  },
+  }
  ],
 "subs"  => [
  "a",
- "b",
+ "b"
  ],
 "tests" => {
  "test" => [
   [
    1,
-   2,
+   2
    ],
-  2.123,
+  2.123
   ],
  :foo   => :bar
  }

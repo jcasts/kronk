@@ -39,17 +39,18 @@ class Kronk
           end
 
         output << data_values.sort.join(",\n") << "\n"
-
         output << "#{" " * indent}}"
 
       when Array
         output = "[\n"
 
-        data.each do |value|
-          pad = " " * indent
-          output << "#{pad}#{ordered_data_string value, indent + 1},\n"
-        end
+        data_values =
+          data.map do |value|
+            pad = " " * indent
+            "#{pad}#{ordered_data_string value, indent + 1}"
+          end
 
+        output << data_values.join(",\n") << "\n"
         output << "#{" " * indent}]"
 
       else
