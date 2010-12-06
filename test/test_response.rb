@@ -207,4 +207,52 @@ class TestResponse < Test::Unit::TestCase
                  @json_resp.selective_data(:no_body => true,
                     :with_headers => ["Content-Type", "Date"])
   end
+
+
+  def test_selective_data_only_data
+    expected = {"business"        => {"id" => "1234"},
+                "original_request"=> {"id"=>"1234"}}
+
+    assert_equal expected,
+      @json_resp.selective_data(:only_data => "**/id")
+  end
+
+
+  def test_selective_data_multiple_only_data
+    expected = {"business"    => {"id" => "1234"},
+                "request_id"  => "mock_rid"}
+
+    assert_equal expected,
+      @json_resp.selective_data(:only_data => ["business/id", "request_id"])
+  end
+
+
+  def test_selective_data_ignore_data
+    expected = JSON.parse @json_resp.body
+    expected['business'].delete 'id'
+    expected['original_request'].delete 'id'
+
+    assert_equal expected,
+      @json_resp.selective_data(:ignore_data => "**/id")
+  end
+
+
+  def test_selective_data_multiple_only_data
+    expected = JSON.parse @json_resp.body
+    expected['business'].delete 'id'
+    expected.delete 'request_id'
+
+    assert_equal expected,
+      @json_resp.selective_data(:ignore_data => ["business/id", "request_id"])
+  end
+
+
+
+  def test_selective_data_collected_and_ignored
+    expected = {"business" => {"id" => "1234"}}
+
+    assert_equal expected,
+      @json_resp.selective_data(:only_data => "**/id",
+        :ignore_data => "original_request")
+  end
 end
