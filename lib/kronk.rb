@@ -12,6 +12,7 @@ end
 
 require 'net/http'
 require 'optparse'
+require 'yaml'
 
 class Kronk
 
