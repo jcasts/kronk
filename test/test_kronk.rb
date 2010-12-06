@@ -69,4 +69,124 @@ class TestKronk < Test::Unit::TestCase
     assert_equal Kronk::XMLParser, Kronk.parser_for('xml')
     assert_equal Kronk::PlistParser, Kronk.parser_for('plist')
   end
+
+
+  def test_load_requires
+    old_requires = Kronk.config[:requires]
+    Kronk.config[:requires] = ["mock_lib1"]
+
+    assert_raises LoadError do
+      Kronk.load_requires
+    end
+
+    Kronk.config[:requires] = old_requires
+  end
+
+
+  def test_load_requires_nil
+    old_requires = Kronk.config[:requires]
+    Kronk.config[:requires] = nil
+
+    assert_nil Kronk.load_requires
+
+    Kronk.config[:requires] = old_requires
+  end
+
+
+  def test_find_const
+    assert_equal Nokogiri::XML::Document,
+                 Kronk.find_const("Nokogiri::XML::Document")
+
+    assert_equal JSON, Kronk.find_const("JSON")
+
+    assert_equal Kronk::XMLParser, Kronk.find_const("XMLParser")
+  end
+
+
+  def test_compare_raw
+    diff = Kronk.compare "test/mocks/200_response.json",
+                         "test/mocks/200_response.xml",
+                         :with_headers => true,
+                         :raw => true
+
+    resp1 = Kronk::Request.retrieve "test/mocks/200_response.json",
+                             :with_headers => true,
+                             :raw => true
+
+    resp2 = Kronk::Request.retrieve "test/mocks/200_response.xml",
+                             :with_headers => true,
+                             :raw => true
+
+    exp_diff = Kronk::Diff.new resp1.selective_string(:with_headers => true),
+                               resp2.selective_string(:with_headers => true)
+
+    assert_equal exp_diff.formatted, diff.formatted
+  end
+
+
+  def test_compare_data
+    diff = Kronk.compare "test/mocks/200_response.json",
+                         "test/mocks/200_response.xml",
+                         :with_headers => true
+
+    resp1 = Kronk::Request.retrieve "test/mocks/200_response.json",
+                             :with_headers => true
+
+    resp2 = Kronk::Request.retrieve "test/mocks/200_response.xml",
+                             :with_headers => true
+
+    exp_diff = Kronk::Diff.new_from_data \
+                  resp1.selective_data(:with_headers => true),
+                  resp2.selective_data(:with_headers => true)
+
+    assert_equal exp_diff.formatted, diff.formatted
+  end
+
+  def test_raw_diff
+    diff = Kronk.raw_diff "test/mocks/200_response.json",
+                          "test/mocks/200_response.xml",
+                          :with_headers => true
+
+    resp1 = Kronk::Request.retrieve "test/mocks/200_response.json",
+                             :with_headers => true,
+                             :raw => true
+
+    resp2 = Kronk::Request.retrieve "test/mocks/200_response.xml",
+                             :with_headers => true,
+                             :raw => true
+
+    exp_diff = Kronk::Diff.new resp1.selective_string(:with_headers => true),
+                               resp2.selective_string(:with_headers => true)
+
+    assert_equal exp_diff.formatted, diff.formatted
+  end
+
+
+  def test_data_diff
+    diff = Kronk.data_diff "test/mocks/200_response.json",
+                           "test/mocks/200_response.xml",
+                           :with_headers => true
+
+    resp1 = Kronk::Request.retrieve "test/mocks/200_response.json",
+                             :with_headers => true
+
+    resp2 = Kronk::Request.retrieve "test/mocks/200_response.xml",
+                             :with_headers => true
+
+    exp_diff = Kronk::Diff.new_from_data \
+                  resp1.selective_data(:with_headers => true),
+                  resp2.selective_data(:with_headers => true)
+
+    assert_equal exp_diff.formatted, diff.formatted
+  end
+
+
+  def test_parse_data_path_args
+    argv = %w{this is --argv -- one -two -- -three four}
+
+    assert_equal [%w{one four}, %w{two - three}],
+                 Kronk.parse_data_path_args(argv)
+
+    assert_equal %w{this is --argv}, argv
+  end
 end
