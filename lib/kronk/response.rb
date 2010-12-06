@@ -137,11 +137,17 @@ class Kronk
       end
 
 
+      ##
+      # Returns the raw response with selective headers and/or the body of
+      # the response. Supports the following options:
+      # :no_body:: Bool - Don't return the body; default nil
+      # :with_headers:: Bool/String/Array - Return headerd; default nil
+
       def selective_string options={}
         str = self.body unless options[:no_body]
 
-        if options[:compare_headers]
-          header = raw_header(options[:compare_headers])
+        if options[:with_headers]
+          header = raw_header(options[:with_headers])
           str = [header, str].compact.join "\r\n\r\n"
         end
 
@@ -161,8 +167,8 @@ class Kronk
           data = ds.data
         end
 
-        if options[:compare_headers]
-          data = [parsed_header(options[:compare_headers]), data].compact
+        if options[:with_headers]
+          data = [parsed_header(options[:with_headers]), data].compact
         end
 
         data

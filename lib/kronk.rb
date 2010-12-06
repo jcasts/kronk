@@ -132,7 +132,7 @@ class Kronk
   # :headers:: Hash - extra headers to pass to the request
   # :http_method:: Symbol - the http method to use; defaults to :get
   # :ignore_data:: String/Array - defines which data points to exclude
-  # :compare_headers:: Bool/String/Array - defines which headers to exclude
+  # :with_headers:: Bool/String/Array - defines which headers to include
   # :raw:: Bool - run diff on raw strings
   #
   # Returns a diff object.
@@ -216,7 +216,7 @@ class Kronk
 
   def self.parse_args argv
     options = {
-      :compare_headers => false,
+      :with_headers    => false,
       :no_body         => false,
       :uris            => []
     }
@@ -250,25 +250,25 @@ Kronk runs diffs against data from live and cached http responses.
 
       opt.on('-i', '--include [header1,header2]', Array,
              'Include all or given headers in response') do |value|
-        options[:compare_headers] ||= []
+        options[:with_headers] ||= []
 
         if value
-          options[:compare_headers].concat value if
-            Array === options[:compare_headers]
+          options[:with_headers].concat value if
+            Array === options[:with_headers]
         else
-          options[:compare_headers] = true
+          options[:with_headers] = true
         end
       end
 
       opt.on('-I', '--head [header1,header2]', Array,
              'Use all or given headers only in the response') do |value|
-        options[:compare_headers] ||= []
+        options[:with_headers] ||= []
 
         if value
-          options[:compare_headers].concat value if
-            Array === options[:compare_headers]
+          options[:with_headers].concat value if
+            Array === options[:with_headers]
         else
-          options[:compare_headers] = true
+          options[:with_headers] = true
         end
 
         options[:no_body]         = true
