@@ -31,6 +31,44 @@ class TestDataSet < Test::Unit::TestCase
   end
 
 
+  def test_collect_data_points_single
+    data = @dataset_mock.collect_data_points "subs/1"
+    assert_equal({"subs" => [nil, "b"]}, data)
+  end
+
+
+  def test_collect_data_points_single_wildcard
+    data = @dataset_mock.collect_data_points "root/*/tests"
+    assert_equal({"root"=>[nil, nil, nil, {:tests=>["D3a", "D3b"]}]}, data)
+  end
+
+
+  def test_collect_data_points_recursive_wildcard
+    data = @dataset_mock.collect_data_points "**/test?"
+
+    expected = {
+      "tests"=>{:foo=>:bar, "test"=>[[1, 2], 2.123]},
+      "root"=>[nil, nil, nil, {
+        :tests=>["D3a", "D3b"],
+        "test"=>[["D1a\nContent goes here", "D1b"], "D2"]}]
+    }
+
+    assert_equal expected, data
+  end
+
+
+  def test_collect_data_points_recursive_wildcard_value
+    data = @dataset_mock.collect_data_points "**=(A|a)?"
+
+    expected = {
+      "root" => [nil, ["A1", "A2"]],
+      "subs" => ["a"]
+    }
+
+    assert_equal expected, data
+  end
+
+
   def test_delete_data_points_single
     data = @dataset_mock.delete_data_points "subs/1"
 
@@ -74,10 +112,11 @@ class TestDataSet < Test::Unit::TestCase
 
 
   def test_delete_data_points_recursive_wildcard_value
-    data = @dataset_mock.delete_data_points "**=A?"
+    data = @dataset_mock.delete_data_points "**=A?|a?"
 
     expected = mock_data
     expected['root'][1].clear
+    expected['subs'] = ["b"]
 
     assert_equal expected, data
   end

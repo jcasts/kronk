@@ -13,24 +13,36 @@ class Kronk
 
 
     ##
-    # Retrieve specific data points from an embedded data structure
-    # and return them as a path => value hash.
+    # Keep only specific data points from the data structure.
 
     def collect_data_points data_paths
-      collected = {}
+      new_data = @data.class.new
 
       [*data_paths].each do |data_path|
         find_data data_path do |obj, k, path|
-          collected[path] = obj[k]
+
+          curr_data     = @data
+          new_curr_data = new_data
+
+          path.each_with_index do |key, i|
+
+            if i == path.length - 1
+              new_curr_data[key] = curr_data[key]
+            else
+              new_curr_data[key] ||= curr_data[key].class.new
+              new_curr_data        = new_curr_data[key]
+              curr_data            = curr_data[key]
+            end
+          end
         end
       end
 
-      collected
+      @data = new_data
     end
 
 
     ##
-    # Remove specific data points from an embedded data structure.
+    # Remove specific data points from the data structure.
 
     def delete_data_points data_paths
       [*data_paths].each do |data_path|
@@ -42,7 +54,7 @@ class Kronk
         end
       end
 
-      data
+      @data
     end
 
 
@@ -136,7 +148,7 @@ class Kronk
     # Decide whether to make path item a regex or not.
 
     def self.parse_path_item str
-      if str =~ /(^|[^\\])(\*|\?|\|)/
+      if str =~ /(^|[^\\])([\*\?\|])/
         str.gsub!(/(^|[^\\])(\*|\?)/, '\1.\2')
         str = /^(#{str})$/
       else
