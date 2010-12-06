@@ -39,12 +39,18 @@ class Kronk
     # TODO: Log request speed.
 
     def self.retrieve query, options={}
-      if query =~ %r{^\w+://}
-        retrieve_uri query, options
-      else
-        retrieve_file query, options
-      end
+      resp =
+        if query =~ %r{^\w+://}
+          retrieve_uri query, options
+        else
+          retrieve_file query, options
+        end
 
+      File.open(options[:cache_response], "w+") do |file|
+        file.write resp.raw
+      end if options[:cache_response]
+
+      resp
     rescue SocketError, Errno::ENOENT
       raise NotFoundError, "#{query} could not be found"
     end

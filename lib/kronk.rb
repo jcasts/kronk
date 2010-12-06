@@ -47,7 +47,8 @@ class Kronk
   # Default config to use.
   DEFAULT_CONFIG = {
     :content_types  => DEFAULT_CONTENT_TYPES.dup,
-    :diff_format    => :ascii_diff
+    :diff_format    => :ascii_diff,
+    :cache_file     => DEFAULT_CACHE_FILE
   }
 
 
@@ -188,6 +189,8 @@ class Kronk
     end
 
     options = parse_args argv
+    options[:cache_response] = config[:cache_file] if config[:cache_file]
+
     uri1, uri2 = options.delete :uris
 
     if uri1 && uri2
