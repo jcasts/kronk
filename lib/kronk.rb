@@ -48,7 +48,7 @@ class Kronk
   # Default config to use.
   DEFAULT_CONFIG = {
     :content_types  => DEFAULT_CONTENT_TYPES.dup,
-    :diff_format    => :color_diff
+    :diff_format    => :ascii_diff
   }
 
 
