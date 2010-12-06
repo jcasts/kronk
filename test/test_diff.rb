@@ -20,7 +20,7 @@ class TestDiff < Test::Unit::TestCase
   def test_ordered_data_string
     expected = <<STR
 {
-"acks"  => [
+"acks" => [
  [
   56,
   78
@@ -30,7 +30,7 @@ class TestDiff < Test::Unit::TestCase
   "34"
   ]
  ],
-"root"  => [
+"root" => [
  [
   "B1",
   "B2"
@@ -61,7 +61,7 @@ class TestDiff < Test::Unit::TestCase
    ]
   }
  ],
-"subs"  => [
+"subs" => [
  "a",
  "b"
  ],
@@ -73,7 +73,7 @@ class TestDiff < Test::Unit::TestCase
    ],
   2.123
   ],
- :foo   => :bar
+ :foo => :bar
  }
 }
 STR
@@ -85,7 +85,7 @@ STR
   def test_ordered_data_string_struct
     expected = <<STR
 {
-"acks"  => [
+"acks" => [
  [
   Fixnum,
   Fixnum
@@ -95,7 +95,7 @@ STR
   String
   ]
  ],
-"root"  => [
+"root" => [
  [
   String,
   String
@@ -126,7 +126,7 @@ STR
    ]
   }
  ],
-"subs"  => [
+"subs" => [
  String,
  String
  ],
@@ -138,7 +138,7 @@ STR
    ],
   Float
   ],
- :foo   => Symbol
+ :foo => Symbol
  }
 }
 STR

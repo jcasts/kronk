@@ -12,9 +12,8 @@ class Kronk
     # Creates a new diff from two data objects.
 
     def self.new_from_data data1, data2, options={}
-      new ordered_data_string(data1),
-          ordered_data_string(data2),
-          options[:struct]
+      new ordered_data_string(data1, options[:struct]),
+          ordered_data_string(data2, options[:struct])
     end
 
 
@@ -37,7 +36,7 @@ class Kronk
           data.map do |key, value|
             pad = " " * indent
             subdata = ordered_data_string value, struct_only, indent + 1
-            "#{pad}#{key.inspect.ljust key_width} => #{subdata}"
+            "#{pad}#{key.inspect} => #{subdata}"
           end
 
         output << data_values.sort.join(",\n") << "\n"
