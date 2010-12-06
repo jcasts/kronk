@@ -177,7 +177,8 @@ class Kronk
     resp2 = Request.retrieve query2, options
 
     Diff.new_from_data resp1.selective_data(options),
-                       resp2.selective_data(options)
+                       resp2.selective_data(options),
+                       options
   end
 
 
@@ -215,7 +216,7 @@ class Kronk
 
     else
       data = Request.retrieve(uri1, options).selective_data options
-      puts Diff.ordered_data_string(data)
+      puts Diff.ordered_data_string(data, options[:struct])
     end
 
   rescue Request::NotFoundError, Response::MissingParser => e
@@ -324,6 +325,10 @@ Kronk runs diffs against data from live and cached http responses.
 
       opt.on('--raw', 'Run diff on the raw data returned') do
         options[:raw] = true
+      end
+
+      opt.on('--struct', 'Run diff on the data structure') do
+        options[:struct] = true
       end
 
       #opt.on('-v', '--verbose', 'Make the operation more talkative') do

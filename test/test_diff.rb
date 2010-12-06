@@ -82,6 +82,72 @@ STR
   end
 
 
+  def test_ordered_data_string_struct
+    expected = <<STR
+{
+"acks"  => [
+ [
+  Fixnum,
+  Fixnum
+  ],
+ [
+  String,
+  String
+  ]
+ ],
+"root"  => [
+ [
+  String,
+  String
+  ],
+ [
+  String,
+  String
+  ],
+ [
+  String,
+  String,
+  [
+   String,
+   String
+   ]
+  ],
+ {
+  "test" => [
+   [
+    String,
+    String
+    ],
+   String
+   ],
+  :tests => [
+   String,
+   String
+   ]
+  }
+ ],
+"subs"  => [
+ String,
+ String
+ ],
+"tests" => {
+ "test" => [
+  [
+   Fixnum,
+   Fixnum
+   ],
+  Float
+  ],
+ :foo   => Symbol
+ }
+}
+STR
+
+    assert_equal expected.strip,
+                  Kronk::Diff.ordered_data_string(mock_data, true)
+  end
+
+
   def test_create_diff_inverted
     @diff = Kronk::Diff.new mock_301_response, mock_302_response
     assert_equal diff_301_302, @diff.create_diff

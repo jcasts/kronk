@@ -11,8 +11,10 @@ class Kronk
     ##
     # Creates a new diff from two data objects.
 
-    def self.new_from_data data1, data2
-      new ordered_data_string(data1), ordered_data_string(data2)
+    def self.new_from_data data1, data2, options={}
+      new ordered_data_string(data1),
+          ordered_data_string(data2),
+          options[:struct]
     end
 
 
@@ -20,7 +22,7 @@ class Kronk
     # Returns a data string that is diff-able, meaning sorted by
     # Hash keys when available.
 
-    def self.ordered_data_string data, indent=0
+    def self.ordered_data_string data, struct_only=false, indent=0
       case data
 
       when Hash
@@ -34,7 +36,7 @@ class Kronk
         data_values =
           data.map do |key, value|
             pad = " " * indent
-            subdata = ordered_data_string value, indent + 1
+            subdata = ordered_data_string value, struct_only, indent + 1
             "#{pad}#{key.inspect.ljust key_width} => #{subdata}"
           end
 
@@ -47,14 +49,14 @@ class Kronk
         data_values =
           data.map do |value|
             pad = " " * indent
-            "#{pad}#{ordered_data_string value, indent + 1}"
+            "#{pad}#{ordered_data_string value, struct_only, indent + 1}"
           end
 
         output << data_values.join(",\n") << "\n"
         output << "#{" " * indent}]"
 
       else
-        data.inspect
+        struct_only ? data.class : data.inspect
       end
     end
 
