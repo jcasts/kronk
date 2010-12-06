@@ -6,9 +6,12 @@ class TestResponse < Test::Unit::TestCase
     File.open "test/mocks/200_response.txt", "r" do |file|
       resp = Kronk::Response.read_new file
 
+
+      expected_header = "#{mock_200_response.split("\r\n\r\n", 2)[0]}\r\n"
+
       assert Net::HTTPResponse === resp
       assert_equal mock_200_response, resp.raw
-      assert_equal mock_200_response.split("\r\n\r\n", 2)[0], resp.raw_header
+      assert_equal expected_header, resp.raw_header
     end
   end
 

@@ -175,6 +175,18 @@ class Kronk
   # Runs the kronk command with the given terminal args.
 
   def self.run argv=ARGV
+    begin
+      load_config
+
+    rescue Errno::ENOENT
+      make_config_file
+
+      puts "\nNo config file was found.\n\n"
+      puts "Created default config in #{DEFAULT_CONFIG_FILE}"
+      puts "Edit file if necessary and try again."
+      exit 1
+    end
+
     options = parse_args argv
     uri1, uri2 = options.delete :uris
 
@@ -189,6 +201,10 @@ class Kronk
       data = Request.retrieve(uri1).selective_data options
       puts Diff.ordered_data_string(data)
     end
+
+  rescue Request::NotFoundError => e
+    puts "\nError: #{e.message}"
+    exit 2
   end
 
 
@@ -215,7 +231,7 @@ Kronk runs diffs against data from live and cached http responses.
   Usage:
     #{opt.program_name} --help
     #{opt.program_name} --version
-    #{opt.program_name} [options...] uri1 [uri2] [-- data-paths]
+    #{opt.program_name} uri1 [uri2] [options...] [-- data-paths]
 
   Examples:
     #{opt.program_name} http://example.com/A
@@ -231,12 +247,27 @@ Kronk runs diffs against data from live and cached http responses.
 
       opt.on('-i', '--include [header1,header2]', Array,
              'Include all or given headers in response') do |value|
-        options[:compare_headers] = value && !value.empty? ? value : true
+        options[:compare_headers] ||= []
+
+        if value
+          options[:compare_headers].concat value if
+            Array === options[:compare_headers]
+        else
+          options[:compare_headers] = true
+        end
       end
 
       opt.on('-I', '--head [header1,header2]', Array,
              'Use all or given headers only in the response') do |value|
-        options[:compare_headers] = value || true
+        options[:compare_headers] ||= []
+
+        if value
+          options[:compare_headers].concat value if
+            Array === options[:compare_headers]
+        else
+          options[:compare_headers] = true
+        end
+
         options[:no_body]         = true
       end
 

@@ -5,6 +5,8 @@ class Kronk
 
   class Request
 
+    class NotFoundError < Exception; end
+
     ##
     # Follows the redirect from a 30X response object and decrease the
     # number of redirects left if it's an Integer.
@@ -42,6 +44,9 @@ class Kronk
       else
         retrieve_file query, options
       end
+
+    rescue SocketError, Errno::ENOENT
+      raise NotFoundError, "#{query} not be found"
     end
 
 
