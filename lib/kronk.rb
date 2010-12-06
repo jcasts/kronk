@@ -48,7 +48,8 @@ class Kronk
   DEFAULT_CONFIG = {
     :content_types  => DEFAULT_CONTENT_TYPES.dup,
     :diff_format    => :ascii_diff,
-    :cache_file     => DEFAULT_CACHE_FILE
+    :cache_file     => DEFAULT_CACHE_FILE,
+    :requires       => []
   }
 
 
@@ -70,12 +71,20 @@ class Kronk
     if conf[:requires]
       requires = [*conf.delete(:requires)]
       self.config[:requires] ||= []
-      requires.each{|lib| require lib }
       self.config[:requires].concat requires
     end
 
     self.config[:content_types].merge!(content_types) if content_types
     self.config.merge! conf
+  end
+
+
+  ##
+  # Load the config-based requires.
+
+  def self.load_requires
+    return unless config[:requires]
+    config[:requires].each{|lib| require lib }
   end
 
 
@@ -189,6 +198,10 @@ class Kronk
     end
 
     options = parse_args argv
+
+    config[:requires].concat options[:requires] if options[:requires]
+    load_requires
+
     options[:cache_response] = config[:cache_file] if config[:cache_file]
 
     uri1, uri2 = options.delete :uris
@@ -271,7 +284,7 @@ Kronk runs diffs against data from live and cached http responses.
           options[:with_headers] = true
         end
 
-        options[:no_body]         = true
+        options[:no_body] = true
       end
 
       opt.on('-d', '--data STR', String,
@@ -305,8 +318,8 @@ Kronk runs diffs against data from live and cached http responses.
 
       opt.on('-r', '--require lib1,lib2', Array,
              'Require a library or gem') do |value|
-        options[:require] ||= []
-        options[:require].concat value
+        options[:requires] ||= []
+        options[:requires].concat value
       end
 
       opt.on('--raw', 'Run diff on the raw data returned') do

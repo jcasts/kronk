@@ -11,7 +11,8 @@ class TestKronk < Test::Unit::TestCase
         'xml'     => 'XMLParser'
       },
       :cache_file  => Kronk::DEFAULT_CACHE_FILE,
-      :diff_format => :ascii_diff
+      :diff_format => :ascii_diff,
+      :requires    => []
     }
 
     assert_equal expected, Kronk::DEFAULT_CONFIG
@@ -26,6 +27,7 @@ class TestKronk < Test::Unit::TestCase
       },
       :ignore_headers => ["Content-Type"],
       :cache_file  => Kronk::DEFAULT_CACHE_FILE,
+      :requires    => [],
       :foo => :bar
     }
 
@@ -44,6 +46,7 @@ class TestKronk < Test::Unit::TestCase
       },
       :diff_format => :ascii_diff,
       :cache_file  => Kronk::DEFAULT_CACHE_FILE,
+      :requires    => [],
       :ignore_headers => ["Content-Type"],
       :foo => :bar
     }
