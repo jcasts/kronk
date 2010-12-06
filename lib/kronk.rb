@@ -276,7 +276,7 @@ Kronk runs diffs against data from live and cached http responses.
 
       opt.on('--suff STR', String,
              'Add common path items to the end of each URI') do |value|
-        options[:suffix] = value
+        options[:uri_suffix] = value
       end
 
 
@@ -367,10 +367,6 @@ Kronk runs diffs against data from live and cached http responses.
 
     options[:uris].concat argv
     options[:uris].slice!(2..-1)
-
-    options[:uris].map! do |uri|
-      Request.local?(uri) ? uri : "#{uri}#{options[:suffix]}"
-    end if options[:suffix]
 
     if options[:uris].empty?
       $stderr << "\nError: You must enter at least one URI\n\n"

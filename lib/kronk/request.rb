@@ -72,6 +72,8 @@ class Kronk
     # Read http response from a file and return a HTTPResponse instance.
 
     def self.retrieve_file path, options={}
+      options = options.dup
+
       path = Kronk::DEFAULT_CACHE_FILE if path == :cache
       resp = nil
 
@@ -127,7 +129,10 @@ class Kronk
     # :http_method:: Symbol - the http method to use; defaults to :get
 
     def self.call http_method, uri, options={}
-      uri  = URI.parse uri unless URI === uri
+      suffix = options.delete :uri_suffix
+
+      uri    = "#{uri}#{suffix}" if suffix
+      uri    = URI.parse uri unless URI === uri
 
       data   = options[:data]
       data &&= Hash === data ? build_query(data) : data.to_s
