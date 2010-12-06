@@ -56,7 +56,9 @@ class Kronk
         output << "#{" " * indent}]"
 
       else
-        struct_only ? data.class : data.inspect
+        return data.inspect unless struct_only
+        return "Boolean" if data == true || data == false
+        data.class
       end
     end
 
