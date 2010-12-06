@@ -156,22 +156,7 @@ class Kronk
     resp1 = Request.retrieve query1, options
     resp2 = Request.retrieve query2, options
 
-    str1 = response_str resp1
-    str2 = response_str resp2
-
-    Diff.new str1, str2
-  end
-
-
-  def self.response_str resp, options={}
-    str = resp.body unless options[:no_body]
-
-    if options[:compare_headers]
-      header = resp.raw_header(options[:compare_headers])
-      str = [header, str].compact.join "\r\n\r\n"
-    end
-
-    str
+    Diff.new resp1.selective_string(options), resp2.selective_string(options)
   end
 
 
@@ -182,30 +167,8 @@ class Kronk
     resp1 = Request.retrieve query1, options
     resp2 = Request.retrieve query2, options
 
-    data1 = response_data resp1, options
-    data2 = response_data resp2, options
-
-    Diff.new_from_data data1, data2
-  end
-
-
-  def self.response_data resp, options={}
-    data = nil
-
-    unless options[:no_body]
-      dataset = DataSet.new resp.parsed_body
-
-      dataset.collect_data_points options[:only_data]  if options[:only_data]
-      dataset.delete_data_points options[:ignore_data] if options[:ignore_data]
-
-      data = dataset.data
-    end
-
-    if options[:compare_headers]
-      data = [resp.parsed_header(options[:compare_headers]), data].compact
-    end
-
-    data
+    Diff.new_from_data resp1.selective_data(options),
+                       resp2.selective_data(options)
   end
 
 
@@ -221,10 +184,10 @@ class Kronk
       puts diff.formatted(config[:diff_format])
 
     elsif options[:raw]
-      puts response_str(Request.retrieve(uri1), options)
+      puts Request.retrieve(uri1).selective_string(options)
 
     else
-      data = response_data Request.retrieve(uri1), options
+      data = Request.retrieve(uri1).selective_data options
       puts Diff.ordered_data_string(data)
     end
   end

@@ -133,6 +133,38 @@ class Kronk
           headers
         end
       end
+
+
+      def selective_string options={}
+        str = self.body unless options[:no_body]
+
+        if options[:compare_headers]
+          header = raw_header(options[:compare_headers])
+          str = [header, str].compact.join "\r\n\r\n"
+        end
+
+        str
+      end
+
+
+      def selective_data options={}
+        data = nil
+
+        unless options[:no_body]
+          ds = DataSet.new parsed_body
+
+          ds.collect_data_points options[:only_data]  if options[:only_data]
+          ds.delete_data_points options[:ignore_data] if options[:ignore_data]
+
+          data = ds.data
+        end
+
+        if options[:compare_headers]
+          data = [parsed_header(options[:compare_headers]), data].compact
+        end
+
+        data
+      end
     end
   end
 
