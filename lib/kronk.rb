@@ -287,8 +287,10 @@ Kronk runs diffs against data from live and cached http responses.
 
       opt.on('-H', '--header STR', String,
              'Header to pass to the server request') do |value|
-        options[:headers] ||= []
-        options[:headers] << value
+        options[:headers] ||= {}
+
+        key, value = value.split ": ", 2
+        options[:headers][key] = value
       end
 
       opt.on('-L', '--location [NUM]', Integer,

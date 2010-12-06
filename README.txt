@@ -5,6 +5,7 @@
 == DESCRIPTION:
 
 Kronk runs diffs against data from live and cached http responses. 
+Kronk was made possible by the sponsoring of AT&T Interactive.
 
 == FEATURES/PROBLEMS:
 
