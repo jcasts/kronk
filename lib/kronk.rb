@@ -274,6 +274,7 @@ Kronk runs diffs against data from live and cached http responses.
         end
       end
 
+
       opt.on('-I', '--head [header1,header2]', Array,
              'Use all or given headers only in the response') do |value|
         options[:with_headers] ||= []
@@ -288,6 +289,7 @@ Kronk runs diffs against data from live and cached http responses.
         options[:no_body] = true
       end
 
+
       opt.on('-d', '--data STR', String,
              'Post data with the request') do |value|
         options[:data] = value
@@ -299,6 +301,7 @@ Kronk runs diffs against data from live and cached http responses.
         options[:uris] << :cache
       end
 
+
       opt.on('-H', '--header STR', String,
              'Header to pass to the server request') do |value|
         options[:headers] ||= {}
@@ -307,15 +310,18 @@ Kronk runs diffs against data from live and cached http responses.
         options[:headers][key] = value
       end
 
+
       opt.on('-L', '--location [NUM]', Integer,
              'Follow the location header always or num times') do |value|
         options[:follow_redirects] = value || true
       end
 
+
       opt.on('-X', '--request STR', String,
              'The request method to use') do |value|
         options[:http_method] = value
       end
+
 
       opt.on('-r', '--require lib1,lib2', Array,
              'Require a library or gem') do |value|
@@ -323,13 +329,26 @@ Kronk runs diffs against data from live and cached http responses.
         options[:requires].concat value
       end
 
+
       opt.on('--raw', 'Run diff on the raw data returned') do
         options[:raw] = true
       end
 
+
       opt.on('--struct', 'Run diff on the data structure') do
         options[:struct] = true
       end
+
+
+      opt.on('--ascii', 'Return ascii formatted diff') do
+        config[:diff_format] = :ascii_diff
+      end
+
+
+      opt.on('--color', 'Return color formatted diff') do
+        config[:diff_format] = :color_diff
+      end
+
 
       #opt.on('-v', '--verbose', 'Make the operation more talkative') do
       #  options[:verbose] = true
