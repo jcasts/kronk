@@ -37,6 +37,14 @@ Compare headers only but only content type and date:
 
   $ kronk http://host.com/path1 http://host.com/path2 -I Content-Type,Date
 
+Compare body structure only:
+
+  $ kronk http://host.com/path.json http://host.com/path.xml --struct
+
+Call comparison with similar uri suffixes:
+
+  $ kronk http://host.com/path.json http://host.com/path.xml --suff '?page=1'
+
 Compare body and headers:
 
   $ kronk http://host.com/path.json http://host.com/path.xml -i
