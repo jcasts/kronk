@@ -163,6 +163,8 @@ class Kronk
       # the response. Supports the following options:
       # :no_body:: Bool - Don't return the body; default nil
       # :with_headers:: Bool/String/Array - Return headers; default nil
+      # :ignore_data:: String/Array - Removes the data from given data paths
+      # :only_data:: String/Array - Extracts the data from given data paths
 
       def selective_data options={}
         data = nil

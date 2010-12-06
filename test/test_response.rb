@@ -121,16 +121,31 @@ class TestResponse < Test::Unit::TestCase
 
     assert_equal body,
                  @json_resp.selective_string
+  end
+
+
+  def test_selective_string_no_body
+    body = @json_resp.raw.split("\r\n\r\n")[1]
 
     assert_nil @json_resp.selective_string(:no_body => true)
 
     assert_equal "#{@json_resp.raw.split("\r\n\r\n")[0]}\r\n",
                  @json_resp.selective_string(:no_body => true,
                   :with_headers => true)
+  end
+
+
+  def test_selective_string_single_header
+    body = @json_resp.raw.split("\r\n\r\n")[1]
 
     expected = "Content-Type: application/json; charset=utf-8\r\n\r\n#{body}"
     assert_equal expected,
                  @json_resp.selective_string(:with_headers => "Content-Type")
+  end
+
+
+  def test_selective_multiple_headers
+    body = @json_resp.raw.split("\r\n\r\n")[1]
 
     expected = "Date: Fri, 03 Dec 2010 21:49:00 GMT\r\nContent-Type: application/json; charset=utf-8\r\n\r\n#{body}"
     assert_equal expected,
@@ -145,5 +160,51 @@ class TestResponse < Test::Unit::TestCase
 
 
   def test_selective_data
+    body = JSON.parse @json_resp.body
+    head = @json_resp.to_hash
+
+    assert_equal body, @json_resp.selective_data
+
+    assert_nil @json_resp.selective_data(:no_body => true)
+
+    assert_equal "#{@json_resp.raw.split("\r\n\r\n")[0]}\r\n",
+                 @json_resp.selective_string(:no_body => true,
+                  :with_headers => true)
+  end
+
+
+  def test_selective_data_single_header
+    body = JSON.parse @json_resp.body
+    expected =
+      [{'content-type' => ['application/json; charset=utf-8']}, body]
+
+    assert_equal expected,
+                 @json_resp.selective_data(:with_headers => "Content-Type")
+  end
+
+
+  def test_selective_data_multiple_headers
+    body = JSON.parse @json_resp.body
+    expected =
+      [{'content-type' => ['application/json; charset=utf-8'],
+        'date'         => ["Fri, 03 Dec 2010 21:49:00 GMT"]
+      }, body]
+
+    assert_equal expected,
+                 @json_resp.selective_data(
+                    :with_headers => ["Content-Type", "Date"])
+  end
+
+
+  def test_selective_data_no_body
+    body = JSON.parse @json_resp.body
+    expected =
+      [{'content-type' => ['application/json; charset=utf-8'],
+        'date'         => ["Fri, 03 Dec 2010 21:49:00 GMT"]
+      }]
+
+    assert_equal expected,
+                 @json_resp.selective_data(:no_body => true,
+                    :with_headers => ["Content-Type", "Date"])
   end
 end
