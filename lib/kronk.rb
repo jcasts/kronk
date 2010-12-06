@@ -23,7 +23,6 @@ class Kronk
   require 'kronk/diff'
   require 'kronk/response'
   require 'kronk/request'
-  require 'kronk/response_diff'
   require 'kronk/plist_parser'
   require 'kronk/xml_parser'
 

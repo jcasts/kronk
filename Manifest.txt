@@ -10,6 +10,5 @@ lib/kronk/diff.rb
 lib/kronk/plist_parser.rb
 lib/kronk/request.rb
 lib/kronk/response.rb
-lib/kronk/response_diff.rb
 lib/kronk/xml_parser.rb
 test/test_kronk.rb
