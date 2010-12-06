@@ -323,6 +323,7 @@ STR
 
     expected = diff_302_301_str.gsub(/^\+/, ">>>301>>>")
     expected = expected.gsub(/^\-/, "<<<302<<<")
+    expected = expected.gsub(/^\s\s/, "")
 
     assert_equal expected, str_diff
   end
@@ -374,24 +375,24 @@ STR
 - Location: http://igoogle.com/
 + HTTP/1.1 301 Moved Permanently
 + Location: http://www.google.com/
-Content-Type: text/html; charset=UTF-8
-Date: Fri, 26 Nov 2010 16:14:45 GMT
-Expires: Sun, 26 Dec 2010 16:14:45 GMT
-Cache-Control: public, max-age=2592000
-Server: gws
+  Content-Type: text/html; charset=UTF-8
+  Date: Fri, 26 Nov 2010 16:14:45 GMT
+  Expires: Sun, 26 Dec 2010 16:14:45 GMT
+  Cache-Control: public, max-age=2592000
+  Server: gws
 - Content-Length: 260
 + Content-Length: 219
-X-XSS-Protection: 1; mode=block
-
-<HTML><HEAD><meta http-equiv="content-type" content="text/html;charset=utf-8">
+  X-XSS-Protection: 1; mode=block
+  
+  <HTML><HEAD><meta http-equiv="content-type" content="text/html;charset=utf-8">
 - <TITLE>302 Found</TITLE></HEAD><BODY>
 - <H1>302 Found</H1>
 + <TITLE>301 Moved</TITLE></HEAD><BODY>
 + <H1>301 Moved</H1>
-The document has moved
-<A HREF="http://www.google.com/">here</A>.
+  The document has moved
+  <A HREF="http://www.google.com/">here</A>.
 - <A HREF="http://igoogle.com/">here</A>.
-</BODY></HTML>
+  </BODY></HTML>
 STR
     str.strip
   end

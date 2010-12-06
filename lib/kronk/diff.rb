@@ -162,13 +162,13 @@ class Kronk
     def ascii_diff item
       case item
       when String
-        item
+        "  #{item}"
       when Array
         item[0] = item[0].map{|str| "- #{str}"}
         item[1] = item[1].map{|str| "+ #{str}"}
         item
       else
-        item.inspect
+        "  #{item.inspect}"
       end
     end
 
