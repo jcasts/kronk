@@ -46,7 +46,7 @@ class Kronk
       end
 
     rescue SocketError, Errno::ENOENT
-      raise NotFoundError, "#{query} not be found"
+      raise NotFoundError, "#{query} could not be found"
     end
 
 

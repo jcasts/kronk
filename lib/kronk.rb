@@ -202,7 +202,7 @@ class Kronk
       puts Diff.ordered_data_string(data)
     end
 
-  rescue Request::NotFoundError => e
+  rescue Request::NotFoundError, Response::MissingParser => e
     puts "\nError: #{e.message}"
     exit 2
   end

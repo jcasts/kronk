@@ -5,6 +5,8 @@ class Kronk
 
   class Response < Net::HTTPResponse
 
+    class MissingParser < Exception; end
+
     ##
     # Create a new Response instance from an IO object.
 
