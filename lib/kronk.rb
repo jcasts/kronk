@@ -120,8 +120,8 @@ class Kronk
   def self.parser_for content_type
     parser_pair =
       config[:content_types].select do |key, value|
-        (content_type =~ %r{#{key}}) && value
-      end
+        (content_type =~ %r{#{key}([^\w]|$)}) && value
+      end.to_a
 
     return if parser_pair.empty?
 
