@@ -84,6 +84,8 @@ class Kronk
       # the Content-Type, or will return the cached parsed body if available.
 
       def parsed_body parser=nil
+        @parsed_body ||= nil
+
         return @parsed_body if @parsed_body && !parser
         parser ||= Kronk.parser_for self['Content-Type']
 
