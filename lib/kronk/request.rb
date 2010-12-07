@@ -72,6 +72,8 @@ class Kronk
     # Read http response from a file and return a HTTPResponse instance.
 
     def self.retrieve_file path, options={}
+      Kronk.verbose "\nReading file:\n#{path}\n"
+
       options = options.dup
 
       path = Kronk::DEFAULT_CACHE_FILE if path == :cache
@@ -107,6 +109,8 @@ class Kronk
     # to using a post request.
 
     def self.retrieve_uri uri, options={}
+      Kronk.verbose "\nRetrieving URL:\n#{uri}\n"
+
       options     = options.dup
       http_method = options.delete(:http_method)
       http_method ||= options[:data] ? :post : :get

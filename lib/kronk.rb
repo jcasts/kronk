@@ -211,6 +211,7 @@ class Kronk
     if uri1 && uri2
       diff = compare uri1, uri2, options
       puts diff.formatted(config[:diff_format])
+      verbose "\n\nFound #{diff.count} diff(s).\n"
 
     elsif options[:raw]
       puts Request.retrieve(uri1, options).selective_string(options)
@@ -223,6 +224,14 @@ class Kronk
   rescue Request::NotFoundError, Response::MissingParser => e
     $stderr << "\nError: #{e.message}\n"
     exit 2
+  end
+
+
+  ##
+  # Print string only if verbose
+
+  def self.verbose str
+    $stdout << "#{str}\n" if config[:verbose]
   end
 
 
@@ -357,9 +366,9 @@ Kronk runs diffs against data from live and cached http responses.
       end
 
 
-      #opt.on('-v', '--verbose', 'Make the operation more talkative') do
-      #  options[:verbose] = true
-      #end
+      opt.on('-V', '--verbose', 'Make the operation more talkative') do
+        config[:verbose] = true
+      end
 
       opt.separator nil
     end

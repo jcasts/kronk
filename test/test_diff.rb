@@ -291,6 +291,11 @@ STR
   end
 
 
+  def test_count
+    assert_equal 4, @diff.count
+  end
+
+
   def test_formatted
     assert_equal diff_302_301_str, @diff.formatted
   end

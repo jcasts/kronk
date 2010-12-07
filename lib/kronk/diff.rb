@@ -191,6 +191,14 @@ class Kronk
 
 
     ##
+    # Returns the number of diffs found.
+
+    def count
+      diff_array.select{|i| Array === i }.length
+    end
+
+
+    ##
     # Returns the cached diff array when available, otherwise creates it.
 
     def diff_array
