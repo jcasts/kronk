@@ -53,7 +53,7 @@ class TestDataSet < Test::Unit::TestCase
   end
 
 
-  def test_modify_ignore_data
+  def test_modify_only_and_ignored_data
     data = @dataset_mock.modify :ignore_data => "subs/1", :only_data => "subs/1"
     assert_equal({"subs" => [nil]}, data)
   end
