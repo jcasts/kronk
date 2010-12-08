@@ -183,10 +183,13 @@ class Kronk
   # Return a diff object from two responses' raw data.
 
   def self.raw_diff query1, query2, options={}
-    resp1 = Request.retrieve query1, options
-    resp2 = Request.retrieve query2, options
+    opts1 = options.merge options_for_uri(query1)
+    opts2 = options.merge options_for_uri(query2)
 
-    Diff.new resp1.selective_string(options), resp2.selective_string(options)
+    resp1 = Request.retrieve query1, opts1
+    resp2 = Request.retrieve query2, opts2
+
+    Diff.new resp1.selective_string(opts1), resp2.selective_string(opts2)
   end
 
 
@@ -194,11 +197,14 @@ class Kronk
   # Return a diff object from two parsed responses.
 
   def self.data_diff query1, query2, options={}
-    resp1 = Request.retrieve query1, options
-    resp2 = Request.retrieve query2, options
+    opts1 = options.merge options_for_uri(query1)
+    opts2 = options.merge options_for_uri(query2)
 
-    Diff.new_from_data resp1.selective_data(options),
-                       resp2.selective_data(options),
+    resp1 = Request.retrieve query1, opts1
+    resp2 = Request.retrieve query2, opts2
+
+    Diff.new_from_data resp1.selective_data(opts1),
+                       resp2.selective_data(opts2),
                        options
   end
 
@@ -234,11 +240,15 @@ class Kronk
       verbose "\n\nFound #{diff.count} diff(s).\n"
 
     elsif options[:raw]
+      options = options.merge options_for_uri(uri1)
+
       out = Request.retrieve(uri1, options).selective_string options
       out = Diff.insert_line_nums out if config[:show_lines]
       puts out
 
     else
+      options = options.merge options_for_uri(uri1)
+
       data = Request.retrieve(uri1, options).selective_data options
       out  = Diff.ordered_data_string data, options[:struct]
       out  = Diff.insert_line_nums out if config[:show_lines]
