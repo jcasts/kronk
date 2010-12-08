@@ -165,6 +165,7 @@ class Kronk
       # the response. Supports the following options:
       # :no_body:: Bool - Don't return the body; default nil
       # :with_headers:: Bool/String/Array - Return headers; default nil
+      # :parser:: Object - The parser to use for the body; default nil
       # :ignore_data:: String/Array - Removes the data from given data paths
       # :only_data:: String/Array - Extracts the data from given data paths
 
@@ -172,7 +173,7 @@ class Kronk
         data = nil
 
         unless options[:no_body]
-          ds = DataSet.new parsed_body
+          ds = DataSet.new parsed_body(options[:parser])
 
           ds.collect_data_points options[:only_data]  if options[:only_data]
           ds.delete_data_points options[:ignore_data] if options[:ignore_data]

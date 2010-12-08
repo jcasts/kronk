@@ -142,8 +142,10 @@ class Kronk
   # :data:: Hash/String - the data to pass to the http request
   # :headers:: Hash - extra headers to pass to the request
   # :http_method:: Symbol - the http method to use; defaults to :get
+  # :only_data:: String/Array - extracts the data from given data paths
   # :ignore_data:: String/Array - defines which data points to exclude
   # :with_headers:: Bool/String/Array - defines which headers to include
+  # :parser:: Object - The parser to use for the body; default nil
   # :raw:: Bool - run diff on raw strings
   #
   # Returns a diff object.
@@ -215,7 +217,7 @@ class Kronk
       verbose "\n\nFound #{diff.count} diff(s).\n"
 
     elsif options[:raw]
-      out = Request.retrieve(uri1, options).selective_string(options)
+      out = Request.retrieve(uri1, options).selective_string options
       out = Diff.insert_line_nums out if config[:show_lines]
       puts out
 
@@ -379,6 +381,12 @@ Kronk runs diffs against data from live and cached http responses.
 
       opt.on('--lines', 'Show line numbers') do
         config[:show_lines] = true
+      end
+
+
+      opt.on('--parser STR', String,
+             'Override default parser') do |value|
+        options[:parser] = parser_for(value) || find_const(value)
       end
 
 
