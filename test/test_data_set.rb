@@ -31,6 +31,34 @@ class TestDataSet < Test::Unit::TestCase
   end
 
 
+  def test_modify_only_data
+    data = @dataset_mock.modify :only_data => "subs/1"
+    assert_equal({"subs" => [nil, "b"]}, data)
+  end
+
+
+  def test_modify_ignore_data
+    data = @dataset_mock.modify :ignore_data => "subs/1"
+
+    expected = mock_data
+    expected['subs'].delete_at 1
+
+    assert_equal expected, data
+  end
+
+
+  def test_modify_only_data
+    data = @dataset_mock.modify :only_data => "subs/1"
+    assert_equal({"subs" => [nil, "b"]}, data)
+  end
+
+
+  def test_modify_ignore_data
+    data = @dataset_mock.modify :ignore_data => "subs/1", :only_data => "subs/1"
+    assert_equal({"subs" => [nil]}, data)
+  end
+
+
   def test_collect_data_points_single
     data = @dataset_mock.collect_data_points "subs/1"
     assert_equal({"subs" => [nil, "b"]}, data)
