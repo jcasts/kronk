@@ -109,6 +109,20 @@ class TestKronk < Test::Unit::TestCase
   end
 
 
+  def test_options_for_uri
+    old_uri_opts = Kronk.config[:uri_options].dup
+    Kronk.config[:uri_options] = {
+      'example'     => 'options1',
+      'example.com' => 'options2'
+    }
+
+    assert_equal 'options1', Kronk.options_for_uri("http://example.com/path")
+    assert_equal Hash.new, Kronk.options_for_uri("http://thing.com/path")
+
+    Kronk.config[:uri_options] = old_uri_opts
+  end
+
+
   def test_compare_raw
     diff = Kronk.compare "test/mocks/200_response.json",
                          "test/mocks/200_response.xml",
@@ -147,6 +161,7 @@ class TestKronk < Test::Unit::TestCase
 
     assert_equal exp_diff.formatted, diff.formatted
   end
+
 
   def test_raw_diff
     diff = Kronk.raw_diff "test/mocks/200_response.json",
