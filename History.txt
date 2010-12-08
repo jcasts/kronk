@@ -1,4 +1,18 @@
-=== 1.0.2 / 2010-12
+=== 1.0.3 / 2010-12
+
+* Enhancements:
+
+  * Supports overriding the parser from the command line.
+
+  * Support for ignoring or collecting parents of matched data paths.
+
+  * Support for uri-specific options in the .kronk config.
+
+* Bugfixes:
+
+  * Lines are displayed for non-diff requests.
+
+=== 1.0.2 / 2010-12-07
 
 * Enhancements:
 

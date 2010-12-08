@@ -173,6 +173,15 @@ class TestResponse < Test::Unit::TestCase
   end
 
 
+  def test_selective_data_parser
+    assert_raises RuntimeError do
+      @json_resp.selective_data :parser => Kronk::PlistParser
+    end
+
+    assert @json_resp.selective_data(:parser => JSON)
+  end
+
+
   def test_selective_data_single_header
     body = JSON.parse @json_resp.body
     expected =
