@@ -87,6 +87,11 @@ class Kronk
         @parsed_body ||= nil
 
         return @parsed_body if @parsed_body && !parser
+
+        if String === parser
+          parser = Kronk.parser_for(parser) || Kronk.find_const(parser)
+        end
+
         parser ||= Kronk.parser_for self['Content-Type']
 
         raise MissingParser,
@@ -173,12 +178,7 @@ class Kronk
         data = nil
 
         unless options[:no_body]
-          ds = DataSet.new parsed_body(options[:parser])
-
-          ds.collect_data_points options[:only_data]  if options[:only_data]
-          ds.delete_data_points options[:ignore_data] if options[:ignore_data]
-
-          data = ds.data
+          data = DataSet.new(parsed_body(options[:parser])).modify options
         end
 
         if options[:with_headers]

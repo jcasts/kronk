@@ -13,9 +13,38 @@ class Kronk
 
 
     ##
+    # Modify the data object by passing inclusive or exclusive data paths.
+    # Supports the following options:
+    # :only_data:: String/Array - keep data with that matches the paths
+    # :only_data_with:: String/Array - keep data with a matched child
+    # :ignore_data:: String/Array - remove data with that matches the paths
+    # :ignore_data_with:: String/Array - remove data with a matched child
+    #
+    # Note: the data is processed in the following order:
+    # * only_data_with
+    # * ignore_data_with
+    # * only_data
+    # * ignore_data
+
+    def modify options
+      collect_data_points options[:only_data_with], true if
+        options[:only_data_with]
+
+      delete_data_points options[:ignore_data_with], true if
+        options[:ignore_data_with]
+
+      collect_data_points options[:only_data]  if options[:only_data]
+
+      delete_data_points options[:ignore_data] if options[:ignore_data]
+
+      @data
+    end
+
+
+    ##
     # Keep only specific data points from the data structure.
 
-    def collect_data_points data_paths
+    def collect_data_points data_paths, affect_parent=false
       new_data = @data.class.new
 
       [*data_paths].each do |data_path|
@@ -44,7 +73,7 @@ class Kronk
     ##
     # Remove specific data points from the data structure.
 
-    def delete_data_points data_paths
+    def delete_data_points data_paths, affect_parent=false
       [*data_paths].each do |data_path|
         find_data data_path do |obj, k, p|
           case obj

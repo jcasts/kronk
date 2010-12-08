@@ -54,6 +54,18 @@ class TestResponse < Test::Unit::TestCase
   end
 
 
+  def test_parsed_body_string_parser
+    raw = File.read "test/mocks/200_response.json"
+    expected = JSON.parse raw.split("\r\n\r\n")[1]
+
+    assert_equal expected, @json_resp.parsed_body
+
+    assert_raises RuntimeError do
+      @json_resp.parsed_body 'PlistParser'
+    end
+  end
+
+
   def test_parsed_body_plist
     raw = File.read "test/mocks/200_response.plist"
     expected = Kronk::PlistParser.parse raw.split("\r\n\r\n")[1]

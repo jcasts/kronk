@@ -13,7 +13,8 @@ class TestKronk < Test::Unit::TestCase
       :cache_file  => Kronk::DEFAULT_CACHE_FILE,
       :diff_format => :ascii_diff,
       :show_lines  => false,
-      :requires    => []
+      :requires    => [],
+      :uri_options => {}
     }
 
     assert_equal expected, Kronk::DEFAULT_CONFIG
@@ -30,6 +31,7 @@ class TestKronk < Test::Unit::TestCase
       :cache_file  => Kronk::DEFAULT_CACHE_FILE,
       :show_lines  => false,
       :requires    => [],
+      :uri_options => {'example.com' => {:parser => 'JSON'}},
       :foo => :bar
     }
 
@@ -51,6 +53,7 @@ class TestKronk < Test::Unit::TestCase
       :requires    => [],
       :show_lines  => false,
       :ignore_headers => ["Content-Type"],
+      :uri_options => {'example.com' => {:parser => 'JSON'}},
       :foo => :bar
     }
 

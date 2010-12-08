@@ -51,7 +51,8 @@ class Kronk
     :diff_format    => :ascii_diff,
     :show_lines     => false,
     :cache_file     => DEFAULT_CACHE_FILE,
-    :requires       => []
+    :requires       => [],
+    :uri_options    => {}
   }
 
 
@@ -69,12 +70,15 @@ class Kronk
   def self.load_config filepath=DEFAULT_CONFIG_FILE
     conf          = YAML.load_file DEFAULT_CONFIG_FILE
     content_types = conf.delete :content_types
+    uri_options   = conf.delete :uri_options
 
     if conf[:requires]
       requires = [*conf.delete(:requires)]
       self.config[:requires] ||= []
       self.config[:requires].concat requires
     end
+
+    self.config[:uri_options].merge! uri_options if uri_options
 
     self.config[:content_types].merge!(content_types) if content_types
     self.config.merge! conf
@@ -129,6 +133,19 @@ class Kronk
     parser = parser_pair[0][1]
     parser = find_const parser if String === parser || Symbol === parser
     parser
+  end
+
+
+  ##
+  # Returns config-defined options for a given uri.
+  # Returns empty Hash if none found.
+
+  def self.options_for_uri uri
+    config[:uri_options].each do |key, options|
+      return options if uri == key || uri =~ %r{#{key}}
+    end
+
+    Hash.new
   end
 
 
@@ -386,7 +403,7 @@ Kronk runs diffs against data from live and cached http responses.
 
       opt.on('--parser STR', String,
              'Override default parser') do |value|
-        options[:parser] = parser_for(value) || find_const(value)
+        options[:parser] = value
       end
 
 
