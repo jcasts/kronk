@@ -12,8 +12,13 @@ class Kronk
 
     class AsciiFormat
 
-      def self.lines d_line, a_line, col_width
-        "#{d_line.to_s.rjust(col_width)}|#{a_line.to_s.rjust(col_width)} "
+      def self.lines line_nums, col_width
+        out =
+          [*line_nums].map do |lnum|
+            lnum.to_s.rjust col_width
+          end.join "|"
+
+        "#{out} "
       end
 
 
@@ -38,11 +43,13 @@ class Kronk
 
     class ColorFormat
 
-      def self.lines d_line, a_line, col_width
-        d_line = d_line.to_s.rjust col_width
-        a_line = a_line.to_s.rjust col_width
+      def self.lines line_nums, col_width
+        out =
+          [*line_nums].map do |lnum|
+            lnum.to_s.rjust col_width
+          end.join "\033[32m"
 
-        "\033[7;31m#{d_line}\033[32m#{a_line.to_s.rjust(col_width)}\033[0m "
+        "\033[7;31m#{out}\033[0m "
       end
 
 
@@ -113,6 +120,23 @@ class Kronk
         return "Boolean" if data == true || data == false
         data.class
       end
+    end
+
+
+    ##
+    # Adds line numbers to each lines of a String.
+
+    def self.insert_line_nums str, formatter=nil
+      format = Diff.formatter formatter || Kronk.config[:diff_format]
+
+      out   = ""
+      width = str.lines.count.to_s.length
+
+      str.split("\n").each_with_index do |line, i|
+        out << "#{format.lines(i+1, width)}#{line}\n"
+      end
+
+      out
     end
 
 
@@ -235,7 +259,7 @@ class Kronk
           line1 = line1.next
           line2 = line2.next
 
-          lines = format.lines line1, line2, width if options[:show_lines]
+          lines = format.lines [line1, line2], width if options[:show_lines]
           "#{lines}#{format.common item}"
 
         when Array
@@ -243,13 +267,13 @@ class Kronk
 
           item[0] = item[0].map do |str|
             line1 = line1.next
-            lines = format.lines line1, nil, width if options[:show_lines]
+            lines = format.lines [line1, nil], width if options[:show_lines]
             "#{lines}#{format.deleted str}"
           end
 
           item[1] = item[1].map do |str|
             line2 = line2.next
-            lines = format.lines nil, line2, width if options[:show_lines]
+            lines = format.lines [nil, line2], width if options[:show_lines]
             "#{lines}#{format.added str}"
           end
 

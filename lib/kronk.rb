@@ -215,11 +215,15 @@ class Kronk
       verbose "\n\nFound #{diff.count} diff(s).\n"
 
     elsif options[:raw]
-      puts Request.retrieve(uri1, options).selective_string(options)
+      out = Request.retrieve(uri1, options).selective_string(options)
+      out = Diff.insert_line_nums out if config[:show_lines]
+      puts out
 
     else
       data = Request.retrieve(uri1, options).selective_data options
-      puts Diff.ordered_data_string(data, options[:struct])
+      out  = Diff.ordered_data_string data, options[:struct]
+      out  = Diff.insert_line_nums out if config[:show_lines]
+      puts out
     end
 
   rescue Request::NotFoundError, Response::MissingParser => e
