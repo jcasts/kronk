@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 begin
-  require 'kronks'
+  require 'kronk'
 
 rescue LoadError => e
   raise unless e.message =~ %r{no such file to load -- kronk}
