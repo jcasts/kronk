@@ -35,8 +35,6 @@ class Kronk
     # :follow_redirects:: Integer/Bool - number of times to follow redirects
     # :headers:: Hash - extra headers to pass to the request
     # :http_method:: Symbol - the http method to use; defaults to :get
-    #
-    # TODO: Log request speed.
 
     def self.retrieve query, options={}
       resp =

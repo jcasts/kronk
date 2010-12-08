@@ -1,3 +1,17 @@
+=== 1.0.2 / 2010-12
+
+* Enhancements:
+
+  * Added support for custom diff formatters.
+
+  * Added verbose mode.
+
+  * Added diff count.
+
+* Bugfixes:
+
+  * Support for ruby-1.9.2
+
 === 1.0.1 / 2010-12-06
 
 * Bugfixes:

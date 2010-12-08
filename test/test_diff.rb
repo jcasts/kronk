@@ -301,31 +301,46 @@ STR
   end
 
 
-  def test_formatted_color
-    assert_equal diff_302_301_color, @diff.formatted(:color_diff)
+  def test_formatted_lines
+    output = @diff.formatted :show_lines => true
+    assert_equal diff_302_301_str_lines, output
+  end
 
-    @diff.format = :color_diff
+
+  def test_formatted_color
+    assert_equal diff_302_301_color,
+      @diff.formatted(:formatter => Kronk::Diff::ColorFormat)
+
+    @diff.formatter = Kronk::Diff::ColorFormat
     assert_equal diff_302_301_color, @diff.formatted
   end
 
 
   def test_formatted_join_char
     expected = diff_302_301_str.gsub(/\n/, "\r\n")
-    assert_equal expected, @diff.formatted(:ascii_diff, "\r\n")
+    assert_equal expected,
+      @diff.formatted(
+        :formatter => Kronk::Diff::AsciiFormat,
+        :join_char => "\r\n")
   end
 
 
-  def test_formatted_block
-    str_diff = @diff.formatted do |item|
-      if Array === item
-        item[0].map!{|str| "<<<302<<< #{str}"}
-        item[1].map!{|str| ">>>301>>> #{str}"}
-        item
-      else
-        item.to_s
-      end
+  class CustomFormat
+    def self.added str
+      ">>>301>>> #{str}"
     end
 
+    def self.deleted str
+      "<<<302<<< #{str}"
+    end
+
+    def self.common str
+      str.to_s
+    end
+  end
+
+  def test_formatted_custom
+    str_diff = @diff.formatted :formatter => CustomFormat
     expected = diff_302_301_str.gsub(/^\+/, ">>>301>>>")
     expected = expected.gsub(/^\-/, "<<<302<<<")
     expected = expected.gsub(/^\s\s/, "")
@@ -401,6 +416,37 @@ STR
 STR
     str.strip
   end
+
+
+  def diff_302_301_str_lines
+    str = <<STR
+ 1|   - HTTP/1.1 302 Found
+ 2|   - Location: http://igoogle.com/
+  | 1 + HTTP/1.1 301 Moved Permanently
+  | 2 + Location: http://www.google.com/
+ 3| 3   Content-Type: text/html; charset=UTF-8
+ 4| 4   Date: Fri, 26 Nov 2010 16:14:45 GMT
+ 5| 5   Expires: Sun, 26 Dec 2010 16:14:45 GMT
+ 6| 6   Cache-Control: public, max-age=2592000
+ 7| 7   Server: gws
+ 8|   - Content-Length: 260
+  | 8 + Content-Length: 219
+ 9| 9   X-XSS-Protection: 1; mode=block
+10|10   
+11|11   <HTML><HEAD><meta http-equiv="content-type" content="text/html;charset=utf-8">
+12|   - <TITLE>302 Found</TITLE></HEAD><BODY>
+13|   - <H1>302 Found</H1>
+  |12 + <TITLE>301 Moved</TITLE></HEAD><BODY>
+  |13 + <H1>301 Moved</H1>
+14|14   The document has moved
+15|15   <A HREF="http://www.google.com/">here</A>.
+16|   - <A HREF="http://igoogle.com/">here</A>.
+17|16   </BODY></HTML>
+STR
+
+    str.rstrip
+  end
+
 
   def diff_302_301_color
     str = <<STR

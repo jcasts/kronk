@@ -7,6 +7,60 @@ class Kronk
 
   class Diff
 
+    ##
+    # Format diff with ascii
+
+    class AsciiFormat
+
+      def self.lines d_line, a_line, col_width
+        "#{d_line.to_s.rjust(col_width)}|#{a_line.to_s.rjust(col_width)} "
+      end
+
+
+      def self.deleted str
+        "- #{str}"
+      end
+
+
+      def self.added str
+        "+ #{str}"
+      end
+
+
+      def self.common str
+        "  #{str}"
+      end
+    end
+
+
+    ##
+    # Format diff with ascii
+
+    class ColorFormat
+
+      def self.lines d_line, a_line, col_width
+        d_line = d_line.to_s.rjust col_width
+        a_line = a_line.to_s.rjust col_width
+
+        "\033[7;31m#{d_line}\033[32m#{a_line.to_s.rjust(col_width)}\033[0m "
+      end
+
+
+      def self.deleted str
+        "\033[31m#{str}\033[0m"
+      end
+
+
+      def self.added str
+        "\033[32m#{str}\033[0m"
+      end
+
+
+      def self.common str
+        str
+      end
+    end
+
 
     ##
     # Creates a new diff from two data objects.
@@ -62,14 +116,26 @@ class Kronk
     end
 
 
-    attr_accessor :str1, :str2, :char, :format
+    ##
+    # Returns a formatter from a symbol or string. Returns nil if not found.
+
+    def self.formatter name
+      return AsciiFormat if name == :ascii_diff
+      return ColorFormat if name == :color_diff
+      Kronk.find_const name rescue name
+    end
+
+
+    attr_accessor :str1, :str2, :char, :formatter, :show_lines
 
     def initialize str1, str2, char=/\r?\n/
-      @str1 = str1
-      @str2 = str2
-      @char = char
-      @diff_ary = nil
-      @format = Kronk.config[:diff_format] || :ascii_diff
+      @str1       = str1
+      @str2       = str2
+      @char       = char
+      @diff_ary   = nil
+      @show_lines = Kronk.config[:show_lines]
+      @formatter  =
+        self.class.formatter(Kronk.config[:diff_format]) || AsciiFormat
     end
 
 
@@ -147,46 +213,49 @@ class Kronk
     # Returns a formatted output as a string.
     # Custom formats may be achieved by passing a block.
 
-    def formatted format=@format, join_char="\n", &block
-      block ||= method format
+    def formatted options={}
+      options = {
+        :join_char  => "\n",
+        :show_lines => @show_lines,
+        :formatter  => @formatter
+      }.merge options
+
+      format = options[:formatter]
+
+      line1 = line2 = 0
+
+      lines1 = @str1.lines.count
+      lines2 = @str2.lines.count
+
+      width = (lines1 > lines2 ? lines1 : lines2).to_s.length
 
       diff_array.map do |item|
-        block.call item.dup
-      end.flatten.join join_char
-    end
+        case item
+        when String
+          line1 = line1.next
+          line2 = line2.next
 
+          lines = format.lines line1, line2, width if options[:show_lines]
+          "#{lines}#{format.common item}"
 
-    ##
-    # Formats a single diff element to the default diff format.
+        when Array
+          item = item.dup
 
-    def ascii_diff item
-      case item
-      when String
-        "  #{item}"
-      when Array
-        item[0] = item[0].map{|str| "- #{str}"}
-        item[1] = item[1].map{|str| "+ #{str}"}
-        item
-      else
-        "  #{item.inspect}"
-      end
-    end
+          item[0] = item[0].map do |str|
+            line1 = line1.next
+            lines = format.lines line1, nil, width if options[:show_lines]
+            "#{lines}#{format.deleted str}"
+          end
 
+          item[1] = item[1].map do |str|
+            line2 = line2.next
+            lines = format.lines nil, line2, width if options[:show_lines]
+            "#{lines}#{format.added str}"
+          end
 
-    ##
-    # Formats a single diff element with colors.
-
-    def color_diff item
-      case item
-      when String
-        item
-      when Array
-        item[0] = item[0].map{|str| "\033[31m#{str}\033[0m"}
-        item[1] = item[1].map{|str| "\033[32m#{str}\033[0m"}
-        item
-      else
-        item.inspect
-      end
+          item
+        end
+      end.flatten.join options[:join_char]
     end
 
 

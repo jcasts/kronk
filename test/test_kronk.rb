@@ -12,6 +12,7 @@ class TestKronk < Test::Unit::TestCase
       },
       :cache_file  => Kronk::DEFAULT_CACHE_FILE,
       :diff_format => :ascii_diff,
+      :show_lines  => false,
       :requires    => []
     }
 
@@ -27,6 +28,7 @@ class TestKronk < Test::Unit::TestCase
       },
       :ignore_headers => ["Content-Type"],
       :cache_file  => Kronk::DEFAULT_CACHE_FILE,
+      :show_lines  => false,
       :requires    => [],
       :foo => :bar
     }
@@ -47,6 +49,7 @@ class TestKronk < Test::Unit::TestCase
       :diff_format => :ascii_diff,
       :cache_file  => Kronk::DEFAULT_CACHE_FILE,
       :requires    => [],
+      :show_lines  => false,
       :ignore_headers => ["Content-Type"],
       :foo => :bar
     }

@@ -7,7 +7,7 @@
 Kronk runs diffs against data from live and cached http responses. 
 Kronk was made possible by the sponsoring of AT&T Interactive.
 
-== FEATURES/PROBLEMS:
+== FEATURES:
 
 * Parse and diff data from http response body and/or headers.
 
@@ -17,9 +17,9 @@ Kronk was made possible by the sponsoring of AT&T Interactive.
 
 * Support for custom data parsers.
 
-== FUTURE:
-
 * Line numbered and custom diff output.
+
+== FUTURE:
 
 * Auto-queryer with optional param randomizing.
 

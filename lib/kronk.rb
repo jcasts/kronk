@@ -49,6 +49,7 @@ class Kronk
   DEFAULT_CONFIG = {
     :content_types  => DEFAULT_CONTENT_TYPES.dup,
     :diff_format    => :ascii_diff,
+    :show_lines     => false,
     :cache_file     => DEFAULT_CACHE_FILE,
     :requires       => []
   }
@@ -103,7 +104,7 @@ class Kronk
   # Find a fully qualified ruby namespace/constant.
 
   def self.find_const namespace
-    consts = namespace.split "::"
+    consts = namespace.to_s.split "::"
     curr = self
 
     until consts.empty? do
@@ -210,7 +211,7 @@ class Kronk
 
     if uri1 && uri2
       diff = compare uri1, uri2, options
-      puts diff.formatted(config[:diff_format])
+      puts diff.formatted
       verbose "\n\nFound #{diff.count} diff(s).\n"
 
     elsif options[:raw]
@@ -363,6 +364,17 @@ Kronk runs diffs against data from live and cached http responses.
 
       opt.on('--color', 'Return color formatted diff') do
         config[:diff_format] = :color_diff
+      end
+
+
+      opt.on('--format STR', String,
+             'Use a custom diff formatter') do |value|
+        config[:diff_format] = value
+      end
+
+
+      opt.on('--lines', 'Show line numbers') do
+        config[:show_lines] = true
       end
 
 
