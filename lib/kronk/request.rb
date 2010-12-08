@@ -12,6 +12,8 @@ class Kronk
     # number of redirects left if it's an Integer.
 
     def self.follow_redirect resp, options={}
+      Kronk.verbose "Following redirect..."
+
       rdir = options[:follow_redirects]
       rdir = rdir - 1 if Integer === rdir && rdir > 0
 
@@ -107,7 +109,7 @@ class Kronk
     # to using a post request.
 
     def self.retrieve_uri uri, options={}
-      Kronk.verbose "\nRetrieving URL:\n#{uri}\n"
+      Kronk.verbose "\nRetrieving URL:  #{uri}#{options[:uri_suffix]}\n"
 
       options     = options.dup
       http_method = options.delete(:http_method)
