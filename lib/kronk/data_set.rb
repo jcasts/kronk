@@ -13,6 +13,22 @@ class Kronk
 
 
     ##
+    # Retrieves the data at the given path array.
+
+    def data_at_path path
+      self.class.data_at_path @data, path
+    end
+
+
+    ##
+    # Checks if data is available at the given path.
+
+    def data_at_path? path
+      self.class.data_at_path? @data, path
+    end
+
+
+    ##
     # Modify the data object by passing inclusive or exclusive data paths.
     # Supports the following options:
     # :only_data:: String/Array - keep data with that matches the paths
@@ -55,8 +71,13 @@ class Kronk
 
           path.each_with_index do |key, i|
 
-            if i == path.length - 1
+            if i == path.length - 1 && !affect_parent
               new_curr_data[key] = curr_data[key]
+
+            elsif i == path.length - 2 && affect_parent
+              new_curr_data[key] = curr_data[key]
+              break
+
             else
               new_curr_data[key] ||= curr_data[key].class.new
               new_curr_data        = new_curr_data[key]
@@ -75,10 +96,17 @@ class Kronk
 
     def delete_data_points data_paths, affect_parent=false
       [*data_paths].each do |data_path|
-        find_data data_path do |obj, k, p|
-          case obj
-          when Hash  then obj.delete k
-          when Array then obj.delete_at k
+        find_data data_path do |obj, k, path|
+
+          if affect_parent && data_at_path?(path)
+            parent_data = data_at_path path[0..-3]
+            del_method  = Array === parent_data ? :delete_at : :delete
+
+            parent_data.send del_method, path[-2]
+
+          else
+            del_method = Array === obj ? :delete_at : :delete
+            obj.send del_method, k
           end
         end
       end
@@ -126,6 +154,33 @@ class Kronk
           yield d, k, p
         end
       end
+    end
+
+
+    ##
+    # Checks if data is available at the given path.
+
+    def self.data_at_path? data, path
+      data_at_path(data, path)
+      true
+
+    rescue NoMethodError, TypeError
+      false
+    end
+
+
+    ##
+    # Retrieve the data at the given path array location.
+
+    def self.data_at_path data, path
+      curr = data
+      path.each do |p|
+        raise TypeError, "Expected instance of Array or Hash" unless
+          Array === curr || Hash === curr
+        curr = curr[p]
+      end
+
+      curr
     end
 
 
@@ -203,6 +258,8 @@ class Kronk
 
         found = match_data_item(mkey, key) &&
                 match_data_item(mvalue, value)
+
+        #puts "Found: #{data.inspect} #{mkey.inspect} -> #{key.inspect}" if found
 
         yield data, key, curr_path if found
         yield_data_points data[key], mkey, mvalue, true, curr_path, &block if

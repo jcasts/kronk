@@ -59,6 +59,24 @@ class TestDataSet < Test::Unit::TestCase
   end
 
 
+  def test_collect_data_points_affect_parent_array
+    data = @dataset_mock.collect_data_points "**=(A|a)?", true
+
+    expected = {
+      "root" => [nil, ["A1", "A2"]],
+      "subs" => ["a", "b"]
+    }
+
+    assert_equal expected, data
+  end
+
+
+  def test_collect_data_points_affect_parent_hash
+    data = @dataset_mock.collect_data_points "**=bar?", true
+    assert_equal({"tests"=>{:foo=>:bar, "test"=>[[1, 2], 2.123]}}, data)
+  end
+
+
   def test_collect_data_points_single
     data = @dataset_mock.collect_data_points "subs/1"
     assert_equal({"subs" => [nil, "b"]}, data)
@@ -92,6 +110,27 @@ class TestDataSet < Test::Unit::TestCase
       "root" => [nil, ["A1", "A2"]],
       "subs" => ["a"]
     }
+
+    assert_equal expected, data
+  end
+
+
+  def test_delete_data_points_affect_parent_array
+    data = @dataset_mock.delete_data_points "**/test/0/*", true
+
+    expected = mock_data
+    expected['root'][3]['test'].delete_at 0
+    expected['tests']['test'].delete_at 0
+
+    assert_equal expected, data
+  end
+
+
+  def test_delete_data_points_affect_parent_hash
+    data = @dataset_mock.delete_data_points "subs/1", true
+
+    expected = mock_data
+    expected.delete 'subs'
 
     assert_equal expected, data
   end
