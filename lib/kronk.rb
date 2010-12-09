@@ -10,7 +10,7 @@ rescue LoadError
   require 'activesupport'
 end
 
-require 'net/http'
+require 'net/https'
 require 'optparse'
 require 'yaml'
 

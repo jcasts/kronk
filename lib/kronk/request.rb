@@ -143,7 +143,11 @@ class Kronk
 
       socket = socket_io = nil
 
-      resp = Net::HTTP.start uri.host, uri.port do |http|
+      resp = Net::HTTP.new uri.host, uri.port
+      resp.use_ssl = true if uri.scheme =~ /^https$/
+
+      resp = resp.start do |http|
+
         socket = http.instance_variable_get "@socket"
         socket.debug_output = socket_io = StringIO.new
 

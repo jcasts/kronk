@@ -172,6 +172,26 @@ class TestRequest < Test::Unit::TestCase
   end
 
 
+  def test_call_ssl
+    resp = expect_request "GET", "https://example.com/request/path?foo=bar"
+    resp.expects(:use_ssl=).with true
+
+    resp = Kronk::Request.call :get, "https://example.com/request/path?foo=bar"
+
+    assert_equal mock_200_response, resp.raw
+  end
+
+
+  def test_call_no_ssl
+    resp = expect_request "GET", "http://example.com/request/path?foo=bar"
+    resp.expects(:use_ssl=).with(true).never
+
+    resp = Kronk::Request.call :get, "http://example.com/request/path?foo=bar"
+
+    assert_equal mock_200_response, resp.raw
+  end
+
+
   def test_build_query_hash
     hash = {
       :foo => :bar,
@@ -216,7 +236,8 @@ class TestRequest < Test::Unit::TestCase
 
     http.expects(:instance_variable_get).with("@socket").returns socket
 
-    Net::HTTP.expects(:start).with(uri.host, uri.port).yields(http).returns resp
+    Net::HTTP.expects(:new).with(uri.host, uri.port).returns resp
+    resp.expects(:start).yields(http).returns resp
 
     Kronk::Response.expects(:read_raw_from).returns ["", mock_200_response, 0]
 
