@@ -131,6 +131,7 @@ class Kronk
     # :follow_redirects:: Integer/Bool - number of times to follow redirects
     # :headers:: Hash - extra headers to pass to the request
     # :http_method:: Symbol - the http method to use; defaults to :get
+    # :proxy:: Hash/String - http proxy to use; defaults to nil
 
     def self.call http_method, uri, options={}
       suffix = options.delete :uri_suffix
@@ -143,7 +144,7 @@ class Kronk
 
       socket = socket_io = nil
 
-      resp = Net::HTTP.new uri.host, uri.port
+      resp = proxy(options[:proxy]).new uri.host, uri.port
       resp.use_ssl = true if uri.scheme =~ /^https$/
 
       resp = resp.start do |http|
@@ -163,6 +164,26 @@ class Kronk
       resp.instance_variable_set "@raw", r_resp
 
       resp
+    end
+
+
+    ##
+    # Return proxy http class.
+    # The proxy_opts arg can be a uri String or a Hash with the :address key
+    # and optional :username and :password keys.
+
+    def self.proxy proxy_opts
+      return Net::HTTP unless proxy_opts
+
+      proxy_opts = {:address => proxy_opts} if String === proxy_opts
+
+      host, port = proxy_opts[:address].split ":"
+      port ||= proxy_opts[:port] || 8080
+
+      user = proxy_opts[:username]
+      pass = proxy_opts[:password]
+
+      Net::HTTP::Proxy host, port, user, pass
     end
 
 

@@ -192,6 +192,81 @@ class TestRequest < Test::Unit::TestCase
   end
 
 
+  def test_call_proxy
+    proxy = {
+      :address  => "proxy.com",
+      :username => "john",
+      :password => "smith"
+    }
+
+    expect_request "GET", "http://example.com"
+
+    Net::HTTP.expects(:Proxy).with("proxy.com", 8080, "john", "smith").
+      returns Net::HTTP
+
+    Kronk::Request.call :get, "http://example.com", :proxy => proxy
+  end
+
+
+  def test_call_proxy_string
+    proxy = "proxy.com:8888"
+
+    expect_request "GET", "http://example.com"
+
+    Net::HTTP.expects(:Proxy).with("proxy.com", "8888", nil, nil).
+      returns Net::HTTP
+
+    Kronk::Request.call :get, "http://example.com", :proxy => proxy
+  end
+
+
+  def test_proxy_nil
+    assert_equal Net::HTTP, Kronk::Request.proxy(nil)
+  end
+
+
+  def test_proxy_string
+    proxy_class = Kronk::Request.proxy("myproxy.com:80")
+
+    assert_equal "myproxy.com",
+      proxy_class.instance_variable_get("@proxy_address")
+
+    assert_equal '80', proxy_class.instance_variable_get("@proxy_port")
+
+    assert_nil proxy_class.instance_variable_get("@proxy_user")
+    assert_nil proxy_class.instance_variable_get("@proxy_pass")
+  end
+
+
+  def test_proxy_no_port
+    proxy_class = Kronk::Request.proxy("myproxy.com")
+
+    assert_equal "myproxy.com",
+      proxy_class.instance_variable_get("@proxy_address")
+
+    assert_equal 8080, proxy_class.instance_variable_get("@proxy_port")
+
+    assert_nil proxy_class.instance_variable_get("@proxy_user")
+    assert_nil proxy_class.instance_variable_get("@proxy_pass")
+  end
+
+
+  def test_proxy_hash
+    proxy_class = Kronk::Request.proxy :address   => "myproxy.com",
+                                       :port      => 8080,
+                                       :username  => "john",
+                                       :password  => "smith"
+
+    assert_equal "myproxy.com",
+      proxy_class.instance_variable_get("@proxy_address")
+
+    assert_equal 8080, proxy_class.instance_variable_get("@proxy_port")
+
+    assert_equal "john", proxy_class.instance_variable_get("@proxy_user")
+    assert_equal "smith", proxy_class.instance_variable_get("@proxy_pass")
+  end
+
+
   def test_build_query_hash
     hash = {
       :foo => :bar,
