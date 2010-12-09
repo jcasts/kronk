@@ -186,7 +186,7 @@ are supported:
 * = is used to match values and may be used in conjuction with a key or not.
 
 * Parentheses are ok to use if in conjunction with other special characters
-for a given path item, such as: /path(1|2)
+  for a given path item, such as: /path(1|2)
 
 Check out Kronk::DataSet for more details on data traversing.
 
