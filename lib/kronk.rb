@@ -159,6 +159,7 @@ class Kronk
   # :data:: Hash/String - the data to pass to the http request
   # :headers:: Hash - extra headers to pass to the request
   # :http_method:: Symbol - the http method to use; defaults to :get
+  # :proxy:: Hash/String - http proxy to use; defaults to nil
   # :only_data:: String/Array - extracts the data from given data paths
   # :ignore_data:: String/Array - defines which data points to exclude
   # :with_headers:: Bool/String/Array - defines which headers to include
@@ -372,6 +373,12 @@ Kronk runs diffs against data from live and cached http responses.
       opt.on('-X', '--request STR', String,
              'The request method to use') do |value|
         options[:http_method] = value
+      end
+
+
+      opt.on('-x', '--proxy [host[:port]]', String,
+              'Use HTTP proxy on given port') do |value|
+        options[:proxy] = value
       end
 
 

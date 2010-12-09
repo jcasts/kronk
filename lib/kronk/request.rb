@@ -37,6 +37,7 @@ class Kronk
     # :follow_redirects:: Integer/Bool - number of times to follow redirects
     # :headers:: Hash - extra headers to pass to the request
     # :http_method:: Symbol - the http method to use; defaults to :get
+    # :proxy:: Hash/String - http proxy to use; defaults to nil
 
     def self.retrieve query, options={}
       resp =
@@ -104,6 +105,7 @@ class Kronk
     # :follow_redirects:: Integer/Bool - number of times to follow redirects
     # :headers:: Hash - extra headers to pass to the request
     # :http_method:: Symbol - the http method to use; defaults to :get
+    # :proxy:: Hash/String - http proxy to use; defaults to nil
     #
     # Note: if no http method is specified and data is given, will default
     # to using a post request.
