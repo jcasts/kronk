@@ -279,7 +279,7 @@ class Kronk
       :uris            => []
     }
 
-    options[:only_data], options[:ignore_data] = parse_data_path_args argv
+    options = parse_data_path_args options, argv
 
     opts = OptionParser.new do |opt|
       opt.program_name = File.basename $0
@@ -443,23 +443,27 @@ Kronk runs diffs against data from live and cached http responses.
   # Searches ARGV and returns data paths to add or exclude in the diff.
   # Returns the array [only_paths, except_paths]
 
-  def self.parse_data_path_args argv
-    return unless argv.include? "--"
+  def self.parse_data_path_args options, argv
+    return options unless argv.include? "--"
 
     data_paths = argv.slice! argv.index("--")..-1
     data_paths.shift
 
-    only_paths   = nil
-    except_paths = nil
-
     data_paths.each do |path|
       if path[0,1] == "-"
-        (except_paths ||= []) << path[1..-1]
+        (options[:ignore_data] ||= []) << path[1..-1]
+
+      elsif path[0,2] == ":-"
+        (options[:ignore_data_with] ||= []) << path[2..-1]
+
+      elsif path[0,1] == ":"
+        (options[:only_data_with] ||= []) << path[1..-1]
+
       else
-        (only_paths ||= []) << path
+        (options[:only_data] ||= []) << path
       end
     end
 
-    [only_paths, except_paths]
+    options
   end
 end

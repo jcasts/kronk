@@ -203,10 +203,16 @@ class TestKronk < Test::Unit::TestCase
 
 
   def test_parse_data_path_args
-    argv = %w{this is --argv -- one -two -- -three four}
+    options = {}
+    argv = %w{this is --argv -- one -two -- -three four :parents :-not_parents}
 
-    assert_equal [%w{one four}, %w{two - three}],
-                 Kronk.parse_data_path_args(argv)
+    options = Kronk.parse_data_path_args options, argv
+
+    assert_equal %w{one four}, options[:only_data]
+    assert_equal %w{two - three}, options[:ignore_data]
+
+    assert_equal %w{parents}, options[:only_data_with]
+    assert_equal %w{not_parents}, options[:ignore_data_with]
 
     assert_equal %w{this is --argv}, argv
   end
