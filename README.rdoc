@@ -1,23 +1,25 @@
-= kronk
+= Kronk
 
 * https://github.com/yaksnrainbows/kronk
 
 == DESCRIPTION:
 
-Kronk runs diffs against data from live and cached http responses. 
+Kronk runs diffs against data from live and cached http responses.
 Kronk was made possible by the sponsoring of AT&T Interactive.
 
 == FEATURES:
 
-* Parse and diff data from http response body and/or headers.
+* Parse and display or diff data from http response body and/or headers.
 
-* Include or exclude particular data points.
+* Follow redirects automatically.
+
+* Include or exclude specific data points with file-glob-like paths.
 
 * Supports json, rails-ish xml, and plist.
 
-* Support for custom data parsers.
+* Support for custom data parsers and diff formatters.
 
-* Line numbered and custom diff output.
+* Easy-to-read output (color or ascii, line numbers, etc).
 
 == FUTURE:
 
@@ -33,25 +35,13 @@ Check if your json response returns the same data as your xml variety:
 
   $ kronk http://host.com/path.json http://host.com/path.xml
 
-Compare headers only but only content type and date:
-
-  $ kronk http://host.com/path1 http://host.com/path2 -I Content-Type,Date
-
-Compare body structure only:
+Compare body structure only (uses datatypes instead of values):
 
   $ kronk http://host.com/path.json http://host.com/path.xml --struct
 
 Call comparison with similar uri suffixes:
 
   $ kronk http://host.com/path.json http://host.com/path.xml --suff '?page=1'
-
-Compare body and headers:
-
-  $ kronk http://host.com/path.json http://host.com/path.xml -i
-
-Compare body and content type header:
-
-  $ kronk http://host.com/path.json http://host.com/path.xml -i Content-Type
 
 Compare response with the previous call:
 
@@ -69,11 +59,140 @@ Run it to display formatted data:
 
   $ kronk http://host.com/path.json
 
-  $ kronk http://host.com/path.json -i
-
 Run it to display raw data with headers:
 
   $ kronk http://host.com/path.json --raw -i
+
+== CONFIGURATION:
+
+Kronk pulls it's config from $HOME/.kronk and supports the following:
+
+Set the file to save the last http response retrieved in:
+
+  :cache_file: ~/.kronk_cache
+
+Content types to match to a parser. Keys are used as a part of
+a regexp and values are evaluated by const_get.
+
+  :content_types:
+    xml:   XMLParser
+    plist: PlistParser
+    json:  JSON
+
+How to format the diff output. Supports the "special" values
+:ascii_diff and :color_diff or any string that will correctly
+resolve to a constant:
+
+  :diff_format: :ascii_diff
+
+Setting URI-specific config options - useful if you always need to send
+headers or use one-off configs. Each URI option key is dropped in a regexp
+to match against the given URIs so this also works for local files.
+See Kronk::Request.retrieve and Kronk::Response#selective_data
+for all options supported:
+
+  :uri_options:
+    example.com:
+      :parser:      XMLParser
+      :http_method: POST
+
+      :follow_redirects: true
+
+      :ignore_data:
+        - path/to/data/point
+
+      :headers:
+        X-Something: custom header value
+
+Require specific files or gems in the ruby runtime:
+
+  :requires:
+    - kronk-my_custom_parser
+    - kronk-my_custom_diff_formatter
+
+Show line numbers in the output:
+
+  :show_lines: true
+
+== DATA TRAVERSING:
+
+One of Kronk's most powerful features is its ability to segregate data.
+From the command line, this is done by passing data paths after '--':
+
+  $ kronk http://host.com -- data/path1 data/path2/1/child
+
+The previous example will narrow down the parsed data returned to
+something like:
+
+  {
+    "data" => {
+      "path1" => "value1",
+      "path2" => [
+        nil,
+        {
+          "child" => "child value"
+        },
+        nil,
+        nil
+      ]
+    }
+  }
+
+If excluding data points is preferred, prepending a '-' to the path will
+flag it to remove data:
+
+  $ kronk http://host.com -- -data/path2
+
+  {
+    "data" => {
+      "path1" => "value1",
+      "path3" => "value3",
+      "path4" => "value4"
+    }
+  }
+
+If you would like to exclude or include only items with a specific child
+attribute, you can do so by prepending the path with a ':'.
+Both ':' and '-' can be combined as ':-'.
+
+  $ kronk http://host.com -- :data/path2/1/child
+
+  {
+    "data" => {
+      "path2" => [
+        nil,
+        {
+          "first_child" => "first value",
+          "child" => "child value",
+          "last_child" => "last value"
+        },
+        nil,
+        nil
+      ]
+    }
+  }
+
+There are additionally a variety of wildcard and special characters that
+are supported:
+
+* \* matches /.*/, meaning zero or more characters
+
+* \*\*/ matches any key recursively down the data structure
+
+* ? matches zero or one character
+
+* | effectively works as an "OR" character, matches /^val1|val2$/
+
+* = is used to match values and may be used in conjuction with a key or not.
+
+* Parentheses are ok to use if in conjunction with other special characters
+for a given path item, such as: /path(1|2)
+
+Check out Kronk::DataSet for more details on data traversing.
+
+Note: Bash may try to parse your data paths, especially if they start with
+wildcards or if they contain the pipe "|" character, so you may need to put
+single quotes around some of your paths.
   
 == REQUIREMENTS:
 
