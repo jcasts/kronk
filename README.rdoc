@@ -206,7 +206,7 @@ single quotes around some of your paths.
 
 == INSTALL:
 
-* sudo gem install kronk
+  $ sudo gem install kronk
 
 == DEVELOPERS:
 
