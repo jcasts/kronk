@@ -376,7 +376,7 @@ Kronk runs diffs against data from live and cached http responses.
       end
 
 
-      opt.on('-x', '--proxy [host[:port]]', String,
+      opt.on('-x', '--proxy STR', String,
               'Use HTTP proxy on given port') do |value|
         options[:proxy] = value
       end

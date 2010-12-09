@@ -73,7 +73,7 @@ class Kronk
     # Read http response from a file and return a HTTPResponse instance.
 
     def self.retrieve_file path, options={}
-      Kronk.verbose "\nReading file:\n#{path}\n"
+      Kronk.verbose "Reading file:\n#{path}\n"
 
       options = options.dup
 
@@ -111,7 +111,7 @@ class Kronk
     # to using a post request.
 
     def self.retrieve_uri uri, options={}
-      Kronk.verbose "\nRetrieving URL:  #{uri}#{options[:uri_suffix]}\n"
+      Kronk.verbose "Retrieving URL:  #{uri}#{options[:uri_suffix]}\n"
 
       options     = options.dup
       http_method = options.delete(:http_method)
@@ -191,6 +191,8 @@ class Kronk
 
       user = proxy_opts[:username]
       pass = proxy_opts[:password]
+
+      Kronk.verbose "Using proxy #{addr}\n" if host
 
       Net::HTTP::Proxy host, port, user, pass
     end
