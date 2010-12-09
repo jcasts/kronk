@@ -146,7 +146,16 @@ class Kronk
 
       socket = socket_io = nil
 
-      resp = proxy(options[:proxy]).new uri.host, uri.port
+      proxy_addr, proxy_opts =
+        if Hash === options[:proxy]
+          [options[:proxy][:address], options[:proxy]]
+        else
+          [options[:proxy], {}]
+        end
+
+      http_class = proxy proxy_addr, proxy_opts
+
+      resp = http_class.new uri.host, uri.port
       resp.use_ssl = true if uri.scheme =~ /^https$/
 
       resp = resp.start do |http|
@@ -174,12 +183,10 @@ class Kronk
     # The proxy_opts arg can be a uri String or a Hash with the :address key
     # and optional :username and :password keys.
 
-    def self.proxy proxy_opts
-      return Net::HTTP unless proxy_opts
+    def self.proxy addr, proxy_opts={}
+      return Net::HTTP unless addr
 
-      proxy_opts = {:address => proxy_opts} if String === proxy_opts
-
-      host, port = proxy_opts[:address].split ":"
+      host, port = addr.split ":"
       port ||= proxy_opts[:port] || 8080
 
       user = proxy_opts[:username]

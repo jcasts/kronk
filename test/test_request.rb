@@ -252,7 +252,7 @@ class TestRequest < Test::Unit::TestCase
 
 
   def test_proxy_hash
-    proxy_class = Kronk::Request.proxy :address   => "myproxy.com",
+    proxy_class = Kronk::Request.proxy "myproxy.com",
                                        :port      => 8080,
                                        :username  => "john",
                                        :password  => "smith"
