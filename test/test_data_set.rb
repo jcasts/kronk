@@ -126,8 +126,28 @@ class TestDataSet < Test::Unit::TestCase
   end
 
 
+  def test_delete_data_points_affect_parent_array_value
+    data = @dataset_mock.delete_data_points "**/test/0/*=D*", true
+
+    expected = mock_data
+    expected['root'][3]['test'].delete_at 0
+
+    assert_equal expected, data
+  end
+
+
   def test_delete_data_points_affect_parent_hash
     data = @dataset_mock.delete_data_points "subs/1", true
+
+    expected = mock_data
+    expected.delete 'subs'
+
+    assert_equal expected, data
+  end
+
+
+  def test_delete_data_points_affect_parent_hash_value
+    data = @dataset_mock.delete_data_points "**/*=a", true
 
     expected = mock_data
     expected.delete 'subs'
