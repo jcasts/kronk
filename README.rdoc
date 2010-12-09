@@ -77,6 +77,8 @@ Run it to display raw data with headers:
   
 == REQUIREMENTS:
 
+* activesupport gem
+
 * nokogiri gem
 
 * plist gem
