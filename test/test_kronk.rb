@@ -14,7 +14,8 @@ class TestKronk < Test::Unit::TestCase
       :diff_format => :ascii_diff,
       :show_lines  => false,
       :requires    => [],
-      :uri_options => {}
+      :uri_options => {},
+      :user_agents => Kronk::USER_AGENTS
     }
 
     assert_equal expected, Kronk::DEFAULT_CONFIG
@@ -32,6 +33,7 @@ class TestKronk < Test::Unit::TestCase
       :show_lines  => false,
       :requires    => [],
       :uri_options => {'example.com' => {:parser => 'JSON'}},
+      :user_agents => {:win_ie6 => 'piece of crap browser'},
       :foo => :bar
     }
 
@@ -54,6 +56,8 @@ class TestKronk < Test::Unit::TestCase
       :show_lines  => false,
       :ignore_headers => ["Content-Type"],
       :uri_options => {'example.com' => {:parser => 'JSON'}},
+      :user_agents =>
+        Kronk::USER_AGENTS.merge(:win_ie6 => 'piece of crap browser'),
       :foo => :bar
     }
 

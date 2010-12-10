@@ -45,6 +45,33 @@ class Kronk
   }
 
 
+  # Aliases for various user-agents. Thanks Mechanize! :)
+  USER_AGENTS = {
+    'kronk'         =>
+    "Kronk/#{VERSION} (http://github.com/yaksnrainbows/kronk)",
+    'iphone'        =>
+    "Mozilla/5.0 (iPhone; U; CPU like Mac OS X; en) AppleWebKit/420+ (KHTML, like Gecko) Version/3.0 Mobile/1C28 Safari/419.3",
+    'linux_firefox' =>
+    "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.2.1) Gecko/20100122 firefox/3.6.1",
+    'linux_mozilla' =>
+    "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.4) Gecko/20030624",
+    'mac_mozilla'   =>
+    "Mozilla/5.0 (Macintosh; U; PPC Mac OS X Mach-O; en-US; rv:1.4a) Gecko/20030401",
+    'linux_konqueror' =>
+    "Mozilla/5.0 (compatible; Konqueror/3; Linux)",
+    'mac_firefox'   =>
+    "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2) Gecko/20100115 Firefox/3.6",
+    'mac_safari'    =>
+    "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_2; de-at) AppleWebKit/531.21.8 (KHTML, like Gecko) Version/4.0.4 Safari/531.21.10",
+    'win_ie6'       =>
+    "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)",
+    'win_ie7'       =>
+    "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)",
+    'win_mozilla'   =>
+    "Mozilla/5.0 (Windows; U; Windows NT 5.0; en-US; rv:1.4b) Gecko/20030516 Mozilla Firebird/0.6"
+  }
+
+
   # Default config to use.
   DEFAULT_CONFIG = {
     :content_types  => DEFAULT_CONTENT_TYPES.dup,
@@ -52,7 +79,8 @@ class Kronk
     :show_lines     => false,
     :cache_file     => DEFAULT_CACHE_FILE,
     :requires       => [],
-    :uri_options    => {}
+    :uri_options    => {},
+    :user_agents    => USER_AGENTS.dup
   }
 
 
@@ -71,6 +99,7 @@ class Kronk
     conf          = YAML.load_file DEFAULT_CONFIG_FILE
     content_types = conf.delete :content_types
     uri_options   = conf.delete :uri_options
+    user_agents   = conf.delete :user_agents
 
     if conf[:requires]
       requires = [*conf.delete(:requires)]
@@ -78,9 +107,10 @@ class Kronk
       self.config[:requires].concat requires
     end
 
-    self.config[:uri_options].merge! uri_options if uri_options
+    self.config[:uri_options].merge! uri_options     if uri_options
+    self.config[:content_types].merge! content_types if content_types
+    self.config[:user_agents].merge! user_agents     if user_agents
 
-    self.config[:content_types].merge!(content_types) if content_types
     self.config.merge! conf
   end
 
@@ -159,6 +189,7 @@ class Kronk
   # :data:: Hash/String - the data to pass to the http request
   # :headers:: Hash - extra headers to pass to the request
   # :http_method:: Symbol - the http method to use; defaults to :get
+  # :user_agent:: String - user agent string or alias; defaults to 'kronk'
   # :proxy:: Hash/String - http proxy to use; defaults to nil
   # :only_data:: String/Array - extracts the data from given data paths
   # :ignore_data:: String/Array - defines which data points to exclude
@@ -182,6 +213,7 @@ class Kronk
 
   ##
   # Return a diff object from two responses' raw data.
+  # See Kronk#compare for supported options (except :raw)
 
   def self.raw_diff query1, query2, options={}
     opts1 = options.merge options_for_uri(query1)
@@ -196,6 +228,7 @@ class Kronk
 
   ##
   # Return a diff object from two parsed responses.
+  # See Kronk#compare for supported options (except :raw)
 
   def self.data_diff query1, query2, options={}
     opts1 = options.merge options_for_uri(query1)
@@ -332,7 +365,7 @@ Kronk runs diffs against data from live and cached http responses.
         options[:headers] ||= {}
 
         key, value = value.split ": ", 2
-        options[:headers][key] = value
+        options[:headers][key] = value.strip
       end
 
 
@@ -361,6 +394,12 @@ Kronk runs diffs against data from live and cached http responses.
         end
 
         options[:no_body] = true
+      end
+
+
+      opt.on('-A', '--user-agent STR', String,
+             'User-Agent to send to server') do |value|
+        options[:user_agent] = value
       end
 
 
@@ -441,9 +480,7 @@ Kronk runs diffs against data from live and cached http responses.
     end
 
     options[:uris].concat argv
-
     options[:uris].slice!(2..-1)
-    puts options[:uris].inspect
 
     if options[:uris].empty?
       $stderr << "\nError: You must enter at least one URI\n\n"

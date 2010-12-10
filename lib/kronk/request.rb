@@ -5,6 +5,7 @@ class Kronk
 
   class Request
 
+
     class NotFoundError < Exception; end
 
     ##
@@ -35,6 +36,7 @@ class Kronk
     # Options supported are:
     # :data:: Hash/String - the data to pass to the http request
     # :follow_redirects:: Integer/Bool - number of times to follow redirects
+    # :user_agent:: String - user agent string or alias; defaults to 'kronk'
     # :headers:: Hash - extra headers to pass to the request
     # :http_method:: Symbol - the http method to use; defaults to :get
     # :proxy:: Hash/String - http proxy to use; defaults to nil
@@ -130,6 +132,7 @@ class Kronk
     # Supports the following options:
     # :data:: Hash/String - the data to pass to the http request
     # :follow_redirects:: Integer/Bool - number of times to follow redirects
+    # :user_agent:: String - user agent string or alias; defaults to 'kronk'
     # :headers:: Hash - extra headers to pass to the request
     # :http_method:: Symbol - the http method to use; defaults to :get
     # :proxy:: Hash/String - http proxy to use; defaults to nil
@@ -157,7 +160,7 @@ class Kronk
     # Make an http request to the given uri and return a HTTPResponse instance.
     # Supports the following options:
     # :data:: Hash/String - the data to pass to the http request
-    # :follow_redirects:: Integer/Bool - number of times to follow redirects
+    # :user_agent:: String - user agent string or alias; defaults to 'kronk'
     # :headers:: Hash - extra headers to pass to the request
     # :http_method:: Symbol - the http method to use; defaults to :get
     # :proxy:: Hash/String - http proxy to use; defaults to nil
@@ -170,6 +173,10 @@ class Kronk
 
       data   = options[:data]
       data &&= Hash === data ? build_query(data) : data.to_s
+
+
+      options[:headers] ||= Hash.new
+      options[:headers]['User-Agent'] ||= get_user_agent options[:user_agent]
 
       socket = socket_io = nil
 
@@ -202,6 +209,15 @@ class Kronk
       resp.instance_variable_set "@raw", r_resp
 
       resp
+    end
+
+
+    ##
+    # Gets the user agent to use for the request.
+
+    def self.get_user_agent agent
+      agent && Kronk.config[:user_agents][agent.to_s] || agent ||
+        Kronk.config[:user_agents]['kronk']
     end
 
 
