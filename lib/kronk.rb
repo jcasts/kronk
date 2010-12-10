@@ -435,8 +435,15 @@ Kronk runs diffs against data from live and cached http responses.
 
     opts.parse! argv
 
+    unless $stdin.tty?
+      io = StringIO.new $stdin.read
+      options[:uris] << io
+    end
+
     options[:uris].concat argv
+
     options[:uris].slice!(2..-1)
+    puts options[:uris].inspect
 
     if options[:uris].empty?
       $stderr << "\nError: You must enter at least one URI\n\n"

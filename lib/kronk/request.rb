@@ -41,10 +41,12 @@ class Kronk
 
     def self.retrieve query, options={}
       resp =
-        if !local?(query)
-          retrieve_uri query, options
-        else
+        if IO === query || StringIO === query
+          retrieve_io query, options
+        elsif local?(query)
           retrieve_file query, options
+        else
+          retrieve_uri query, options
         end
 
       begin
@@ -73,7 +75,7 @@ class Kronk
     # Read http response from a file and return a HTTPResponse instance.
 
     def self.retrieve_file path, options={}
-      Kronk.verbose "Reading file:\n#{path}\n"
+      Kronk.verbose "Reading file:  #{path}\n"
 
       options = options.dup
 
@@ -89,6 +91,31 @@ class Kronk
           resp = HeadlessResponse.new file.read
           resp['Content-Type'] = File.extname path
         end
+      end
+
+      resp = follow_redirect resp, options if
+        follow_redirect? resp, options[:follow_redirects]
+
+      resp
+    end
+
+
+    ##
+    # Read the http response from an IO instance and return a HTTPResponse.
+
+    def self.retrieve_io io, options={}
+      Kronk.verbose "Reading IO..."
+
+      options = options.dup
+
+      resp = nil
+
+      begin
+        resp = Response.read_new io
+
+      rescue Net::HTTPBadResponse
+        io.rewind
+        resp = HeadlessResponse.new io.read
       end
 
       resp = follow_redirect resp, options if
