@@ -85,6 +85,11 @@ resolve to a constant:
 
   :diff_format: :ascii_diff
 
+Adding User-Agent aliases is useful and simple!
+
+  :user_agents:
+    win_ie9: Mozilla/4.0 (compatible; MSIE 9.0; Windows NT 6.0)
+
 Setting URI-specific config options - useful if you always need to send
 headers or use one-off configs. Each URI option key is dropped in a regexp
 to match against the given URIs so this also works for local files.

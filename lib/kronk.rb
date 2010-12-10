@@ -398,7 +398,7 @@ Kronk runs diffs against data from live and cached http responses.
 
 
       opt.on('-A', '--user-agent STR', String,
-             'User-Agent to send to server') do |value|
+             'User-Agent to send to server or a valid alias') do |value|
         options[:user_agent] = value
       end
 

@@ -6,6 +6,8 @@
 
   * Support for piping to the kronk bin.
 
+  * Support for customizing User-Agent.
+
 === 1.0.3 / 2010-12-09
 
 * Enhancements:
