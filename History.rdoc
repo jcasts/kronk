@@ -4,6 +4,8 @@
 
   * Added http ssl, proxy support.
 
+  * Support for piping to the kronk bin.
+
 === 1.0.3 / 2010-12-09
 
 * Enhancements:
