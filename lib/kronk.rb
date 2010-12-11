@@ -188,6 +188,7 @@ class Kronk
     password = $stdin.gets.chomp
   ensure
     system "stty echo"
+    $stderr << "\n"
     password
   end
 

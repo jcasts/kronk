@@ -192,22 +192,22 @@ class Kronk
 
       http_class = proxy proxy_addr, proxy_opts
 
-      resp = http_class.new uri.host, uri.port
-      resp.use_ssl = true if uri.scheme =~ /^https$/
+      req = http_class.new uri.host, uri.port
+      req.use_ssl = true if uri.scheme =~ /^https$/
 
-      if options[:auth] && options[:auth][:username]
-        resp.basic_auth options[:auth][:username],
-                        options[:auth][:password]
-      end
-
-      resp = resp.start do |http|
+      resp = req.start do |http|
         socket = http.instance_variable_get "@socket"
         socket.debug_output = socket_io = StringIO.new
 
-        http.send_request http_method.to_s.upcase,
-                          uri.request_uri,
-                          data,
-                          options[:headers]
+        req = VanillaRequest.new http_method.to_s.upcase,
+                uri.request_uri, options[:headers]
+
+        if options[:auth] && options[:auth][:username]
+          req.basic_auth options[:auth][:username],
+                         options[:auth][:password]
+        end
+
+        http.request req, data
       end
 
       resp.extend Response::Helpers
@@ -275,6 +275,21 @@ class Kronk
 
       else
         "#{param}=#{data}"
+      end
+    end
+
+
+    ##
+    # Allow any http method to be sent
+
+    class VanillaRequest
+      def self.new method, path, initheader=nil
+        klass = Class.new Net::HTTPRequest
+        klass.const_set "METHOD", method.to_s.upcase
+        klass.const_set "REQUEST_HAS_BODY", true
+        klass.const_set "RESPONSE_HAS_BODY", true
+
+        klass.new path, initheader
       end
     end
   end

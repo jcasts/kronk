@@ -175,21 +175,55 @@ class TestRequest < Test::Unit::TestCase
   end
 
 
-  def test_call_ssl
-    resp = expect_request "GET", "https://example.com/request/path?foo=bar"
-    resp.expects(:use_ssl=).with true
+  def test_call_basic_auth
+    auth_opts = {:username => "user", :password => "pass"}
 
-    resp = Kronk::Request.call :get, "https://example.com/request/path?foo=bar"
+    expect_request "GET", "http://example.com" do |http, req, resp|
+      req.expects(:basic_auth).with auth_opts[:username], auth_opts[:password]
+    end
+
+    resp = Kronk::Request.call :get, "http://example.com", :auth => auth_opts
+  end
+
+
+  def test_call_bad_basic_auth
+    auth_opts = {:password => "pass"}
+
+    expect_request "GET", "http://example.com" do |http, req, resp|
+      req.expects(:basic_auth).with(auth_opts[:username], auth_opts[:password]).
+        never
+    end
+
+    resp = Kronk::Request.call :get, "http://example.com", :auth => auth_opts
+  end
+
+
+  def test_call_no_basic_auth
+    expect_request "GET", "http://example.com" do |http, req, resp|
+      req.expects(:basic_auth).never
+    end
+
+    resp = Kronk::Request.call :get, "http://example.com"
+  end
+
+
+  def test_call_ssl
+    expect_request "GET", "https://example.com" do |http, req, resp|
+      req.expects(:use_ssl=).with true
+    end
+
+    resp = Kronk::Request.call :get, "https://example.com"
 
     assert_equal mock_200_response, resp.raw
   end
 
 
   def test_call_no_ssl
-    resp = expect_request "GET", "http://example.com/request/path?foo=bar"
-    resp.expects(:use_ssl=).with(true).never
+    expect_request "GET", "http://example.com" do |http, req, resp|
+      req.expects(:use_ssl=).with(true).never
+    end
 
-    resp = Kronk::Request.call :get, "http://example.com/request/path?foo=bar"
+    resp = Kronk::Request.call :get, "http://example.com"
 
     assert_equal mock_200_response, resp.raw
   end
@@ -331,6 +365,20 @@ class TestRequest < Test::Unit::TestCase
   end
 
 
+  def test_vanilla_request
+    req = Kronk::Request::VanillaRequest.new :my_http_method,
+            "some/path", 'User-Agent' => 'vanilla kronk'
+
+    assert Net::HTTPRequest === req
+    assert_equal "MY_HTTP_METHOD", req.class::METHOD
+    assert req.class::REQUEST_HAS_BODY
+    assert req.class::RESPONSE_HAS_BODY
+
+    assert_equal "some/path", req.path
+    assert_equal "vanilla kronk", req['User-Agent']
+  end
+
+
   private
 
   def expect_request req_method, url, options={}
@@ -339,8 +387,9 @@ class TestRequest < Test::Unit::TestCase
     resp = mock 'resp'
     resp.stubs(:code).returns(options[:status] || '200')
 
-    http = mock 'http'
+    http   = mock 'http'
     socket = mock 'socket'
+    req    = mock 'req'
 
     data   = options[:data]
     data &&= Hash === data ? Kronk::Request.build_query(data) : data.to_s
@@ -350,17 +399,19 @@ class TestRequest < Test::Unit::TestCase
 
     socket.expects(:debug_output=)
 
-    http.expects(:send_request).
-      with(req_method, uri.request_uri, data, headers).
-      returns resp
+    Kronk::Request::VanillaRequest.expects(:new).
+      with(req_method, uri.request_uri, headers).returns req
+
+    http.expects(:request).with(req, data).returns resp
 
     http.expects(:instance_variable_get).with("@socket").returns socket
 
-    Net::HTTP.expects(:new).with(uri.host, uri.port).returns resp
-    resp.expects(:start).yields(http).returns resp
+    Net::HTTP.expects(:new).with(uri.host, uri.port).returns req
+    req.expects(:start).yields(http).returns resp
 
     Kronk::Response.expects(:read_raw_from).returns ["", mock_200_response, 0]
 
+    yield http, req, resp if block_given?
     resp
   end
 end
