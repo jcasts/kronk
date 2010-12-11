@@ -180,6 +180,19 @@ class Kronk
 
 
   ##
+  # Ask the user for a password from stdinthe command line.
+
+  def self.query_password str=nil
+    $stderr << "#{(str || "Password:")} "
+    system "stty -echo"
+    password = $stdin.gets.chomp
+  ensure
+    system "stty echo"
+    password
+  end
+
+
+  ##
   # Make requests, parse the responses and compare the data.
   # If the second argument is omitted or is passed :cache, will
   # attempt to compare with the last made request. If there was no last
@@ -308,9 +321,10 @@ class Kronk
 
   def self.parse_args argv
     options = {
-      :with_headers    => false,
-      :no_body         => false,
-      :uris            => []
+      :with_headers   => false,
+      :no_body        => false,
+      :uris           => [],
+      :proxy          => {}
     }
 
     options = parse_data_path_args options, argv
@@ -416,8 +430,17 @@ Kronk runs diffs against data from live and cached http responses.
 
 
       opt.on('-x', '--proxy STR', String,
-              'Use HTTP proxy on given port') do |value|
-        options[:proxy] = value
+             'Use HTTP proxy on given port') do |value|
+        options[:proxy][:address], options[:proxy][:port] = value.split ":", 2
+      end
+
+
+      opt.on('-U', '--proxy-user user[:password]', String,
+             'Set server user and password') do |value|
+        options[:proxy][:username], options[:proxy][:password] =
+          value.split ":", 2
+
+        options[:proxy][:password] ||= query_password "Proxy password:"
       end
 
 
