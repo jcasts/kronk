@@ -435,8 +435,8 @@ Kronk runs diffs against data from live and cached http responses.
       end
 
 
-      opt.on('-U', '--proxy-user user[:password]', String,
-             'Set server user and password') do |value|
+      opt.on('-U', '--proxy-user STR', String,
+             'Set server user and/or password: usr[:pass]') do |value|
         options[:proxy][:username], options[:proxy][:password] =
           value.split ":", 2
 
