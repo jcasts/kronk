@@ -19,6 +19,8 @@ Kronk was made possible by the sponsoring of AT&T Interactive.
 
 * Support for custom data parsers and diff formatters.
 
+* Support for proxies, ssl, and http auth.
+
 * Easy-to-read output (color or ascii, line numbers, etc).
 
 == FUTURE:
@@ -26,8 +28,6 @@ Kronk was made possible by the sponsoring of AT&T Interactive.
 * Auto-queryer with optional param randomizing.
 
 * Support for test suites.
-
-* Support for proxies, ssl, and http auth.
 
 == SYNOPSIS:
 

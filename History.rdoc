@@ -2,7 +2,7 @@
 
 * Enhancements:
 
-  * Added http ssl, proxy support.
+  * Added http ssl, proxy, and basic auth support.
 
   * Support for piping to the kronk bin.
 
