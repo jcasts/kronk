@@ -203,6 +203,7 @@ class Kronk
   # :headers:: Hash - extra headers to pass to the request
   # :http_method:: Symbol - the http method to use; defaults to :get
   # :user_agent:: String - user agent string or alias; defaults to 'kronk'
+  # :auth:: Hash - must contain :username and :password; defaults to nil
   # :proxy:: Hash/String - http proxy to use; defaults to nil
   # :only_data:: String/Array - extracts the data from given data paths
   # :ignore_data:: String/Array - defines which data points to exclude
@@ -321,7 +322,7 @@ class Kronk
 
   def self.parse_args argv
     options = {
-      :http_auth      => {},
+      :auth           => {},
       :no_body        => false,
       :proxy          => {},
       :uris           => [],
@@ -489,7 +490,7 @@ Kronk runs diffs against data from live and cached http responses.
 
       opt.on('-u', '--user STR', String,
              'Set server auth user and/or password: usr[:pass]') do |value|
-        options[:http_auth][:username], options[:http_auth][:password] =
+        options[:auth][:username], options[:auth][:password] =
           value.split ":", 2
 
         options[:auth][:password] ||= query_password "Server password:"

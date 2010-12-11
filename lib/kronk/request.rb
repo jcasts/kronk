@@ -37,6 +37,7 @@ class Kronk
     # :data:: Hash/String - the data to pass to the http request
     # :follow_redirects:: Integer/Bool - number of times to follow redirects
     # :user_agent:: String - user agent string or alias; defaults to 'kronk'
+    # :auth:: Hash - must contain :username and :password; defaults to nil
     # :headers:: Hash - extra headers to pass to the request
     # :http_method:: Symbol - the http method to use; defaults to :get
     # :proxy:: Hash/String - http proxy to use; defaults to nil
@@ -133,6 +134,7 @@ class Kronk
     # :data:: Hash/String - the data to pass to the http request
     # :follow_redirects:: Integer/Bool - number of times to follow redirects
     # :user_agent:: String - user agent string or alias; defaults to 'kronk'
+    # :auth:: Hash - must contain :username and :password; defaults to nil
     # :headers:: Hash - extra headers to pass to the request
     # :http_method:: Symbol - the http method to use; defaults to :get
     # :proxy:: Hash/String - http proxy to use; defaults to nil
@@ -161,6 +163,7 @@ class Kronk
     # Supports the following options:
     # :data:: Hash/String - the data to pass to the http request
     # :user_agent:: String - user agent string or alias; defaults to 'kronk'
+    # :auth:: Hash - must contain :username and :password; defaults to nil
     # :headers:: Hash - extra headers to pass to the request
     # :http_method:: Symbol - the http method to use; defaults to :get
     # :proxy:: Hash/String - http proxy to use; defaults to nil
@@ -192,8 +195,12 @@ class Kronk
       resp = http_class.new uri.host, uri.port
       resp.use_ssl = true if uri.scheme =~ /^https$/
 
-      resp = resp.start do |http|
+      if options[:auth] && options[:auth][:username]
+        resp.basic_auth options[:auth][:username],
+                        options[:auth][:password]
+      end
 
+      resp = resp.start do |http|
         socket = http.instance_variable_get "@socket"
         socket.debug_output = socket_io = StringIO.new
 
