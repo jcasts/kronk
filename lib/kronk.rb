@@ -321,10 +321,11 @@ class Kronk
 
   def self.parse_args argv
     options = {
-      :with_headers   => false,
+      :http_auth      => {},
       :no_body        => false,
+      :proxy          => {},
       :uris           => [],
-      :proxy          => {}
+      :with_headers   => false
     }
 
     options = parse_data_path_args options, argv
@@ -356,30 +357,19 @@ Kronk runs diffs against data from live and cached http responses.
   Options:
       STR
 
-      opt.on('-d', '--data STR', String,
-             'Post data with the request') do |value|
-        options[:data] = value
-        options[:http_method] ||= 'POST'
+      opt.on('--ascii', 'Return ascii formatted diff') do
+        config[:diff_format] = :ascii_diff
       end
 
 
-      opt.on('--prev', 'Use last response to diff against') do
-        options[:uris] << :cache
+      opt.on('--color', 'Return color formatted diff') do
+        config[:diff_format] = :color_diff
       end
 
 
-      opt.on('--suff STR', String,
-             'Add common path items to the end of each URI') do |value|
-        options[:uri_suffix] = value
-      end
-
-
-      opt.on('-H', '--header STR', String,
-             'Header to pass to the server request') do |value|
-        options[:headers] ||= {}
-
-        key, value = value.split ": ", 2
-        options[:headers][key] = value.strip
+      opt.on('--format STR', String,
+             'Use a custom diff formatter') do |value|
+        config[:diff_format] = value
       end
 
 
@@ -411,6 +401,65 @@ Kronk runs diffs against data from live and cached http responses.
       end
 
 
+      opt.on('--lines', 'Show line numbers') do
+        config[:show_lines] = true
+      end
+
+
+      opt.on('--parser STR', String,
+             'Override default parser') do |value|
+        options[:parser] = value
+      end
+
+
+      opt.on('--prev', 'Use last response to diff against') do
+        options[:uris] << :cache
+      end
+
+
+      opt.on('--raw', 'Run diff on the raw data returned') do
+        options[:raw] = true
+      end
+
+
+      opt.on('-r', '--require lib1,lib2', Array,
+             'Require a library or gem') do |value|
+        options[:requires] ||= []
+        options[:requires].concat value
+      end
+
+
+      opt.on('--struct', 'Run diff on the data structure') do
+        options[:struct] = true
+      end
+
+
+      opt.on('-V', '--verbose', 'Make the operation more talkative') do
+        config[:verbose] = true
+      end
+
+
+      opt.separator <<-STR
+
+  HTTP Options:
+      STR
+
+      opt.on('-d', '--data STR', String,
+             'Post data with the request') do |value|
+        options[:data] = value
+        options[:http_method] ||= 'POST'
+      end
+
+
+      opt.on('-H', '--header STR', String,
+             'Header to pass to the server request') do |value|
+        options[:headers] ||= {}
+
+        key, value = value.split ": ", 2
+        options[:headers][key] = value.strip
+      end
+
+
       opt.on('-A', '--user-agent STR', String,
              'User-Agent to send to server or a valid alias') do |value|
         options[:user_agent] = value
@@ -423,20 +472,14 @@ Kronk runs diffs against data from live and cached http responses.
       end
 
 
-      opt.on('-X', '--request STR', String,
-             'The request method to use') do |value|
-        options[:http_method] = value
-      end
-
-
-      opt.on('-x', '--proxy STR', String,
-             'Use HTTP proxy on given port') do |value|
-        options[:proxy][:address], options[:proxy][:port] = value.split ":", 2
+      opt.on('--suff STR', String,
+             'Add common path items to the end of each URL') do |value|
+        options[:uri_suffix] = value
       end
 
 
       opt.on('-U', '--proxy-user STR', String,
-             'Set server user and/or password: usr[:pass]') do |value|
+             'Set proxy user and/or password: usr[:pass]') do |value|
         options[:proxy][:username], options[:proxy][:password] =
           value.split ":", 2
 
@@ -444,52 +487,24 @@ Kronk runs diffs against data from live and cached http responses.
       end
 
 
-      opt.on('-r', '--require lib1,lib2', Array,
-             'Require a library or gem') do |value|
-        options[:requires] ||= []
-        options[:requires].concat value
+      opt.on('-u', '--user STR', String,
+             'Set server auth user and/or password: usr[:pass]') do |value|
+        options[:http_auth][:username], options[:http_auth][:password] =
+          value.split ":", 2
+
+        options[:auth][:password] ||= query_password "Server password:"
       end
 
 
-      opt.on('--raw', 'Run diff on the raw data returned') do
-        options[:raw] = true
+      opt.on('-X', '--request STR', String,
+             'The request method to use') do |value|
+        options[:http_method] = value
       end
 
 
-      opt.on('--struct', 'Run diff on the data structure') do
-        options[:struct] = true
-      end
-
-
-      opt.on('--ascii', 'Return ascii formatted diff') do
-        config[:diff_format] = :ascii_diff
-      end
-
-
-      opt.on('--color', 'Return color formatted diff') do
-        config[:diff_format] = :color_diff
-      end
-
-
-      opt.on('--format STR', String,
-             'Use a custom diff formatter') do |value|
-        config[:diff_format] = value
-      end
-
-
-      opt.on('--lines', 'Show line numbers') do
-        config[:show_lines] = true
-      end
-
-
-      opt.on('--parser STR', String,
-             'Override default parser') do |value|
-        options[:parser] = value
-      end
-
-
-      opt.on('-V', '--verbose', 'Make the operation more talkative') do
-        config[:verbose] = true
+      opt.on('-x', '--proxy STR', String,
+             'Use HTTP proxy on given port: host[:port]') do |value|
+        options[:proxy][:address], options[:proxy][:port] = value.split ":", 2
       end
 
       opt.separator nil
