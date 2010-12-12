@@ -25,6 +25,8 @@ Kronk was made possible by the sponsoring of AT&T Interactive.
 
 == FUTURE:
 
+* Parser for html.
+
 * Auto-queryer with optional param randomizing.
 
 * Support for test suites.

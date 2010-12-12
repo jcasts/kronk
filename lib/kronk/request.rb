@@ -18,7 +18,10 @@ class Kronk
       rdir = options[:follow_redirects]
       rdir = rdir - 1 if Integer === rdir && rdir > 0
 
-      retrieve_uri resp['Location'], options.merge(:follow_redirects => rdir)
+      options = options.merge :follow_redirects => rdir,
+                              :http_method      => :get
+
+      retrieve_uri resp['Location'], options
     end
 
 
@@ -161,7 +164,8 @@ class Kronk
     ##
     # Make an http request to the given uri and return a HTTPResponse instance.
     # Supports the following options:
-    # :data:: Hash/String - the data to pass to the http request
+    # :data:: Hash/String - the data to pass to the http request body
+    # :query:: Hash/String - the data to append to the http request path
     # :user_agent:: String - user agent string or alias; defaults to 'kronk'
     # :auth:: Hash - must contain :username and :password; defaults to nil
     # :headers:: Hash - extra headers to pass to the request

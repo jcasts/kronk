@@ -6,7 +6,7 @@ class TestRequest < Test::Unit::TestCase
     resp = mock "resp"
     resp.expects(:[]).with("Location").returns "http://example.com"
 
-    options = {:follow_redirects => true}
+    options = {:follow_redirects => true, :http_method => :get}
     Kronk::Request.expects(:retrieve_uri).with("http://example.com", options)
 
     Kronk::Request.follow_redirect resp, options
@@ -19,7 +19,7 @@ class TestRequest < Test::Unit::TestCase
 
     options = {:follow_redirects => 1}
     Kronk::Request.expects(:retrieve_uri).
-      with "http://example.com", :follow_redirects => 0
+      with "http://example.com", :follow_redirects => 0, :http_method => :get
 
     Kronk::Request.follow_redirect resp, options
   end
