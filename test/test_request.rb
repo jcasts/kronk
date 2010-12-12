@@ -405,6 +405,7 @@ class TestRequest < Test::Unit::TestCase
 
     resp = mock 'resp'
     resp.stubs(:code).returns(options[:status] || '200')
+    resp.stubs(:to_hash).returns Hash.new
 
     http   = mock 'http'
     socket = mock 'socket'

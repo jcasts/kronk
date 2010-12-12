@@ -189,6 +189,11 @@ class Kronk
       options[:headers] ||= Hash.new
       options[:headers]['User-Agent'] ||= get_user_agent options[:user_agent]
 
+      unless options[:no_cookies] || options[:headers]['Cookie']
+        cookie = Kronk.cookie_jar.get_cookie_header uri.to_s
+        options[:headers]['Cookie'] = cookie unless cookie.empty?
+      end
+
       socket = socket_io = nil
 
       proxy_addr, proxy_opts =
@@ -219,6 +224,9 @@ class Kronk
 
         http.request req, data
       end
+
+      Kronk.cookie_jar.set_cookies_from_headers uri.to_s, resp.to_hash unless
+        options[:no_cookies]
 
       resp.extend Response::Helpers
 

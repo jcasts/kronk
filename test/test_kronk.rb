@@ -4,18 +4,19 @@ class TestKronk < Test::Unit::TestCase
 
   def test_default_config
     expected = {
-      :content_types  => {
+      :content_types => {
         'js'      => 'JSON',
         'json'    => 'JSON',
         'plist'   => 'PlistParser',
         'xml'     => 'XMLParser'
       },
-      :cache_file  => Kronk::DEFAULT_CACHE_FILE,
-      :diff_format => :ascii_diff,
-      :show_lines  => false,
-      :requires    => [],
-      :uri_options => {},
-      :user_agents => Kronk::USER_AGENTS
+      :cache_file   => Kronk::DEFAULT_CACHE_FILE,
+      :cookies_file => Kronk::DEFAULT_COOKIES_FILE,
+      :diff_format  => :ascii_diff,
+      :show_lines   => false,
+      :requires     => [],
+      :uri_options  => {},
+      :user_agents  => Kronk::USER_AGENTS
     }
 
     assert_equal expected, Kronk::DEFAULT_CONFIG
@@ -30,6 +31,7 @@ class TestKronk < Test::Unit::TestCase
       },
       :ignore_headers => ["Content-Type"],
       :cache_file  => Kronk::DEFAULT_CACHE_FILE,
+      :cookies_file => Kronk::DEFAULT_COOKIES_FILE,
       :show_lines  => false,
       :requires    => [],
       :uri_options => {'example.com' => {:parser => 'JSON'}},
@@ -52,6 +54,7 @@ class TestKronk < Test::Unit::TestCase
       },
       :diff_format => :ascii_diff,
       :cache_file  => Kronk::DEFAULT_CACHE_FILE,
+      :cookies_file => Kronk::DEFAULT_COOKIES_FILE,
       :requires    => [],
       :show_lines  => false,
       :ignore_headers => ["Content-Type"],

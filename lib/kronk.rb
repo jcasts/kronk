@@ -2,11 +2,13 @@ require 'rubygems'
 require 'plist'
 require 'json'
 require 'nokogiri'
+require 'cookiejar'
 
 # Support for new and old versions of ActiveSupport
 begin
   require 'active_support/inflector'
-rescue LoadError
+rescue LoadError => e
+  raise unless e.message =~ /-- active_support/
   require 'activesupport'
 end
 
@@ -34,6 +36,10 @@ class Kronk
 
   # Default cache file.
   DEFAULT_CACHE_FILE = File.expand_path "~/.kronk_cache"
+
+
+  # Default cookies file.
+  DEFAULT_COOKIES_FILE = File.expand_path "~/.kronk_cookies"
 
 
   # Default Content-Type header to parser mapping.
@@ -78,6 +84,7 @@ class Kronk
     :diff_format    => :ascii_diff,
     :show_lines     => false,
     :cache_file     => DEFAULT_CACHE_FILE,
+    :cookies_file   => DEFAULT_COOKIES_FILE,
     :requires       => [],
     :uri_options    => {},
     :user_agents    => USER_AGENTS.dup
@@ -118,9 +125,9 @@ class Kronk
   ##
   # Load the config-based requires.
 
-  def self.load_requires
-    return unless config[:requires]
-    config[:requires].each{|lib| require lib }
+  def self.load_requires more_requires=nil
+    return unless config[:requires] || more_requires
+    (config[:requires] | more_requires.to_a).each{|lib| require lib }
   end
 
 
@@ -194,6 +201,37 @@ class Kronk
 
 
   ##
+  # Load the saved cookies file.
+
+  def self.load_cookie_jar file=nil
+    file ||= config[:cookies_file]
+    @cookie_jar = YAML.load_file file if File.file? file
+    @cookie_jar ||= CookieJar::Jar.new
+    @cookie_jar.expire_cookies
+    @cookie_jar
+  end
+
+
+  ##
+  # Save the cookie jar to file.
+
+  def self.save_cookie_jar file=nil
+    file ||= config[:cookies_file]
+    File.open(file, "w") do |file|
+      file.write @cookie_jar.to_yaml
+    end
+  end
+
+
+  ##
+  # Returns the kronk cookie jar.
+
+  def self.cookie_jar
+    @cookie_jar ||= load_cookie_jar
+  end
+
+
+  ##
   # Make requests, parse the responses and compare the data.
   # Query arguments may be set to the special value :cache to use the
   # last live http response retrieved.
@@ -228,6 +266,7 @@ class Kronk
 
   def self.retrieve_data_string query, options={}
     options = options.merge options_for_uri(query)
+
     resp = Request.retrieve query, options
 
     if options[:raw]
@@ -262,8 +301,13 @@ class Kronk
 
     options = parse_args argv
 
-    config[:requires].concat options[:requires] if options[:requires]
-    load_requires
+    load_requires options[:requires]
+
+    load_cookie_jar
+
+    at_exit do
+      save_cookie_jar
+    end
 
     options[:cache_response] = config[:cache_file] if config[:cache_file]
 
