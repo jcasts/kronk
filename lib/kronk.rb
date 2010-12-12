@@ -195,9 +195,8 @@ class Kronk
 
   ##
   # Make requests, parse the responses and compare the data.
-  # If the second argument is omitted or is passed :cache, will
-  # attempt to compare with the last made request. If there was no last
-  # request will compare against nil.
+  # Query arguments may be set to the special value :cache to use the
+  # last live http response retrieved.
   #
   # Supports the following options:
   # :data:: Hash/String - the data to pass to the http request
@@ -215,7 +214,7 @@ class Kronk
   #
   # Returns a diff object.
 
-  def self.compare query1, query2=:cache, options={}
+  def self.compare query1, query2, options={}
     diff =
       if options[:raw]
         raw_diff query1, query2, options
@@ -416,7 +415,7 @@ Kronk runs diffs against data from live and cached http responses.
 
 
       opt.on('--prev', 'Use last response to diff against') do
-        options[:uris] << :cache
+        options[:uris].unshift :cache
       end
 
 
