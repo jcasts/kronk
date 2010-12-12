@@ -4,6 +4,8 @@
 
   * Added http ssl, proxy, and basic auth support.
 
+  * URL queries can now be set from the command line or the config file.
+
   * Support for piping to the kronk bin.
 
   * Support for customizing User-Agent.

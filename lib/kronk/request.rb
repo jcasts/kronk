@@ -175,8 +175,8 @@ class Kronk
     def self.call http_method, uri, options={}
       suffix = options.delete :uri_suffix
 
-      uri    = "#{uri}#{suffix}" if suffix
-      uri    = URI.parse uri unless URI === uri
+      uri = "#{uri}#{suffix}" if suffix
+      uri = URI.parse uri unless URI === uri
 
       if options[:query]
         query = build_query options[:query]

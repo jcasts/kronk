@@ -111,6 +111,10 @@ for all options supported:
       :headers:
         X-Something: custom header value
 
+      :query:
+        offset: 1
+        limit:  10
+
 Require specific files or gems in the ruby runtime:
 
   :requires:
