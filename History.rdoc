@@ -2,7 +2,9 @@
 
 * Enhancements:
 
-  * Added http ssl, proxy, and basic auth support.
+  * Support for http ssl, proxy, and basic auth.
+
+  * Support for cookies and sessions.
 
   * URL queries can now be set from the command line or the config file.
 

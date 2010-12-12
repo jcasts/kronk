@@ -21,11 +21,11 @@ Kronk was made possible by the sponsoring of AT&T Interactive.
 
 * Support for proxies, ssl, and basic auth.
 
+* Cookie/session handling.
+
 * Easy-to-read output (color or ascii, line numbers, etc).
 
 == FUTURE:
-
-* Cookie/session handling.
 
 * Auto-queryer with optional param randomizing.
 

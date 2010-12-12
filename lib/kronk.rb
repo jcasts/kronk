@@ -480,11 +480,6 @@ Kronk runs diffs against data from live and cached http responses.
       end
 
 
-      opt.on('--no-cookies', 'Don\'t use cookies for this session') do
-        options[:no_cookies] = true
-      end
-
-
       opt.on('-d', '--data STR', String,
              'Post data with the request') do |value|
         options[:data] = value
@@ -510,6 +505,11 @@ Kronk runs diffs against data from live and cached http responses.
       opt.on('-L', '--location [NUM]', Integer,
              'Follow the location header always or num times') do |value|
         options[:follow_redirects] = value || true
+      end
+
+
+      opt.on('--no-cookies', 'Don\'t use cookies for this session') do
+        options[:no_cookies] = true
       end
 
 
