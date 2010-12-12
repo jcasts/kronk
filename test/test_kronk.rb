@@ -167,42 +167,86 @@ class TestKronk < Test::Unit::TestCase
   end
 
 
-  def test_raw_diff
-    diff = Kronk.raw_diff "test/mocks/200_response.json",
-                          "test/mocks/200_response.xml",
-                          :with_headers => true
-
-    resp1 = Kronk::Request.retrieve "test/mocks/200_response.json",
-                             :with_headers => true,
-                             :raw => true
-
-    resp2 = Kronk::Request.retrieve "test/mocks/200_response.xml",
-                             :with_headers => true,
-                             :raw => true
-
-    exp_diff = Kronk::Diff.new resp1.selective_string(:with_headers => true),
-                               resp2.selective_string(:with_headers => true)
-
-    assert_equal exp_diff.formatted, diff.formatted
+  def test_retrieve_data_string
+    str = Kronk.retrieve_data_string "test/mocks/200_response.json"
+    expected = <<-STR
+{
+"business" => {
+ "address" => "3845 Rivertown Pkwy SW Ste 500",
+ "city" => "Grandville",
+ "description" => {
+  "additional_urls" => [
+   {
+    "destination" => "http://example.com",
+    "url_click" => "http://example.com"
+    }
+   ],
+  "general_info" => "<p>A Paint Your Own Pottery Studios..</p>",
+  "op_hours" => "Fri 1pm-7pm, Sat 10am-6pm, Sun 1pm-4pm, Appointments Available",
+  "payment_text" => "DISCOVER, AMEX, VISA, MASTERCARD",
+  "slogan" => "<p>Pottery YOU dress up</p>"
+  },
+ "distance" => 0.0,
+ "has_detail_page" => true,
+ "headings" => [
+  "Pottery"
+  ],
+ "id" => "1234",
+ "impression_id" => "mock_iid",
+ "improvable" => true,
+ "latitude" => 42.882561,
+ "listing_id" => "1234",
+ "listing_type" => "free",
+ "longitude" => -85.759586,
+ "mappable" => true,
+ "name" => "Naked Plates",
+ "omit_address" => false,
+ "omit_phone" => false,
+ "phone" => "6168055326",
+ "rateable" => true,
+ "rating_count" => 0,
+ "red_listing" => false,
+ "state" => "MI",
+ "website" => "http://example.com",
+ "year_established" => "1996",
+ "zip" => "49418"
+ },
+"original_request" => {
+ "id" => "1234"
+ },
+"request_id" => "mock_rid"
+}
+STR
+    assert_equal expected.strip, str
   end
 
 
-  def test_data_diff
-    diff = Kronk.data_diff "test/mocks/200_response.json",
-                           "test/mocks/200_response.xml",
-                           :with_headers => true
+  def test_retrieve_data_string_raw
+    str = Kronk.retrieve_data_string "test/mocks/200_response.json", :raw => 1
+    expected = File.read("test/mocks/200_response.json").split("\r\n\r\n")[1]
+    assert_equal expected, str
+  end
 
-    resp1 = Kronk::Request.retrieve "test/mocks/200_response.json",
-                             :with_headers => true
 
-    resp2 = Kronk::Request.retrieve "test/mocks/200_response.xml",
-                             :with_headers => true
+  def test_retrieve_data_string_struct
+    str = Kronk.retrieve_data_string "test/mocks/200_response.json",
+            :struct => true
 
-    exp_diff = Kronk::Diff.new_from_data \
-                  resp1.selective_data(:with_headers => true),
-                  resp2.selective_data(:with_headers => true)
+    expected = JSON.parse \
+      File.read("test/mocks/200_response.json").split("\r\n\r\n")[1]
 
-    assert_equal exp_diff.formatted, diff.formatted
+    expected = Kronk::Diff.ordered_data_string expected, true
+
+    assert_equal expected, str
+  end
+
+
+  def test_retrieve_data_string_missing_parser
+    str = Kronk.retrieve_data_string "test/mocks/200_response.txt"
+
+    expected = File.read("test/mocks/200_response.txt").split("\r\n\r\n")[1]
+
+    assert_equal expected, str
   end
 
 

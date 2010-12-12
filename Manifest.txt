@@ -8,7 +8,6 @@ lib/kronk.rb
 lib/kronk/data_set.rb
 lib/kronk/diff.rb
 lib/kronk/plist_parser.rb
-lib/kronk/raw_xml_parser.rb
 lib/kronk/request.rb
 lib/kronk/response.rb
 lib/kronk/xml_parser.rb
