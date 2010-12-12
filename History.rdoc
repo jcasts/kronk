@@ -8,7 +8,12 @@
 
   * Support for piping to the kronk bin.
 
-  * Support for customizing User-Agent.
+  * Support for customizing User-Agent and added user agent aliases.
+
+* Bugfixes:
+
+  * Updated how --prev option does cache retrieval, so cache is always
+    the left side of the diff.
 
 === 1.0.3 / 2010-12-09
 
