@@ -100,7 +100,7 @@ class Kronk
             "#{pad}#{key.inspect} => #{subdata}"
           end
 
-        output << data_values.sort.join(",\n") << "\n"
+        output << data_values.sort.join(",\n") << "\n" unless data_values.empty?
         output << "#{" " * indent}}"
 
       when Array
@@ -112,7 +112,7 @@ class Kronk
             "#{pad}#{ordered_data_string value, struct_only, indent + 1}"
           end
 
-        output << data_values.join(",\n") << "\n"
+        output << data_values.join(",\n") << "\n" unless data_values.empty?
         output << "#{" " * indent}]"
 
       else

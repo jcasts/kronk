@@ -35,11 +35,8 @@ class Kronk
 
       # Returns node name and value
       when Nokogiri::XML::Element
-        {
-          :name       => xml_node.name,
-          :attributes => attributes_for(xml_node),
-          :children   => node_value(xml_node.children)
-        }
+        [xml_node.name, attributes_for(xml_node),
+          *node_value(xml_node.children)]
       end
     end
 

@@ -42,7 +42,8 @@ class Kronk
     'js'      => 'JSON',
     'json'    => 'JSON',
     'plist'   => 'PlistParser',
-    'xml'     => 'XMLParser'
+    'xml'     => 'XMLParser',
+    'html'    => 'RawXMLParser'
   }
 
 
