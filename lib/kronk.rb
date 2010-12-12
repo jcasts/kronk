@@ -26,6 +26,7 @@ class Kronk
   require 'kronk/request'
   require 'kronk/plist_parser'
   require 'kronk/xml_parser'
+  require 'kronk/raw_xml_parser'
 
 
   # Default config file to load. Defaults to ~/.kronk.

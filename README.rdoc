@@ -19,13 +19,15 @@ Kronk was made possible by the sponsoring of AT&T Interactive.
 
 * Support for custom data parsers and diff formatters.
 
-* Support for proxies, ssl, and http auth.
+* Support for proxies, ssl, and basic auth.
 
 * Easy-to-read output (color or ascii, line numbers, etc).
 
 == FUTURE:
 
 * Parser for html.
+
+* Cookie/session handling.
 
 * Auto-queryer with optional param randomizing.
 

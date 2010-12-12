@@ -1,7 +1,7 @@
 class Kronk
 
   ##
-  # Wrapper class for Nokogiri parser.
+  # Rails-like XML parser.
 
   class XMLParser
 
