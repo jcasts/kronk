@@ -12,6 +12,9 @@
 
 * Bugfixes:
 
+  * No longer need to explicitely specify raw mode for content types
+    with no parsers.
+
   * Updated how --prev option does cache retrieval, so cache is always
     the left side of the diff.
 
