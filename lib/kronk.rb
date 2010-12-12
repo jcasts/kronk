@@ -224,6 +224,15 @@ class Kronk
 
 
   ##
+  # Deletes all cookies from the runtime.
+  # If Kronk.run is in use, will write the change to the cookies file as well.
+
+  def self.clear_cookies!
+    @cookie_jar = CookieJar::Jar.new
+  end
+
+
+  ##
   # Returns the kronk cookie jar.
 
   def self.cookie_jar
@@ -299,11 +308,11 @@ class Kronk
       exit 1
     end
 
+    load_cookie_jar
+
     options = parse_args argv
 
     load_requires options[:requires]
-
-    load_cookie_jar
 
     at_exit do
       save_cookie_jar
@@ -465,6 +474,16 @@ Kronk runs diffs against data from live and cached http responses.
 
   HTTP Options:
       STR
+
+      opt.on('--clear-cookies', 'Delete all saved cookies') do
+        clear_cookies!
+      end
+
+
+      opt.on('--no-cookies', 'Don\'t use cookies for this session') do
+        options[:no_cookies] = true
+      end
+
 
       opt.on('-d', '--data STR', String,
              'Post data with the request') do |value|
