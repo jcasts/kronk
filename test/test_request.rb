@@ -175,6 +175,27 @@ class TestRequest < Test::Unit::TestCase
   end
 
 
+  def test_call_query
+    expect_request "GET", "http://example.com/path?foo=bar"
+    Kronk::Request.call :get, "http://example.com/path",
+      :query => {:foo => :bar}
+  end
+
+
+  def test_call_query_appended
+    expect_request "GET", "http://example.com/path?foo=bar&test=thing"
+    Kronk::Request.call :get, "http://example.com/path?foo=bar",
+      :query => {:test => :thing}
+  end
+
+
+  def test_call_query_appended_string
+    expect_request "GET", "http://example.com/path?foo=bar&test=thing"
+    Kronk::Request.call :get, "http://example.com/path?foo=bar",
+      :query => "test=thing"
+  end
+
+
   def test_call_basic_auth
     auth_opts = {:username => "user", :password => "pass"}
 
@@ -356,9 +377,7 @@ class TestRequest < Test::Unit::TestCase
 
 
   def test_build_query_non_hash
-    assert_raises ArgumentError do
-      Kronk::Request.build_query [1,2,3]
-    end
+    assert_equal [1,2,3].to_s, Kronk::Request.build_query([1,2,3])
 
     assert_equal "q[]=1&q[]=2&q[]=3", Kronk::Request.build_query([1,2,3], "q")
     assert_equal "key=val", Kronk::Request.build_query("val", "key")

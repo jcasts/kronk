@@ -201,6 +201,7 @@ class Kronk
   #
   # Supports the following options:
   # :data:: Hash/String - the data to pass to the http request
+  # :query:: Hash/String - the data to append to the http request path
   # :headers:: Hash - extra headers to pass to the request
   # :http_method:: Symbol - the http method to use; defaults to :get
   # :user_agent:: String - user agent string or alias; defaults to 'kronk'
@@ -471,6 +472,12 @@ Kronk runs diffs against data from live and cached http responses.
       opt.on('-L', '--location [NUM]', Integer,
              'Follow the location header always or num times') do |value|
         options[:follow_redirects] = value || true
+      end
+
+
+      opt.on('-?', '--query STR', String,
+             'Append query to URLs') do |value|
+        options[:query] = value
       end
 
 

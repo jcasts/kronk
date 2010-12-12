@@ -38,6 +38,7 @@ class Kronk
     # Returns the value from a url, file, or cache as a String.
     # Options supported are:
     # :data:: Hash/String - the data to pass to the http request
+    # :query:: Hash/String - the data to append to the http request path
     # :follow_redirects:: Integer/Bool - number of times to follow redirects
     # :user_agent:: String - user agent string or alias; defaults to 'kronk'
     # :auth:: Hash - must contain :username and :password; defaults to nil
@@ -135,6 +136,7 @@ class Kronk
     # Make an http request to the given uri and return a HTTPResponse instance.
     # Supports the following options:
     # :data:: Hash/String - the data to pass to the http request
+    # :query:: Hash/String - the data to append to the http request path
     # :follow_redirects:: Integer/Bool - number of times to follow redirects
     # :user_agent:: String - user agent string or alias; defaults to 'kronk'
     # :auth:: Hash - must contain :username and :password; defaults to nil
@@ -146,8 +148,6 @@ class Kronk
     # to using a post request.
 
     def self.retrieve_uri uri, options={}
-      Kronk.verbose "Retrieving URL:  #{uri}#{options[:uri_suffix]}\n"
-
       options     = options.dup
       http_method = options.delete(:http_method)
       http_method ||= options[:data] ? :post : :get
@@ -178,9 +178,13 @@ class Kronk
       uri    = "#{uri}#{suffix}" if suffix
       uri    = URI.parse uri unless URI === uri
 
-      data   = options[:data]
-      data &&= Hash === data ? build_query(data) : data.to_s
+      if options[:query]
+        query = build_query options[:query]
+        uri.query = [uri.query, query].compact.join "&"
+      end
 
+      data   = options[:data]
+      data &&= build_query data
 
       options[:headers] ||= Hash.new
       options[:headers]['User-Agent'] ||= get_user_agent options[:user_agent]
@@ -210,6 +214,8 @@ class Kronk
           req.basic_auth options[:auth][:username],
                          options[:auth][:password]
         end
+
+        Kronk.verbose "Retrieving URL:  #{uri}\n"
 
         http.request req, data
       end
@@ -256,9 +262,7 @@ class Kronk
     # Creates a query string from data.
 
     def self.build_query data, param=nil
-      raise ArgumentError,
-        "Can't convert #{data.class} to query without a param name" unless
-          Hash === data || param
+      return data.to_s unless param || Hash === data
 
       case data
       when Array
