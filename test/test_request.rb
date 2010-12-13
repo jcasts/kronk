@@ -175,6 +175,62 @@ class TestRequest < Test::Unit::TestCase
   end
 
 
+  def test_call_cookies
+    Kronk.cookie_jar.expects(:get_cookie_header).
+      with("http://example.com/request/path?foo=bar").returns "mock_cookie"
+
+    Kronk.cookie_jar.expects(:set_cookies_from_headers).
+      with("http://example.com/request/path?foo=bar", {})
+
+    expect_request "GET", "http://example.com/request/path?foo=bar",
+      :headers => {'Cookie' => "mock_cookie", 'User-Agent' => "kronk"}
+
+    resp = Kronk::Request.call :get, "http://example.com/request/path",
+            :query => "foo=bar", :headers => {'User-Agent' => "kronk"}
+  end
+
+
+  def test_call_no_cookies_found
+    Kronk.cookie_jar.expects(:get_cookie_header).
+      with("http://example.com/request/path?foo=bar").returns ""
+
+    expect_request "GET", "http://example.com/request/path?foo=bar",
+      :headers => {'User-Agent' => "kronk"}
+
+    resp = Kronk::Request.call :get, "http://example.com/request/path",
+            :query => "foo=bar", :headers => {'User-Agent' => "kronk"}
+  end
+
+
+  def test_call_no_cookies
+    Kronk.cookie_jar.expects(:get_cookie_header).
+      with("http://example.com/request/path?foo=bar").never
+
+    Kronk.cookie_jar.expects(:set_cookies_from_headers).never
+
+    expect_request "GET", "http://example.com/request/path?foo=bar",
+      :headers => {'User-Agent' => "kronk"}
+
+    resp = Kronk::Request.call :get, "http://example.com/request/path",
+            :query => "foo=bar", :headers => {'User-Agent' => "kronk"},
+            :no_cookies => true
+  end
+
+
+  def test_call_cookies_already_set
+    Kronk.cookie_jar.expects(:get_cookie_header).
+      with("http://example.com/request/path?foo=bar").never
+
+    expect_request "GET", "http://example.com/request/path?foo=bar",
+      :headers => {'User-Agent' => "kronk", 'Cookie' => "mock_cookie"}
+
+    resp = Kronk::Request.call :get, "http://example.com/request/path",
+            :query => "foo=bar",
+            :headers => {'User-Agent' => "kronk", 'Cookie' => "mock_cookie"},
+            :no_cookies => true
+  end
+
+
   def test_call_query
     expect_request "GET", "http://example.com/path?foo=bar"
     Kronk::Request.call :get, "http://example.com/path",
