@@ -189,7 +189,7 @@ class Kronk
       options[:headers] ||= Hash.new
       options[:headers]['User-Agent'] ||= get_user_agent options[:user_agent]
 
-      unless options[:no_cookies] || options[:headers]['Cookie']
+      unless options[:headers]['Cookie'] || !use_cookies?(options)
         cookie = Kronk.cookie_jar.get_cookie_header uri.to_s
         options[:headers]['Cookie'] = cookie unless cookie.empty?
       end
@@ -225,8 +225,8 @@ class Kronk
         http.request req, data
       end
 
-      Kronk.cookie_jar.set_cookies_from_headers uri.to_s, resp.to_hash unless
-        options[:no_cookies]
+      Kronk.cookie_jar.set_cookies_from_headers uri.to_s, resp.to_hash if
+        use_cookies? options
 
       resp.extend Response::Helpers
 
@@ -234,6 +234,15 @@ class Kronk
       resp.instance_variable_set "@raw", r_resp
 
       resp
+    end
+
+
+    ##
+    # Checks if cookies should be used and set.
+
+    def self.use_cookies? options
+      return !options[:no_cookies] if options.has_key? :no_cookies
+      Kronk.config[:use_cookies]
     end
 
 

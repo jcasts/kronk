@@ -217,6 +217,45 @@ class TestRequest < Test::Unit::TestCase
   end
 
 
+  def test_call_no_cookies_config
+    old_config = Kronk.config[:use_cookies]
+    Kronk.config[:use_cookies] = false
+
+    Kronk.cookie_jar.expects(:get_cookie_header).
+      with("http://example.com/request/path?foo=bar").never
+
+    Kronk.cookie_jar.expects(:set_cookies_from_headers).never
+
+    expect_request "GET", "http://example.com/request/path?foo=bar",
+      :headers => {'User-Agent' => "kronk"}
+
+    resp = Kronk::Request.call :get, "http://example.com/request/path",
+            :query => "foo=bar", :headers => {'User-Agent' => "kronk"}
+
+    Kronk.config[:use_cookies] = old_config
+  end
+
+
+  def test_call_no_cookies_config_override
+    old_config = Kronk.config[:use_cookies]
+    Kronk.config[:use_cookies] = false
+
+    Kronk.cookie_jar.expects(:get_cookie_header).
+      with("http://example.com/request/path?foo=bar").returns ""
+
+    Kronk.cookie_jar.expects(:set_cookies_from_headers)
+
+    expect_request "GET", "http://example.com/request/path?foo=bar",
+      :headers => {'User-Agent' => "kronk"}
+
+    resp = Kronk::Request.call :get, "http://example.com/request/path",
+            :query => "foo=bar", :headers => {'User-Agent' => "kronk"},
+            :no_cookies => false
+
+    Kronk.config[:use_cookies] = old_config
+  end
+
+
   def test_call_cookies_already_set
     Kronk.cookie_jar.expects(:get_cookie_header).
       with("http://example.com/request/path?foo=bar").never

@@ -85,6 +85,7 @@ class Kronk
     :show_lines     => false,
     :cache_file     => DEFAULT_CACHE_FILE,
     :cookies_file   => DEFAULT_COOKIES_FILE,
+    :use_cookies    => true,
     :requires       => [],
     :uri_options    => {},
     :user_agents    => USER_AGENTS.dup

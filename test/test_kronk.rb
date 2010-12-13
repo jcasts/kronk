@@ -14,6 +14,7 @@ class TestKronk < Test::Unit::TestCase
       :cookies_file => Kronk::DEFAULT_COOKIES_FILE,
       :diff_format  => :ascii_diff,
       :show_lines   => false,
+      :use_cookies  => true,
       :requires     => [],
       :uri_options  => {},
       :user_agents  => Kronk::USER_AGENTS
@@ -33,6 +34,7 @@ class TestKronk < Test::Unit::TestCase
       :cache_file  => Kronk::DEFAULT_CACHE_FILE,
       :cookies_file => Kronk::DEFAULT_COOKIES_FILE,
       :show_lines  => false,
+      :use_cookies => true,
       :requires    => [],
       :uri_options => {'example.com' => {:parser => 'JSON'}},
       :user_agents => {:win_ie6 => 'piece of crap browser'},
@@ -57,6 +59,7 @@ class TestKronk < Test::Unit::TestCase
       :cookies_file => Kronk::DEFAULT_COOKIES_FILE,
       :requires    => [],
       :show_lines  => false,
+      :use_cookies => true,
       :ignore_headers => ["Content-Type"],
       :uri_options => {'example.com' => {:parser => 'JSON'}},
       :user_agents =>
