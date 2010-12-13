@@ -11,4 +11,16 @@ lib/kronk/plist_parser.rb
 lib/kronk/request.rb
 lib/kronk/response.rb
 lib/kronk/xml_parser.rb
+test/mocks/200_response.json
+test/mocks/200_response.plist
+test/mocks/200_response.txt
+test/mocks/200_response.xml
+test/mocks/301_response.txt
+test/mocks/302_response.txt
+test/test_data_set.rb
+test/test_diff.rb
+test/test_helper.rb
 test/test_kronk.rb
+test/test_request.rb
+test/test_response.rb
+test/test_xml_parser.rb

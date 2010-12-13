@@ -151,6 +151,62 @@ class TestKronk < Test::Unit::TestCase
   end
 
 
+  def test_load_cookie_jar
+    Kronk.clear_cookies!
+    mock_cookie_jar = YAML.load_file("test/mocks/cookies.yml")
+
+    File.expects(:file?).with(Kronk::DEFAULT_COOKIES_FILE).returns true
+    YAML.expects(:load_file).with(Kronk::DEFAULT_COOKIES_FILE).
+      returns mock_cookie_jar
+
+    cookie_jar = Kronk.load_cookie_jar
+
+    assert CookieJar::Jar === cookie_jar
+    assert !cookie_jar.get_cookies("http://rubygems.org/").empty?
+  end
+
+
+  def test_load_cookie_jar_no_file
+    Kronk.clear_cookies!
+    mock_cookie_jar = YAML.load_file("test/mocks/cookies.yml")
+
+    File.expects(:file?).with(Kronk::DEFAULT_COOKIES_FILE).returns false
+    YAML.expects(:load_file).with(Kronk::DEFAULT_COOKIES_FILE).never
+
+    cookie_jar = Kronk.load_cookie_jar
+    assert cookie_jar.get_cookies("http://rubygems.org/").empty?
+  end
+
+
+  def test_save_cookie_jar
+    mock_file = mock "mockfile"
+    mock_file.expects(:write).with Kronk.cookie_jar.to_yaml
+    File.expects(:open).with(Kronk::DEFAULT_COOKIES_FILE, "w").yields mock_file
+
+    Kronk.save_cookie_jar
+  end
+
+
+  def test_clear_cookies
+    mock_cookie_jar = YAML.load_file("test/mocks/cookies.yml")
+
+    File.expects(:file?).with(Kronk::DEFAULT_COOKIES_FILE).returns true
+    YAML.expects(:load_file).with(Kronk::DEFAULT_COOKIES_FILE).
+      returns mock_cookie_jar
+
+    assert !Kronk.cookie_jar.get_cookies("http://rubygems.org/").empty?
+
+    Kronk.clear_cookies!
+
+    assert Kronk.cookie_jar.get_cookies("http://rubygems.org/").empty?
+  end
+
+
+  def test_cookie_jar
+    assert_equal Kronk.instance_variable_get("@cookie_jar"), Kronk.cookie_jar
+  end
+
+
   def test_compare_data
     diff = Kronk.compare "test/mocks/200_response.json",
                          "test/mocks/200_response.xml",
