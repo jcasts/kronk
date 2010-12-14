@@ -31,9 +31,9 @@ class Kronk
     ##
     # Modify the data object by passing inclusive or exclusive data paths.
     # Supports the following options:
-    # :only_data:: String/Array - keep data with that matches the paths
+    # :only_data:: String/Array - keep data that matches the paths
     # :only_data_with:: String/Array - keep data with a matched child
-    # :ignore_data:: String/Array - remove data with that matches the paths
+    # :ignore_data:: String/Array - remove data that matches the paths
     # :ignore_data_with:: String/Array - remove data with a matched child
     #
     # Note: the data is processed in the following order:
