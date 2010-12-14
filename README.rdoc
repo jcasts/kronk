@@ -198,7 +198,7 @@ are supported:
 
 * | effectively works as an "OR" character, matches /^val1|val2$/
 
-* = is used to match values and may be used in conjuction with a key or not.
+* \= is used to match values and may be used in conjuction with a key or not.
 
 * Parentheses are ok to use if in conjunction with other special characters
   for a given path item, such as: /path(1|2)
