@@ -235,7 +235,10 @@ class Kronk
 
     ##
     # Returns a formatted output as a string.
-    # Custom formats may be achieved by passing a block.
+    # Supported options are:
+    # :join_char:: String - The string used to join lines; default "\n"
+    # :show_lines:: Boolean - Insert line numbers or not; default @show_lines
+    # :formatter:: Object - The formatter to use; default @formatter
 
     def formatted options={}
       options = {
