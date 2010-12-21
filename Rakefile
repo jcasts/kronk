@@ -17,6 +17,7 @@ Hoe.spec 'kronk' do
   self.extra_deps << ['i18n',          '~>0.5']
   self.extra_deps << ['activesupport', '>=2.0.0']
   self.extra_deps << ['cookiejar',     '~>0.3.0']
+  self.extra_deps << ['rack',          '~>1.0']
 
   self.extra_dev_deps << ['mocha', '~>0.9.10']
 end

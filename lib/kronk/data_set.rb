@@ -5,6 +5,13 @@ class Kronk
 
   class DataSet
 
+    # Deep merge proc for recursive Hash merging.
+    DEEP_MERGE =
+      proc do |key,v1,v2|
+        Hash === v1 && Hash === v2 ? v1.merge(v2,&DEEP_MERGE) : v2
+      end
+
+
     attr_accessor :data
 
     def initialize data

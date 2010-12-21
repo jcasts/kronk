@@ -3,6 +3,7 @@ require 'plist'
 require 'json'
 require 'nokogiri'
 require 'cookiejar'
+require 'rack'
 
 # Support for new and old versions of ActiveSupport
 begin
@@ -175,15 +176,64 @@ class Kronk
 
 
   ##
-  # Returns config-defined options for a given uri.
-  # Returns empty Hash if none found.
+  # Returns merged config-defined options for a given uri.
+  # Values in cmd_opts take precedence.
+  # Returns cmd_opts Hash if none found.
 
-  def self.options_for_uri uri
+  def self.merge_options_for_uri uri, cmd_opts={}
+    out_opts = Hash.new.merge cmd_opts
+
     config[:uri_options].each do |key, options|
-      return options if uri == key || uri =~ %r{#{key}}
+      next unless (uri == key || uri =~ %r{#{key}}) && Hash === options
+
+      options.each do |key, val|
+        if !out_opts[key]
+          out_opts[key] = val
+          next
+        end
+
+
+        case key
+
+        # Hash or uri query String
+        when :data, :query
+          val = Rack::Utils.parse_nested_query val if String === val
+
+          out_opts[key] = Rack::Utils.parse_nested_query out_opts[key] if
+            String === out_opts[key]
+
+          out_opts[key] = val.merge out_opts[key], &DataSet::DEEP_MERGE
+
+        # Hashes
+        when :headers, :auth
+          out_opts[key] = val.merge out_opts[key]
+
+        # Proxy hash or String
+        when :proxy
+          if Hash === val && Hash === out_opts[key]
+            out_opts[key] = val.merge out_opts[key]
+
+          elsif Hash === val && String === out_opts[key]
+            val[:address] = out_opts[key]
+            out_opts[key] = val
+
+          elsif String === val && Hash === out_opts[key]
+            out_opts[key][:address] ||= val
+          end
+
+        # Response headers - Boolean, String, or Array
+        when :with_headers
+          next if out_opts[key] == true || out_opts[key] && val == true
+          out_opts[key] = [*out_opts[key]] | [*val]
+
+        # String or Array
+        when :only_data, :only_data_with, :ignore_data, :ignore_data_with
+          out_opts[key] = [*out_opts[key]] | [*val]
+        end
+      end
     end
 
-    Hash.new
+    out_opts
   end
 
 
@@ -255,9 +305,11 @@ class Kronk
   # :auth:: Hash - must contain :username and :password; defaults to nil
   # :proxy:: Hash/String - http proxy to use; defaults to nil
   # :only_data:: String/Array - extracts the data from given data paths
+  # :only_data_with:: String/Array - extracts the data from given parent paths
   # :ignore_data:: String/Array - defines which data points to exclude
+  # :ignore_data_with:: String/Array - defines which parent data to exclude
   # :with_headers:: Bool/String/Array - defines which headers to include
-  # :parser:: Object - The parser to use for the body; default nil
+  # :parser:: Object/String - The parser to use for the body; default nil
   # :raw:: Bool - run diff on raw strings
   #
   # Returns a diff object.
@@ -275,7 +327,7 @@ class Kronk
   # See Kronk.compare for supported options.
 
   def self.retrieve_data_string query, options={}
-    options = options.merge options_for_uri(query)
+    options = merge_options_for_uri query, options
 
     resp = Request.retrieve query, options
 

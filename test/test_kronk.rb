@@ -119,17 +119,180 @@ class TestKronk < Test::Unit::TestCase
   end
 
 
-  def test_options_for_uri
-    old_uri_opts = Kronk.config[:uri_options].dup
-    Kronk.config[:uri_options] = {
-      'example'     => 'options1',
-      'example.com' => 'options2'
+  def test_merge_options_for_uri
+    with_uri_options do
+      assert_equal mock_uri_options['example'],
+        Kronk.merge_options_for_uri("http://example.com/path")
+
+      assert_equal Hash.new,
+        Kronk.merge_options_for_uri("http://thing.com/path")
+    end
+  end
+
+
+  def test_merge_options_for_uri_query
+    data = {
+      "add" => "this",
+      "foo" => {
+        "bar1" => "one",
+        "bar2" => 2,
+        "bar3" => "three"},
+      "key"=>"otherval"}
+
+    expected = {:query => data, :data => data}
+
+    with_uri_options do
+      new_data = {
+        "add" => "this",
+        "foo" => {'bar2' => 2, 'bar3' => "three"},
+        "key" => "otherval"
+      }
+
+      %w{uri_query hash_query}.each do |qtype|
+        opts = Kronk.merge_options_for_uri("http://#{qtype}.com",
+                :query => data, :data => data)
+
+        assert_equal expected, opts
+      end
+
+      opts = Kronk.merge_options_for_uri("http://uri_query.com")
+      assert_equal mock_uri_options['uri_query'], opts
+    end
+  end
+
+
+  def test_merge_options_for_uri_headers
+    with_uri_options do
+      opts = Kronk.merge_options_for_uri("http://headers.example.com",
+              :headers => {'hdr2' => 2, 'hdr3' => 3})
+
+      expected = {
+        :headers => {
+          'hdr1' => 'one',
+          'hdr2' => 2,
+          'hdr3' => 3
+        },
+        :parser => "XMLParser"
+      }
+
+      assert_equal expected, opts
+    end
+  end
+
+
+  def test_merge_options_for_uri_auth
+    with_uri_options do
+      opts = Kronk.merge_options_for_uri("http://auth.example.com",
+              :auth => {:username => "bob"})
+
+      expected = {
+        :auth => {
+          :username => "bob",
+          :password => "pass"
+        },
+        :parser => "XMLParser"
+      }
+
+      assert_equal expected, opts
+    end
+  end
+
+
+  def test_merge_options_for_uri_proxy
+    with_uri_options do
+      expected = {
+        :proxy => {
+          :address  => "proxy.com",
+          :port     => 1234,
+          :username => "user",
+          :password => "pass"
+        }
+      }
+
+      opts = Kronk.merge_options_for_uri("http://proxy.com",
+              :proxy => "proxy.com")
+
+      assert_equal expected, opts
+
+      opts = Kronk.merge_options_for_uri("http://proxy.com",
+              :proxy => {:address => "proxy.com"})
+
+      assert_equal expected, opts
+    end
+  end
+
+
+  def test_merge_options_for_uri_str_proxy
+    with_uri_options do
+      expected = {
+        :proxy => {
+          :address  => "someproxy.com",
+          :username => "user",
+          :password => "pass"
+        }
+      }
+
+      opts = Kronk.merge_options_for_uri("http://strprox.com",
+              :proxy => {:username => "user", :password => "pass"})
+
+      assert_equal expected, opts
+
+      opts = Kronk.merge_options_for_uri("http://strprox.com",
+              :proxy => "proxy.com")
+
+      assert_equal "proxy.com", opts[:proxy]
+    end
+  end
+
+
+  def test_merge_options_for_uri_with_headers
+    with_uri_options do
+      %w{withhdrs withstrhdrs withtruehdrs}.each do |type|
+        opts = Kronk.merge_options_for_uri "http://#{type}.com",
+                :with_headers => true
+
+        assert_equal true, opts[:with_headers]
+      end
+    end
+  end
+
+
+  def test_merge_options_for_uri_with_headers_arr
+    with_uri_options do
+      %w{withhdrs withstrhdrs}.each do |type|
+        opts = Kronk.merge_options_for_uri "http://#{type}.com",
+                :with_headers => %w{hdr2 hdr3}
+
+        assert_equal %w{hdr1 hdr2 hdr3}.sort, opts[:with_headers].sort
+      end
+
+      opts = Kronk.merge_options_for_uri "http://withtruehdrs.com",
+              :with_headers => %w{hdr2 hdr3}
+
+      assert_equal %w{hdr2 hdr3}, opts[:with_headers]
+    end
+  end
+
+
+  def test_merge_options_for_uri_data_paths
+    expected = {
+      :only_data        => %w{path1 path2 path3},
+      :only_data_with   => %w{only1 only2},
+      :ignore_data      => "ign1",
+      :ignore_data_with => %w{ign2 ign3}
     }
 
-    assert_equal 'options1', Kronk.options_for_uri("http://example.com/path")
-    assert_equal Hash.new, Kronk.options_for_uri("http://thing.com/path")
+    with_uri_options do
+      opts = Kronk.merge_options_for_uri "http://focus_data.com",
+              :only_data        => %w{path2 path3},
+              :only_data_with   => "only2",
+              :ignore_data_with => %w{ign2 ign3}
 
-    Kronk.config[:uri_options] = old_uri_opts
+      opts[:only_data].sort!
+      opts[:only_data_with].sort!
+
+      assert_equal expected, opts
+    end
   end
 
 
@@ -325,5 +488,81 @@ STR
     assert_equal %w{not_parents}, options[:ignore_data_with]
 
     assert_equal %w{this is --argv}, argv
+  end
+
+
+  private
+
+  def mock_uri_options
+    {
+      'example'     => {
+        :parser => "XMLParser"
+      },
+      'example.com' => {
+        :parser => "PlistParser"
+      },
+      'uri_query'   => {
+        :query => "foo[bar1]=one&foo[bar2]=two&key=val",
+        :data  => "foo[bar1]=one&foo[bar2]=two&key=val"
+      },
+      'hash_query'  => {
+        :query => {
+          'foo' => {'bar1'=>'one', 'bar2'=>'two'},
+          'key' => "val"
+        },
+        :data  => {
+          'foo' => {'bar1'=>'one', 'bar2'=>'two'},
+          'key' => "val"
+        }
+      },
+      'headers'     => {
+        :headers => {
+          'hdr1' => 'one',
+          'hdr2' => 'two'
+        }
+      },
+      'auth'        => {
+        :auth => {
+          :username => "user",
+          :password => "pass"
+        }
+      },
+      'proxy'       => {
+        :proxy => {
+          :username => "user",
+          :password => "pass",
+          :address  => "someproxy.com",
+          :port     => 1234
+        }
+      },
+      'strprox'     => {
+        :proxy => "someproxy.com"
+      },
+      'withhdrs'    => {
+        :with_headers => %w{hdr1 hdr2 hdr3}
+      },
+      'withstrhdrs' => {
+        :with_headers => "hdr1"
+      },
+      'withtruehdrs' => {
+        :with_headers => true
+      },
+      'focus_data'   => {
+        :only_data      => %w{path1 path2},
+        :only_data_with => "only1",
+        :ignore_data    => "ign1"
+      }
+    }
+  end
+
+
+  def with_uri_options
+    old_uri_opts = Kronk.config[:uri_options].dup
+    Kronk.config[:uri_options] = mock_uri_options
+
+    yield if block_given?
+
+  ensure
+    Kronk.config[:uri_options] = old_uri_opts
   end
 end
