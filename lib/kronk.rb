@@ -451,6 +451,12 @@ Kronk runs diffs against data from live and cached http responses.
       end
 
 
+      opt.on('--config STR', String,
+             'Load the given Kronk config file') do |value|
+        load_config value
+      end
+
+
       opt.on('--format STR', String,
              'Use a custom diff formatter') do |value|
         config[:diff_format] = value
