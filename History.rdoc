@@ -1,3 +1,15 @@
+=== 1.1.1 / 2010-12
+
+* Enhancements:
+
+  * Added support for loading alternate Kronk configs from the command line.
+
+* Bugfixes:
+
+  * Changed uri options config to allow matching of multiple keys.
+
+  * Implementing smart merging of uri options with command line options.
+
 === 1.1.0 / 2010-12-12
 
 * Enhancements:
