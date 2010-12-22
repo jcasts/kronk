@@ -358,7 +358,7 @@ class Kronk
       $stderr << "\nNo config file was found.\n\n"
       $stderr << "Created default config in #{DEFAULT_CONFIG_FILE}\n"
       $stderr << "Edit file if necessary and try again.\n"
-      exit 1
+      exit 2
     end
 
     load_cookie_jar
@@ -377,8 +377,13 @@ class Kronk
 
     if uri1 && uri2
       diff = compare uri1, uri2, options
-      puts diff.formatted
-      verbose "\n\nFound #{diff.count} diff(s).\n"
+      puts "#{diff.formatted}\n" unless config[:brief]
+
+      if config[:verbose] || config[:brief]
+        $stdout << "Found #{diff.count} diff(s).\n"
+      end
+
+      exit 1 if diff.count > 0
 
     else
       out = retrieve_data_string uri1, options
@@ -454,6 +459,11 @@ Kronk runs diffs against data from live and cached http responses.
       opt.on('--config STR', String,
              'Load the given Kronk config file') do |value|
         load_config value
+      end
+
+
+      opt.on('-q', '--brief', 'Output only whether URI responses differ') do
+        config[:brief] = true
       end
 
 
