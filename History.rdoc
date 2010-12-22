@@ -2,6 +2,8 @@
 
 * Enhancements:
 
+  * Added diff-like brief option.
+
   * Added support for loading alternate Kronk configs from the command line.
 
 * Bugfixes:
