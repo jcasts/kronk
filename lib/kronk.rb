@@ -183,8 +183,8 @@ class Kronk
   def self.merge_options_for_uri uri, cmd_opts={}
     out_opts = Hash.new.merge cmd_opts
 
-    config[:uri_options].each do |key, options|
-      next unless (uri == key || uri =~ %r{#{key}}) && Hash === options
+    config[:uri_options].each do |matcher, options|
+      next unless (uri == matcher || uri =~ %r{#{matcher}}) && Hash === options
 
       options.each do |key, val|
         if !out_opts[key]
@@ -268,8 +268,8 @@ class Kronk
 
   def self.save_cookie_jar file=nil
     file ||= config[:cookies_file]
-    File.open(file, "w") do |file|
-      file.write @cookie_jar.to_yaml
+    File.open(file, "w") do |f|
+      f.write @cookie_jar.to_yaml
     end
   end
 

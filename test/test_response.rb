@@ -258,7 +258,7 @@ class TestResponse < Test::Unit::TestCase
   end
 
 
-  def test_selective_data_multiple_only_data
+  def test_selective_data_multiple_ignore_data
     expected = JSON.parse @json_resp.body
     expected['business'].delete 'id'
     expected.delete 'request_id'

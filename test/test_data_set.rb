@@ -47,9 +47,9 @@ class TestDataSet < Test::Unit::TestCase
   end
 
 
-  def test_modify_only_data
-    data = @dataset_mock.modify :only_data => "subs/1"
-    assert_equal({"subs" => [nil, "b"]}, data)
+  def test_modify_only_data_with
+    data = @dataset_mock.modify :only_data_with => "subs/1"
+    assert_equal({"subs" => ["a", "b"]}, data)
   end
 
 
