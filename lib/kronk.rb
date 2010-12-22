@@ -20,7 +20,7 @@ require 'yaml'
 class Kronk
 
   # This gem's version.
-  VERSION = '1.1.0'
+  VERSION = '1.1.1'
 
 
   require 'kronk/data_set'
