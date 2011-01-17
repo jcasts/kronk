@@ -1,3 +1,5 @@
+Encoding.default_internal = "UTF-8"
+
 class Kronk
 
   ##
@@ -23,7 +25,7 @@ class Kronk
       resp.extend Helpers
 
       r_req, r_resp, r_bytes = read_raw_from socket_io
-      resp.instance_variable_set "@raw", r_resp
+      resp.raw = r_resp
       resp.instance_variable_set "@read", true
       resp.instance_variable_set "@socket", true
 
@@ -69,6 +71,20 @@ class Kronk
     # Helper methods for Net::HTTPResponse objects.
 
     module Helpers
+
+      ##
+      # Assigns the raw http response value.
+
+      def raw= value
+        if RUBY_VERSION =~ /^1.9/ && !value.valid_encoding?
+          value.encode! "ASCII-8BIT", :invalid => :replace,
+                                      :undef   => :replace,
+                                      :replace => "?"
+        end
+
+        @raw = value
+      end
+
 
       ##
       # Returns the raw http response.

@@ -231,7 +231,7 @@ class Kronk
       resp.extend Response::Helpers
 
       r_req, r_resp, r_bytes = Response.read_raw_from socket_io
-      resp.instance_variable_set "@raw", r_resp
+      resp.raw = r_resp
 
       resp
     end
