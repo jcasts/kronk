@@ -1,5 +1,3 @@
-Encoding.default_internal = "UTF-8"
-
 class Kronk
 
   ##
@@ -76,7 +74,7 @@ class Kronk
       # Assigns the raw http response value.
 
       def raw= value
-        if RUBY_VERSION =~ /^1.9/ && !value.valid_encoding?
+        if value.respond_to?(:valid_encoding?) && !value.valid_encoding?
           value.encode! "ASCII-8BIT", :invalid => :replace,
                                       :undef   => :replace,
                                       :replace => "?"
