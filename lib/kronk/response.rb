@@ -194,14 +194,14 @@ class Kronk
         data = nil
 
         unless options[:no_body]
-          data = DataSet.new(parsed_body(options[:parser])).modify options
+          data = parsed_body options[:parser]
         end
 
         if options[:with_headers]
           data = [parsed_header(options[:with_headers]), data].compact
         end
 
-        data
+        DataSet.new(data).modify options
       end
     end
   end
