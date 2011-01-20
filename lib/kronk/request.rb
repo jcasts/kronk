@@ -58,7 +58,7 @@ class Kronk
         end
 
       begin
-        File.open(options[:cache_response], "w+") do |file|
+        File.open(options[:cache_response], "wb+") do |file|
           file.write resp.raw
         end if options[:cache_response]
       rescue => e
@@ -90,7 +90,7 @@ class Kronk
       path = Kronk::DEFAULT_CACHE_FILE if path == :cache
       resp = nil
 
-      File.open(path, "r") do |file|
+      File.open(path, "rb") do |file|
 
         # On windows, read the full file and insert contents into
         # a StringIO to avoid failures with IO#read_nonblock

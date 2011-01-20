@@ -82,7 +82,7 @@ class TestRequest < Test::Unit::TestCase
 
 
   def test_retrieve_file_cache
-    File.expects(:open).with(Kronk::DEFAULT_CACHE_FILE, "r").
+    File.expects(:open).with(Kronk::DEFAULT_CACHE_FILE, "rb").
       yields StringIO.new(mock_200_response)
 
     resp = Kronk::Request.retrieve_file :cache
