@@ -9,6 +9,7 @@ class Kronk
     # Alias for Plist.parse_xml
 
     def self.parse plist
+      require 'plist'
       Plist.parse_xml plist
     end
   end

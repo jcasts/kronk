@@ -6,10 +6,27 @@ class Kronk
   class XMLParser
 
     ##
+    # Load required gems.
+
+    def self.require_gems
+      require 'nokogiri'
+
+      # Support for new and old versions of ActiveSupport
+      begin
+        require 'active_support/inflector'
+      rescue LoadError => e
+        raise unless e.message =~ /-- active_support/
+        require 'activesupport'
+      end
+    end
+
+    ##
     # Takes an xml string and returns a data hash.
     # Ignores blank spaces between tags.
 
     def self.parse str
+      require_gems
+
       root_node = Nokogiri.XML str do |config|
         config.default_xml.noblanks
       end

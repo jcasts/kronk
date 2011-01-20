@@ -467,7 +467,7 @@ class TestRequest < Test::Unit::TestCase
     }
 
     assert_equal "a[]=one&a[]=two&b[b1][]=1&b[b1][]=2&b[b2]=test&foo=bar",
-                  Kronk::Request.build_query(hash)
+                  Kronk::Request.build_query(hash).split("&").sort.join("&")
   end
 
 

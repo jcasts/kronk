@@ -1,17 +1,8 @@
 require 'rubygems'
-require 'plist'
+
 require 'json'
-require 'nokogiri'
 require 'cookiejar'
 require 'rack'
-
-# Support for new and old versions of ActiveSupport
-begin
-  require 'active_support/inflector'
-rescue LoadError => e
-  raise unless e.message =~ /-- active_support/
-  require 'activesupport'
-end
 
 require 'net/https'
 require 'optparse'
@@ -328,9 +319,9 @@ class Kronk
   #
   # Returns a diff object.
 
-  def self.compare query1, query2, options={}
-    str1 = retrieve_data_string query1, options
-    str2 = retrieve_data_string query2, options
+  def self.compare uri1, uri2, options={}
+    str1 = retrieve_data_string uri1, options
+    str2 = retrieve_data_string uri2, options
 
     Diff.new str1, str2
   end
@@ -340,19 +331,21 @@ class Kronk
   # Return a data string, parsed or raw.
   # See Kronk.compare for supported options.
 
-  def self.retrieve_data_string query, options={}
-    options = merge_options_for_uri query, options
+  def self.retrieve_data_string uri, options={}
+    options = merge_options_for_uri uri, options
 
-    resp = Request.retrieve query, options
+    resp = Request.retrieve uri, options
 
     if options[:raw]
       resp.selective_string options
+
     else
       begin
         data = resp.selective_data options
         Diff.ordered_data_string data, options[:struct]
+
       rescue Response::MissingParser
-        verbose "Warning: No parser for #{resp['Content-Type']} [#{query}]"
+        verbose "Warning: No parser for #{resp['Content-Type']} [#{uri}]"
         resp.selective_string options
       end
     end
@@ -515,6 +508,11 @@ Kronk runs diffs against data from live and cached http responses.
       end
 
 
+      opt.on('--irb', 'Start an IRB console') do
+        config[:irb] = true
+      end
+
+
       opt.on('--lines', 'Show line numbers') do
         config[:show_lines] = true
       end
@@ -650,13 +648,15 @@ Kronk runs diffs against data from live and cached http responses.
     options[:uris].concat argv
     options[:uris].slice!(2..-1)
 
-    if options[:uris].empty?
-      $stderr << "\nError: You must enter at least one URI\n\n"
-      $stderr << opts.to_s
-      exit 1
-    end
+    raise OptionParser::MissingArgument, "You must enter at least one URI" if
+      options[:uris].empty?
 
     options
+
+  rescue => e
+    $stderr << "\nError: #{e.message}\n"
+    $stderr << "See 'kronk --help' for usage\n\n"
+    exit 1
   end
 
 
