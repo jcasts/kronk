@@ -22,12 +22,6 @@ class Kronk
   end
 
 
-  begin
-    require 'Win32/Console/ANSI' if windows?
-  rescue LoadError
-    puts "Warning: You must gem install win32console to use color on Windows"
-  end
-
   require 'kronk/data_set'
   require 'kronk/diff'
   require 'kronk/response'
