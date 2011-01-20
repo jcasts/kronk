@@ -6,6 +6,7 @@ class Kronk
   class Request
 
 
+    # Raised when the URI was not resolvable.
     class NotFoundError < Exception; end
 
     ##
@@ -90,6 +91,12 @@ class Kronk
       resp = nil
 
       File.open(path, "r") do |file|
+
+        # On windows, read the full file and insert contents into
+        # a StringIO to avoid failures with IO#read_nonblock
+        file = StringIO.new file.read if
+          RUBY_PLATFORM.downcase =~ /mswin|mingw|cygwin/
+
         begin
           resp = Response.read_new file
 
