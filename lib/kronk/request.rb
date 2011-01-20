@@ -94,8 +94,7 @@ class Kronk
 
         # On windows, read the full file and insert contents into
         # a StringIO to avoid failures with IO#read_nonblock
-        file = StringIO.new file.read if
-          RUBY_PLATFORM.downcase =~ /mswin|mingw|cygwin/
+        file = StringIO.new file.read if Kronk.windows?
 
         begin
           resp = Response.read_new file
