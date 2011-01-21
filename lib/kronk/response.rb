@@ -21,48 +21,11 @@ class Kronk
       end
 
       resp.extend Helpers
-
-      r_req, r_resp, r_bytes = read_raw_from socket_io
-      resp.raw = r_resp
-      resp.instance_variable_set "@read", true
-      resp.instance_variable_set "@socket", true
-
-      resp.instance_variable_set "@body", resp.raw.split("\r\n\r\n",2)[1] if
-        !resp.body
+      resp.set_helper_attribs socket_io, true, true
 
       resp
     end
 
-
-    ##
-    # Read the raw response from a debug_output instance and return an array
-    # containing the raw request, response, and number of bytes received.
-
-    def self.read_raw_from debug_io
-      req = nil
-      resp = ""
-      bytes = nil
-
-      debug_io.rewind
-      output = debug_io.read.split "\n"
-
-      if output.first =~ %r{<-\s(.*)}
-        req = instance_eval $1
-        output.delete_at 0
-      end
-
-      if output.last =~ %r{read (\d+) bytes}
-        bytes = $1.to_i
-        output.delete_at(-1)
-      end
-
-      output.map do |line|
-        next unless line[0..2] == "-> "
-        resp << instance_eval(line[2..-1])
-      end
-
-      [req, resp, bytes]
-    end
 
 
     ##
@@ -71,15 +34,80 @@ class Kronk
     module Helpers
 
       ##
-      # Assigns the raw http response value. Sets the encoding to binary
-      # if the encoding is invalid in Ruby 1.9.x
+      # Read the raw response from a debug_output instance and return an array
+      # containing the raw request, response, and number of bytes received.
 
-      def raw= value
-        if value.respond_to?(:valid_encoding?) && !value.valid_encoding?
-          value.force_encoding "binary"
+      def read_raw_from debug_io
+        req = nil
+        resp = ""
+        bytes = nil
+
+        debug_io.rewind
+        output = debug_io.read.split "\n"
+
+        if output.first =~ %r{<-\s(.*)}
+          req = instance_eval $1
+          output.delete_at 0
         end
 
-        @raw = value
+        if output.last =~ %r{read (\d+) bytes}
+          bytes = $1.to_i
+          output.delete_at(-1)
+        end
+
+        output.map do |line|
+          next unless line[0..2] == "-> "
+          resp << instance_eval(line[2..-1])
+        end
+
+        [req, resp, bytes]
+      end
+
+
+      ##
+      # Instantiates helper attributes from the debug socket io.
+
+      def set_helper_attribs socket_io, socket=nil, body_read=nil
+        @raw      = udpate_encoding read_raw_from(socket_io)[1]
+
+        @read     = body_read unless body_read.nil?
+        @socket ||= socket
+        @body   ||= @raw.split("\r\n\r\n",2)[1]
+
+        udpate_encoding @body
+
+        puts "#{@raw.length} - #{@body.length}" if
+          @raw.length == 0 && @body.length != 0
+        self
+      end
+
+
+      ##
+      # Returns the encoding provided in the Content-Type header or
+      # "binary" if charset is unavailable.
+      # Returns "utf-8" if no content type header is missing.
+
+      def encoding
+        content_types = self.to_hash["content-type"]
+
+        return "utf-8" if !content_types
+
+        content_types.each do |c_type|
+          return $2 if c_type =~ /(^|;\s?)charset=(.*?)\s*(;|$)/
+        end
+
+        "binary"
+      end
+
+
+      ##
+      # Assigns self.encoding to the passed string if
+      # it responds to 'force_encoding'.
+      # Returns the string given with the new encoding.
+
+      def udpate_encoding str
+        str.force_encoding self.encoding if str.respond_to? :force_encoding
+        str
       end
 
 
@@ -213,10 +241,15 @@ class Kronk
 
     attr_accessor :body, :code
 
-    def initialize body
+    def initialize body, file_ext=nil
       @body = body
       @raw  = body
-      @header = {}
+
+      encoding = body.encoding rescue "UTF-8"
+
+      @header = {
+        'Content-Type' => ["#{file_ext}; charset=#{encoding}"]
+      }
     end
 
 

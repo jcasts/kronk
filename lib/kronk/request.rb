@@ -101,8 +101,7 @@ class Kronk
 
         rescue Net::HTTPBadResponse
           file.rewind
-          resp = HeadlessResponse.new file.read
-          resp['Content-Type'] = File.extname path
+          resp = HeadlessResponse.new file.read, File.extname(path)
         end
       end
 
@@ -235,9 +234,7 @@ class Kronk
         use_cookies? options
 
       resp.extend Response::Helpers
-
-      r_req, r_resp, r_bytes = Response.read_raw_from socket_io
-      resp.raw = r_resp
+      resp.set_helper_attribs socket_io
 
       resp
     end

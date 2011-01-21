@@ -324,7 +324,7 @@ class TestRequest < Test::Unit::TestCase
 
 
   def test_call_ssl
-    expect_request "GET", "https://example.com" do |http, req, resp|
+    expr = expect_request "GET", "https://example.com" do |http, req, resp|
       req.expects(:use_ssl=).with true
     end
 
@@ -498,7 +498,8 @@ class TestRequest < Test::Unit::TestCase
   def expect_request req_method, url, options={}
     uri  = URI.parse url
 
-    resp = mock 'resp'
+    resp_io = StringIO.new(mock_200_response)
+    resp = Kronk::Response.read_new resp_io #mock 'resp'
     resp.stubs(:code).returns(options[:status] || '200')
     resp.stubs(:to_hash).returns Hash.new
 
@@ -524,9 +525,10 @@ class TestRequest < Test::Unit::TestCase
     Net::HTTP.expects(:new).with(uri.host, uri.port).returns req
     req.expects(:start).yields(http).returns resp
 
-    Kronk::Response.expects(:read_raw_from).returns ["", mock_200_response, 0]
+    resp.expects(:read_raw_from).returns [nil, mock_200_response, nil]
 
     yield http, req, resp if block_given?
+
     resp
   end
 end

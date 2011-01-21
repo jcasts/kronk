@@ -3,6 +3,11 @@ require "kronk"
 require "mocha"
 
 
+def mock_resp name
+  File.read File.join("test/mocks", name)
+end
+
+
 def mock_200_response
   @mock_200 ||= File.read 'test/mocks/200_response.txt'
 end

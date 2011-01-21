@@ -33,7 +33,8 @@ class TestResponse < Test::Unit::TestCase
 
     io = StringIO.new str
 
-    req, resp, bytes = Kronk::Response.read_raw_from io
+    resp = Kronk::Response.read_new StringIO.new(mock_200_response)
+    req, resp, bytes = resp.read_raw_from io
 
     assert_equal "mock debug request", req
     assert_equal mock_200_response, resp

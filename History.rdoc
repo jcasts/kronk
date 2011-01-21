@@ -1,3 +1,10 @@
+=== 1.2.1 / 2011-01-21
+
+* Enhancements:
+
+  * Added support for setting the encoding from the Content-Type charset
+    in ruby 1.9.x
+
 === 1.2.0 / 2011-01-20
 
 * Enhancements:
