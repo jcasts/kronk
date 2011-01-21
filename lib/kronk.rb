@@ -331,7 +331,10 @@ class Kronk
 
     resp = Request.retrieve uri, options
 
-    if options[:raw]
+    if options[:irb]
+      irb resp
+
+    elsif options[:raw]
       resp.selective_string options
 
     else
@@ -344,6 +347,24 @@ class Kronk
         resp.selective_string options
       end
     end
+  end
+
+
+
+  ##
+  # Start an IRB console with the given response object.
+
+  def self.irb resp
+    require 'irb'
+
+    $http_response = resp
+    $response = resp.parsed_body rescue resp.body
+
+    puts "\nHTTP Response is in $http_response"
+    puts "Response data is in $response\n\n"
+
+    IRB.start
+    exit 1
   end
 
 
@@ -504,7 +525,7 @@ Kronk runs diffs against data from live and cached http responses.
 
 
       opt.on('--irb', 'Start an IRB console') do
-        config[:irb] = true
+        options[:irb] = true
       end
 
 
@@ -642,6 +663,8 @@ Kronk runs diffs against data from live and cached http responses.
 
     options[:uris].concat argv
     options[:uris].slice!(2..-1)
+
+    argv.clear
 
     raise OptionParser::MissingArgument, "You must enter at least one URI" if
       options[:uris].empty?
