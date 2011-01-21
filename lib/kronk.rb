@@ -358,7 +358,11 @@ class Kronk
     require 'irb'
 
     $http_response = resp
-    $response = resp.parsed_body rescue resp.body
+    $response = begin
+                  resp.parsed_body
+                rescue Response::MissingParser
+                  resp.body
+                end
 
     puts "\nHTTP Response is in $http_response"
     puts "Response data is in $response\n\n"
