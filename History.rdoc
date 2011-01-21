@@ -1,3 +1,17 @@
+=== 1.2.0 / 2011-01-20
+
+* Enhancements:
+
+  * Added IRB option to manipulate retrieved data in IRB console.
+
+* Bugfixes:
+
+  * Updated encoding of binary data to force_encode to binary encoding.
+
+  * Moved gem requires to avoid preloading unneeded libs.
+
+  * Added Windows support.
+
 === 1.1.2 / 2011-01-17
 
 * Bugfixes:

@@ -76,7 +76,7 @@ class Kronk
 
       def raw= value
         if value.respond_to?(:valid_encoding?) && !value.valid_encoding?
-          value.force_encoding! "binary"
+          value.force_encoding "binary"
         end
 
         @raw = value
