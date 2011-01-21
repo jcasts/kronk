@@ -19,6 +19,8 @@ Kronk was made possible by the sponsoring of AT&T Interactive.
 
 * Support for custom data parsers and diff formatters.
 
+* Launch IRB console with the retrieved response data.
+
 * Support for proxies, ssl, and basic auth.
 
 * Cookie/session handling.
@@ -64,6 +66,10 @@ Run it to display formatted data:
 Run it to display raw data with headers:
 
   $ kronk http://host.com/path.json --raw -i
+
+Parse the data and run an IRB console with the response:
+
+  $ kronk http://host.com/path.json --irb
 
 == CONFIGURATION:
 

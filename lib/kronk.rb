@@ -352,7 +352,7 @@ class Kronk
 
 
   ##
-  # Start an IRB console with the given response object.
+  # Start an IRB console with the given http response object.
 
   def self.irb resp
     require 'irb'
