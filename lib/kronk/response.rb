@@ -71,15 +71,12 @@ class Kronk
     module Helpers
 
       ##
-      # Assigns the raw http response value. Sets the encoding to ASCII-8BIT
-      # and replaces invalid characters with '?' if the encoding is invalid
-      # in Ruby 1.9.x
+      # Assigns the raw http response value. Sets the encoding to binary
+      # if the encoding is invalid in Ruby 1.9.x
 
       def raw= value
         if value.respond_to?(:valid_encoding?) && !value.valid_encoding?
-          value.encode! "ASCII-8BIT", :invalid => :replace,
-                                      :undef   => :replace,
-                                      :replace => "?"
+          value.force_encoding! "binary"
         end
 
         @raw = value

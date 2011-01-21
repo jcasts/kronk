@@ -298,6 +298,7 @@ class Kronk
   # Supports the following options:
   # :data:: Hash/String - the data to pass to the http request
   # :query:: Hash/String - the data to append to the http request path
+  # :follow_redirects:: Integer/Bool - number of times to follow redirects
   # :headers:: Hash - extra headers to pass to the request
   # :http_method:: Symbol - the http method to use; defaults to :get
   # :user_agent:: String - user agent string or alias; defaults to 'kronk'
