@@ -101,11 +101,6 @@ class Kronk
       when Hash
         output = "{\n"
 
-        key_width = 0
-        data.keys.each do |k|
-          key_width = k.inspect.length if k.inspect.length > key_width
-        end
-
         data_values =
           data.map do |key, value|
             pad = " " * indent

@@ -1,4 +1,5 @@
 require 'test/test_helper'
+require "nokogiri"
 
 class TestXmlParser < Test::Unit::TestCase
 
