@@ -27,6 +27,8 @@ Kronk was made possible by the sponsoring of AT&T Interactive.
 
 * Easy-to-read output (color or ascii, line numbers, etc).
 
+* Yes, it works on Windows.
+
 == FUTURE:
 
 * Auto-queryer with optional param randomizing.
