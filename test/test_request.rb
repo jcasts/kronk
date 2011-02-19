@@ -68,6 +68,7 @@ class TestRequest < Test::Unit::TestCase
   def test_retrieve_cached
     query   = "path/to/file.txt"
     options = {:foo => "bar"}
+    File.expects(:file?).with(query).returns true
     Kronk::Request.expects(:retrieve_file).with query, options
 
     Kronk::Request.retrieve query, options

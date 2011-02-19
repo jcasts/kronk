@@ -51,7 +51,7 @@ class Kronk
       resp =
         if IO === query || StringIO === query
           retrieve_io query, options
-        elsif local?(query)
+        elsif query == :cache || File.file?(query)
           retrieve_file query, options
         else
           retrieve_uri query, options
@@ -68,14 +68,6 @@ class Kronk
       resp
     rescue SocketError, Errno::ENOENT, Errno::ECONNREFUSED
       raise NotFoundError, "#{query} could not be found"
-    end
-
-
-    ##
-    # Check if a URI should be treated as a local file.
-
-    def self.local? uri
-      !(uri =~ %r{^\w+://})
     end
 
 
@@ -178,15 +170,7 @@ class Kronk
     # :proxy:: Hash/String - http proxy to use; defaults to nil
 
     def self.call http_method, uri, options={}
-      suffix = options.delete :uri_suffix
-
-      uri = "#{uri}#{suffix}" if suffix
-      uri = URI.parse uri unless URI === uri
-
-      if options[:query]
-        query = build_query options[:query]
-        uri.query = [uri.query, query].compact.join "&"
-      end
+      uri = build_uri uri, options
 
       data   = options[:data]
       data &&= build_query data
@@ -237,6 +221,26 @@ class Kronk
       resp.set_helper_attribs socket_io
 
       resp
+    end
+
+
+    ##
+    # Build the URI to use for the request from the given uri or
+    # path and options.
+
+    def self.build_uri uri, options={}
+      suffix = options.delete :uri_suffix
+
+      uri = "#{uri}#{suffix}" if suffix
+      uri = URI.parse uri unless URI === uri
+      uri = URI.parse(Kronk.config[:default_host]) + uri unless uri.host
+
+      if options[:query]
+        query = build_query options[:query]
+        uri.query = [uri.query, query].compact.join "&"
+      end
+
+      uri
     end
 
 

@@ -12,6 +12,7 @@ class TestKronk < Test::Unit::TestCase
       },
       :cache_file   => Kronk::DEFAULT_CACHE_FILE,
       :cookies_file => Kronk::DEFAULT_COOKIES_FILE,
+      :default_host => "http://localhost:3000",
       :diff_format  => :ascii_diff,
       :show_lines   => false,
       :use_cookies  => true,
@@ -54,6 +55,7 @@ class TestKronk < Test::Unit::TestCase
         'plist' => "PlistParser",
         'xml'   => "XMLParser"
       },
+      :default_host => "http://localhost:3000",
       :diff_format => :ascii_diff,
       :cache_file  => Kronk::DEFAULT_CACHE_FILE,
       :cookies_file => Kronk::DEFAULT_COOKIES_FILE,

@@ -81,6 +81,7 @@ class Kronk
   # Default config to use.
   DEFAULT_CONFIG = {
     :content_types  => DEFAULT_CONTENT_TYPES.dup,
+    :default_host   => "http://localhost:3000",
     :diff_format    => :ascii_diff,
     :show_lines     => false,
     :cache_file     => DEFAULT_CACHE_FILE,
