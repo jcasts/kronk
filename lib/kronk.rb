@@ -302,7 +302,6 @@ class Kronk
   def self.save_history *uris
     path = self.config[:history_file]
 
-    uris.map!{|uri| uri.sub(%r{^http://}, "")}
     uris.concat File.readlines(path).map{|line| line.strip} if File.file?(path)
 
     File.open path, "w" do |file|
