@@ -300,11 +300,13 @@ class Kronk
   # Writes the given URIs to the history file.
 
   def self.save_history *uris
-    File.open self.config[:history_file], "w+" do |file|
-      hist = file.readlines.map{|line| line.strip}
-      hist.concat uris.compact
+    path = self.config[:history_file]
 
-      file.write hist.uniq.join($/)
+    uris.map!{|uri| uri.sub(%r{^http://}, "")}
+    uris.concat File.readlines(path).map{|line| line.strip} if File.file?(path)
+
+    File.open path, "w" do |file|
+      file.write uris.uniq.join($/)
     end
   end
 
@@ -475,7 +477,7 @@ class Kronk
 
       opt.banner = <<-STR
 
-[kronk #{VERSION}]
+#{opt.program_name} #{opt.version}
 
 Parse and run diffs against data from live and cached http responses.
 
