@@ -7,6 +7,8 @@
 
   * Added support for bash completion of URIs.
 
+  * Explicitely passing the http protocol is now optional.
+
 === 1.2.1 / 2011-01-21
 
 * Enhancements:

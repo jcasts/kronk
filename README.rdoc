@@ -39,35 +39,37 @@ Kronk was made possible by the sponsoring of AT&T Interactive.
 
 Check if your json response returns the same data as your xml variety:
 
-  $ kronk http://host.com/path.json http://host.com/path.xml
+  $ kronk host.com/path.json host.com/path.xml
 
 Compare body structure only (uses datatypes instead of values):
 
-  $ kronk http://host.com/path.json http://host.com/path.xml --struct
+  $ kronk host.com/path.json host.com/path.xml --struct
 
 Call comparison with similar uri suffixes:
 
-  $ kronk http://host.com/path.json http://host.com/path.xml --suff '?page=1'
+  $ kronk host.com/path.json host.com/path.xml --suff '?page=1'
 
-Compare response with the previous call:
+Compare response over ssl with the previous call:
 
-  $ kronk http://host.com/path --prev
+  $ kronk https://host.com/path --prev
 
 Compare response with a local file:
 
-  $ kronk http://host.com/path.json ./saved_response.json
+  $ kronk host.com/path.json ./saved_response.json
 
 Do a simple text diff on the http response, including headers:
 
-  $ kronk http://host.com/A/path.json http://host.com/B/path.json --raw -i
+  $ kronk host.com/A/path.json host.com/B/path.json --raw -i
 
 Run it to display formatted data:
 
-  $ kronk http://host.com/path.json
+  $ kronk host.com/path.json
 
-Run it to display raw data with headers:
+Run it to display raw data with headers from the default host (localhost:3000).
+Default host is assumed when the path starts with "/" and no local files match
+the given path:
 
-  $ kronk http://host.com/path.json --raw -i
+  $ kronk /path.json --raw -i
 
 Parse the data and run an IRB console with the response:
 
