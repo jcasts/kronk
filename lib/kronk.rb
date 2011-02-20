@@ -297,6 +297,19 @@ class Kronk
 
 
   ##
+  # Writes the given URIs to the history file.
+
+  def self.save_history *uris
+    File.open self.config[:history_file], "w+" do |file|
+      hist = file.readlines.map{|line| line.strip}
+      hist.concat uris.compact
+
+      file.write hist.uniq.join($/)
+    end
+  end
+
+
+  ##
   # Make requests, parse the responses and compare the data.
   # Query arguments may be set to the special value :cache to use the
   # last live http response retrieved.
@@ -416,12 +429,15 @@ class Kronk
         $stdout << "Found #{diff.count} diff(s).\n"
       end
 
+      save_history uri1, uri2
       exit 1 if diff.count > 0
 
     else
       out = retrieve_data_string uri1, options
       out = Diff.insert_line_nums out if config[:show_lines]
       puts out
+
+      save_history uri1
     end
 
   rescue Request::NotFoundError, Response::MissingParser => e

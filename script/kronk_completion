@@ -1,0 +1,22 @@
+#!/bin/bash
+
+_kronk() 
+{
+  local cur prev opts kronk_keys
+  COMPREPLY=()
+  cur="${COMP_WORDS[COMP_CWORD]}"
+  prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+  kronk_keys="$HOME/.kronk_history"
+
+
+  if [ -f "$kronk_keys" ]; then
+    opts=$(cat $kronk_keys)
+    COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+    return 0
+  fi
+
+  return 1
+}
+
+complete -d -X '.[^./]*' -F _kronk kronk
