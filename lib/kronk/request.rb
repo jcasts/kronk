@@ -231,6 +231,7 @@ class Kronk
     def self.build_uri uri, options={}
       suffix = options.delete :uri_suffix
 
+      uri = "http://#{uri}"   unless uri =~ %r{^(\w+://|/)}
       uri = "#{uri}#{suffix}" if suffix
       uri = URI.parse uri unless URI === uri
       uri = URI.parse(Kronk.config[:default_host]) + uri unless uri.host
