@@ -227,6 +227,10 @@ single quotes around some of your paths.
 
 * json gem
 
+* rack gem
+
+* cookiejar gem
+
 == INSTALL:
 
   $ sudo gem install kronk
@@ -244,7 +248,7 @@ and generate the RDoc.
 
 (The MIT License)
 
-Copyright (c) 2010 Jeremie Castagna
+Copyright (c) 2010, 2011 Jeremie Castagna
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the

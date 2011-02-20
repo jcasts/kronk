@@ -11,7 +11,7 @@ require 'yaml'
 class Kronk
 
   # This gem's version.
-  VERSION = '1.2.1'
+  VERSION = '1.2.2'
 
 
   ##
@@ -40,6 +40,10 @@ class Kronk
 
   # Default cookies file.
   DEFAULT_COOKIES_FILE = File.expand_path "~/.kronk_cookies"
+
+
+  # Default file with history of unique URIs. (Used for autocomplete)
+  DEFAULT_HISTORY_FILE = File.expand_path "~/.kronk_history"
 
 
   # Default Content-Type header to parser mapping.
@@ -86,6 +90,7 @@ class Kronk
     :show_lines     => false,
     :cache_file     => DEFAULT_CACHE_FILE,
     :cookies_file   => DEFAULT_COOKIES_FILE,
+    :history_file   => DEFAULT_HISTORY_FILE,
     :use_cookies    => true,
     :requires       => [],
     :uri_options    => {},
@@ -453,7 +458,10 @@ class Kronk
       opt.release = nil
 
       opt.banner = <<-STR
-Kronk runs diffs against data from live and cached http responses.
+
+[kronk #{VERSION}]
+
+Parse and run diffs against data from live and cached http responses.
 
   Usage:
     #{opt.program_name} --help

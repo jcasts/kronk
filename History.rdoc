@@ -1,3 +1,14 @@
+=== 1.2.2 / 2011-02-19
+
+* Enhancements:
+
+  * Added support for default host to avoid having to write out
+    the most commonly used host name (e.g. http://localhost:3000)
+
+  * Added support for autocompletion of URIs.
+
+  * Added support for URI aliases for less typing.
+
 === 1.2.1 / 2011-01-21
 
 * Enhancements:
