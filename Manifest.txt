@@ -11,6 +11,7 @@ lib/kronk/plist_parser.rb
 lib/kronk/request.rb
 lib/kronk/response.rb
 lib/kronk/xml_parser.rb
+script/kronk_completion
 test/mocks/200_response.json
 test/mocks/200_response.plist
 test/mocks/200_response.txt
