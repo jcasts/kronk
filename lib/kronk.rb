@@ -508,6 +508,13 @@ Parse and run diffs against data from live and cached http responses.
       end
 
 
+      opt.on('--completion', 'Print bash completion file path and exit') do
+        file = File.join(File.dirname(__FILE__), "../script/kronk_completion")
+        puts File.expand_path(file)
+        exit 2
+      end
+
+
       opt.on('--config STR', String,
              'Load the given Kronk config file') do |value|
         load_config value
