@@ -5,9 +5,7 @@
   * Added support for default host to avoid having to write out
     the most commonly used host name (e.g. http://localhost:3000)
 
-  * Added support for autocompletion of URIs.
-
-  * Added support for URI aliases for less typing.
+  * Added support for bash completion of URIs.
 
 === 1.2.1 / 2011-01-21
 
