@@ -3,22 +3,18 @@
 _kronk() 
 {
   local cur prev opts kronk_keys comp_reply
-  COMPREPLY=()
   cur="${COMP_WORDS[COMP_CWORD]}"
   prev="${COMP_WORDS[COMP_CWORD-1]}"
 
   kronk_keys="$HOME/.kronk_history"
 
-  comp_reply=$(compgen -d -X '.[^./]*' -S/ -- ${cur})
-  #comp_reply="$comp_reply $(compgen -f -- ${cur})"
-
   if [ -f "$kronk_keys" ]; then
     opts=$(cat $kronk_keys)
-    comp_reply=( "$comp_reply $(compgen -W "${opts}" -- ${cur})" )
+    COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+    return 0
   fi
 
-  COMPREPLY=( $comp_reply )
-  return 0
+  return 1
 }
 
 complete -o default -F _kronk kronk
