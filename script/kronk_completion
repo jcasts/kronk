@@ -24,6 +24,7 @@ _kronk()
     local is_dir
 
     for (( i = 0 ; i < ${#COMPREPLY[$i]} ; i++ )); do
+      is_dir=false;
       if [ -d ${COMPREPLY[$i]} ]; then is_dir=true; fi
       #COMPREPLY[$i]=${COMPREPLY[$i]/#*\///}
       if [ $is_dir ]; then COMPREPLY[$i]="${COMPREPLY[$i]}/"; fi
