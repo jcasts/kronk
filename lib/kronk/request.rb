@@ -67,7 +67,7 @@ class Kronk
 
       resp
     rescue SocketError, Errno::ENOENT, Errno::ECONNREFUSED
-      raise NotFoundError, "#{query} could not be found"
+      raise NotFoundError, "#{uri} could not be found"
     end
 
 
