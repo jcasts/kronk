@@ -1,8 +1,13 @@
 #!/bin/bash
 
+export COMP_WORDBREAKS=${COMP_WORDBREAKS/\:/}
+
+# TODO: resolve the use of protocol issue
+
 _kronk() 
 {
-  local cur prev opts kronk_keys comp_reply
+  local cur prev opts kronk_keys
+
   cur="${COMP_WORDS[COMP_CWORD]}"
   prev="${COMP_WORDS[COMP_CWORD-1]}"
 
