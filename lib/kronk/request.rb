@@ -54,7 +54,7 @@ class Kronk
         resp = retrieve_file uri, options
       else
         resp = retrieve_uri uri, options
-        Kronk.history << uri
+        Kronk.history << build_uri(uri, options).to_s
       end
 
       begin
@@ -229,7 +229,7 @@ class Kronk
     # path and options.
 
     def self.build_uri uri, options={}
-      suffix = options.delete :uri_suffix
+      suffix = options[:uri_suffix]
 
       uri = "http://#{uri}"   unless uri =~ %r{^(\w+://|/)}
       uri = "#{uri}#{suffix}" if suffix

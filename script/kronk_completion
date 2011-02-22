@@ -10,7 +10,7 @@ _kronk()
 
   if [ -f "$kronk_keys" ]; then
     opts=$(cat $kronk_keys)
-    COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+    COMPREPLY=( $(compgen -f -W "${opts}" -- ${cur}) )
     return 0
   fi
 
