@@ -313,7 +313,7 @@ class Kronk
   # Writes the URL history to the history file.
 
   def self.save_history
-    File.open path, "w" do |file|
+    File.open self.config[:history_file], "w" do |file|
       file.write self.history.uniq.join($/)
     end
   end
