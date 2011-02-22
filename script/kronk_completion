@@ -4,16 +4,14 @@ export COMP_WORDBREAKS=${COMP_WORDBREAKS/\:/}
 
 _kronk() 
 {
-  local cur prev opts kronk_keys
+  local cur kronk_keys
 
   cur="${COMP_WORDS[COMP_CWORD]}"
-  prev="${COMP_WORDS[COMP_CWORD-1]}"
 
   kronk_keys="$HOME/.kronk_history"
 
   if [ -f "$kronk_keys" ]; then
-    opts=$(cat $kronk_keys)
-    COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+    COMPREPLY=( $(compgen -W "$(cat $kronk_keys)" -- ${cur}) )
     return 0
   fi
 
