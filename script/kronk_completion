@@ -1,12 +1,6 @@
 #!/bin/bash
 
 export COMP_WORDBREAKS=${COMP_WORDBREAKS/\:/}
-export COMP_WORDBREAKS=${COMP_WORDBREAKS/\=/}
-
-# TODO: resolve the use of protocol issue
-# should it be allowed and/or completable
-
-# TODO: resolve the default path behavior issue
 
 _kronk() 
 {
@@ -19,22 +13,11 @@ _kronk()
 
   if [ -f "$kronk_keys" ]; then
     opts=$(cat $kronk_keys)
-    COMPREPLY=( $(compgen -f -W "${opts}" -- ${cur}) )
-
-    local is_dir
-
-    for (( i = 0 ; i < ${#COMPREPLY[@]} ; i++ )); do
-      is_dir="";
-      if [ -d ${COMPREPLY[$i]} ]; then is_dir=true; fi
-      #COMPREPLY[$i]=${COMPREPLY[$i]/#*\///}
-      if [ $is_dir ]; then COMPREPLY[$i]="${COMPREPLY[$i]}/"; fi
-    done
-
-    #COMPREPLY=${COMPREPLY[@]/#*\//}
+    COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
     return 0
   fi
 
   return 1
 }
 
-complete -o default -o nospace -F _kronk kronk
+complete -o default -F _kronk kronk
