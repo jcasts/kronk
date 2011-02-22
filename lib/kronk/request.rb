@@ -54,7 +54,7 @@ class Kronk
         resp = retrieve_file uri, options
       else
         resp = retrieve_uri uri, options
-        Kronk.history << build_uri(uri, options).to_s
+        Kronk.history << uri
       end
 
       begin
