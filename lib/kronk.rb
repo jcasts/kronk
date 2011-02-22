@@ -186,6 +186,8 @@ class Kronk
   # Returns cmd_opts Hash if none found.
 
   def self.merge_options_for_uri uri, cmd_opts={}
+    return cmd_opts if config[:no_uri_options]
+
     out_opts = Hash.new.merge cmd_opts
 
     config[:uri_options].each do |matcher, options|
@@ -568,6 +570,11 @@ Parse and run diffs against data from live and cached http responses.
 
       opt.on('--lines', 'Show line numbers') do
         config[:show_lines] = true
+      end
+
+
+      opt.on('--no-opts', 'Turn off config URI options') do
+        config[:no_uri_options] = true
       end
 
 
