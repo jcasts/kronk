@@ -299,15 +299,22 @@ class Kronk
 
 
   ##
-  # Writes the given URIs to the history file.
+  # Returns the Kronk history array of accessed URLs.
 
-  def self.save_history *uris
+  def self.history
     path = self.config[:history_file]
+    @history ||= File.read(path).split($/) if File.file?(path)
+    @history ||= []
+    @history
+  end
 
-    uris.concat File.readlines(path).map{|line| line.strip} if File.file?(path)
 
+  ##
+  # Writes the URL history to the history file.
+
+  def self.save_history
     File.open path, "w" do |file|
-      file.write uris.uniq.join($/)
+      file.write self.history.uniq.join($/)
     end
   end
 
@@ -418,6 +425,7 @@ class Kronk
 
     at_exit do
       save_cookie_jar
+      save_history
     end
 
     options[:cache_response] = config[:cache_file] if config[:cache_file]
@@ -432,15 +440,12 @@ class Kronk
         $stdout << "Found #{diff.count} diff(s).\n"
       end
 
-      save_history uri1, uri2
       exit 1 if diff.count > 0
 
     else
       out = retrieve_data_string uri1, options
       out = Diff.insert_line_nums out if config[:show_lines]
       puts out
-
-      save_history uri1
     end
 
   rescue Request::NotFoundError, Response::MissingParser => e

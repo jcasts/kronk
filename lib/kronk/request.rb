@@ -47,15 +47,15 @@ class Kronk
     # :http_method:: Symbol - the http method to use; defaults to :get
     # :proxy:: Hash/String - http proxy to use; defaults to nil
 
-    def self.retrieve query, options={}
-      resp =
-        if IO === query || StringIO === query
-          retrieve_io query, options
-        elsif query == :cache || File.file?(query)
-          retrieve_file query, options
-        else
-          retrieve_uri query, options
-        end
+    def self.retrieve uri, options={}
+      if IO === uri || StringIO === uri
+        resp = retrieve_io uri, options
+      elsif uri == :cache || File.file?(uri)
+        resp = retrieve_file uri, options
+      else
+        resp = retrieve_uri uri, options
+        Kronk.history << uri
+      end
 
       begin
         File.open(options[:cache_response], "wb+") do |file|
