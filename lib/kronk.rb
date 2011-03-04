@@ -428,6 +428,11 @@ class Kronk
       save_history
     end
 
+    trap 'INT' do
+      exit 2
+    end
+
+
     options[:cache_response] = config[:cache_file] if config[:cache_file]
 
     uri1, uri2 = options.delete :uris
