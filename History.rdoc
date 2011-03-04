@@ -1,3 +1,11 @@
+=== 1.2.4 / 2011-03-04
+
+* Enhancements:
+
+  * Cleaner exit on sigint.
+
+  * Support for connection timeout in both config and uri options.
+
 === 1.2.3 / 2011-02-20
 
 * Bugfixes:
