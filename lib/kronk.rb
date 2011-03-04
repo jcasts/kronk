@@ -85,15 +85,15 @@ class Kronk
   # Default config to use.
   DEFAULT_CONFIG = {
     :content_types  => DEFAULT_CONTENT_TYPES.dup,
-    :default_host   => "http://localhost:3000",
-    :diff_format    => :ascii_diff,
-    :show_lines     => false,
     :cache_file     => DEFAULT_CACHE_FILE,
     :cookies_file   => DEFAULT_COOKIES_FILE,
+    :default_host   => "http://localhost:3000",
+    :diff_format    => :ascii_diff,
     :history_file   => DEFAULT_HISTORY_FILE,
-    :use_cookies    => true,
     :requires       => [],
+    :show_lines     => false,
     :uri_options    => {},
+    :use_cookies    => true,
     :user_agents    => USER_AGENTS.dup
   }
 
@@ -448,7 +448,7 @@ class Kronk
       puts out
     end
 
-  rescue Request::NotFoundError, Response::MissingParser => e
+  rescue Request::Exception, Response::MissingParser => e
     $stderr << "\nError: #{e.message}\n"
     exit 2
   end
@@ -668,6 +668,12 @@ Parse and run diffs against data from live and cached http responses.
       opt.on('--suff STR', String,
              'Add common path items to the end of each URL') do |value|
         options[:uri_suffix] = value
+      end
+
+
+      opt.on('--timeout INT', Integer,
+             'Timeout for http connection in seconds') do |value|
+        config[:timeout] = value
       end
 
 

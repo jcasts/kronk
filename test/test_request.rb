@@ -116,7 +116,8 @@ class TestRequest < Test::Unit::TestCase
 
     Kronk::Request.expects(:follow_redirect).
       with resp, :follow_redirects => true,
-      :headers => {'User-Agent' => Kronk::USER_AGENTS['kronk']}
+      :headers => {'User-Agent' => Kronk::USER_AGENTS['kronk']},
+      :timeout => nil
 
     Kronk::Request.retrieve_uri "http://example.com/request/path?foo=bar",
       :follow_redirects => true
@@ -129,7 +130,8 @@ class TestRequest < Test::Unit::TestCase
 
     Kronk::Request.expects(:follow_redirect).
       with resp, :follow_redirects => 3, :data => {:foo => "bar"},
-      :headers => {'User-Agent' => Kronk::USER_AGENTS['kronk']}
+      :headers => {'User-Agent' => Kronk::USER_AGENTS['kronk']},
+      :timeout => nil
 
     Kronk::Request.retrieve_uri "http://example.com/request/path?foo=bar",
       :follow_redirects => 3, :data => {:foo => "bar"}
