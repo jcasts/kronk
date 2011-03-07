@@ -205,7 +205,8 @@ class Kronk
         match1 = arr1.index item2
         match2 = arr2.index item1
 
-        if match1
+
+        if use_left?(match1, match2)
           diff_ary.concat diff_match(item1, match1, arr1, 0, sub_diff)
           sub_diff = nil
 
@@ -223,6 +224,14 @@ class Kronk
       diff_ary << sub_diff if sub_diff
 
       diff_ary
+    end
+
+
+    ##
+    # Check if the index on the left should be used.
+
+    def use_left? index1, index2
+      index1 && (index2.nil? || index1 < index2)
     end
 
 
