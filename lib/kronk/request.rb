@@ -5,9 +5,14 @@ class Kronk
 
   class Request
 
+    # Generic Request exception.
+    class Exception < ::Exception; end
 
     # Raised when the URI was not resolvable.
     class NotFoundError < Exception; end
+
+    # Raised when HTTP times out.
+    class TimeoutError < Exception; end
 
     ##
     # Follows the redirect from a 30X response object and decrease the
@@ -66,8 +71,12 @@ class Kronk
       end
 
       resp
+
     rescue SocketError, Errno::ENOENT, Errno::ECONNREFUSED
       raise NotFoundError, "#{uri} could not be found"
+
+    rescue Timeout::Error
+      raise TimeoutError, "#{uri} took too long to respond"
     end
 
 
@@ -196,6 +205,9 @@ class Kronk
 
       req = http_class.new uri.host, uri.port
       req.use_ssl = true if uri.scheme =~ /^https$/
+
+      options[:timeout] ||= Kronk.config[:timeout]
+      req.read_timeout = options[:timeout] if options[:timeout]
 
       resp = req.start do |http|
         socket = http.instance_variable_get "@socket"

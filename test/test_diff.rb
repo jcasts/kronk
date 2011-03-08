@@ -291,6 +291,23 @@ STR
   end
 
 
+  def test_create_diff_smallest_match
+    str1 = "line1\nline right\nline4\nline4\nline5\nline6\nline2\nline7"
+    str2 = "line1\nline left\nline2\nline3\nline4\nline5"
+
+    expected = [
+      "line1",
+      [["line right", "line4"], ["line left", "line2", "line3"]],
+      "line4",
+      "line5",
+      [["line6", "line2", "line7"], []]
+    ]
+
+    diff = Kronk::Diff.new str1, str2
+    assert_equal expected, diff.create_diff
+  end
+
+
   def test_count
     assert_equal 4, @diff.count
   end
