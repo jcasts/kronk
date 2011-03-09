@@ -3,7 +3,7 @@
 * Bugfixes:
 
   * Small fix to the diff functionality.
-    Swapping left and right would not always yeild the same behavior.
+    Swapping left and right would not always yield the same behavior.
 
 === 1.2.4 / 2011-03-04
 
