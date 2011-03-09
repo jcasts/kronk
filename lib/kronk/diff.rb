@@ -184,43 +184,69 @@ class Kronk
 
     def create_diff
       diff_ary = []
-      buffer = nil
+      sub_diff = nil
 
       arr1 = @str1.split @char
       arr2 = @str2.split @char
 
       until arr1.empty? && arr2.empty?
+        item1, item2 = arr1.shift, arr2.shift
 
-        if arr1[0] == arr2[0]
-          diff_ary << buffer if buffer
-          buffer = nil
+        if item1 == item2
+          if sub_diff
+            diff_ary << sub_diff
+            sub_diff = nil
+          end
 
-          arr2.shift
-          diff_ary << arr1.shift
-
+          diff_ary << item1
           next
         end
 
-        buffer ||= [[],[]]
+        match1 = arr1.index item2
+        match2 = arr2.index item1
 
-        if buffer[0].count(arr2[0]) > buffer[1].count(arr2[0])
-          index = buffer[0].rindex arr2[0]
-          arr1.unshift(*buffer[0].slice!(index..-1))
-          next
 
-        elsif buffer[1].count(arr1[0]) > buffer[0].count(arr1[0])
-          index = buffer[1].rindex arr1[0]
-          arr2.unshift(*buffer[1].slice!(index..-1))
+        if use_left?(match1, match2)
+          diff_ary.concat diff_match(item1, match1, arr1, 0, sub_diff)
+          sub_diff = nil
 
-        else
-          buffer[0] << arr1.shift unless arr1.empty?
-          buffer[1] << arr2.shift unless arr2.empty?
+        elsif match2
+          diff_ary.concat diff_match(item2, match2, arr2, 1, sub_diff)
+          sub_diff = nil
+
+        elsif !item1.nil? || !item2.nil?
+          sub_diff ||= [[],[]]
+          sub_diff[0] << item1 if item1
+          sub_diff[1] << item2 if item2
         end
       end
 
-      diff_ary << buffer if buffer
+      diff_ary << sub_diff if sub_diff
 
       diff_ary
+    end
+
+
+    ##
+    # Check if the index on the left should be used.
+
+    def use_left? index1, index2
+      index1 && (index2.nil? || index1 < index2)
+    end
+
+
+    ##
+    # Create a diff from a match.
+
+    def diff_match item, match, arr, side, sub_diff
+      sub_diff ||= [[],[]]
+
+      index = match - 1
+      added = [item]
+      added.concat arr.slice!(0..index) if index >= 0
+
+      sub_diff[side].concat(added)
+      [sub_diff, arr.shift]
     end
 
 

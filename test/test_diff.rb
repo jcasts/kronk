@@ -297,8 +297,9 @@ STR
 
     expected = [
       "line1",
-      [["line right", "line4"], ["line left", "line2", "line3"]],
+      [["line right"], ["line left", "line2", "line3"]],
       "line4",
+      [["line4"], []],
       "line5",
       [["line6", "line2", "line7"], []]
     ]
