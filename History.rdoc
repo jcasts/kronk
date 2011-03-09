@@ -1,3 +1,10 @@
+=== 1.2.5 / 2011-03-09
+
+* Bugfixes:
+
+  * Small fix to the diff functionality.
+    Swapping left and right would not always yeild the same behavior.
+
 === 1.2.4 / 2011-03-04
 
 * Enhancements:
