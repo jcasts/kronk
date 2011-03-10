@@ -236,17 +236,22 @@ class Kronk
 
 
     ##
-    # Decide whether to make path item a regex or not.
+    # Decide whether to make path item a regex, range, array, or string.
 
     def self.parse_path_item str
       if str =~ /(^|[^\\])([\*\?\|])/
         str.gsub!(/(^|[^\\])(\*|\?)/, '\1.\2')
-        str = /^(#{str})$/
-      else
-        str.gsub! "\\", ""
-      end
+        /^(#{str})$/
 
-      str
+      elsif str =~ %r{^(\-?\d+)(\.{2,3})(\-?\d+)$}
+        Range.new $1.to_i, $3.to_i, ($2 == "...")
+
+      elsif str =~ %r{^(\-?\d+),(\-?\d+)$}
+        Range.new $1.to_i, ($1.to_i + $2.to_i), true
+
+      else
+        str.gsub "\\", ""
+      end
     end
 
 
@@ -266,8 +271,6 @@ class Kronk
         found = match_data_item(mkey, key) &&
                 match_data_item(mvalue, value)
 
-        #puts "Found: #{data.inspect} #{mkey.inspect} -> #{key.inspect}" if found
-
         yield data, key, curr_path if found
         yield_data_points data[key], mkey, mvalue, true, curr_path, &block if
           recursive
@@ -283,8 +286,13 @@ class Kronk
 
       if Regexp === item1
         item2.to_s =~ item1
+
+      elsif Range === item1
+        item1.include? item2.to_i
+
       elsif item1.nil?
         true
+
       else
         item2.to_s == item1.to_s
       end
