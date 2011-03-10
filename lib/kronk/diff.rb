@@ -254,20 +254,20 @@ class Kronk
         left  = arr1[last_i1...c[1]]
         right = arr2[last_i2...c[1]]
 
-        last_i1 = c[1] + c[0] + 1
-        last_i2 = c[2] + c[0] + 1
-
         # add diffs
         diff_ary << [left, right] unless left.empty? && right.empty?
 
         # add common
         diff_ary.concat arr1[c[1], c[0]]
+
+        last_i1 = c[1] + c[0]
+        last_i2 = c[2] + c[0]
       end
 
-      c = common_list[-1]
-      last_i1 = c[1] + c[0] + 1
+      left  = arr1[last_i1..-1]
+      right = arr2[last_i2..-1]
 
-      diff_ary.concat arr1[last_i1..-1] if last_i1 < arr1.length
+      diff_ary << [left, right] unless left.empty? && right.empty?
 
       diff_ary
     end
