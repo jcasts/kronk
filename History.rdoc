@@ -4,6 +4,8 @@
 
   * Reimplemented the diff logic to be much more accurate.
 
+  * Added support for ranges and index+length pairs to DataSet path parsing.
+
 === 1.2.5 / 2011-03-09
 
 * Bugfixes:
