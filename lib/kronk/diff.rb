@@ -252,7 +252,7 @@ class Kronk
         #p "matched #{c[1]} -> #{c[1] + c[0]}"
 
         left  = arr1[last_i1...c[1]]
-        right = arr2[last_i2...c[1]]
+        right = arr2[last_i2...c[2]]
 
         # add diffs
         diff_ary << [left, right] unless left.empty? && right.empty?
