@@ -190,63 +190,44 @@ class Kronk
       arr2 = @str2.split @char
 
       until arr1.empty? && arr2.empty?
-        item1, item2 = arr1.shift, arr2.shift
+        if arr1[0] == arr2[0]
+          arr2.shift
+          diff_ary << arr1.shift
 
-        if item1 == item2
-          if sub_diff
-            diff_ary << sub_diff
-            sub_diff = nil
-          end
-
-          diff_ary << item1
           next
         end
 
-        match1 = arr1.index item2
-        match2 = arr2.index item1
-
-
-        if use_left?(match1, match2)
-          diff_ary.concat diff_match(item1, match1, arr1, 0, sub_diff)
-          sub_diff = nil
-
-        elsif match2
-          diff_ary.concat diff_match(item2, match2, arr2, 1, sub_diff)
-          sub_diff = nil
-
-        elsif !item1.nil? || !item2.nil?
-          sub_diff ||= [[],[]]
-          sub_diff[0] << item1 if item1
-          sub_diff[1] << item2 if item2
-        end
+        diff_ary << upto_next_match(arr1, arr2)
       end
-
-      diff_ary << sub_diff if sub_diff
 
       diff_ary
     end
 
 
     ##
-    # Check if the index on the left should be used.
+    # Find the next match and between both arrays and return
+    # slices of each array up to (but not including) the match.
 
-    def use_left? index1, index2
-      index1 && (index2.nil? || index1 < index2)
-    end
+    def upto_next_match arr1, arr2
+      indecies = nil
 
+      arr1.each_with_index do |line, i|
+        j = arr2.index line
+        next unless j
 
-    ##
-    # Create a diff from a match.
+        if indecies
+          diff = (indecies[0] - indecies[1]).abs
+          add  = indecies[0] + indecies[1]
+        end
 
-    def diff_match item, match, arr, side, sub_diff
-      sub_diff ||= [[],[]]
+        indecies = [i, j] if diff.nil? ||
+                              arr1[i+1] == arr2[j+1] &&
+                              (i + j) < add          &&
+                              (i - j).abs < diff
+      end
 
-      index = match - 1
-      added = [item]
-      added.concat arr.slice!(0..index) if index >= 0
-
-      sub_diff[side].concat(added)
-      [sub_diff, arr.shift]
+      return [arr1.slice!(0..-1), arr2.slice!(0..-1)] unless indecies
+      [arr1.slice!(0...indecies[0]), arr2.slice!(0...indecies[1])]
     end
 
 

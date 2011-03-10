@@ -22,4 +22,23 @@ Hoe.spec 'kronk' do
   self.extra_dev_deps << ['mocha', '~>0.9.10']
 end
 
+
+namespace :bm do
+
+  desc "Run performance benchmarks on diff"
+  task :diff do
+    $: << "lib"
+    require 'kronk'
+
+    start = Time.now
+    number = 1000
+
+    number.times do
+      Kronk.compare "prod.txt", "beta.txt"
+    end
+
+    puts "Ran #{number} times: #{(Time.now - start).to_f / number}"
+  end
+end
+
 # vim: syntax=ruby
