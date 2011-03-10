@@ -1,3 +1,9 @@
+=== 1.3.0 / 2011-03
+
+* Enhancements:
+
+  * Reimplemented the diff logic to be much more accurate.
+
 === 1.2.5 / 2011-03-09
 
 * Bugfixes:
