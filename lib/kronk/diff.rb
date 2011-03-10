@@ -231,6 +231,129 @@ class Kronk
     end
 
 
+
+    def create_diff
+      diff_ary = []
+
+      arr1 = @str1.split @char
+      arr2 = @str2.split @char
+
+      common_list = find_common arr1, arr2
+
+      return [[arr1, arr2]] if common_list.nil?
+
+      #p common_list
+
+      last_i1 = 0
+      last_i2 = 0
+
+      common_list.each do |c|
+        #p "diff start: #{last_i1} up to #{c[1]-1}"
+        #p "matched #{c[1]} -> #{c[1] + c[0]}"
+
+        left  = arr1[last_i1...c[1]]
+        right = arr2[last_i2...c[1]]
+
+        last_i1 = c[1] + c[0] + 1
+        last_i2 = c[2] + c[0] + 1
+
+        # add diffs
+        diff_ary << [left, right] unless left.empty? && right.empty?
+
+        # add common
+        diff_ary.concat arr1[c[1], c[0]]
+      end
+
+      c = common_list[-1]
+      last_i1 = c[1] + c[0] + 1
+
+      diff_ary.concat arr1[last_i1..-1] if last_i1 < arr1.length
+
+      diff_ary
+    end
+
+
+    def find_common arr1, arr2, i1=0, i2=0
+      common = longest_common_sequence arr1, arr2
+
+      return unless common
+
+      left_i = common[1]
+      right_i = common[2]
+
+      common[1] = common[1] + i1
+      common[2] = common[2] + i2
+
+      out = [common]
+
+      if left_i > 0 && right_i > 0
+        new_arr1 = arr1[0...left_i]
+        new_arr2 = arr2[0...right_i]
+
+        pre_common = find_common new_arr1, new_arr2, i1, i2
+        out = pre_common.concat out if pre_common
+      end
+
+      if (common[0] + left_i  < arr1.length - 1) &&
+         (common[0] + right_i < arr2.length - 1)
+
+        s1 = left_i  + common[0]
+        s2 = right_i + common[0]
+
+        new_arr1 = arr1[s1..-1]
+        new_arr2 = arr2[s2..-1]
+
+        post_common = find_common new_arr1, new_arr2, s1+i1, s2+i2
+        out.concat post_common if post_common
+      end
+
+      out
+    end
+
+
+    def longest_common_sequence arr1, arr2
+      longest = nil
+
+      i = 0
+
+      while i < arr1.length
+        return longest if !longest.nil? && arr1[i..-1].length < longest[0]
+        line1 = arr1[i]
+
+        j = 0
+
+        while j < arr2.length
+
+          line2 = arr2[j]
+
+          j += 1 and next unless line1 == line2
+
+          k = i
+          start_j = j
+
+          while line1 == line2 && k < arr1.length
+            k += 1
+            j += 1
+
+            line1 = arr1[k]
+            line2 = arr2[j]
+          end
+
+          len = j - start_j
+
+          if longest.nil? || longest[0] < len
+            longest = [len, i, j-len]
+          end
+
+          j += 1
+        end
+        i += 1
+      end
+
+      longest
+    end
+
+
     ##
     # Returns a formatted output as a string.
     # Supported options are:

@@ -7,6 +7,40 @@ class TestDiff < Test::Unit::TestCase
   end
 
 
+  def test_longest_common_sequence
+    arr1 = [1,2,3,4,5,6,7,8,9,0]
+    arr2 = [2,3,1,4,7,8,9,0,5,6]
+
+    assert_equal [4, 6, 4], @diff.longest_common_sequence(arr1, arr2)
+  end
+
+
+  def test_longest_common_sequence_end
+    arr1 = [1,2,3,4,5,6,7,8,9,0]
+    arr2 = [2,1,4,9,0]
+
+    assert_equal [2, 8, 3], @diff.longest_common_sequence(arr1, arr2)
+  end
+
+
+  def test_find_common
+    arr1 = [1,2,3,4,5,6,7,8,9,0]
+    arr2 = [2,3,1,4,7,8,9,0,5,6]
+
+    assert_equal [[2, 1, 0], [1, 3, 3], [4, 6, 4]],
+                @diff.find_common(arr1, arr2)
+  end
+
+
+  def test_find_common_many
+    arr1 = [1,2,3,4,5,6,7,8,9,0,7,8]
+    arr2 = [2,3,1,4,7,8,9,0,5,6,1,7,8]
+
+    assert_equal [[2, 1, 0], [1, 3, 3], [4, 6, 4], [2, 10, 11]],
+                 @diff.find_common(arr1, arr2)
+  end
+
+
   def test_new_from_data
     other_data = {:foo => :bar}
 
