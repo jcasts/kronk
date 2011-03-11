@@ -218,6 +218,12 @@ class Kronk
     end
 
 
+    ##
+    # Recursively finds common sequences between two arrays and returns
+    # them in the order they occur as an array of arrays:
+    #   find_common arr1, arr2
+    #   #=> [[size, arr1_index, arr2_index], [size, arr1_index, arr2_index],...]
+
     def find_common arr1, arr2, i1=0, i2=0
       common = longest_common_sequence arr1, arr2
 
@@ -256,6 +262,9 @@ class Kronk
     end
 
 
+    ##
+    # Finds the longest common sequence between two arrays.
+
     def longest_common_sequence arr1, arr2
       longest = nil
 
@@ -270,7 +279,6 @@ class Kronk
         while j < arr2.length
 
           line2 = arr2[j]
-
           j += 1 and next unless line1 == line2
 
           k = i
