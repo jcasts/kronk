@@ -23,11 +23,28 @@ class TestDiff < Test::Unit::TestCase
   end
 
 
+  def test_longest_common_sequence_diff_last_only
+    arr1 = [7,0]
+    arr2 = [0]
+
+    assert_equal [1, 1, 0], @diff.longest_common_sequence(arr1, arr2)
+  end
+
+
   def test_find_common
     arr1 = [1,2,3,4,5,6,7,8,9,0]
     arr2 = [2,3,1,4,7,8,9,0,5,6]
 
     assert_equal [[2, 1, 0], [1, 3, 3], [4, 6, 4]],
+                @diff.find_common(arr1, arr2)
+  end
+
+
+  def test_find_common_prelast_only_diff
+    arr1 = [1,2,3,4,5,6,0]
+    arr2 = [1,2,3,4,5,0]
+
+    assert_equal [[5,0,0],[1,6,5]],
                 @diff.find_common(arr1, arr2)
   end
 
@@ -331,9 +348,8 @@ STR
 
     expected = [
       "line1",
-      [["line right"], ["line left", "line2", "line3"]],
+      [["line right", "line4"], ["line left", "line2", "line3"]],
       "line4",
-      [["line4"], []],
       "line5",
       [["line6", "line2", "line7"], []]
     ]

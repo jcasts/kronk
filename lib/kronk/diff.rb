@@ -184,56 +184,6 @@ class Kronk
 
     def create_diff
       diff_ary = []
-      sub_diff = nil
-
-      arr1 = @str1.split @char
-      arr2 = @str2.split @char
-
-      until arr1.empty? && arr2.empty?
-        if arr1[0] == arr2[0]
-          arr2.shift
-          diff_ary << arr1.shift
-
-          next
-        end
-
-        diff_ary << upto_next_match(arr1, arr2)
-      end
-
-      diff_ary
-    end
-
-
-    ##
-    # Find the next match and between both arrays and return
-    # slices of each array up to (but not including) the match.
-
-    def upto_next_match arr1, arr2
-      indecies = nil
-
-      arr1.each_with_index do |line, i|
-        j = arr2.index line
-        next unless j
-
-        if indecies
-          diff = (indecies[0] - indecies[1]).abs
-          add  = indecies[0] + indecies[1]
-        end
-
-        indecies = [i, j] if diff.nil? ||
-                              arr1[i+1] == arr2[j+1] &&
-                              (i + j) < add          &&
-                              (i - j).abs < diff
-      end
-
-      return [arr1.slice!(0..-1), arr2.slice!(0..-1)] unless indecies
-      [arr1.slice!(0...indecies[0]), arr2.slice!(0...indecies[1])]
-    end
-
-
-
-    def create_diff
-      diff_ary = []
 
       arr1 = @str1.split @char
       arr2 = @str2.split @char
@@ -242,15 +192,10 @@ class Kronk
 
       return [[arr1, arr2]] if common_list.nil?
 
-      #p common_list
-
       last_i1 = 0
       last_i2 = 0
 
       common_list.each do |c|
-        #p "diff start: #{last_i1} up to #{c[1]-1}"
-        #p "matched #{c[1]} -> #{c[1] + c[0]}"
-
         left  = arr1[last_i1...c[1]]
         right = arr2[last_i2...c[2]]
 
@@ -294,8 +239,8 @@ class Kronk
         out = pre_common.concat out if pre_common
       end
 
-      if (common[0] + left_i  < arr1.length - 1) &&
-         (common[0] + right_i < arr2.length - 1)
+      if (common[0] + left_i  < arr1.length) &&
+         (common[0] + right_i < arr2.length)
 
         s1 = left_i  + common[0]
         s2 = right_i + common[0]
