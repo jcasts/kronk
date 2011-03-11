@@ -518,28 +518,28 @@ STR
 
   def diff_302_301_color
     str = <<STR
-\033[31mHTTP/1.1 302 Found\033[0m
-\033[31mLocation: http://igoogle.com/\033[0m
-\033[32mHTTP/1.1 301 Moved Permanently\033[0m
-\033[32mLocation: http://www.google.com/\033[0m
-Content-Type: text/html; charset=UTF-8
-Date: Fri, 26 Nov 2010 16:14:45 GMT
-Expires: Sun, 26 Dec 2010 16:14:45 GMT
-Cache-Control: public, max-age=2592000
-Server: gws
-\033[31mContent-Length: 260\033[0m
-\033[32mContent-Length: 219\033[0m
-X-XSS-Protection: 1; mode=block
-
-<HTML><HEAD><meta http-equiv="content-type" content="text/html;charset=utf-8">
-\033[31m<TITLE>302 Found</TITLE></HEAD><BODY>\033[0m
-\033[31m<H1>302 Found</H1>\033[0m
-\033[32m<TITLE>301 Moved</TITLE></HEAD><BODY>\033[0m
-\033[32m<H1>301 Moved</H1>\033[0m
-The document has moved
-<A HREF="http://www.google.com/">here</A>.
-\033[31m<A HREF="http://igoogle.com/">here</A>.\033[0m
-</BODY></HTML>
+\033[31m- HTTP/1.1 302 Found\033[0m
+\033[31m- Location: http://igoogle.com/\033[0m
+\033[32m+ HTTP/1.1 301 Moved Permanently\033[0m
+\033[32m+ Location: http://www.google.com/\033[0m
+  Content-Type: text/html; charset=UTF-8
+  Date: Fri, 26 Nov 2010 16:14:45 GMT
+  Expires: Sun, 26 Dec 2010 16:14:45 GMT
+  Cache-Control: public, max-age=2592000
+  Server: gws
+\033[31m- Content-Length: 260\033[0m
+\033[32m+ Content-Length: 219\033[0m
+  X-XSS-Protection: 1; mode=block
+  
+  <HTML><HEAD><meta http-equiv="content-type" content="text/html;charset=utf-8">
+\033[31m- <TITLE>302 Found</TITLE></HEAD><BODY>\033[0m
+\033[31m- <H1>302 Found</H1>\033[0m
+\033[32m+ <TITLE>301 Moved</TITLE></HEAD><BODY>\033[0m
+\033[32m+ <H1>301 Moved</H1>\033[0m
+  The document has moved
+  <A HREF="http://www.google.com/">here</A>.
+\033[31m- <A HREF="http://igoogle.com/">here</A>.\033[0m
+  </BODY></HTML>
 STR
     str.strip
   end

@@ -66,18 +66,18 @@ class Kronk
 
       def self.deleted str
         require_win_color if Kronk.windows?
-        "\033[31m#{str}\033[0m"
+        "\033[31m- #{str}\033[0m"
       end
 
 
       def self.added str
         require_win_color if Kronk.windows?
-        "\033[32m#{str}\033[0m"
+        "\033[32m+ #{str}\033[0m"
       end
 
 
       def self.common str
-        str
+        "  #{str}"
       end
     end
 
@@ -229,7 +229,7 @@ class Kronk
 
       return unless common
 
-      left_i = common[1]
+      left_i  = common[1]
       right_i = common[2]
 
       common[1] = common[1] + i1
