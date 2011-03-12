@@ -28,7 +28,7 @@ namespace :bm do
   desc "Run performance benchmarks on diff"
   task :diff do
     $: << "lib"
-    require 'kronk'
+    require './lib/kronk'
 
     start = Time.now
     number = 1000

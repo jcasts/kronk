@@ -272,13 +272,14 @@ class Kronk
 
       while i < arr1.length
         return longest if !longest.nil? && arr1[i..-1].length < longest[0]
-        line1 = arr1[i]
 
         j = 0
 
         while j < arr2.length
 
+          line1 = arr1[i]
           line2 = arr2[j]
+
           j += 1 and next unless line1 == line2
 
           k = i
