@@ -271,7 +271,7 @@ class Kronk
       i = 0
 
       while i < arr1.length
-        return longest if !longest.nil? && arr1[i..-1].length < longest[0]
+        return longest if longest && arr1.length - (i+1) < longest[0]
 
         j = 0
 
@@ -295,9 +295,7 @@ class Kronk
 
           len = j - start_j
 
-          if longest.nil? || longest[0] < len
-            longest = [len, i, j-len]
-          end
+          longest = [len, i, j-len] if !longest || longest[0] < len
 
           j += 1
         end
