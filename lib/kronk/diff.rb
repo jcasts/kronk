@@ -281,18 +281,7 @@ class Kronk
         i += 1
       end
 
-      sequences.sort! do |x, y|
-        if y[0] == x[0]
-          if x[1] == y[1]
-            x[2] <=> y[2]
-          else
-            x[1] <=> y[1]
-          end
-        else
-          y[0] <=> x[0]
-        end
-      end
-
+      sequences.sort!{|x, y| y[0] <=> x[0]}
       sequences
     end
 

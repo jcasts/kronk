@@ -41,7 +41,7 @@ namespace :bm do
   desc "Run performance benchmarks on diff and parsing"
   task :full do
 
-    benchmark do
+    benchmark(100) do
       Kronk.compare "prod.txt", "beta.txt"
     end
   end
@@ -54,7 +54,7 @@ namespace :bm do
 
     diff = Kronk::Diff.new_from_data left, right
 
-    benchmark(30) do
+    benchmark(100) do
       diff.create_diff
     end
   end
