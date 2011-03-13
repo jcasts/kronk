@@ -227,18 +227,13 @@ class Kronk
     def find_common arr1, arr2
       used1  = []
       used2  = []
-      common = []
 
-      common_sequences(arr1, arr2).each do |seq|
-        next if used1[seq[1]] ||
-                used2[seq[2]] ||
-                used1[seq[1]..-1].to_a.compact.length !=
-                  used2[seq[2]..-1].to_a.compact.length
-
-        used1.fill(true, seq[1], seq[0])
+      common = common_sequences(arr1, arr2).select do |seq|
+        !(used1[seq[1]] || used2[seq[2]] ||
+            used1[seq[1]..-1].to_a.compact.length !=
+              used2[seq[2]..-1].to_a.compact.length) &&
+        used1.fill(true, seq[1], seq[0])             &&
         used2.fill(true, seq[2], seq[0])
-
-        common << seq
       end
 
       common.sort!{|x, y| x[1] <=> y[1]}
