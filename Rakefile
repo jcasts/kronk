@@ -3,7 +3,18 @@
 require 'rubygems'
 require 'hoe'
 
-Hoe.plugin :isolate
+
+if ENV['version']
+  gem 'kronk', ENV['version']
+else
+  $: << "lib"
+  Hoe.plugin :isolate
+end
+
+require 'kronk'
+
+puts "kronk-#{Kronk::VERSION}"
+
 
 Hoe.spec 'kronk' do
   developer('Jeremie Castagna', 'yaksnrainbows@gmail.com')
@@ -32,9 +43,6 @@ def benchmark num=1000
   puts "Ran #{num} times: #{(Time.now - start).to_f / num}"
 end
 
-$: << "lib"
-require 'kronk'
-p Kronk::VERSION
 
 namespace :bm do
 
