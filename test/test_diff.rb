@@ -7,30 +7,6 @@ class TestDiff < Test::Unit::TestCase
   end
 
 
-  def test_longest_common_sequence
-    arr1 = [1,2,3,4,5,6,7,8,9,0]
-    arr2 = [2,3,1,4,7,8,9,0,5,6]
-
-    assert_equal [4, 6, 4], @diff.longest_common_sequence(arr1, arr2)
-  end
-
-
-  def test_longest_common_sequence_end
-    arr1 = [1,2,3,4,5,6,7,8,9,0]
-    arr2 = [2,1,4,9,0]
-
-    assert_equal [2, 8, 3], @diff.longest_common_sequence(arr1, arr2)
-  end
-
-
-  def test_longest_common_sequence_diff_last_only
-    arr1 = [7,0]
-    arr2 = [0]
-
-    assert_equal [1, 1, 0], @diff.longest_common_sequence(arr1, arr2)
-  end
-
-
   def test_find_common
     arr1 = [1,2,3,4,5,6,7,8,9,0]
     arr2 = [2,3,1,4,7,8,9,0,5,6]

@@ -190,7 +190,7 @@ class Kronk
 
       common_list = find_common arr1, arr2
 
-      return [[arr1, arr2]] if common_list.nil?
+      return [[arr1, arr2]] if common_list.empty?
 
       last_i1 = 0
       last_i2 = 0
@@ -224,67 +224,45 @@ class Kronk
     #   find_common arr1, arr2
     #   #=> [[size, arr1_index, arr2_index], [size, arr1_index, arr2_index],...]
 
-    def find_common arr1, arr2, i1=0, i2=0
-      common = longest_common_sequence arr1, arr2
+    def find_common arr1, arr2
+      used1  = []
+      used2  = []
+      common = []
 
-      return unless common
+      common_sequences(arr1, arr2).each do |seq|
+        next if used1[seq[1]] ||
+                used2[seq[2]] ||
+                used1[seq[1]..-1].to_a.compact.length !=
+                  used2[seq[2]..-1].to_a.compact.length
 
-      left_i  = common[1]
-      right_i = common[2]
+        used1.fill(true, seq[1], seq[0])
+        used2.fill(true, seq[2], seq[0])
 
-      common[1] = common[1] + i1
-      common[2] = common[2] + i2
-
-      out = [common]
-
-      if left_i > 0 && right_i > 0
-        new_arr1 = arr1[0...left_i]
-        new_arr2 = arr2[0...right_i]
-
-        pre_common = find_common new_arr1, new_arr2, i1, i2
-        out = pre_common.concat out if pre_common
+        common << seq
       end
 
-      if (common[0] + left_i  < arr1.length) &&
-         (common[0] + right_i < arr2.length)
-
-        s1 = left_i  + common[0]
-        s2 = right_i + common[0]
-
-        new_arr1 = arr1[s1..-1]
-        new_arr2 = arr2[s2..-1]
-
-        post_common = find_common new_arr1, new_arr2, s1+i1, s2+i2
-        out.concat post_common if post_common
-      end
-
-      out
+      common.sort!{|x, y| x[1] <=> y[1]}
+      common
     end
 
 
-    ##
-    # Finds the longest common sequence between two arrays.
-
-    def longest_common_sequence arr1, arr2
-      longest = nil
+    def common_sequences arr1, arr2
+      sequences = []
 
       i = 0
 
       while i < arr1.length
-        return longest if !longest.nil? && arr1[i..-1].length < longest[0]
-        line1 = arr1[i]
-
         j = 0
 
         while j < arr2.length
-
+          line1 = arr1[i]
           line2 = arr2[j]
           j += 1 and next unless line1 == line2
 
           k = i
           start_j = j
 
-          while line1 == line2 && k < arr1.length
+          while line1 == line2 && (k < arr1.length || j < arr2.length)
             k += 1
             j += 1
 
@@ -294,18 +272,27 @@ class Kronk
 
           len = j - start_j
 
-          if longest.nil? || longest[0] < len
-            longest = [len, i, j-len]
-          end
+          sequences << [len, i, j-len]
 
           j += 1
         end
         i += 1
       end
 
-      longest
-    end
+      sequences.sort! do |x, y|
+        if y[0] == x[0]
+          if x[1] == y[1]
+            x[2] <=> y[2]
+          else
+            x[1] <=> y[1]
+          end
+        else
+          y[0] <=> x[0]
+        end
+      end
 
+      sequences
+    end
 
     ##
     # Returns a formatted output as a string.
