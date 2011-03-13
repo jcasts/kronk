@@ -249,20 +249,23 @@ class Kronk
     def common_sequences arr1, arr2
       sequences = []
 
+      arr2_map = Hash.new{|h,k| h[k] = []}
+      arr2.each_with_index do |line, j|
+        arr2_map[line] << j
+      end
+
       i = 0
 
       while i < arr1.length
-        j = 0
 
-        while j < arr2.length
+        arr2_map[arr1[i]].each do |j|
           line1 = arr1[i]
           line2 = arr2[j]
-          j += 1 and next unless line1 == line2
 
           k = i
           start_j = j
 
-          while line1 == line2 && (k < arr1.length || j < arr2.length)
+          while line1 == line2 && k < arr1.length
             k += 1
             j += 1
 
@@ -272,9 +275,8 @@ class Kronk
 
           len = j - start_j
 
-          sequences << [len, i, j-len]
+          sequences << [len, i, start_j]
 
-          j += 1
         end
         i += 1
       end
@@ -293,6 +295,7 @@ class Kronk
 
       sequences
     end
+
 
     ##
     # Returns a formatted output as a string.
