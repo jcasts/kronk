@@ -22,22 +22,41 @@ Hoe.spec 'kronk' do
   self.extra_dev_deps << ['mocha', '~>0.9.10']
 end
 
+def benchmark num=1000
+  start = Time.now
+
+  num.times do
+    yield
+  end
+
+  puts "Ran #{num} times: #{(Time.now - start).to_f / num}"
+end
+
+$: << "lib"
+require 'kronk'
+p Kronk::VERSION
 
 namespace :bm do
 
-  desc "Run performance benchmarks on diff"
-  task :diff do
-    $: << "lib"
-    require './lib/kronk'
+  desc "Run performance benchmarks on diff and parsing"
+  task :full do
 
-    start = Time.now
-    number = 1000
-
-    number.times do
+    benchmark do
       Kronk.compare "prod.txt", "beta.txt"
     end
+  end
 
-    puts "Ran #{number} times: #{(Time.now - start).to_f / number}"
+
+  desc "Run performance benchmarks on diffs"
+  task :diff do
+    left = Kronk::Request.retrieve("prod.txt").parsed_body
+    right = Kronk::Request.retrieve("beta.txt").parsed_body
+
+    diff = Kronk::Diff.new_from_data left, right
+
+    benchmark(30) do
+      diff.create_diff
+    end
   end
 end
 
