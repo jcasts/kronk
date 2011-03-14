@@ -62,9 +62,21 @@ namespace :bm do
 
     diff = Kronk::Diff.new_from_data left, right
 
+    arr1 = diff.str1.split "\n"
+    arr2 = diff.str2.split "\n"
+
     benchmark(100) do
-      diff.create_diff
+      #arr1.each{|i| 0.upto(5){|j| foo = j+123}}
+      #arr2.each{|i| foo = 'foobar'}
+      #arr2.each{|i| i == 'foobar'}
+      #diff.create_diff
+      diff.common_sequences arr1, arr2
+      #diff.find_common arr1, arr2
     end
+
+    Kronk::Diff::BENCHMARKS.each do |name, bm|
+      puts "#{name} (#{bm[:weight]/100}): #{bm[:time] / 100}"
+    end rescue nil
   end
 end
 

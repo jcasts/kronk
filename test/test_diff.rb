@@ -12,7 +12,7 @@ class TestDiff < Test::Unit::TestCase
     arr2 = [2,3,1,4,7,8,9,0,5,6]
 
     assert_equal [[2, 1, 0], [1, 3, 3], [4, 6, 4]],
-                @diff.find_common(arr1, arr2)
+                @diff.find_common(arr1, arr2).compact
   end
 
 
@@ -21,7 +21,7 @@ class TestDiff < Test::Unit::TestCase
     arr2 = [1,2,3,4,5,0]
 
     assert_equal [[5,0,0],[1,6,5]],
-                @diff.find_common(arr1, arr2)
+                @diff.find_common(arr1, arr2).compact
   end
 
 
@@ -30,7 +30,7 @@ class TestDiff < Test::Unit::TestCase
     arr2 = [2,3,1,4,7,8,9,0,5,6,1,7,8,0,0,9,1,2,4,4]
 
     assert_equal [[2,1,0],[1,3,3],[4,6,4],[2,10,11],[3,12,15],[2,16,18]],
-                 @diff.find_common(arr1, arr2)
+                 @diff.find_common(arr1, arr2).compact
   end
 
 
