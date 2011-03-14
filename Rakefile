@@ -33,15 +33,6 @@ Hoe.spec 'kronk' do
   self.extra_dev_deps << ['mocha', '~>0.9.10']
 end
 
-def benchmark num=1000
-  start = Time.now
-
-  num.times do
-    yield
-  end
-
-  puts "Ran #{num} times: #{(Time.now - start).to_f / num}"
-end
 
 
 class Object
@@ -65,6 +56,17 @@ class Object
       BENCHMARKS[name] = {:time => span, :weight => 1}
     end
   end
+end
+
+
+def benchmark num=1000
+  start = Time.now
+
+  num.times do
+    yield
+  end
+
+  puts "Ran #{num} times: #{(Time.now - start).to_f / num}"
 end
 
 
