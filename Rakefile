@@ -44,6 +44,30 @@ def benchmark num=1000
 end
 
 
+class Object
+
+  BENCHMARKS = {}
+
+  def benchmark name=nil
+    start = Time.now
+    yield
+    span = Time.now - start
+
+    if BENCHMARKS[name]
+      t = BENCHMARKS[name][:time]
+      w = BENCHMARKS[name][:weight]
+
+      t = t + span
+      w += 1
+
+      BENCHMARKS[name] = {:time => t, :weight => w}
+    else
+      BENCHMARKS[name] = {:time => span, :weight => 1}
+    end
+  end
+end
+
+
 namespace :bm do
 
   desc "Run performance benchmarks on diff and parsing"
@@ -69,13 +93,13 @@ namespace :bm do
       #arr1.each{|i| 0.upto(5){|j| foo = j+123}}
       #arr2.each{|i| foo = 'foobar'}
       #arr2.each{|i| i == 'foobar'}
-      #diff.create_diff
-      diff.common_sequences arr1, arr2
+      diff.create_diff
+      #diff.common_sequences arr1, arr2
       #diff.find_common arr1, arr2
       #`diff prod.txt beta.txt`
     end
 
-    Kronk::Diff::BENCHMARKS.each do |name, bm|
+    Object::BENCHMARKS.each do |name, bm|
       puts "#{name} (#{bm[:weight]/100}): #{bm[:time] / 100}"
     end rescue nil
   end

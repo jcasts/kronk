@@ -196,6 +196,8 @@ class Kronk
       last_i2 = 0
 
       common_list.each do |c|
+        next unless c
+
         left  = arr1[last_i1...c[1]]
         right = arr2[last_i2...c[2]]
 
@@ -228,61 +230,6 @@ class Kronk
       used1  = []
       used2  = []
 
-      common = common_sequences(arr1, arr2).select do |seq|
-        !(used1[seq[1]] || used2[seq[2]] ||
-            used1[seq[1]..-1].to_a.compact.length !=
-              used2[seq[2]..-1].to_a.compact.length) &&
-        used1.fill(true, seq[1], seq[0])             &&
-        used2.fill(true, seq[2], seq[0])
-      end
-
-      common.sort!{|x, y| x[1] <=> y[1]}
-      common
-    end
-
-
-    def create_diff
-      diff_ary = []
-
-      arr1 = @str1.split @char
-      arr2 = @str2.split @char
-
-      common_list = find_common arr1, arr2
-
-      return [[arr1, arr2]] if common_list.empty?
-
-      last_i1 = 0
-      last_i2 = 0
-
-      common_list.each do |c|
-        next unless c
-
-        left  = arr1[last_i1...c[1]]
-        right = arr2[last_i2...c[2]]
-
-        # add diffs
-        diff_ary << [left, right] unless left.empty? && right.empty?
-
-        # add common
-        diff_ary.concat arr1[c[1], c[0]]
-
-        last_i1 = c[1] + c[0]
-        last_i2 = c[2] + c[0]
-      end
-
-      left  = arr1[last_i1..-1]
-      right = arr2[last_i2..-1]
-
-      diff_ary << [left, right] unless left.empty? && right.empty?
-
-      diff_ary
-    end
-
-
-    def find_common arr1, arr2
-      used1  = []
-      used2  = []
-
       common = []
 
       common_sequences(arr1, arr2).reverse_each do |seqs|
@@ -302,24 +249,6 @@ class Kronk
       common
     end
 
-BENCHMARKS = {}
-def benchmark name=nil
-  start = Time.now
-  yield
-  span = Time.now - start
-
-  if BENCHMARKS[name]
-    t = BENCHMARKS[name][:time]
-    w = BENCHMARKS[name][:weight]
-
-    t = t + span
-    w += 1
-
-    BENCHMARKS[name] = {:time => t, :weight => w}
-  else
-    BENCHMARKS[name] = {:time => span, :weight => 1}
-  end
-end
 
     def common_sequences arr1, arr2
       sequences = []
@@ -354,48 +283,6 @@ end
 
       sequences
     end
-
-
-    def _common_sequences arr1, arr2
-      sequences = []
-      map = Hash.new
-
-      arr2_map = Hash.new{|h,k| h[k] = []}
-      arr2.each_with_index do |line, j|
-        arr2_map[line] << j
-      end
-
-      i = arr1.length - 1
-
-      while i >= 0
-        line = arr1[i]
-        prev_line = arr1[i+1]
-
-        arr2_map[line].each do |j|
-          prev_id = "#{i+1}-#{j+1}-#{prev_line}"
-          prev_map = map[prev_id]
-
-          curr_id = "#{i}-#{j}-#{line}"
-
-          len = 1
-
-          if prev_map
-            len = prev_map[0] + len
-            map[prev_id].clear
-            map.delete prev_id
-          end
-
-          map[curr_id] = [len, i,j]
-          sequences[len] ||= []
-          sequences[len] << map[curr_id]
-        end
-
-        i = i - 1
-      end
-
-      sequences
-    end
-
 
 
     ##
@@ -476,4 +363,15 @@ end
       formatted
     end
   end
+end
+
+
+# For Ruby 1.9
+
+unless [].respond_to? :nitems
+class Array
+  def nitems
+    self.compact.length
+  end
+end
 end
