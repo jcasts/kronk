@@ -39,7 +39,7 @@ class Object
 
   BENCHMARKS = {}
 
-  def benchmark name=nil
+  def bm name=nil
     start = Time.now
     yield
     span = Time.now - start
