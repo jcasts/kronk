@@ -365,22 +365,23 @@ end
         arr2_map[line] << j
       end
 
-      rarr1 = arr1.reverse
+      i = arr1.length - 1
 
-      rarr1.each_with_index do |line, ri|
-        i = arr1.length - ri
-        prev_line = arr1[i-1]
+      while i >= 0
+        line = arr1[i]
+        prev_line = arr1[i+1]
 
         arr2_map[line].each do |j|
-          prev_id = "#{ri-1}-#{j-1}-#{prev_line}"
+          prev_id = "#{i+1}-#{j+1}-#{prev_line}"
           prev_map = map[prev_id]
 
-          curr_id = "#{ri}-#{j}-#{line}"
+          curr_id = "#{i}-#{j}-#{line}"
 
           len = 1
+
           if prev_map
             len = prev_map[0] + len
-            sequences[prev_map[0]].delete prev_map
+            map[prev_id].clear
             map.delete prev_id
           end
 
@@ -388,6 +389,8 @@ end
           sequences[len] ||= []
           sequences[len] << map[curr_id]
         end
+
+        i = i - 1
       end
 
       sequences

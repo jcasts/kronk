@@ -72,6 +72,7 @@ namespace :bm do
       #diff.create_diff
       diff.common_sequences arr1, arr2
       #diff.find_common arr1, arr2
+      #`diff prod.txt beta.txt`
     end
 
     Kronk::Diff::BENCHMARKS.each do |name, bm|
