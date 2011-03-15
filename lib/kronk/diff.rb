@@ -178,69 +178,6 @@ class Kronk
     end
 
 
-    def _find_common arr1, arr2, i=0, j=0
-      seq = largest_sequence arr1, arr2
-
-      return [] unless seq
-
-      common = [[seq[0], seq[1]+i, seq[2]+j]]
-
-      if seq[1] > 0 || seq[2] > 0
-        new_arr1 = arr1[0...seq[1]]
-        new_arr2 = arr2[0...seq[2]]
-
-        common = find_common(new_arr1, new_arr2, i, j).concat common
-      end
-
-      local_i = seq[1] + seq[0]
-      local_j = seq[2] + seq[0]
-
-      if local_i < arr1.length || local_j < arr2.length
-        new_arr1 = arr1[local_i..-1]
-        new_arr2 = arr2[local_j..-1]
-
-        common.concat find_common(new_arr1, new_arr2, i+local_i, j+local_j)
-      end
-
-      common
-    end
-
-    def largest_sequence arr1, arr2
-      largest = nil
-
-      arr2_map = Hash.new{|h,k| h[k] = []}
-      arr2.each_with_index do |line, j|
-        arr2_map[line] << j
-      end
-
-      arr1.each_with_index do |line, i|
-        arr2_map[line].each do |j|
-          line1 = line
-          line2 = arr2[j]
-
-          k = i
-          start_j = j
-
-          while line1 == line2 && k < arr1.length
-            k += 1
-            j += 1
-
-            line1 = arr1[k]
-            line2 = arr2[j]
-          end
-
-          len = j - start_j
-          seq = [len, i, start_j]
-
-          largest = seq if !largest || seq[0] > largest[0]
-          return largest if arr1.length <= k+1
-        end
-      end
-
-      largest
-    end
-
-
     def common_sequences arr1, arr2
       sequences = []
 
