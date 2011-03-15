@@ -1,86 +1,10 @@
 class Kronk
 
-
   ##
   # Creates simple diffs as formatted strings or arrays, from two strings or
   # data objects.
 
   class Diff
-
-    ##
-    # Format diff with ascii
-
-    class AsciiFormat
-
-      def self.lines line_nums, col_width
-        out =
-          [*line_nums].map do |lnum|
-            lnum.to_s.rjust col_width
-          end.join "|"
-
-        "#{out} "
-      end
-
-
-      def self.deleted str
-        "- #{str}"
-      end
-
-
-      def self.added str
-        "+ #{str}"
-      end
-
-
-      def self.common str
-        "  #{str}"
-      end
-    end
-
-
-    ##
-    # Format diff with ascii
-
-    class ColorFormat
-
-      def self.require_win_color
-        begin
-          require 'Win32/Console/ANSI'
-        rescue LoadError
-          puts "Warning: You must gem install win32console to use color"
-        end
-      end
-
-
-      def self.lines line_nums, col_width
-        require_win_color if Kronk.windows?
-
-        out =
-          [*line_nums].map do |lnum|
-            lnum.to_s.rjust col_width
-          end.join "\033[32m"
-
-        "\033[7;31m#{out}\033[0m "
-      end
-
-
-      def self.deleted str
-        require_win_color if Kronk.windows?
-        "\033[31m- #{str}\033[0m"
-      end
-
-
-      def self.added str
-        require_win_color if Kronk.windows?
-        "\033[32m+ #{str}\033[0m"
-      end
-
-
-      def self.common str
-        "  #{str}"
-      end
-    end
-
 
     ##
     # Creates a new diff from two data objects.
@@ -190,12 +114,14 @@ class Kronk
 
       common_list = find_common arr1, arr2
 
-      return [[arr1, arr2]] if common_list.nil?
+      return [[arr1, arr2]] if common_list.empty?
 
       last_i1 = 0
       last_i2 = 0
 
       common_list.each do |c|
+        next unless c
+
         left  = arr1[last_i1...c[1]]
         right = arr2[last_i2...c[2]]
 
@@ -224,63 +150,46 @@ class Kronk
     #   find_common arr1, arr2
     #   #=> [[size, arr1_index, arr2_index], [size, arr1_index, arr2_index],...]
 
-    def find_common arr1, arr2, i1=0, i2=0
-      common = longest_common_sequence arr1, arr2
+    def find_common arr1, arr2
+      used1  = []
+      used2  = []
 
-      return unless common
+      common = []
 
-      left_i  = common[1]
-      right_i = common[2]
+      common_sequences(arr1, arr2).reverse_each do |seqs|
+        next unless seqs
+        seqs.each do |seq|
+          next if used1[seq[1]] || used2[seq[2]] ||
+                  used1[seq[1]..-1].to_a.nitems !=
+                    used2[seq[2]..-1].to_a.nitems
 
-      common[1] = common[1] + i1
-      common[2] = common[2] + i2
+          u1 = used1[seq[1], seq[0]].to_a.index(true) || seq[0]
+          u2 = used2[seq[2], seq[0]].to_a.index(true) || seq[0]
+          seq[0] = u1 < u2 ? u1 : u2
 
-      out = [common]
+          used1.fill(true, seq[1], seq[0])
+          used2.fill(true, seq[2], seq[0])
 
-      if left_i > 0 && right_i > 0
-        new_arr1 = arr1[0...left_i]
-        new_arr2 = arr2[0...right_i]
-
-        pre_common = find_common new_arr1, new_arr2, i1, i2
-        out = pre_common.concat out if pre_common
+          common[seq[1]] = seq
+        end
       end
 
-      if (common[0] + left_i  < arr1.length) &&
-         (common[0] + right_i < arr2.length)
-
-        s1 = left_i  + common[0]
-        s2 = right_i + common[0]
-
-        new_arr1 = arr1[s1..-1]
-        new_arr2 = arr2[s2..-1]
-
-        post_common = find_common new_arr1, new_arr2, s1+i1, s2+i2
-        out.concat post_common if post_common
-      end
-
-      out
+      common
     end
 
 
-    ##
-    # Finds the longest common sequence between two arrays.
+    def common_sequences arr1, arr2
+      sequences = []
 
-    def longest_common_sequence arr1, arr2
-      longest = nil
+      arr2_map = Hash.new{|h,k| h[k] = []}
+      arr2.each_with_index do |line, j|
+        arr2_map[line] << j
+      end
 
-      i = 0
-
-      while i < arr1.length
-        return longest if longest && arr1.length - (i+1) < longest[0]
-
-        j = 0
-
-        while j < arr2.length
-
-          line1 = arr1[i]
+      arr1.each_with_index do |line, i|
+        arr2_map[line].each do |j|
+          line1 = line
           line2 = arr2[j]
-
-          j += 1 and next unless line1 == line2
 
           k = i
           start_j = j
@@ -295,14 +204,12 @@ class Kronk
 
           len = j - start_j
 
-          longest = [len, i, j-len] if !longest || longest[0] < len
-
-          j += 1
+          sequences[len] ||= []
+          sequences[len] << [len, i, start_j]
         end
-        i += 1
       end
 
-      longest
+      sequences
     end
 
 
@@ -384,4 +291,15 @@ class Kronk
       formatted
     end
   end
+end
+
+
+# For Ruby 1.9
+
+unless [].respond_to? :nitems
+class Array
+  def nitems
+    self.compact.length
+  end
+end
 end
