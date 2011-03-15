@@ -23,6 +23,8 @@ class Kronk
 
 
   require 'kronk/data_set'
+  require 'kronk/diff/ascii_format'
+  require 'kronk/diff/color_format'
   require 'kronk/diff'
   require 'kronk/response'
   require 'kronk/request'
