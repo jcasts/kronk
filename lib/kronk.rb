@@ -428,6 +428,9 @@ class Kronk
   # Runs the kronk command with the given terminal args.
 
   def self.run argv=ARGV
+
+    options = parse_args argv
+
     begin
       load_config
 
@@ -448,8 +451,6 @@ class Kronk
     end
 
     load_cookie_jar
-
-    options = parse_args argv
 
     load_requires options[:requires]
 
