@@ -4,6 +4,8 @@
 
   * Added auto-querying functionality with param randomizing.
 
+  * Added integration test helper methods.
+
 * Enhancements:
 
   * Reimplemented the diff logic to "largest match" algorithm.
