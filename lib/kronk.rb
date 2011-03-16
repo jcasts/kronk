@@ -32,20 +32,24 @@ class Kronk
   require 'kronk/xml_parser'
 
 
+  # Config directory.
+  CONFIG_DIR = File.expand_path "~/.kronk"
+
+
   # Default config file to load. Defaults to ~/.kronk.
-  DEFAULT_CONFIG_FILE = File.expand_path "~/.kronk"
+  DEFAULT_CONFIG_FILE = File.join CONFIG_DIR, "rc"
 
 
   # Default cache file.
-  DEFAULT_CACHE_FILE = File.expand_path "~/.kronk_cache"
+  DEFAULT_CACHE_FILE = File.join CONFIG_DIR, "cache"
 
 
   # Default cookies file.
-  DEFAULT_COOKIES_FILE = File.expand_path "~/.kronk_cookies"
+  DEFAULT_COOKIES_FILE = File.join CONFIG_DIR, "cookies"
 
 
   # Default file with history of unique URIs. (Used for autocomplete)
-  DEFAULT_HISTORY_FILE = File.expand_path "~/.kronk_history"
+  DEFAULT_HISTORY_FILE =File.join CONFIG_DIR, "history"
 
 
   # Default Content-Type header to parser mapping.
@@ -143,10 +147,27 @@ class Kronk
   ##
   # Creates the default config file at the given path.
 
-  def self.make_config_file filepath=DEFAULT_CONFIG_FILE
-    File.open filepath, "w+" do |file|
+  def self.make_config_file
+    Dir.mkdir CONFIG_DIR unless File.directory? CONFIG_DIR
+
+    File.open DEFAULT_CONFIG_FILE, "w+" do |file|
       file << DEFAULT_CONFIG.to_yaml
     end
+  end
+
+
+  ##
+  # Moves the old config file to the new directory structure.
+
+  def self.move_config_file
+    require 'fileutils'
+
+    kronk_tmp_config = ".kronk.tmp"
+    File.rename CONFIG_DIR, kronk_tmp_config
+
+    Dir.mkdir CONFIG_DIR
+
+    FileUtils.mv kronk_tmp_config, DEFAULT_CONFIG_FILE
   end
 
 
@@ -413,8 +434,15 @@ class Kronk
     rescue Errno::ENOENT
       make_config_file
 
-      $stderr << "\nNo config file was found.\n\n"
+      $stderr << "\nNo config file was found.\n"
       $stderr << "Created default config in #{DEFAULT_CONFIG_FILE}\n"
+      $stderr << "Edit file if necessary and try again.\n"
+      exit 2
+
+    rescue Errno::ENOTDIR
+      move_config_file
+
+      $stderr << "\nOld config file was moved to #{DEFAULT_CONFIG_FILE}\n"
       $stderr << "Edit file if necessary and try again.\n"
       exit 2
     end
