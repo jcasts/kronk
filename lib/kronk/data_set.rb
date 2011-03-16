@@ -20,6 +20,22 @@ class Kronk
 
 
     ##
+    # Retrieves the data at the given path array.
+
+    def data_at_path path
+      self.class.data_at_path @data, path
+    end
+
+
+    ##
+    # Checks if data is available at the given path.
+
+    def data_at_path? path
+      self.class.data_at_path? @data, path
+    end
+
+
+    ##
     # Modify the data object by passing inclusive or exclusive data paths.
     # Supports the following options:
     # :only_data:: String/Array - keep data that matches the paths
@@ -55,7 +71,7 @@ class Kronk
       new_data = @data.class.new
 
       [*data_paths].each do |data_path|
-        find_data @data, data_path do |obj, k, path|
+        find_data data_path do |obj, k, path|
 
           curr_data     = @data
           new_curr_data = new_data
@@ -67,10 +83,6 @@ class Kronk
 
             elsif i == path.length - 2 && affect_parent
               new_curr_data[key] = curr_data[key]
-              break
-
-            elsif path.length == 1 && affect_parent
-              new_data = curr_data
               break
 
             else
@@ -91,11 +103,9 @@ class Kronk
 
     def delete_data_points data_paths, affect_parent=false
       [*data_paths].each do |data_path|
-        find_data @data, data_path do |obj, k, path|
+        find_data data_path do |obj, k, path|
 
           if affect_parent && data_at_path?(path)
-            @data = @data.class.new and return if path.length == 1
-
             parent_data = data_at_path path[0..-3]
             del_method  = Array === parent_data ? :delete_at : :delete
 
@@ -130,7 +140,15 @@ class Kronk
     #   # Returns an Array of grand-children key/value pairs
     #   # where the value is 'invalid' or blank
 
-    def find_data data, data_path, curr_path=nil, &block
+    def find_data data_path, curr_path=nil, &block
+      self.class.find_data @data, data_path, curr_path, &block
+    end
+
+
+    ##
+    # See DataSet#find_data
+
+    def self.find_data data, data_path, curr_path=nil, &block
       curr_path ||= []
 
       key, value, rec, data_path = parse_data_path data_path
@@ -149,8 +167,8 @@ class Kronk
     ##
     # Checks if data is available at the given path.
 
-    def data_at_path? path
-      data_at_path path
+    def self.data_at_path? data, path
+      data_at_path(data, path)
       true
 
     rescue NoMethodError, TypeError
@@ -161,8 +179,8 @@ class Kronk
     ##
     # Retrieve the data at the given path array location.
 
-    def data_at_path path
-      curr = @data
+    def self.data_at_path data, path
+      curr = data
       path.each do |p|
         raise TypeError, "Expected instance of Array or Hash" unless
           Array === curr || Hash === curr
@@ -180,7 +198,7 @@ class Kronk
     # - Recursive matching
     # - New data path value
 
-    def parse_data_path data_path
+    def self.parse_data_path data_path
       data_path  = data_path.dup
       key        = nil
       value      = nil
@@ -220,10 +238,10 @@ class Kronk
     ##
     # Decide whether to make path item a regex, range, array, or string.
 
-    def parse_path_item str
+    def self.parse_path_item str
       if str =~ /(^|[^\\])([\*\?\|])/
         str.gsub!(/(^|[^\\])(\*|\?)/, '\1.\2')
-        /^(#{str})$/i
+        /^(#{str})$/
 
       elsif str =~ %r{^(\-?\d+)(\.{2,3})(\-?\d+)$}
         Range.new $1.to_i, $3.to_i, ($2 == "...")
@@ -241,7 +259,7 @@ class Kronk
     # Yield data object and key, if a specific key or value matches
     # the given data.
 
-    def yield_data_points data, mkey, mvalue=nil,
+    def self.yield_data_points data, mkey, mvalue=nil,
                                recursive=false, path=nil, &block
 
       return unless Hash === data || Array === data
@@ -263,7 +281,7 @@ class Kronk
     ##
     # Check if data key or value is a match for nested data searches.
 
-    def match_data_item item1, item2
+    def self.match_data_item item1, item2
       return if !item1.nil? && (Array === item2 || Hash === item2)
 
       if Regexp === item1
@@ -276,7 +294,7 @@ class Kronk
         true
 
       else
-        item2.to_s.downcase == item1.to_s.downcase
+        item2.to_s == item1.to_s
       end
     end
 
@@ -284,7 +302,7 @@ class Kronk
     ##
     # Universal iterator for Hash and Array objects.
 
-    def each_data_item data, &block
+    def self.each_data_item data, &block
       case data
 
       when Hash
