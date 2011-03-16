@@ -6,14 +6,17 @@
 
 * Enhancements:
 
-  * Reimplemented the diff logic to be much more accurate.
+  * Reimplemented the diff logic to "largest match" algorithm.
 
-  * Added support for ranges and index+length pairs to DataSet path parsing.
-
+  * Added support for ranges and 'index,length' pairs to DataSet path parsing.
 
   * Moved kronk config files to the ~/.kronk folder.
 
-  * Added option for case-insensitive path matching.
+  * Made path matching case-insensitive.
+
+* Bugfixes:
+
+  * Fix for path lookup of parents when parent is the root data object.
 
 === 1.2.5 / 2011-03-09
 

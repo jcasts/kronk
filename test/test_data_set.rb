@@ -213,7 +213,7 @@ class TestDataSet < Test::Unit::TestCase
     keys = []
     data_points = []
 
-    @dataset.find_data "*/*/0|1" do |data, key, path|
+    @dataset.find_data @data, "*/*/0|1" do |data, key, path|
       keys << key
       data_points << data
     end
@@ -229,7 +229,7 @@ class TestDataSet < Test::Unit::TestCase
     paths = []
     data_points = []
 
-    @dataset.find_data "**=foo*" do |data, key, path|
+    @dataset.find_data @data, "**=foo*" do |data, key, path|
       keys << key
       data_points << data
       paths << path
@@ -247,7 +247,7 @@ class TestDataSet < Test::Unit::TestCase
     paths = []
     data_points = []
 
-    @dataset.find_data "**/findme" do |data, key, path|
+    @dataset.find_data @data, "**/findme" do |data, key, path|
       keys << key.to_s
       data_points << data
       paths << path
@@ -272,7 +272,7 @@ class TestDataSet < Test::Unit::TestCase
     keys = []
     data_points = []
 
-    @dataset.find_data "*/key1?" do |data, key, path|
+    @dataset.find_data @data, "*/key1?" do |data, key, path|
       keys << key.to_s
       data_points << data
     end
@@ -284,7 +284,7 @@ class TestDataSet < Test::Unit::TestCase
 
   def test_parse_data_path
     data_path = "key1/key\\/2=value/key*=*value/**=value2/key\\=thing"
-    key, value, rec, data_path = Kronk::DataSet.parse_data_path data_path
+    key, value, rec, data_path = @dataset.parse_data_path data_path
 
     assert_equal "key1", key
     assert_nil value
@@ -295,7 +295,7 @@ class TestDataSet < Test::Unit::TestCase
 
   def test_parse_data_path_escaped_slash
     key, value, rec, data_path =
-      Kronk::DataSet.parse_data_path \
+      @dataset.parse_data_path \
         "key\\/2=value/key*=*value/**=value2/key\\=thing"
 
     assert_equal "key/2", key
@@ -306,9 +306,9 @@ class TestDataSet < Test::Unit::TestCase
 
 
   def test_parse_data_path_wildcard
-    key, value, rec, data_path = Kronk::DataSet.parse_data_path "*/key1?"
+    key, value, rec, data_path = @dataset.parse_data_path "*/key1?"
 
-    assert_equal(/^(.*)$/, key)
+    assert_equal(/^(.*)$/i, key)
     assert_nil value
     assert !rec, "Should not return recursive = true"
     assert_equal "key1?", data_path
@@ -317,7 +317,7 @@ class TestDataSet < Test::Unit::TestCase
 
   def test_parse_data_path_recursive_value
     key, value, rec, data_path =
-      Kronk::DataSet.parse_data_path "**=value2/key\\=thing"
+      @dataset.parse_data_path "**=value2/key\\=thing"
 
     assert_equal(/.*/, key)
     assert_equal "value2", value
@@ -328,7 +328,7 @@ class TestDataSet < Test::Unit::TestCase
 
   def test_parse_data_path_recursive
     data_path = "**"
-    key, value, rec, data_path = Kronk::DataSet.parse_data_path "**"
+    key, value, rec, data_path = @dataset.parse_data_path "**"
 
     assert_equal(/.*/, key)
     assert_nil value
@@ -339,7 +339,7 @@ class TestDataSet < Test::Unit::TestCase
 
   def test_parse_data_path_recursive_key
     data_path = "**"
-    key, value, rec, data_path = Kronk::DataSet.parse_data_path "**/key"
+    key, value, rec, data_path = @dataset.parse_data_path "**/key"
 
     assert_equal "key", key
     assert_nil value
@@ -349,7 +349,7 @@ class TestDataSet < Test::Unit::TestCase
 
 
   def test_parse_data_path_escaped_equal
-    key, value, rec, data_path = Kronk::DataSet.parse_data_path "key\\=thing"
+    key, value, rec, data_path = @dataset.parse_data_path "key\\=thing"
 
     assert_equal "key=thing", key
     assert_nil value
@@ -359,9 +359,9 @@ class TestDataSet < Test::Unit::TestCase
 
 
   def test_parse_data_path_last
-    key, value, rec, data_path = Kronk::DataSet.parse_data_path "key*"
+    key, value, rec, data_path = @dataset.parse_data_path "key*"
 
-    assert_equal(/^(key.*)$/, key)
+    assert_equal(/^(key.*)$/i, key)
     assert_nil value
     assert !rec, "Should not return recursive = true"
     assert_equal nil, data_path
@@ -369,7 +369,7 @@ class TestDataSet < Test::Unit::TestCase
 
 
   def test_parse_data_path_empty
-    key, value, rec, data_path = Kronk::DataSet.parse_data_path ""
+    key, value, rec, data_path = @dataset.parse_data_path ""
 
     assert_equal nil, key
     assert_nil value
@@ -379,25 +379,25 @@ class TestDataSet < Test::Unit::TestCase
 
 
   def test_parse_path_item
-    assert_equal "foo", Kronk::DataSet.parse_path_item("foo")
+    assert_equal "foo", @dataset.parse_path_item("foo")
 
-    assert_equal(/^(foo.*bar)$/, Kronk::DataSet.parse_path_item("foo*bar"))
-    assert_equal(/^(foo|bar)$/, Kronk::DataSet.parse_path_item("foo|bar"))
-    assert_equal(/^(foo.?bar)$/, Kronk::DataSet.parse_path_item("foo?bar"))
+    assert_equal(/^(foo.*bar)$/i, @dataset.parse_path_item("foo*bar"))
+    assert_equal(/^(foo|bar)$/i, @dataset.parse_path_item("foo|bar"))
+    assert_equal(/^(foo.?bar)$/i, @dataset.parse_path_item("foo?bar"))
 
-    assert_equal(/^(foo.?\?bar)$/, Kronk::DataSet.parse_path_item("foo?\\?bar"))
-    assert_equal(/^(key.*)$/, Kronk::DataSet.parse_path_item("key*"))
+    assert_equal(/^(foo.?\?bar)$/i, @dataset.parse_path_item("foo?\\?bar"))
+    assert_equal(/^(key.*)$/i, @dataset.parse_path_item("key*"))
 
-    assert_equal "foo*bar", Kronk::DataSet.parse_path_item("foo\\*bar")
-    assert_equal "foo|bar", Kronk::DataSet.parse_path_item("foo\\|bar")
-    assert_equal "foo?bar", Kronk::DataSet.parse_path_item("foo\\?bar")
+    assert_equal "foo*bar", @dataset.parse_path_item("foo\\*bar")
+    assert_equal "foo|bar", @dataset.parse_path_item("foo\\|bar")
+    assert_equal "foo?bar", @dataset.parse_path_item("foo\\?bar")
   end
 
 
   def test_yield_data_points
     keys = []
 
-    Kronk::DataSet.yield_data_points @data, /key/ do |data, key|
+    @dataset.yield_data_points @data, /key/ do |data, key|
       keys << key.to_s
       assert_equal @data, data
     end
@@ -410,7 +410,7 @@ class TestDataSet < Test::Unit::TestCase
     keys = []
     data_points = []
 
-    Kronk::DataSet.yield_data_points @data, :findme, nil, true do |data, key|
+    @dataset.yield_data_points @data, :findme, nil, true do |data, key|
       keys << key.to_s
       data_points << data
     end
@@ -430,7 +430,7 @@ class TestDataSet < Test::Unit::TestCase
     keys = []
     data_points = []
 
-    Kronk::DataSet.yield_data_points @data, nil, "findme" do |data, key|
+    @dataset.yield_data_points @data, nil, "findme" do |data, key|
       keys << key.to_s
       data_points << data
     end
@@ -438,7 +438,7 @@ class TestDataSet < Test::Unit::TestCase
     assert keys.empty?
     assert data_points.empty?
 
-    Kronk::DataSet.yield_data_points @data, nil, "findme", true do |data, key|
+    @dataset.yield_data_points @data, nil, "findme", true do |data, key|
       keys << key.to_s
       data_points << data
     end
@@ -449,14 +449,14 @@ class TestDataSet < Test::Unit::TestCase
 
 
   def test_match_data_item
-    assert Kronk::DataSet.match_data_item(:key, "key")
-    assert Kronk::DataSet.match_data_item("key", :key)
+    assert @dataset.match_data_item(:key, "key")
+    assert @dataset.match_data_item("key", :key)
 
-    assert Kronk::DataSet.match_data_item(/key/, "foo_key")
-    assert !Kronk::DataSet.match_data_item("foo_key", /key/)
+    assert @dataset.match_data_item(/key/, "foo_key")
+    assert !@dataset.match_data_item("foo_key", /key/)
 
-    assert Kronk::DataSet.match_data_item(nil, "foo_key")
-    assert !Kronk::DataSet.match_data_item("foo_key", nil)
+    assert @dataset.match_data_item(nil, "foo_key")
+    assert !@dataset.match_data_item("foo_key", nil)
   end
 
 
@@ -470,7 +470,7 @@ class TestDataSet < Test::Unit::TestCase
     keys = []
     values = []
 
-    Kronk::DataSet.each_data_item hash do |key, val|
+    @dataset.each_data_item hash do |key, val|
       keys << key
       values << val
     end
@@ -486,7 +486,7 @@ class TestDataSet < Test::Unit::TestCase
     keys = []
     values = []
 
-    Kronk::DataSet.each_data_item ary do |key, val|
+    @dataset.each_data_item ary do |key, val|
       keys << key
       values << val
     end
