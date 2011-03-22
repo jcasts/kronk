@@ -79,6 +79,8 @@ class TestKronk < Test::Unit::TestCase
   def test_make_config_file
     file = mock 'file'
     file.expects(:<<).with Kronk::DEFAULT_CONFIG.to_yaml
+    File.expects(:directory?).with(Kronk::CONFIG_DIR).returns false
+    Dir.expects(:mkdir).with Kronk::CONFIG_DIR
     File.expects(:open).with(Kronk::DEFAULT_CONFIG_FILE, "w+").yields file
 
     Kronk.make_config_file
