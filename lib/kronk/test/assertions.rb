@@ -43,6 +43,19 @@ class Kronk
 
         assert_equal match, last_data, msg
       end
+
+
+      ##
+      # Makes request to both uris and asserts that the parsed data they
+      # return is equal. Compares response body if data is unparsable.
+      # Supports all options of Kronk.compare.
+
+      def assert_equal_responses uri1, uri2, options={}
+        resp1 = Request.retrieve_data_string uri1, options
+        resp2 = Request.retrieve_data_string uri2, options
+
+        assert_equal resp1, resp2
+      end
     end
   end
 end
