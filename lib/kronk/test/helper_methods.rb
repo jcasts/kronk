@@ -1,76 +1,73 @@
 class Kronk
 
-  ##
-  # Kronk test helper methods to easily make and mock requests.
-  # Sets @response, @data, and @diff instance variables.
-
-  module HelperMethods
+  module Test
 
     ##
-    # Do a get request for one or two URIs.
-    # See Kronk#compare for all supported options.
+    # Kronk test helper methods to easily make and mock requests.
+    # Sets @responses, @response, @datas, @data, and @diff instance variables.
 
-    def get uri1, uri2=nil, options={}
-      uri2, options = nil, uri2 if Hash === uri2
-      retrieve uri1, uri2, options.merge(:http_method => :get)
-    end
+    module HelperMethods
 
+      ##
+      # Do a get request for one or two URIs.
+      # See Kronk#compare for all supported options.
 
-    ##
-    # Do a post request for one or two URIs.
-    # See Kronk#compare for all supported options.
-
-    def post uri1, uri2=nil, options={}
-      uri2, options = nil, uri2 if Hash === uri2
-      retrieve uri1, uri2, options.merge(:http_method => :post)
-    end
+      def get uri1, uri2=nil, options={}
+        retrieve uri1, uri2, options.merge(:http_method => :get)
+      end
 
 
-    ##
-    # Do a put request for one or two URIs.
-    # See Kronk#compare for all supported options.
+      ##
+      # Do a post request for one or two URIs.
+      # See Kronk#compare for all supported options.
 
-    def put uri1, uri2=nil, options={}
-      uri2, options = nil, uri2 if Hash === uri2
-      retrieve uri1, uri2, options.merge(:http_method => :put)
-    end
-
-
-    ##
-    # Do a delete request for one or two URIs.
-    # See Kronk#compare for all supported options.
-
-    def delete uri1, uri2=nil, options={}
-      uri2, options = nil, uri2 if Hash === uri2
-      retrieve uri1, uri2, options.merge(:http_method => :delete)
-    end
+      def post uri1, uri2=nil, options={}
+        retrieve uri1, uri2, options.merge(:http_method => :post)
+      end
 
 
-    ##
-    # Set a mock http response for a given uri.
-    # Uri argument must be a String or Regexp.
-    # Response argument must be a String or IO.
+      ##
+      # Do a put request for one or two URIs.
+      # See Kronk#compare for all supported options.
 
-    def mock_http_response uri, mock_response
-      @_kronk_mocks ||= {}
-      @_kronk_mocks[uri] = mock_response
-    end
+      def put uri1, uri2=nil, options={}
+        retrieve uri1, uri2, options.merge(:http_method => :put)
+      end
 
 
-    protected
+      ##
+      # Do a delete request for one or two URIs.
+      # See Kronk#compare for all supported options.
 
-    def retrieve uri1, uri2, options={}
-      if uri2
-        @response = [Request.retrieve(uri1, options),
-                     Request.retrieve(uri2, options)]
+      def delete uri1, uri2=nil, options={}
+        retrieve uri1, uri2, options.merge(:http_method => :delete)
+      end
 
-        @data     = @response.map{|r| r.selective_data options}
-        @diff     = Diff.new_from_data(*@data)
 
-      else
-        @response = Request.retrieve uri1, options
-        @data     = @response.selective_data options
-        @diff     = nil
+      protected
+
+      def retrieve uri1, uri2=nil, options={}
+        uri2, options = nil, uri2.merge(options) if Hash === uri2
+
+        if uri2
+          @responses = [Request.retrieve(uri1, options),
+                        Request.retrieve(uri2, options)]
+          @response  = @responses.last
+
+          @datas     = @response.map{|r| r.selective_data options}
+          @data      = @datas.last
+
+          @diff      = Diff.new_from_data(*@datas)
+
+        else
+          @response  = Request.retrieve uri1, options
+          @responses = [@response]
+
+          @data      = @response.selective_data options
+          @datas     = [@data]
+
+          @diff      = nil
+        end
       end
     end
   end
