@@ -55,7 +55,7 @@ class Kronk
       new_data = @data.class.new
 
       [*data_paths].each do |data_path|
-        find_data @data, data_path do |obj, k, path|
+        find_data data_path do |obj, k, path|
 
           curr_data     = @data
           new_curr_data = new_data
@@ -91,7 +91,7 @@ class Kronk
 
     def delete_data_points data_paths, affect_parent=false
       [*data_paths].each do |data_path|
-        find_data @data, data_path do |obj, k, path|
+        find_data data_path do |obj, k, path|
 
           if affect_parent && data_at_path?(path)
             @data = @data.class.new and return if path.length == 1
@@ -130,15 +130,16 @@ class Kronk
     #   # Returns an Array of grand-children key/value pairs
     #   # where the value is 'invalid' or blank
 
-    def find_data data, data_path, curr_path=nil, &block
+    def find_data data_path, curr_path=nil, data=nil, &block
       curr_path ||= []
+      data      ||= @data
 
       key, value, rec, data_path = parse_data_path data_path
 
       yield_data_points data, key, value, rec, curr_path do |d, k, p|
 
         if data_path
-          find_data d[k], data_path, p, &block
+          find_data data_path, p, d[k], &block
         else
           yield d, k, p
         end

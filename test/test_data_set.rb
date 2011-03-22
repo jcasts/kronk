@@ -213,7 +213,7 @@ class TestDataSet < Test::Unit::TestCase
     keys = []
     data_points = []
 
-    @dataset.find_data @data, "*/*/0|1" do |data, key, path|
+    @dataset.find_data "*/*/0|1" do |data, key, path|
       keys << key
       data_points << data
     end
@@ -229,7 +229,7 @@ class TestDataSet < Test::Unit::TestCase
     paths = []
     data_points = []
 
-    @dataset.find_data @data, "**=foo*" do |data, key, path|
+    @dataset.find_data "**=foo*" do |data, key, path|
       keys << key
       data_points << data
       paths << path
@@ -247,7 +247,7 @@ class TestDataSet < Test::Unit::TestCase
     paths = []
     data_points = []
 
-    @dataset.find_data @data, "**/findme" do |data, key, path|
+    @dataset.find_data "**/findme" do |data, key, path|
       keys << key.to_s
       data_points << data
       paths << path
@@ -272,7 +272,7 @@ class TestDataSet < Test::Unit::TestCase
     keys = []
     data_points = []
 
-    @dataset.find_data @data, "*/key1?" do |data, key, path|
+    @dataset.find_data "*/key1?" do |data, key, path|
       keys << key.to_s
       data_points << data
     end
