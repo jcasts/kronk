@@ -267,7 +267,10 @@ class Kronk
     def match_data_item item1, item2
       return if !item1.nil? && (Array === item2 || Hash === item2)
 
-      if Regexp === item1
+      if item1.class == item2.class
+        item1 == item2
+
+      elsif Regexp === item1
         item2.to_s =~ item1
 
       elsif Range === item1

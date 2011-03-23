@@ -454,9 +454,14 @@ class TestDataSet < Test::Unit::TestCase
 
     assert @dataset.match_data_item(/key/, "foo_key")
     assert !@dataset.match_data_item("foo_key", /key/)
+    assert @dataset.match_data_item(/key/, /key/)
 
     assert @dataset.match_data_item(nil, "foo_key")
     assert !@dataset.match_data_item("foo_key", nil)
+
+    assert @dataset.match_data_item(1..3, 1)
+    assert !@dataset.match_data_item(1, 1..3)
+    assert @dataset.match_data_item(1..3, 1..3)
   end
 
 
