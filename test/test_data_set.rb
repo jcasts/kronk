@@ -391,6 +391,10 @@ class TestDataSet < Test::Unit::TestCase
     assert_equal "foo*bar", @dataset.parse_path_item("foo\\*bar")
     assert_equal "foo|bar", @dataset.parse_path_item("foo\\|bar")
     assert_equal "foo?bar", @dataset.parse_path_item("foo\\?bar")
+
+    assert_equal 1..3, @dataset.parse_path_item("1..3")
+    assert_equal 1...3, @dataset.parse_path_item("1...3")
+    assert_equal 3...6, @dataset.parse_path_item("3,3")
   end
 
 
