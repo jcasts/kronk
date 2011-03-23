@@ -12,6 +12,9 @@ lib/kronk/diff/color_format.rb
 lib/kronk/plist_parser.rb
 lib/kronk/request.rb
 lib/kronk/response.rb
+lib/kronk/test/assertions.rb
+lib/kronk/test/core_ext.rb
+lib/kronk/test/helper_methods.rb
 lib/kronk/xml_parser.rb
 script/kronk_completion
 test/mocks/200_response.json
@@ -20,6 +23,9 @@ test/mocks/200_response.txt
 test/mocks/200_response.xml
 test/mocks/301_response.txt
 test/mocks/302_response.txt
+test/test_assertions.rb
+test/test_core_ext.rb
+test/test_helper_methods.rb
 test/test_data_set.rb
 test/test_diff.rb
 test/test_helper.rb

@@ -4,7 +4,7 @@
 
   * Added auto-querying functionality with param randomizing.
 
-  * Added integration test helper methods.
+  * Added test helper methods, assertions, and core extensions.
 
 * Enhancements:
 
