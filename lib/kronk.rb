@@ -336,8 +336,10 @@ class Kronk
   # Writes the URL history to the history file.
 
   def self.save_history
+    history_str = self.history.uniq.join($/)
+
     File.open self.config[:history_file], "w" do |file|
-      file.write self.history.uniq.join($/)
+      file.write history_str
     end
   end
 
@@ -609,7 +611,7 @@ Parse and run diffs against data from live and cached http responses.
       end
 
 
-      opt.on('--lines', 'Show line numbers') do
+      opt.on('-l', '--lines', 'Show line numbers') do
         config[:show_lines] = true
       end
 
@@ -619,7 +621,7 @@ Parse and run diffs against data from live and cached http responses.
       end
 
 
-      opt.on('--parser STR', String,
+      opt.on('-P', '--parser STR', String,
              'Override default parser') do |value|
         options[:parser] = value
       end
@@ -630,7 +632,7 @@ Parse and run diffs against data from live and cached http responses.
       end
 
 
-      opt.on('--raw', 'Run diff on the raw data returned') do
+      opt.on('-R', '--raw', 'Run diff on the raw data returned') do
         options[:raw] = true
       end
 
