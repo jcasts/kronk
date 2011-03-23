@@ -54,7 +54,14 @@ class Kronk
                         Request.retrieve(uri2, options)]
           @response  = @responses.last
 
-          @datas     = @response.map{|r| r.selective_data options}
+          @datas     = @responses.map do |r|
+                         begin
+                           r.selective_data options
+                         rescue Kronk::Response::MissingParser
+                           r.body
+                         end
+                       end
+
           @data      = @datas.last
 
           @diff      = Diff.new_from_data(*@datas)
@@ -63,7 +70,12 @@ class Kronk
           @response  = Request.retrieve uri1, options
           @responses = [@response]
 
-          @data      = @response.selective_data options
+          @data      = begin
+                         @response.selective_data options
+                       rescue Kronk::Response::MissingParser
+                         @response.body
+                       end
+
           @datas     = [@data]
 
           @diff      = nil
