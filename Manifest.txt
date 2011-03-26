@@ -12,6 +12,7 @@ lib/kronk/diff/color_format.rb
 lib/kronk/plist_parser.rb
 lib/kronk/request.rb
 lib/kronk/response.rb
+lib/kronk/test.rb
 lib/kronk/test/assertions.rb
 lib/kronk/test/core_ext.rb
 lib/kronk/test/helper_methods.rb
