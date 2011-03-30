@@ -11,8 +11,6 @@ Kronk was made possible by the sponsoring of AT&T Interactive.
 
 * Parse and display or diff data from http response body and/or headers.
 
-* Follow redirects automatically.
-
 * Include or exclude specific data points with file-glob-like paths.
 
 * Supports json, rails-ish xml, and plist.
@@ -27,13 +25,13 @@ Kronk was made possible by the sponsoring of AT&T Interactive.
 
 * Easy-to-read output (color or ascii, line numbers, etc).
 
+* URI-specific configuration.
+
+* Helper methods for test suites.
+
+* Auto-query reports with request randomization support.
+
 * Yes, it works on Windows.
-
-== FUTURE:
-
-* Auto-queryer with optional param randomizing.
-
-* Support for test suites.
 
 == SYNOPSIS:
 
