@@ -22,8 +22,8 @@ class Yzma
     curr_req = nil
 
     yzma.report.write do |req, data|
-      next unless data[:diff].count > 0
-      "\n#{data[:diff].count} diffs:\n#{req[0]} - #{req[1]}\n#{req[2].inspect}\n"
+      next unless data[:diff] > 0
+      "\n#{data[:diff]} avg diffs:\n#{req[0]} - #{req[1]}\n"
     end
   end
 
@@ -51,6 +51,9 @@ class Yzma
 
     @comparisons = @comparisons.next
 
+    diff_avg = 0
+    diff_cnt = 0
+
     1.upto(count) do |i|
       randomizer = Randomizer.new
       randomizer.instance_eval &block if block_given?
@@ -61,10 +64,13 @@ class Yzma
       $stdout << (diff.count > 0 ? "D" : ".")
       $stdout.flush
 
-      @iterations = @iterations.next
+      diff_avg = (diff_avg * diff_cnt + diff.count) / (diff_cnt + 1)
+      diff_cnt = diff_cnt.next
 
-      @report.add [uri1, uri2, randomized_opts], :diff => diff
+      @iterations = @iterations.next
     end
+
+    @report.add [uri1, uri2], :diff => diff_avg
 
     $stdout << "\n\n"
   end
