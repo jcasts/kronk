@@ -25,7 +25,7 @@ Hoe.spec 'kronk' do
   self.extra_deps << ['plist',         '~>3.1.0']
   self.extra_deps << ['json',          '~>1.5']
   self.extra_deps << ['nokogiri',      '~>1.4']
-  self.extra_deps << ['i18n',          '~>0.5']
+  self.extra_deps << ['i18n',          '>=0.5']
   self.extra_deps << ['activesupport', '>=2.0.0']
   self.extra_deps << ['cookiejar',     '~>0.3.0']
   self.extra_deps << ['rack',          '~>1.0']
