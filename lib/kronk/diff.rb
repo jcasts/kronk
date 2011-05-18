@@ -151,42 +151,50 @@ class Kronk
     #   #=> [[size, arr1_index, arr2_index], [size, arr1_index, arr2_index],...]
 
     def find_common arr1, arr2
-      used1  = []
-      used2  = []
+      used1 = []
+      used2 = []
 
       common = []
 
-      common_sequences(arr1, arr2).reverse_each do |seqs|
-        next unless seqs
-        seqs.each do |seq|
-          next if used1[seq[1]] || used2[seq[2]] ||
-                  used1[seq[1]..-1].to_a.nitems !=
-                    used2[seq[2]..-1].to_a.nitems
+      common_sequences(arr1, arr2) do |seq|
+        next if used1[seq[1]] || used2[seq[2]]
 
-          u1 = used1[seq[1], seq[0]].to_a.index(true) || seq[0]
-          u2 = used2[seq[2], seq[0]].to_a.index(true) || seq[0]
-          seq[0] = u1 < u2 ? u1 : u2
+        next if used1[seq[1], seq[0]].to_a.index(true) ||
+                used2[seq[2], seq[0]].to_a.index(true)
 
-          used1.fill(true, seq[1], seq[0])
-          used2.fill(true, seq[2], seq[0])
+        next if used1[seq[1]..-1].to_a.nitems !=
+                  used2[seq[2]..-1].to_a.nitems
 
-          common[seq[1]] = seq
-        end
+        used1.fill(true, seq[1], seq[0])
+        used2.fill(true, seq[2], seq[0])
+
+        common[seq[1]] = seq
       end
 
       common
     end
 
 
-    def common_sequences arr1, arr2
+
+    ##
+    # Returns all common sequences between to arrays ordered by sequence length
+    # according to the following format:
+    #   [[[len1, ix, iy], [len1, ix, iy]],[[len2, ix, iy]]]
+    #   # e.g.
+    #   [nil,[[1,2,3],[1,2,5]],nil,[[3,4,5],[3,6,9]]
+
+    def common_sequences arr1, arr2, &block
       sequences = []
 
-      arr2_map = Hash.new{|h,k| h[k] = []}
+      arr2_map = {}
       arr2.each_with_index do |line, j|
+        arr2_map[line] ||= []
         arr2_map[line] << j
       end
 
       arr1.each_with_index do |line, i|
+        next unless arr2_map[line]
+
         arr2_map[line].each do |j|
           line1 = line
           line2 = arr2[j]
@@ -194,7 +202,7 @@ class Kronk
           k = i
           start_j = j
 
-          while line1 == line2 && k < arr1.length
+          while line1 && line1 == line2 && k < arr1.length
             k += 1
             j += 1
 
@@ -209,7 +217,18 @@ class Kronk
         end
       end
 
+      yield_sequences sequences, &block if block_given?
+
       sequences
+    end
+
+
+    def yield_sequences sequences, dist=0, &block
+      while sequences.length > dist
+        item = sequences.pop
+        next unless item
+        item.each &block
+      end
     end
 
 
