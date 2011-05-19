@@ -10,7 +10,7 @@
 
   * Updated dependencies json ~>1.5, nokogiri ~>1.4, i18n >=0.5
 
-  * Reimplemented the diff logic to "largest match" algorithm.
+  * Reimplemented the diff logic to a LCS algorithm.
 
   * Added support for ranges and 'index,length' pairs to DataSet path parsing.
 

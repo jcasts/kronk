@@ -176,7 +176,6 @@ class Kronk
     end
 
 
-
     ##
     # Returns all common sequences between to arrays ordered by sequence length
     # according to the following format:
