@@ -143,32 +143,6 @@ class Kronk
       diff_ary
     end
 
-require 'diff/lcs'
-
-    def create_diff
-      diff_ary = []
-
-      arr1 = @str1.split @char
-      arr2 = @str2.split @char
-
-      last_action = nil
-
-      ::Diff::LCS.sdiff(arr1, arr2).each do |elmt|
-        if elmt.action == "="
-          diff_ary << elmt.new_element
-
-        else
-          diff_ary << [[],[]] if last_action != elmt.action
-
-          diff_ary[-1][0] << elmt.old_element if elmt.old_element
-          diff_ary[-1][1] << elmt.new_element if elmt.new_element
-        end
-
-        last_action = elmt.action
-      end
-
-      diff_ary
-    end
 
     ##
     # Recursively finds common sequences between two arrays and returns
@@ -188,8 +162,9 @@ require 'diff/lcs'
         next if used1[seq[1], seq[0]].to_a.index(true) ||
                 used2[seq[2], seq[0]].to_a.index(true)
 
-        next if used1[seq[1]..-1].to_a.nitems !=
-                  used2[seq[2]..-1].to_a.nitems
+        next if used1[seq[1]+seq[0]..-1].to_a.nitems !=
+                  used2[seq[2]+seq[0]..-1].to_a.nitems
+
 
         used1.fill(true, seq[1], seq[0])
         used2.fill(true, seq[2], seq[0])

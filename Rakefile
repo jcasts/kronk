@@ -29,7 +29,6 @@ Hoe.spec 'kronk' do
   self.extra_deps << ['activesupport', '>=2.0.0']
   self.extra_deps << ['cookiejar',     '~>0.3.0']
   self.extra_deps << ['rack',          '~>1.0']
-  self.extra_deps << ['diff-lcs',      '~>1.1']
 
   self.extra_dev_deps << ['mocha', '~>0.9.10']
 end
@@ -76,7 +75,7 @@ namespace :bm do
   task :full do
 
     benchmark(100) do
-      Kronk.compare "prod.txt", "beta.txt"
+      Kronk.compare("prod.txt", "beta.txt").count
     end
   end
 
