@@ -59,7 +59,7 @@ class Yzma
     diff_avg = 0
     diff_cnt = 0
 
-    puts name
+    puts title
     1.upto(count) do |i|
       randomizer = Randomizer.new
       randomizer.instance_eval &block if block_given?
