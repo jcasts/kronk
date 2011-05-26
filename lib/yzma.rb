@@ -1,6 +1,8 @@
 ##
 # Yzma bosses Kronk around to give you meaningful diff variation
 # statistical data.
+#
+# TODO: report on what uri requests were different.
 
 class Yzma
 
@@ -45,29 +47,40 @@ class Yzma
   # Compare two paths or uris. Second uri may be omitted.
   # Supports all Kronk.compare options, plus:
   # :count:: Integer - number of times to run the endpoint; default 1.
+  # :title:: String - title to display when running compares.
 
   def compare uri1, uri2, options={}, &block
-    count = options.delete(:count) || 1
+    options = options.dup
+    count   = options.delete(:count) || 1
+    title   = options.delete(:title)  || "#{uri1} --- #{uri2}"
 
     @comparisons = @comparisons.next
 
     diff_avg = 0
     diff_cnt = 0
 
+    puts name
     1.upto(count) do |i|
       randomizer = Randomizer.new
       randomizer.instance_eval &block if block_given?
 
       randomized_opts = options.merge randomizer.to_options
-      diff = Kronk.compare uri1, uri2, randomized_opts
 
-      $stdout << (diff.count > 0 ? "D" : ".")
+      begin
+        diff = Kronk.compare uri1, uri2, randomized_opts
+
+        diff_avg = (diff_avg * diff_cnt + diff.count) / (diff_cnt + 1)
+        diff_cnt = diff_cnt.next
+
+        @iterations = @iterations.next
+
+        $stdout << (diff.count > 0 ? "D" : ".")
+
+      rescue Kronk::Request::NotFoundError
+        $stdout << "E"
+      end
+
       $stdout.flush
-
-      diff_avg = (diff_avg * diff_cnt + diff.count) / (diff_cnt + 1)
-      diff_cnt = diff_cnt.next
-
-      @iterations = @iterations.next
     end
 
     @report.add [uri1, uri2], :diff => diff_avg
@@ -75,38 +88,3 @@ class Yzma
     $stdout << "\n\n"
   end
 end
-
-
-
-
-# host args optional, may be set in the block for each item tested
-# if no host is set, :name option must be used
-Yzma.report :my_report do
-
-  # supports Kronk#compare options
-  compare "syndication.yellowpages.com/_priv/sysinfo",
-          "beta-syndication.yellowpages.com/_priv/sysinfo", :count => 10 do
-    randomize_param :param1, 1..23, :allow_blank => true, :optional => true
-    randomize_param :param2, ["val1", "val2"]
-  end
-end
-
-
-##
-# Report format:
-#
-# = Report for host1[, host2] | name
-# requests count
-# total diffs
-# diff avg
-# avg request time for left and right side
-# data filters
-# 10 most significant http request diffs w/ kronk command to run to get diff
-#
-# == Path: path1[, path2]
-# requests count
-# total diffs
-# diff avg
-# avg request time for left and right side
-# data filters
-# 10 most significant http request diffs w/ kronk command to run to get diff
