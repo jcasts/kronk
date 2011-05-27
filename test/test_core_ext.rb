@@ -10,15 +10,15 @@ class TestCoreExt < Test::Unit::TestCase
 
 
   def test_has_path_array
-    assert_equal [2, :foo], @array.has_path?("**/foo")
-    assert_equal [2, :bar, 2, :foo], @array.has_path?("**/foo=other")
+    assert @array.has_path?("**/foo")
+    assert @array.has_path?("**/foo=other")
     assert_nil @array.has_path?("**/foobar")
   end
 
 
   def test_has_path_hash
-    assert_equal [:foo], @hash.has_path?("**/foo")
-    assert_equal [:bar, 2, :foo], @hash.has_path?("**/foo=other")
+    assert @hash.has_path?("**/foo")
+    assert @hash.has_path?("**/foo=other")
     assert_nil @hash.has_path?("**/foobar")
   end
 
@@ -42,8 +42,9 @@ class TestCoreExt < Test::Unit::TestCase
       collected << [data, key, path]
     end
 
-    assert_equal([@array[2], :foo, [2, :foo]], collected[0])
-    assert_equal([@array[2][:bar][2], :foo, [2, :bar, 2, :foo]], collected[1])
+    assert_equal 2, collected.length
+    assert collected.include?([@array[2], :foo, [2, :foo]])
+    assert collected.include?([@array[2][:bar][2], :foo, [2, :bar, 2, :foo]])
   end
 
 
@@ -66,7 +67,8 @@ class TestCoreExt < Test::Unit::TestCase
       collected << [data, key, path]
     end
 
-    assert_equal([@hash, :foo, [:foo]], collected[0])
-    assert_equal([@hash[:bar][2], :foo, [:bar, 2, :foo]], collected[1])
+    assert_equal 2, collected.length
+    assert collected.include?([@hash, :foo, [:foo]])
+    assert collected.include?([@hash[:bar][2], :foo, [:bar, 2, :foo]])
   end
 end
