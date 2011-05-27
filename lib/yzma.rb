@@ -1,8 +1,6 @@
 ##
 # Yzma bosses Kronk around to give you meaningful diff variation
 # statistical data.
-#
-# TODO: report on what uri requests were different.
 
 class Yzma
 

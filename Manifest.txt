@@ -5,6 +5,7 @@ README.rdoc
 Rakefile
 bin/kronk
 lib/kronk.rb
+lib/kronk/cmd.rb
 lib/kronk/data_set.rb
 lib/kronk/diff.rb
 lib/kronk/diff/ascii_format.rb

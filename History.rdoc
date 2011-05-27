@@ -18,6 +18,8 @@
 
   * Made path matching case-insensitive.
 
+  * Deprecated and moved cmd functionality into Kronk::Cmd class.
+
 * Bugfixes:
 
   * Fix for path lookup of parents when parent is the root data object.
@@ -31,7 +33,7 @@
 
 === 1.2.4 / 2011-03-04
 
-* Enhancements:
+* Bugfixes:
 
   * Cleaner exit on sigint.
 

@@ -29,13 +29,13 @@ class Kronk
 
 
       def self.deleted str
-        require_win_color if Kronk.windows?
+        require_win_color if Kronk::Cmd.windows?
         "\033[31m- #{str}\033[0m"
       end
 
 
       def self.added str
-        require_win_color if Kronk.windows?
+        require_win_color if Kronk::Cmd.windows?
         "\033[32m+ #{str}\033[0m"
       end
 

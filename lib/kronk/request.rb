@@ -19,7 +19,7 @@ class Kronk
     # number of redirects left if it's an Integer.
 
     def self.follow_redirect resp, options={}
-      Kronk.verbose "Following redirect..."
+      Kronk::Cmd.verbose "Following redirect..."
 
       rdir = options[:follow_redirects]
       rdir = rdir - 1 if Integer === rdir && rdir > 0
@@ -84,7 +84,7 @@ class Kronk
     # Read http response from a file and return a HTTPResponse instance.
 
     def self.retrieve_file path, options={}
-      Kronk.verbose "Reading file:  #{path}\n"
+      Kronk::Cmd.verbose "Reading file:  #{path}\n"
 
       options = options.dup
 
@@ -95,7 +95,7 @@ class Kronk
 
         # On windows, read the full file and insert contents into
         # a StringIO to avoid failures with IO#read_nonblock
-        file = StringIO.new file.read if Kronk.windows?
+        file = StringIO.new file.read if Kronk::Cmd.windows?
 
         begin
           resp = Response.read_new file
@@ -117,7 +117,7 @@ class Kronk
     # Read the http response from an IO instance and return a HTTPResponse.
 
     def self.retrieve_io io, options={}
-      Kronk.verbose "Reading IO..."
+      Kronk::Cmd.verbose "Reading IO..."
 
       options = options.dup
 
@@ -221,7 +221,7 @@ class Kronk
                          options[:auth][:password]
         end
 
-        Kronk.verbose "Retrieving URL:  #{uri}\n"
+        Kronk::Cmd.verbose "Retrieving URL:  #{uri}\n"
 
         http.request req, data
       end
@@ -289,7 +289,7 @@ class Kronk
       user = proxy_opts[:username]
       pass = proxy_opts[:password]
 
-      Kronk.verbose "Using proxy #{addr}\n" if host
+      Kronk::Cmd.verbose "Using proxy #{addr}\n" if host
 
       Net::HTTP::Proxy host, port, user, pass
     end

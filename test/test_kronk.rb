@@ -486,7 +486,7 @@ STR
     options = {}
     argv = %w{this is --argv -- one -two -- -three four :parents :-not_parents}
 
-    options = Kronk.parse_data_path_args options, argv
+    options = Kronk::Cmd.parse_data_path_args options, argv
 
     assert_equal %w{one four}, options[:only_data]
     assert_equal %w{two - three}, options[:ignore_data]

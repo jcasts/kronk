@@ -11,4 +11,4 @@ rescue LoadError => e
   require 'kronk'
 end
 
-Kronk.run
+Kronk::Cmd.run

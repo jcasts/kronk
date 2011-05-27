@@ -13,7 +13,7 @@ class Kronk
 
       def has_path? path
         Kronk::DataSet.new(self).find_data path do |d,k,p|
-          return p
+          return !!p
         end
 
         nil
