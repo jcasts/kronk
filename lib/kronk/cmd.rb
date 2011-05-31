@@ -455,7 +455,7 @@ Parse and run diffs against data from live and cached http responses.
     # Write a warning to stderr.
 
     def self.warn str
-      $stderr << "#{str}\n"
+      $stderr << "Warning: #{str}\n"
     end
 
 

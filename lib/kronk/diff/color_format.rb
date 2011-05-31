@@ -11,7 +11,7 @@ class Kronk
         begin
           require 'Win32/Console/ANSI'
         rescue LoadError
-          puts "Warning: You must gem install win32console to use color"
+          Cmd.warn "You must gem install win32console to use color"
         end
       end
 

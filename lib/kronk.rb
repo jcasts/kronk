@@ -373,7 +373,7 @@ class Kronk
     replacement &&= ", use #{replacement}"
     replacement ||= " with no replacement"
 
-    Cmd.warn "Warning: #{method_name} deprecated#{replacement}"
+    Cmd.warn "#{method_name} deprecated#{replacement}"
   end
 
 
