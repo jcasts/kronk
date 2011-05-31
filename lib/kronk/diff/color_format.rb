@@ -7,7 +7,8 @@ class Kronk
 
     class ColorFormat
 
-      def self.require_win_color
+      def self.ensure_color
+        return unless Kronk::Cmd.windows?
         begin
           require 'Win32/Console/ANSI'
         rescue LoadError
@@ -17,7 +18,7 @@ class Kronk
 
 
       def self.lines line_nums, col_width
-        require_win_color if Kronk.windows?
+        ensure_color
 
         out =
           [*line_nums].map do |lnum|
@@ -29,13 +30,13 @@ class Kronk
 
 
       def self.deleted str
-        require_win_color if Kronk::Cmd.windows?
+        ensure_color
         "\033[31m- #{str}\033[0m"
       end
 
 
       def self.added str
-        require_win_color if Kronk::Cmd.windows?
+        ensure_color
         "\033[32m+ #{str}\033[0m"
       end
 
