@@ -19,6 +19,9 @@ lib/kronk/test/assertions.rb
 lib/kronk/test/core_ext.rb
 lib/kronk/test/helper_methods.rb
 lib/kronk/xml_parser.rb
+lib/yzma.rb
+lib/yzma/randomizer.rb
+lib/yzma/report.rb
 script/kronk_completion
 test/mocks/200_response.json
 test/mocks/200_response.plist
