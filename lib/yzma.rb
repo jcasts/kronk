@@ -3,7 +3,19 @@ require 'kronk'
 
 ##
 # Yzma bosses Kronk around to give you meaningful diff variation
-# statistical data.
+# statistical data:
+#   Yzma.report "My Report" do
+#     compare uri1, uri2, :count => 100 do
+#       randomize_param :limit, 20..200, :optional => true, :allow_blank => true
+#
+#       randomize_param :q, %w{pizza restaurant flowers}
+#
+#       randomize_param :g, %w{91106 91203}
+#     end
+#
+#     compare uri3, uri4, :count => 10,
+#                         :title => "Second Compare"
+#   end
 
 class Yzma
 
