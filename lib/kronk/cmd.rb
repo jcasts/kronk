@@ -437,7 +437,7 @@ Parse and run diffs against data from live and cached http responses.
         puts out
       end
 
-    rescue Request::Exception, Response::MissingParser => e
+    rescue Request::Exception, Response::MissingParser, Errno::ECONNRESET => e
       $stderr << "\nError: #{e.message}\n"
       exit 2
     end
