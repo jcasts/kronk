@@ -24,6 +24,8 @@
 
   * Fix for path lookup of parents when parent is the root data object.
 
+  * Handling of reset connection errors.
+
 === 1.2.5 / 2011-03-09
 
 * Bugfixes:
