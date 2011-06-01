@@ -357,7 +357,7 @@ class Kronk
         Diff.ordered_data_string data, options[:struct]
 
       rescue Response::MissingParser
-        Cmd.verbose "Warning: No parser for #{resp['Content-Type']} [#{uri}]"
+        Cmd.warn "No parser for #{resp['Content-Type']} [#{uri}]"
         resp.selective_string options
       end
     end
