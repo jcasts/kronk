@@ -4,6 +4,7 @@ Manifest.txt
 README.rdoc
 Rakefile
 bin/kronk
+bin/yzma
 lib/kronk.rb
 lib/kronk/cmd.rb
 lib/kronk/data_set.rb

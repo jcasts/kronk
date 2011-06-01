@@ -1,14 +1,19 @@
 class Yzma
 
+  ##
+  # Used to build and display Yzma reports.
+  # Other report types can be created by inheriting this class and
+  # overridding the 'write' method to use @data as desired.
+
   class Report
 
-    attr_accessor :data, :header, :footer
+    attr_accessor :data, :header, :footer, :name
 
     def initialize name
       @name = name
       @data = []
-      @header = "#{@name} #{Time.now}\n"
-      @footer = "\n"
+      @header = ["#{@name} #{Time.now}"]
+      @footer = ["\n"]
     end
 
 
@@ -26,7 +31,7 @@ class Yzma
     # Defaults to STDOUT.
 
     def write io=$stdout
-      io << @header
+      io << @header.join("\n")
 
       @data.each do |identifier, data|
         if block_given?
@@ -36,7 +41,7 @@ class Yzma
         end
       end
 
-      io << @footer
+      io << @footer.join("\n")
     end
   end
 end

@@ -1,23 +1,64 @@
+require 'rubygems'
+require 'kronk'
+
 ##
 # Yzma bosses Kronk around to give you meaningful diff variation
 # statistical data.
 
 class Yzma
 
-  require 'kronk'
   require 'yzma/report'
   require 'yzma/randomizer'
+
+
+  ##
+  # Parses ARGV for Yzma.
+
+  def self.parse_args argv
+    options = {:files => []}
+
+    opts = OptionParser.new do |opt|
+      opt.program_name = File.basename $0
+      opt.version = Kronk::VERSION
+      opt.release = nil
+
+      opt.banner = <<-STR
+
+#{opt.program_name} #{opt.version}
+
+Run diff reports between two URI requests.
+
+  Usage:
+    #{opt.program_name} --help
+    #{opt.program_name} --version
+    #{opt.program_name} file1 [file2 ...]
+      STR
+    end
+
+    opts.parse! argv
+
+    options[:files] = argv.dup
+
+    if options[:files].empty?
+      $stderr << "\nError: At least one report file must be specified.\n"
+      $stderr << "See 'yzma --help' for usage\n\n"
+      exit 1
+    end
+
+    options
+  end
+
 
   ##
   # Construct and run an Yzma report.
 
-  def self.report name=nil, &block
-    yzma = new name
+  def self.report name_or_report=nil, &block
+    yzma = new name_or_report
 
     yzma.instance_eval(&block)
 
-    yzma.report.header << "Ran #{yzma.comparisons} URI comparison(s)\n"
-    yzma.report.header << "Iterated a total of #{yzma.iterations} case(s)\n"
+    yzma.report.header << "Ran #{yzma.comparisons} URI comparison(s)"
+    yzma.report.header << "Iterated a total of #{yzma.iterations} case(s)"
 
     curr_req = nil
 
@@ -28,14 +69,46 @@ class Yzma
   end
 
 
+  ##
+  # Run the Yzma command.
+
+  def self.run argv=ARGV
+    options = parse_args argv
+    options[:files].each do |file|
+      self.instance_eval File.read(file)
+    end
+
+    exit 2 if self.diffs > 0
+  end
+
+
+  class << self
+    attr_accessor :diffs
+  end
+
+  self.diffs = 0
+
+
   attr_reader :report, :comparisons, :iterations
 
   ##
   # Initialize Izma with optional name.
 
-  def initialize name=nil
-    @name   = name || 'Yzma Report'
-    @report = Report.new @name
+  def initialize name_or_report=nil
+    case name_or_report
+    when String
+      @name   = name_or_report
+      @report = Report.new @name
+
+    when Report
+      @report = name_or_report
+      @name   = @report.name
+
+    else
+      @name   = 'Yzma Report'
+      @report = Report.new @name
+    end
+
     @comparisons = 0
     @iterations  = 0
   end
@@ -73,6 +146,7 @@ class Yzma
         @iterations = @iterations.next
 
         $stdout << (diff.count > 0 ? "D" : ".")
+        self.class.diffs = self.class.diffs + diff.count
 
       rescue Kronk::Request::NotFoundError
         $stdout << "E"
