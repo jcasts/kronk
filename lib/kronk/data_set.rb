@@ -187,8 +187,8 @@ class Kronk
       value      = nil
       recursive  = false
 
-      until key && key != "**" || value || data_path.empty? do
-        value = data_path.slice!(%r{((.*?[^\\])+?/)})
+      until key && key != "**" || value || data_path.nil? || data_path.empty? do
+        value = data_path.slice!(%r{((^|.*?[^\\])+?/)})
         (value ||= data_path).sub!(/\/$/, '')
 
         data_path = nil if value == data_path
@@ -222,15 +222,17 @@ class Kronk
     # Decide whether to make path item a regex, range, array, or string.
 
     def parse_path_item str
-      if str =~ /(^|[^\\])([\*\?\|])/
-        str.gsub!(/(^|[^\\])(\*|\?)/, '\1.\2')
-        /^(#{str})$/i
+      return unless str && !str.empty?
 
-      elsif str =~ %r{^(\-?\d+)(\.{2,3})(\-?\d+)$}
+      if str =~ %r{^(\-?\d+)(\.{2,3})(\-?\d+)$}
         Range.new $1.to_i, $3.to_i, ($2 == "...")
 
       elsif str =~ %r{^(\-?\d+),(\-?\d+)$}
         Range.new $1.to_i, ($1.to_i + $2.to_i), true
+
+      elsif str =~ /(^|[^\\])([\*\?\|])/
+        str.gsub!(/(^|[^\\])(\*|\?)/, '\1.\2')
+        Regexp.new "^(#{str})$", true
 
       else
         str.gsub "\\", ""

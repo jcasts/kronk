@@ -67,11 +67,11 @@ class Kronk
 
     def self.parse_args argv
       options = {
-        :auth           => {},
-        :no_body        => false,
-        :proxy          => {},
-        :uris           => [],
-        :with_headers   => false
+        :auth         => {},
+        :no_body      => false,
+        :proxy        => {},
+        :uris         => [],
+        :with_headers => false
       }
 
       options = parse_data_path_args options, argv
