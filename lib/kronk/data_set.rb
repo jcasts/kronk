@@ -193,7 +193,7 @@ class Kronk
 
         data_path = nil if value == data_path
 
-        key   = value.slice! %r{((.*?[^\\])+?=)}
+        key = value.slice! %r{((^|.*?[^\\])+?=)}
         key, value = value, nil if key.nil?
         key.sub!(/\=$/, '')
 
