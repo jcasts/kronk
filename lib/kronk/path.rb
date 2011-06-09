@@ -3,55 +3,21 @@ class Kronk
 
     module PARENT; end
 
-    ##
-    # Fully streamed version of:
-    #   Path.new(str_path).find_in data
-    #
-    # See Path#find_in for usage.
-
-    def self.find path_str, data, &block
-      path_str = path_str.dup
-      matches = {[] => data}
-
-      parse_path_str! path_str do |mkey, mvalue, recur|
-        assign_find matches, data, mkey, mvalue, recur do |sdata, key, spath|
-          yield sdata, key, spath if path_str.empty? && block_given?
-        end
-      end
-
-      matches
-    end
-
-
-    ##
-    # Common find functionality that assigns to the matches hash.
-
-    def self.assign_find matches, data, mkey, mvalue, recur #:nodoc:
-      matches.keys.each do |path|
-        pdata = matches.delete path
-
-        if mkey == PARENT
-          path = path[0..-2]
-          matches[path] = data_at_path path, data
-          yield matches[path], path.last, path if block_given?
-          next
-        end
-
-        find_match pdata, mkey, mvalue, recur, path do |sdata, key, spath|
-          matches[spath] = sdata[key]
-          yield sdata, key, spath if block_given?
-        end
-      end
-    end
+    REGEX_OPTS = {
+      "i" => Regexp::IGNORECASE,
+      "m" => Regexp::MULTILINE,
+      "u" => Regexp::FIXEDENCODING,
+      "x" => Regexp::EXTENDED
+    }
 
 
     ##
     # Instantiate a Path object with a String data path.
     #   Path.new "/path/**/to/*=bar/../../**/last"
 
-    def initialize path_str
+    def initialize path_str, regex_opts=nil
       path_str = path_str.dup
-      @path = self.class.parse_path_str! path_str
+      @path = self.class.parse_path_str! path_str, regex_opts
     end
 
 
@@ -70,6 +36,48 @@ class Kronk
       end
 
       matches
+    end
+
+
+    ##
+    # Fully streamed version of:
+    #   Path.new(str_path).find_in data
+    #
+    # See Path#find_in for usage.
+
+    def self.find path_str, data, regex_opts=nil, &block
+      path_str = path_str.dup
+      matches = {[] => data}
+
+      parse_path_str! path_str, regex_opts do |mkey, mvalue, recur|
+        assign_find matches, data, mkey, mvalue, recur do |sdata, key, spath|
+          yield sdata, key, spath if path_str.empty? && block_given?
+        end
+      end
+
+      matches
+    end
+
+
+    ##
+    # Common find functionality that assigns to the matches hash.
+
+    def self.assign_find matches, data, mkey, mvalue, recur
+      matches.keys.each do |path|
+        pdata = matches.delete path
+
+        if mkey == PARENT
+          path = path[0..-2]
+          matches[path] = data_at_path path, data
+          yield matches[path], path.last, path if block_given?
+          next
+        end
+
+        find_match pdata, mkey, mvalue, recur, path do |sdata, key, spath|
+          matches[spath] = sdata[key]
+          yield sdata, key, spath if block_given?
+        end
+      end
     end
 
 
@@ -202,9 +210,9 @@ class Kronk
     # Note: Path.parse_path_str! will slice the original path string
     # until it is empty.
 
-    def self.parse_path_str! path
+    def self.parse_path_str! path, regex_opts=nil
       parsed = []
-      regex_opts = nil
+      regex_opts = parse_regex_opts! path, regex_opts
 
       recur = false
 
@@ -240,6 +248,25 @@ class Kronk
       end
 
       parsed
+    end
+
+
+    ##
+    # Parses the tail end of a path String to determine regexp matching flags.
+
+    def self.parse_regex_opts! path, default=nil
+      opts = default || 0
+      str_opts = path.slice! %r{//[uixm]+$}
+      return unless str_opts
+
+      str_opts.delete! "/"
+
+      str_opts.each_char do |c|
+        opt = REGEX_OPTS[c] or next
+        opts = opts | opt
+      end
+
+      opts if opts > 0
     end
   end
 end
