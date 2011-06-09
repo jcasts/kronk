@@ -149,6 +149,8 @@ class Kronk
     # Finds data with the given key and value matcher, optionally recursive.
     # Yields data, key and path Array when block is given.
     # Returns an Array of path arrays.
+    #
+    # TODO: add support for method or instance_var calls on objects in addition to :[]
 
     def self.find_match data, mkey, mvalue, recur=false, path=nil, &block
       return [] unless data.respond_to? :[]
@@ -213,6 +215,8 @@ class Kronk
       else
         if regex_opts || str =~ /(^|[^\\])([\*\?\|])/
           str.gsub!(/(^|[^\\])(\*|\?)/, '\1.\2')
+          # TODO: figure out if and when to Regexp.escape str
+          # Currently special regexp chars like '+' aren't escaped.
           Regexp.new "\\A(#{str})\\Z", regex_opts
 
         else
