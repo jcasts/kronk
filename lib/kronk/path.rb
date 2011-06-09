@@ -256,15 +256,9 @@ class Kronk
 
     def self.parse_regex_opts! path, default=nil
       opts = default || 0
-      str_opts = path.slice! %r{//[uixm]+$}
-      return unless str_opts
 
-      str_opts.delete! "/"
-
-      str_opts.each_char do |c|
-        opt = REGEX_OPTS[c] or next
-        opts = opts | opt
-      end
+      path.slice!(%r{//[#{REGEX_OPTS.keys.join}]+$}).to_s.
+        each_char{|c| opts |= REGEX_OPTS[c] || 0}
 
       opts if opts > 0
     end
