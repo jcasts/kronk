@@ -23,6 +23,26 @@ class Kronk
 
     ##
     # Finds the current path in the given data structure.
+    # Returns a Hash of path_ary => data pairs for each match.
+    #
+    # If a block is given, yields the parent data object matched,
+    # the key, and the path array.
+    #
+    #   data = {:path => {:foo => :bar, :sub => {:foo => :bar2}}, :other => nil}
+    #   path = Path.new "path/**/foo"
+    #
+    #   all_args = []
+    #
+    #   path.find_in data |*args|
+    #     all_args << args
+    #   end
+    #   #=> {[:path, :foo] => :bar, [:path, :sub, :foo] => :bar2}
+    #
+    #   all_args
+    #   #=> [
+    #   #=>  [{:foo => :bar, :sub => {:foo => :bar2}}, :foo, [:path, :foo]],
+    #   #=>  [{:foo => :bar2}, :foo, [:path, :sub, :foo]]
+    #   #=> ]
 
     def find_in data
       matches = {[] => data}
@@ -180,20 +200,24 @@ class Kronk
     # Decide whether to make path item a regex, range, array, or string.
 
     def self.parse_path_item str, regex_opts=nil
-      return unless str && !str.empty?
+      case str
+      when nil, "", "*"
+        nil
 
-      if str =~ %r{^(\-?\d+)(\.{2,3})(\-?\d+)$}
+      when %r{^(\-?\d+)(\.{2,3})(\-?\d+)$}
         Range.new $1.to_i, $3.to_i, ($2 == "...")
 
-      elsif str =~ %r{^(\-?\d+),(\-?\d+)$}
+      when %r{^(\-?\d+),(\-?\d+)$}
         Range.new $1.to_i, ($1.to_i + $2.to_i), true
 
-      elsif regex_opts || str =~ /(^|[^\\])([\*\?\|])/
-        str.gsub!(/(^|[^\\])(\*|\?)/, '\1.\2')
-        Regexp.new "^(#{str})$", regex_opts
-
       else
-        str.gsub "\\", ""
+        if regex_opts || str =~ /(^|[^\\])([\*\?\|])/
+          str.gsub!(/(^|[^\\])(\*|\?)/, '\1.\2')
+          Regexp.new "\\A(#{str})\\Z", regex_opts
+
+        else
+          str
+        end
       end
     end
 
@@ -212,7 +236,9 @@ class Kronk
 
     def self.parse_path_str! path, regex_opts=nil
       parsed = []
+
       regex_opts = parse_regex_opts! path, regex_opts
+      path.gsub! %r{/(\.?(/|$))+}, "/"  # Handle foo//bar, foo/./bar, foo/./.
 
       recur = false
 
@@ -222,7 +248,7 @@ class Kronk
 
         path.replace "" if value == path
 
-        value.sub!(/\/$/, '')     # Handle paths ending in /
+        value.sub!(/\/$/, '')           # Handle paths ending in /
 
         key = value.slice! %r{((^?.*?[^\\])+?=)}
         key, value = value, nil if key.nil?
@@ -237,7 +263,7 @@ class Kronk
 
         elsif key == ".."
           key = PARENT
-          next if recur           # Handle  **/..
+          next if recur                 # Handle  **/..
         end
 
         key = parse_path_item key, regex_opts unless key == PARENT
@@ -257,7 +283,7 @@ class Kronk
     def self.parse_regex_opts! path, default=nil
       opts = default || 0
 
-      path.slice!(%r{//[#{REGEX_OPTS.keys.join}]+$}).to_s.
+      path.slice!(%r{//[#{REGEX_OPTS.keys.join}]+\Z}).to_s.
         each_char{|c| opts |= REGEX_OPTS[c] || 0}
 
       opts if opts > 0
