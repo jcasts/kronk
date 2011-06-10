@@ -6,9 +6,12 @@ class Kronk
     REGEX_OPTS = {
       "i" => Regexp::IGNORECASE,
       "m" => Regexp::MULTILINE,
-      "u" => Regexp::FIXEDENCODING,
+      "u" => (Regexp::FIXEDENCODING if defined?(Regexp::FIXEDENCODING)),
       "x" => Regexp::EXTENDED
     }
+
+    SUFF_CHARS = Regexp.escape "*?"
+    PATH_CHARS = Regexp.escape("()|") << SUFF_CHARS
 
 
     ##
@@ -203,7 +206,7 @@ class Kronk
 
     def self.parse_path_item str, regex_opts=nil
       case str
-      when nil, "", "*"
+      when nil, /^(\?*\*+\?*)*$/
         nil
 
       when %r{^(\-?\d+)(\.{2,3})(\-?\d+)$}
@@ -213,10 +216,16 @@ class Kronk
         Range.new $1.to_i, ($1.to_i + $2.to_i), true
 
       else
-        if regex_opts || str =~ /(^|[^\\])([\*\?\|])/
-          str.gsub!(/(^|[^\\])(\*|\?)/, '\1.\2')
-          # TODO: figure out if and when to Regexp.escape str
-          # Currently special regexp chars like '+' aren't escaped.
+        if regex_opts || str =~ /(^|[^\\])([#{PATH_CHARS}])/
+
+          # Remove extra suffix characters
+          str.gsub! /\*+\?+|\?+\*+/, '*'
+          str.gsub! /\*+/, '*'
+
+          str = Regexp.escape str
+          str.gsub! /\\([#{PATH_CHARS}])/, '\1\2'
+          str.gsub! /(^|[^\\])([#{SUFF_CHARS}])/, '\1.\2'
+
           Regexp.new "\\A(#{str})\\Z", regex_opts
 
         else
@@ -247,14 +256,14 @@ class Kronk
       recur = false
 
       until path.empty?
-        value   = path.slice! %r{((^?.*?[^\\])+?/)}
+        value   = path.slice! %r{(((^|.*)?[^\\])+?/)}
         value ||= path.dup
 
         path.replace "" if value == path
 
         value.sub!(/\/$/, '')           # Handle paths ending in /
 
-        key = value.slice! %r{((^?.*?[^\\])+?=)}
+        key = value.slice! %r{.*?(^|[^\\])=}
         key, value = value, nil if key.nil?
         key.sub!(/\=$/, '')
 
