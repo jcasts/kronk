@@ -1,8 +1,13 @@
 class Kronk
   class Path
 
+    # Used as path instruction to go up one path level.
     module PARENT; end
 
+    # Used as path item value to match any key or value.
+    module ANY_VALUE; end
+
+    # Mapping of letters to Regexp options.
     REGEX_OPTS = {
       "i" => Regexp::IGNORECASE,
       "m" => Regexp::MULTILINE,
@@ -10,9 +15,39 @@ class Kronk
       "x" => Regexp::EXTENDED
     }
 
+    # Shortcut characters that require modification before being turned into
+    # a matcher.
     SUFF_CHARS = Regexp.escape "*?"
-    PATH_CHARS = Regexp.escape("()|") << SUFF_CHARS
 
+    # All special path characters.
+    PATH_CHARS = Regexp.escape("()|/=") << SUFF_CHARS
+
+    # Path chars that get regexp escaped.
+    RESC_CHARS = "*?()|"
+
+    # The path item delimiter character "/"
+    DCH = "/"
+
+    # The escape character to use any PATH_CHARS as its literal.
+    ECH = "\\"
+
+    # The Regexp escaped version of ECH.
+    RECH = Regexp.escape ECH
+
+    # The EndOfPath delimiter after which regex opt chars may be specified.
+    EOP = DCH + DCH
+
+    # Matcher for Range path item.
+    RANGE_MATCHER  = %r{^(\-?\d+)(\.{2,3})(\-?\d+)$}
+
+    # Matcher for index,length path item.
+    ILEN_MATCHER   = %r{^(\-?\d+),(\-?\d+)$}
+
+    # Matcher allowing any value to be matched.
+    ANYVAL_MATCHER = /^(\?*\*+\?*)*$/
+
+    # Matcher to assert if any unescaped special chars are in a path item.
+    PATH_CHAR_MATCHER = /(^|[^#{RECH}])([#{PATH_CHARS}])/
 
     ##
     # Instantiate a Path object with a String data path.
@@ -192,7 +227,7 @@ class Kronk
       elsif Range === item1
         item1.include? item2.to_i
 
-      elsif item1.nil?
+      elsif ANY_VALUE === item1
         true
 
       else
@@ -206,27 +241,34 @@ class Kronk
 
     def self.parse_path_item str, regex_opts=nil
       case str
-      when nil, /^(\?*\*+\?*)*$/
-        nil
+      when nil, ANYVAL_MATCHER
+        ANY_VALUE
 
-      when %r{^(\-?\d+)(\.{2,3})(\-?\d+)$}
+      when RANGE_MATCHER
         Range.new $1.to_i, $3.to_i, ($2 == "...")
 
-      when %r{^(\-?\d+),(\-?\d+)$}
+      when ILEN_MATCHER
         Range.new $1.to_i, ($1.to_i + $2.to_i), true
 
       else
-        if regex_opts || str =~ /(^|[^\\])([#{PATH_CHARS}])/
-
+        if String === str && (regex_opts || str =~ PATH_CHAR_MATCHER)
+p str
           # Remove extra suffix characters
-          str.gsub! /\*+\?+|\?+\*+/, '*'
-          str.gsub! /\*+/, '*'
+          str.gsub! /(^|[^#{RECH}])(\*+\?+|\?+\*+)/, '\1*'
+          str.gsub! /(^|[^#{RECH}])\*+/, '\1*'
 
           str = Regexp.escape str
-          str.gsub! /\\([#{PATH_CHARS}])/, '\1\2'
-          str.gsub! /(^|[^\\])([#{SUFF_CHARS}])/, '\1.\2'
 
+          # Remove escaping from special path characters
+          str.gsub! /#{RECH}([#{PATH_CHARS}])/, '\1'
+          str.gsub! /#{RECH}([#{RESC_CHARS}])/, '\1'
+          str.gsub! /(^|[^#{RECH}])([#{SUFF_CHARS}])/, '\1.\2'
+p str
           Regexp.new "\\A(#{str})\\Z", regex_opts
+
+        elsif String === str
+          str.gsub! %r{#{RECH}([#{PATH_CHARS}])}, '\1'
+          str
 
         else
           str
@@ -251,34 +293,47 @@ class Kronk
       parsed = []
 
       regex_opts = parse_regex_opts! path, regex_opts
-      path.gsub! %r{/(\.?(/|$))+}, "/"  # Handle foo//bar, foo/./bar, foo/./.
+
+      # Handle paths that start with /
+      path.sub! %r{^#{DCH}+}, ''
+
+      # Handle foo//bar, foo/./bar, foo/./.
+      path.gsub! %r{#{DCH}(\.?(#{DCH}|$))+}, DCH
 
       recur = false
 
       until path.empty?
-        value   = path.slice! %r{(((^|.*)?[^\\])+?/)}
+        # Split path on DCH and not \DCH
+        value   = path.slice! %r{(((^|.*)*?[^#{RECH}])*?#{DCH})}
         value ||= path.dup
 
         path.replace "" if value == path
 
-        value.sub!(/\/$/, '')           # Handle paths ending in /
+        # Handle paths ending with DCH
+        value.sub! %r{(^|[^#{RECH}])#{DCH}$}, '\1'
 
-        key = value.slice! %r{.*?(^|[^\\])=}
+        # Handle key=val and key\=val
+        key = value.slice! %r{.*?(^|[^#{RECH}])=}
         key, value = value, nil if key.nil?
-        key.sub!(/\=$/, '')
+
+        # Remove trailing = from key
+        key.sub! %r{(^|[^#{RECH}])=$}, '\1'
 
         value = parse_path_item value, regex_opts if value
 
         if key == "**"
           recur = true
           key   = "*"
-          next unless value || path.empty?  # Handle  **=value
+          # Handle **=value
+          next unless value || path.empty?
 
         elsif key == ".."
           key = PARENT
-          next if recur                 # Handle  **/..
+          # Handle  **/.. as flattened
+          next if recur
         end
 
+        # TODO: remove and test unless statement
         key = parse_path_item key, regex_opts unless key == PARENT
         parsed << [key, value, recur]
         recur = false
@@ -296,7 +351,8 @@ class Kronk
     def self.parse_regex_opts! path, default=nil
       opts = default || 0
 
-      path.slice!(%r{//[#{REGEX_OPTS.keys.join}]+\Z}).to_s.
+      # TODO: Make sure character before EOP isn't the escape char
+      path.slice!(%r{#{EOP}[#{REGEX_OPTS.keys.join}]+\Z}).to_s.
         each_char{|c| opts |= REGEX_OPTS[c] || 0}
 
       opts if opts > 0
