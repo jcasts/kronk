@@ -28,6 +28,9 @@ class Kronk
     # The path item delimiter character "/"
     DCH = "/"
 
+    # The path character to assign value "="
+    VCH = "="
+
     # The escape character to use any PATH_CHARS as its literal.
     ECH = "\\"
 
@@ -252,7 +255,7 @@ class Kronk
 
       else
         if String === str && (regex_opts || str =~ PATH_CHAR_MATCHER)
-p str
+
           # Remove extra suffix characters
           str.gsub! /(^|[^#{RECH}])(\*+\?+|\?+\*+)/, '\1*'
           str.gsub! /(^|[^#{RECH}])\*+/, '\1*'
@@ -263,7 +266,7 @@ p str
           str.gsub! /#{RECH}([#{PATH_CHARS}])/, '\1'
           str.gsub! /#{RECH}([#{RESC_CHARS}])/, '\1'
           str.gsub! /(^|[^#{RECH}])([#{SUFF_CHARS}])/, '\1.\2'
-p str
+
           Regexp.new "\\A(#{str})\\Z", regex_opts
 
         elsif String === str
@@ -339,6 +342,76 @@ p str
         recur = false
 
         yield(*parsed.last) if block_given?
+      end
+
+      parsed
+    end
+
+
+    def self.parse_path_str! path, regex_opts=nil
+      regex_opts = parse_regex_opts! path, regex_opts
+
+      parsed = []
+
+      escaped   = false
+      key       = ""
+      value     = nil
+      recur     = false
+      next_item = false
+
+      until path.empty?
+        char = path.slice! 0
+
+        case char
+        when DCH
+          next_item = true
+          char = ""
+
+        when VCH
+          value = ""
+          next
+
+        when ECH
+          escaped = true
+          next
+        end unless escaped
+
+        char = "#{ECH}#{char}" if escaped
+
+        if value
+          value << char
+        else
+          key << char
+        end
+
+        next_item = true if path.empty?
+
+        if next_item
+          next_item = false
+
+          if key == "**"
+            key   = "*"
+            recur = true
+            next unless value || path.empty?
+
+          elsif key == ".."
+            key = PARENT
+          end
+
+          unless key =~ /^\.?$/
+            parsed << [ parse_path_item(key, regex_opts),
+                        parse_path_item(value, regex_opts),
+                        recur ]
+
+            yield(*parsed.last) if block_given?
+          end
+
+          key   = ""
+          value = nil
+          recur = false
+        end
+
+        escaped = false
       end
 
       parsed
