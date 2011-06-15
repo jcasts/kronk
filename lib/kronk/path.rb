@@ -392,10 +392,11 @@ class Kronk
           if key == "**"
             key   = "*"
             recur = true
-            next unless value || path.empty?
+            key = "" and next unless value || path.empty?
 
           elsif key == ".."
             key = PARENT
+            key = "" and next if recur
           end
 
           unless key =~ /^\.?$/
