@@ -425,6 +425,9 @@ class Kronk
     def self.parse_regex_opts! path, default=nil
       opts = default || 0
 
+      return default unless
+         path =~ %r{[^#{RECH}]#{EOP}[#{REGEX_OPTS.keys.join}]+\Z}
+
       # TODO: Make sure character before EOP isn't the escape char
       path.slice!(%r{#{EOP}[#{REGEX_OPTS.keys.join}]+\Z}).to_s.
         each_char{|c| opts |= REGEX_OPTS[c] || 0}
