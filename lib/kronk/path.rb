@@ -40,6 +40,12 @@ class Kronk
     # The EndOfPath delimiter after which regex opt chars may be specified.
     EOP = DCH + DCH
 
+    # The key string that represents PARENT.
+    PARENT_KEY = ".."
+
+    # The key string that indicates recursive lookup.
+    RECUR_KEY = "**"
+
     # Matcher for Range path item.
     RANGE_MATCHER  = %r{^(\-?\d+)(\.{2,3})(\-?\d+)$}
 
@@ -270,8 +276,11 @@ class Kronk
 
           Regexp.new "\\A(#{str})\\Z", regex_opts
 
-        else
+        elsif String === str
           str.gsub %r{#{RECH}([^#{RECH}])}, '\1'
+
+        else
+          str
         end
       end
     end
@@ -331,14 +340,14 @@ class Kronk
         if next_item
           next_item = false
 
-          if key == "**"
-            key   = "" and next unless value || path.empty?
+          if key == RECUR_KEY
             key   = "*"
             recur = true
+            key   = "" and next unless value || path.empty?
 
-          elsif key == ".."
-            key = "" and next if recur
+          elsif key == PARENT_KEY
             key = PARENT
+            key = "" and next if recur
           end
 
           unless key =~ /^\.?$/
