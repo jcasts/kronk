@@ -6,7 +6,7 @@
     for ../ and ./ paradygms in favor of the :path notation.
 
   * Removed explicit dependencies for ActiveSupport. Will attempt loading only
-    if String#pluralize isn't defined.
+    if String#pluralize isn't defined. Otherwise uses naïve pluralization.
 
   * Removed Rack dependency.
 

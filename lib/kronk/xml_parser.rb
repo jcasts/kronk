@@ -133,7 +133,27 @@ class Kronk
       names.first == parent_name             ||
       names.first.respond_to?(:pluralize) &&
         names.first.pluralize == parent_name ||
-      "#{names.first}s" == parent_name
+      pluralize(names.first) == parent_name
+    end
+
+
+    ##
+    # Naïve pluralization used if String#pluralize isn't defined.
+
+    def self.pluralize str
+      case str
+      when /z$/             then "#{str}zes"
+      when /f$/             then "#{str}ves"
+      when /y$/             then "#{str}ies"
+      when /is$/            then str.sub /is$/, "es"
+      when "child"          then "children"
+      when "person"         then "people"
+      when "foot"           then "feet"
+      when "photo"          then "photos"
+      when /([sxo]|[cs]h)$/ then "#{str}es"
+      else
+        "#{str}s"
+      end
     end
   end
 end
