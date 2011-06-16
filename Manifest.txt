@@ -11,6 +11,7 @@ lib/kronk/data_set.rb
 lib/kronk/diff.rb
 lib/kronk/diff/ascii_format.rb
 lib/kronk/diff/color_format.rb
+lib/kronk/path.rb
 lib/kronk/plist_parser.rb
 lib/kronk/request.rb
 lib/kronk/response.rb
@@ -36,6 +37,7 @@ test/test_data_set.rb
 test/test_diff.rb
 test/test_helper.rb
 test/test_kronk.rb
+test/test_path.rb
 test/test_request.rb
 test/test_response.rb
 test/test_xml_parser.rb

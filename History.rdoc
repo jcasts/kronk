@@ -1,3 +1,13 @@
+=== 1.4.0 / 2011-06
+
+* Enhancements:
+
+  * Rewrote data path parsing to be more efficient and powerful. Added support
+    for ../ and ./ paradygms in favor of the :path notation.
+
+  * Removed explicit dependencies for ActiveSupport. Will attempt loading only
+    if String#pluralize isn't defined.
+
 === 1.3.1 / 2011-06-01
 
 * Bugfixes:
