@@ -55,24 +55,16 @@ class Kronk
       new_data = @data.class.new
 
       [*data_paths].each do |data_path|
-        find_data data_path do |obj, k, path|
+        opts = Path.parse_regex_opts! data_path
+        data_path << "/.." if affect_parent
 
+        Path.find data_path, @data, opts do |data, k, path|
           curr_data     = @data
           new_curr_data = new_data
 
           path.each_with_index do |key, i|
-
-            if i == path.length - 1 && !affect_parent
-              new_curr_data[key] = curr_data[key]
-
-            elsif i == path.length - 2 && affect_parent
-              new_curr_data[key] = curr_data[key]
-              break
-
-            elsif path.length == 1 && affect_parent
-              new_data = curr_data
-              break
-
+            if i == path.length - 1
+              new_curr_data[key]   = curr_data[key]
             else
               new_curr_data[key] ||= curr_data[key].class.new
               new_curr_data        = new_curr_data[key]
