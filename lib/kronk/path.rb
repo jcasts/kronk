@@ -293,62 +293,6 @@ class Kronk
     # until it is empty.
 
     def self.parse_path_str! path, regex_opts=nil
-      parsed = []
-
-      regex_opts = parse_regex_opts! path, regex_opts
-
-      # Handle paths that start with /
-      path.sub! %r{^#{DCH}+}, ''
-
-      # Handle foo//bar, foo/./bar, foo/./.
-      path.gsub! %r{#{DCH}(\.?(#{DCH}|$))+}, DCH
-
-      recur = false
-
-      until path.empty?
-        # Split path on DCH and not \DCH
-        value   = path.slice! %r{(((^|.*)*?[^#{RECH}])*?#{DCH})}
-        value ||= path.dup
-
-        path.replace "" if value == path
-
-        # Handle paths ending with DCH
-        value.sub! %r{(^|[^#{RECH}])#{DCH}$}, '\1'
-
-        # Handle key=val and key\=val
-        key = value.slice! %r{.*?(^|[^#{RECH}])=}
-        key, value = value, nil if key.nil?
-
-        # Remove trailing = from key
-        key.sub! %r{(^|[^#{RECH}])=$}, '\1'
-
-        value = parse_path_item value, regex_opts if value
-
-        if key == "**"
-          recur = true
-          key   = "*"
-          # Handle **=value
-          next unless value || path.empty?
-
-        elsif key == ".."
-          key = PARENT
-          # Handle  **/.. as flattened
-          next if recur
-        end
-
-        # TODO: remove and test unless statement
-        key = parse_path_item key, regex_opts unless key == PARENT
-        parsed << [key, value, recur]
-        recur = false
-
-        yield(*parsed.last) if block_given?
-      end
-
-      parsed
-    end
-
-
-    def self.parse_path_str! path, regex_opts=nil
       regex_opts = parse_regex_opts! path, regex_opts
 
       parsed = []
