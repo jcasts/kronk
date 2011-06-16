@@ -2,7 +2,6 @@ require 'rubygems'
 
 require 'json'
 require 'cookiejar'
-require 'rack'
 
 require 'net/https'
 require 'optparse'
@@ -170,9 +169,9 @@ class Kronk
 
         # Hash or uri query String
         when :data, :query
-          val = Rack::Utils.parse_nested_query val if String === val
+          val = Request.parse_nested_query val if String === val
 
-          out_opts[key] = Rack::Utils.parse_nested_query out_opts[key] if
+          out_opts[key] = Request.parse_nested_query out_opts[key] if
             String === out_opts[key]
 
           out_opts[key] = val.merge out_opts[key], &DataSet::DEEP_MERGE
