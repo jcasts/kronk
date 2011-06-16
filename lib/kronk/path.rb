@@ -52,6 +52,7 @@ class Kronk
     # Matcher to assert if any unescaped special chars are in a path item.
     PATH_CHAR_MATCHER = /(^|[^#{RECH}])([#{PATH_CHARS}])/
 
+
     ##
     # Instantiate a Path object with a String data path.
     #   Path.new "/path/**/to/*=bar/../../**/last"
@@ -269,12 +270,8 @@ class Kronk
 
           Regexp.new "\\A(#{str})\\Z", regex_opts
 
-        elsif String === str
-          str.gsub! %r{#{RECH}([#{PATH_CHARS}])}, '\1'
-          str
-
         else
-          str
+          str.gsub %r{#{RECH}([^#{RECH}])}, '\1'
         end
       end
     end
