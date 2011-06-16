@@ -241,7 +241,7 @@ class Kronk
 
 
     ##
-    # Decide whether to make path item a regex, range, array, or string.
+    # Decide whether to make path item matcher a regex, range, array, or string.
 
     def self.parse_path_item str, regex_opts=nil
       case str
@@ -283,8 +283,9 @@ class Kronk
     # such as recursion.
     #
     #   Path.parse_path_str! "/path/**/to/*=bar/../../**/last"
-    #   #=> [["path",nil,false],["to",nil,true],[/.*/,"bar",false],
-    #   #    ["..",nil,false],["..",nil,false],["last",nil,true]]
+    #   #=> [["path",ANY_VALUE,false],["to",ANY_VALUE,true],[/.*/,"bar",false],
+    #   #    [PARENT,ANY_VALUE,false],[PARENT,ANY_VALUE,false],
+    #   #    ["last",ANY_VALUE,true]]
     #
     # Note: Path.parse_path_str! will slice the original path string
     # until it is empty.
