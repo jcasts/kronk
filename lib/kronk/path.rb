@@ -390,13 +390,13 @@ class Kronk
           next_item = false
 
           if key == "**"
+            key   = "" and next unless value || path.empty?
             key   = "*"
             recur = true
-            key = "" and next unless value || path.empty?
 
           elsif key == ".."
-            key = PARENT
             key = "" and next if recur
+            key = PARENT
           end
 
           unless key =~ /^\.?$/
@@ -428,7 +428,6 @@ class Kronk
       return default unless
          path =~ %r{[^#{RECH}]#{EOP}[#{REGEX_OPTS.keys.join}]+\Z}
 
-      # TODO: Make sure character before EOP isn't the escape char
       path.slice!(%r{#{EOP}[#{REGEX_OPTS.keys.join}]+\Z}).to_s.
         each_char{|c| opts |= REGEX_OPTS[c] || 0}
 
