@@ -60,39 +60,64 @@ class TestPath < Test::Unit::TestCase
   end
 
 
+  def test_parse_path_str_yield
+    all_args = []
+
+    Kronk::Path.parse_path_str! "path/**/to=foo/item" do |*args|
+      all_args << args
+    end
+
+    expected = [
+      ["path", ANY_VALUE, false],
+      ["to", "foo", true],
+      ["item", ANY_VALUE, false],
+    ]
+
+    assert_equal expected, all_args
+  end
+
+
+  def test_parse_path_str_modif
+    path = "path/to/item"
+    Kronk::Path.parse_path_str! path
+
+    assert path.empty?
+  end
+
+
   def test_parse_path_str_simple
-     assert_path %w{path to item}, "path/to/item"
-     assert_path %w{path to item}, "///path//to/././item///"
-     assert_path %w{path to item}, "///path//to/./item///"
-     assert_path %w{path/to item}, "path\\/to/item"
+    assert_path %w{path to item}, "path/to/item"
+    assert_path %w{path to item}, "///path//to/././item///"
+    assert_path %w{path to item}, "///path//to/./item///"
+    assert_path %w{path/to item}, "path\\/to/item"
 
-     assert_path %w{path/to item/ i}, "path\\/to/item\\//i"
+    assert_path %w{path/to item/ i}, "path\\/to/item\\//i"
 
-     assert_path [/\A(path\/\.to)\Z/i, /\A(item)\Z/i],
-        "path\\/.to/item", Regexp::IGNORECASE
+    assert_path [/\A(path\/\.to)\Z/i, /\A(item)\Z/i],
+       "path\\/.to/item", Regexp::IGNORECASE
 
-     assert_path ['path', /\A(to|for)\Z/, 'item'], "path/to|for/item"
+    assert_path ['path', /\A(to|for)\Z/, 'item'], "path/to|for/item"
   end
 
 
   def test_parse_path_str_value
-     assert_path ['path', ['to', 'foo'], 'item'], "path/to=foo/item"
-     assert_path ['path', [nil, 'foo'], 'item'],  "path/*=foo/item"
-     assert_path ['path', [nil, 'foo'], 'item'],  "path/=foo/item"
+    assert_path ['path', ['to', 'foo'], 'item'], "path/to=foo/item"
+    assert_path ['path', [nil, 'foo'], 'item'],  "path/*=foo/item"
+    assert_path ['path', [nil, 'foo'], 'item'],  "path/=foo/item"
 
-     assert_path ['path', ['to', /\A(foo|bar)\Z/], 'item'],
-       "path/to=foo|bar/item"
+    assert_path ['path', ['to', /\A(foo|bar)\Z/], 'item'],
+      "path/to=foo|bar/item"
 
-     assert_path [/\A(path)\Z/i, [/\A(to)\Z/i, /\A(foo)\Z/i], /\A(item)\Z/i],
-       "path/to=foo/item", Regexp::IGNORECASE
+    assert_path [/\A(path)\Z/i, [/\A(to)\Z/i, /\A(foo)\Z/i], /\A(item)\Z/i],
+      "path/to=foo/item", Regexp::IGNORECASE
   end
 
 
   def test_parse_path_str_recur
-     assert_path ['path', ['to', 'foo', true], 'item'],    "path/**/to=foo/item"
-     assert_path [['path', nil, true], 'to', 'item'],      "**/**/path/to/item"
-     assert_path ['path', 'to', 'item', [nil, nil, true]], "path/to/item/**/**"
-     assert_path ['path', [nil, 'foo', true], 'item'],     "path/**=foo/item"
+    assert_path ['path', ['to', 'foo', true], 'item'],    "path/**/to=foo/item"
+    assert_path [['path', nil, true], 'to', 'item'],      "**/**/path/to/item"
+    assert_path ['path', 'to', 'item', [nil, nil, true]], "path/to/item/**/**"
+    assert_path ['path', [nil, 'foo', true], 'item'],     "path/**=foo/item"
   end
 
 
@@ -106,15 +131,40 @@ class TestPath < Test::Unit::TestCase
   end
 
 
+  def test_parse_regex_opts
+    path = "path/to/item///mix"
+    opts = Kronk::Path.parse_regex_opts! path
+
+    assert_equal "path/to/item/", path
+
+    expected_opts = Regexp::IGNORECASE | Regexp::EXTENDED | Regexp::MULTILINE
+    assert_equal expected_opts, opts
+  end
+
+
+  def test_parse_regex_opts_mix
+    opts = Kronk::Path.parse_regex_opts! "path/to/item//m", Regexp::EXTENDED
+    assert_equal Regexp::EXTENDED | Regexp::MULTILINE, opts
+  end
+
+
+  def test_parse_regex_opts_none
+    assert_nil Kronk::Path.parse_regex_opts!("path/to/item//")
+    assert_equal Regexp::EXTENDED,
+      Kronk::Path.parse_regex_opts!("path/to/item//", Regexp::EXTENDED)
+  end
+
+
   private
 
-  PARENT = Kronk::Path::PARENT
+  PARENT    = Kronk::Path::PARENT
+  ANY_VALUE = Kronk::Path::ANY_VALUE
 
   def assert_path match, path, regexp_opt=nil
     match.map! do |i|
       i = [i] unless Array === i
-      i[0] ||= Kronk::Path::ANY_VALUE
-      i[1] ||= Kronk::Path::ANY_VALUE
+      i[0] ||= ANY_VALUE
+      i[1] ||= ANY_VALUE
       i[2] ||= false
       i
     end
