@@ -20,7 +20,7 @@ class Kronk
     SUFF_CHARS = Regexp.escape "*?"
 
     # All special path characters.
-    PATH_CHARS = Regexp.escape("()|/=") << SUFF_CHARS
+    PATH_CHARS = Regexp.escape("()|") << SUFF_CHARS
 
     # Path chars that get regexp escaped.
     RESC_CHARS = "*?()|"
@@ -311,7 +311,7 @@ class Kronk
       next_item = false
 
       until path.empty?
-        char = path.slice! 0
+        char = path.slice!(0..0)
 
         case char
         when DCH
