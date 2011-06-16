@@ -230,7 +230,7 @@ class Kronk
       elsif Range === item1
         item1.include? item2.to_i
 
-      elsif ANY_VALUE === item1
+      elsif ANY_VALUE == item1
         true
 
       else
