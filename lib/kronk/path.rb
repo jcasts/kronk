@@ -23,7 +23,7 @@ class Kronk
     PATH_CHARS = Regexp.escape("()|") << SUFF_CHARS
 
     # Path chars that get regexp escaped.
-    RESC_CHARS = "*?()|"
+    RESC_CHARS = "*?()|/"
 
     # The path item delimiter character "/"
     DCH = "/"
@@ -277,7 +277,7 @@ class Kronk
           Regexp.new "\\A(#{str})\\Z", regex_opts
 
         elsif String === str
-          str.gsub %r{#{RECH}([^#{RECH}])}, '\1'
+          str.gsub %r{#{RECH}([^#{RECH}]|$)}, '\1'
 
         else
           str
@@ -347,10 +347,14 @@ class Kronk
 
           elsif key == PARENT_KEY
             key = PARENT
-            key = "" and next if recur
+
+            if recur
+              key = "" and next unless value
+              key = "*"
+            end
           end
 
-          unless key =~ /^\.?$/
+          unless key =~ /^\.?$/ && !value
             parsed << [ parse_path_item(key, regex_opts),
                         parse_path_item(value, regex_opts),
                         recur ]
