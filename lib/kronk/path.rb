@@ -224,7 +224,7 @@ class Kronk
     # Check if data key or value is a match for nested data searches.
 
     def self.match_data_item item1, item2
-      return if !item1.nil? && (Array === item2 || Hash === item2)
+      return if ANY_VALUE != item1 && (Array === item2 || Hash === item2)
 
       if item1.class == item2.class
         item1 == item2
