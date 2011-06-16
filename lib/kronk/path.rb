@@ -136,8 +136,9 @@ class Kronk
 
         if mkey == PARENT
           path = path[0..-2]
-          matches[path] = data_at_path path, data
-          yield matches[path], path.last, path if block_given?
+          sdata = data_at_path path[0..-2], data
+          matches[path] = sdata[path.last]
+          yield sdata, path.last, path if block_given?
           next
         end
 
@@ -178,17 +179,21 @@ class Kronk
 
         i = 0
 
-        while i < data.length do
-          index = i
-          old_length = data.length
-
-          block.call index, data[index]
-
-          adj = old_length - data.length
-          adj = 0 if adj < 0
-
-          i = i.next - adj
+        (data.length - 1).downto(0) do |i|
+          block.call i, data[i]
         end
+
+#       while i < data.length do
+#         index = i
+#         old_length = data.length
+
+#         block.call index, data[index]
+
+#         adj = old_length - data.length
+#         adj = 0 if adj < 0
+
+#         i = i.next - adj
+#       end
       end
     end
 

@@ -83,21 +83,38 @@ class Kronk
 
     def delete_data_points data_paths, affect_parent=false
       [*data_paths].each do |data_path|
-        find_data data_path do |obj, k, path|
+        opts = Path.parse_regex_opts! data_path
+        data_path << "/.." if affect_parent
 
-          if affect_parent && data_at_path?(path)
-            @data = @data.class.new and return if path.length == 1
+        Path.find(data_path, @data, opts).each do |path, v|
+          obj = Path.data_at_path path[0..-2], @data rescue nil
+          k   = path.last
+          next unless obj.respond_to? :[]
 
-            parent_data = data_at_path path[0..-3]
-            del_method  = Array === parent_data ? :delete_at : :delete
-
-            parent_data.send del_method, path[-2]
-
-          else
-            del_method = Array === obj ? :delete_at : :delete
-            obj.send del_method, k
-          end
+          del_method = Array === obj ? :delete_at : :delete
+          obj.send del_method, k
+          #if Hash === obj
+          #  obj.delete k
+          #else
+          #  obj[k] = nil
+          #end
         end
+
+#       find_data data_path do |obj, k, path|
+
+#         if affect_parent && data_at_path?(path)
+#           @data = @data.class.new and return if path.length == 1
+
+#           parent_data = data_at_path path[0..-3]
+#           del_method  = Array === parent_data ? :delete_at : :delete
+
+#           parent_data.send del_method, path[-2]
+
+#         else
+#           del_method = Array === obj ? :delete_at : :delete
+#           obj.send del_method, k
+#         end
+#       end
       end
 
       @data
