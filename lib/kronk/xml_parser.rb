@@ -6,19 +6,28 @@ class Kronk
   class XMLParser
 
     ##
-    # Load required gems.
+    # Load required gems. Loads Nokogiri. ActiveSupport will attempt to be
+    # loaded if String#pluralize is not defined.
 
     def self.require_gems
       require 'nokogiri'
 
+      return if "".respond_to?(:pluralize)
+
       # Support for new and old versions of ActiveSupport
+      active_support_versions = %w{active_support/inflector activesupport}
+      asupp_i = 0
+
       begin
-        require 'active_support/inflector'
+        require active_support_versions[asupp_i]
+
       rescue LoadError => e
-        raise unless e.message =~ /-- active_support/
-        require 'activesupport'
+        raise unless e.message =~ /-- active_?support/
+        asupp_i = asupp_i.next
+        retry if asupp_i < active_support_versions.length
       end
     end
+
 
     ##
     # Takes an xml string and returns a data hash.
@@ -117,9 +126,14 @@ class Kronk
         n.name
       end
 
-      names.uniq.length == 1 && (names.length > 1 ||
-      parent_name && (names.first == parent_name ||
-      names.first.pluralize == parent_name))
+      return false unless names.uniq.length == 1
+      return true  if     names.length > 1
+      return false unless parent_name
+
+      names.first == parent_name             ||
+      names.first.respond_to?(:pluralize) &&
+        names.first.pluralize == parent_name ||
+      "#{names.first}s" == parent_name
     end
   end
 end
