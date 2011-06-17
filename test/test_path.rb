@@ -26,6 +26,42 @@ class TestPath < Test::Unit::TestCase
   end
 
 
+  def test_each_data_item_hash
+    hash = {
+      :a => 1,
+      :b => 2,
+      :c => 3
+    }
+
+    keys = []
+    values = []
+
+    Kronk::Path.each_data_item hash do |key, val|
+      keys << key
+      values << val
+    end
+
+    assert_equal keys, (keys | hash.keys)
+    assert_equal values, (values | hash.values)
+  end
+
+
+  def test_each_data_item_array
+    ary = [:a, :b, :c]
+
+    keys = []
+    values = []
+
+    Kronk::Path.each_data_item ary do |key, val|
+      keys << key
+      values << val
+    end
+
+    assert_equal [2,1,0], keys
+    assert_equal ary.reverse, values
+  end
+
+
   def test_match_data_item
     assert Kronk::Path.match_data_item(:key, "key")
     assert Kronk::Path.match_data_item("key", :key)
@@ -40,6 +76,60 @@ class TestPath < Test::Unit::TestCase
     assert Kronk::Path.match_data_item(1..3, 1)
     assert !Kronk::Path.match_data_item(1, 1..3)
     assert Kronk::Path.match_data_item(1..3, 1..3)
+  end
+
+
+  def test_find_match
+    keys = []
+
+    Kronk::Path.find_match @data, /key/ do |data, key|
+      keys << key.to_s
+      assert_equal @data, data
+    end
+
+    assert_equal ['key1', 'key2', 'key3'], keys.sort
+  end
+
+
+  def test_find_match_recursive
+    keys = []
+    data_points = []
+
+    Kronk::Path.find_match @data, :findme, ANY_VALUE, true do |data, key|
+      keys << key.to_s
+      data_points << data
+    end
+
+    assert_equal 3, keys.length
+    assert_equal 1, keys.uniq.length
+    assert_equal "findme", keys.first
+
+    assert_equal 3, data_points.length
+    assert data_points.include?(@data)
+    assert data_points.include?({:findme => "thing"})
+    assert data_points.include?({:findme => 123456})
+  end
+
+
+  def test_find_match_value
+    keys = []
+    data_points = []
+
+    Kronk::Path.find_match @data, ANY_VALUE, "findme" do |data, key|
+      keys << key.to_s
+      data_points << data
+    end
+
+    assert keys.empty?
+    assert data_points.empty?
+
+    Kronk::Path.find_match @data, ANY_VALUE, "findme", true do |data, key|
+      keys << key.to_s
+      data_points << data
+    end
+
+    assert_equal ['key1b'], keys
+    assert_equal [@data[:key1]], data_points
   end
 
 

@@ -1,4 +1,38 @@
 class Kronk
+
+  ##
+  # Finds specific data points from a nested Hash or Array data structure
+  # through the use of a file-glob-like path selector.
+  #
+  # Special characters are: "/ * ? = | \ . , \ ( )"
+  # and are interpreted as follows:
+  #
+  # :foo/ - walk down tree by one level from key "foo"
+  # :*/foo - walk down tree from any parent with key "foo" as a child
+  # :foo|foo2 - return elements with key value of "foo1" or "foo2"
+  # :foo(1|2) - same behavior as above
+  # :foo=val - return elements where key has a value of val
+  # :foo\* - return root-level element with key "foo*" ('*' char is escaped)
+  # :**/foo - recursively search for key "foo"
+  # :foo? - return keys that match /\Afoo.?\Z/
+  # :2..10 - match any integer from 2 to 10
+  # :2...10 - match any integer from 2 to 9
+  # :2,5 - match any integer from 2 to 7
+  #
+  # Examples:
+  #
+  #   # Recursively look for elements with value "val" under top element "root"
+  #   Path.find "root/**=val", data
+  #
+  #   # Find child elements of "root" that have a key of "foo" or "bar"
+  #   Path.find "root/foo|bar", data
+  #
+  #   # Recursively find child elements of root whose value is 1, 2, or 3.
+  #   Path.find "root/**=1..3", data
+  #
+  #   # Recursively find child elements of root of literal value "1..3"
+  #   Path.find "root/**=\\1..3", data
+
   class Path
 
     # Used as path instruction to go up one path level.
@@ -139,8 +173,9 @@ class Kronk
           subdata = data_at_path path[0..-2], data
 
           #!! Avoid yielding parent more than once
-          yield subdata, path.last, path if block_given? && !matches[path]
+          next if matches[path]
 
+          yield subdata, path.last, path if block_given?
           matches[path] = subdata[path.last]
           next
         end
@@ -155,6 +190,7 @@ class Kronk
 
     ##
     # Returns the data object found at the given path array.
+    # Returns nil if not found.
 
     def self.data_at_path path_arr, data
       c_data = data
@@ -182,24 +218,9 @@ class Kronk
       elsif data.respond_to?(:each_with_index) && data.respond_to?(:length)
         # We need to iterate through the array this way
         # in case items in it get deleted.
-
-#       i = 0
-
         (data.length - 1).downto(0) do |i|
           block.call i, data[i]
         end
-
-#       while i < data.length do
-#         index = i
-#         old_length = data.length
-
-#         block.call index, data[index]
-
-#         adj = old_length - data.length
-#         adj = 0 if adj < 0
-
-#         i = i.next - adj
-#       end
       end
     end
 
@@ -209,7 +230,9 @@ class Kronk
     # Yields data, key and path Array when block is given.
     # Returns an Array of path arrays.
 
-    def self.find_match data, mkey, mvalue, recur=false, path=nil, &block
+    def self.find_match data, mkey, mvalue=ANY_VALUE,
+                        recur=false, path=nil, &block
+
       return [] unless Array === data || Hash === data
 
       paths  = []
