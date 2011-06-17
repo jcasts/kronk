@@ -74,7 +74,7 @@ class Kronk
         end
       end
 
-      @data = new_data
+      @data.replace new_data
     end
 
 

@@ -1,5 +1,13 @@
 class Kronk
 
+  # TODO: Consider the following methods:
+  #
+  #   #set path, value
+  #   #set! path, value
+  #   #move from_path, to_path
+  #   #move! from_path, to_path
+  #   #delete path
+
   ##
   # Finds specific data points from a nested Hash or Array data structure
   # through the use of a file-glob-like path selector.
