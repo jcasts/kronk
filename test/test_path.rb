@@ -2,6 +2,120 @@ require 'test/test_helper'
 
 class TestPath < Test::Unit::TestCase
 
+  def setup
+    @data = {
+      :key1 => {
+        :key1a => [
+          "foo",
+          "bar",
+          "foobar",
+          {:findme => "thing"}
+        ],
+        'key1b' => "findme"
+      },
+      'findme' => [
+        123,
+        456,
+        {:findme => 123456}
+      ],
+      :key2 => "foobar",
+      :key3 => {
+        :key3a => ["val1", "val2", "val3"]
+      }
+    }
+  end
+
+
+  def test_match_data_item
+    assert Kronk::Path.match_data_item(:key, "key")
+    assert Kronk::Path.match_data_item("key", :key)
+
+    assert Kronk::Path.match_data_item(/key/, "foo_key")
+    assert !Kronk::Path.match_data_item("foo_key", /key/)
+    assert Kronk::Path.match_data_item(/key/, /key/)
+
+    assert Kronk::Path.match_data_item(Kronk::Path::ANY_VALUE, "foo_key")
+    assert !Kronk::Path.match_data_item("foo_key", Kronk::Path::ANY_VALUE)
+
+    assert Kronk::Path.match_data_item(1..3, 1)
+    assert !Kronk::Path.match_data_item(1, 1..3)
+    assert Kronk::Path.match_data_item(1..3, 1..3)
+  end
+
+
+  def test_find_wildcard
+    keys = []
+    data_points = []
+
+    Kronk::Path.find "*/key1?", @data do |data, key, path|
+      keys << key.to_s
+      data_points << data
+    end
+
+    assert_equal ['key1a', 'key1b'], keys.sort
+    assert_equal [@data[:key1], @data[:key1]], data_points
+  end
+
+
+  def test_find_recursive
+    keys = []
+    paths = []
+    data_points = []
+
+    Kronk::Path.find "**/findme", @data do |data, key, path|
+      keys << key.to_s
+      data_points << data
+      paths << path
+    end
+
+    expected_paths =
+      [[:key1,:key1a,3,:findme], ["findme"], ["findme",2,:findme]]
+
+    assert_equal 3, keys.length
+    assert_equal 1, keys.uniq.length
+    assert_equal "findme", keys.first
+
+    assert data_points.include?(@data)
+    assert data_points.include?(@data[:key1][:key1a].last)
+    assert data_points.include?(@data['findme'].last)
+
+    assert_equal expected_paths, (expected_paths | paths)
+  end
+
+
+  def test_find_index
+    keys = []
+    data_points = []
+
+    Kronk::Path.find "*/*/0|1", @data do |data, key, path|
+      keys << key
+      data_points << data
+    end
+
+    assert_equal [1,0,1,0], keys
+    assert_equal 2, data_points.count(@data[:key1][:key1a])
+    assert_equal 2, data_points.count(@data[:key3][:key3a])
+  end
+
+
+  def test_find_data_recursive_wildcard_value
+    keys = []
+    paths = []
+    data_points = []
+
+    Kronk::Path.find "**=foo*", @data do |data, key, path|
+      keys << key
+      data_points << data
+      paths << path
+    end
+
+    expected_paths = [[:key1,:key1a,0], [:key1,:key1a,2], [:key2]]
+
+    assert_equal [0,2,:key2], ([0,2,:key2] | keys)
+    assert_equal expected_paths, (expected_paths | paths)
+  end
+
+
   def test_parse_path_item_range
     assert_equal 1..4,   Kronk::Path.parse_path_item("1..4")
     assert_equal 1...4,  Kronk::Path.parse_path_item("1...4")
@@ -31,16 +145,16 @@ class TestPath < Test::Unit::TestCase
 
 
   def test_parse_path_item_regex
-    assert_equal /\A(test.*)\Z/,     Kronk::Path.parse_path_item("test*")
-    assert_equal /\A(.?test.*)\Z/,   Kronk::Path.parse_path_item("?test*")
-    assert_equal /\A(\?test.*)\Z/,   Kronk::Path.parse_path_item("\\?test*")
-    assert_equal /\A(.?test\*.*)\Z/, Kronk::Path.parse_path_item("?test\\**")
-    assert_equal /\A(.?test.*)\Z/,   Kronk::Path.parse_path_item("?test*?**??")
-    assert_equal /\A(a|b)\Z/,        Kronk::Path.parse_path_item("a|b")
-    assert_equal /\A(a|b(c|d))\Z/,   Kronk::Path.parse_path_item("a|b(c|d)")
+    assert_equal(/\A(test.*)\Z/,     Kronk::Path.parse_path_item("test*"))
+    assert_equal(/\A(.?test.*)\Z/,   Kronk::Path.parse_path_item("?test*"))
+    assert_equal(/\A(\?test.*)\Z/,   Kronk::Path.parse_path_item("\\?test*"))
+    assert_equal(/\A(.?test\*.*)\Z/, Kronk::Path.parse_path_item("?test\\**"))
+    assert_equal(/\A(.?test.*)\Z/,   Kronk::Path.parse_path_item("?test*?**??"))
+    assert_equal(/\A(a|b)\Z/,        Kronk::Path.parse_path_item("a|b"))
+    assert_equal(/\A(a|b(c|d))\Z/,   Kronk::Path.parse_path_item("a|b(c|d)"))
 
-    assert_equal /\A(a|b(c|d))\Z/i,
-      Kronk::Path.parse_path_item("a|b(c|d)", Regexp::IGNORECASE)
+    assert_equal(/\A(a|b(c|d))\Z/i,
+      Kronk::Path.parse_path_item("a|b(c|d)", Regexp::IGNORECASE))
   end
 
 

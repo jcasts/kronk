@@ -145,7 +145,7 @@ class Kronk
       when /z$/             then "#{str}zes"
       when /f$/             then "#{str}ves"
       when /y$/             then "#{str}ies"
-      when /is$/            then str.sub /is$/, "es"
+      when /is$/            then str.sub(/is$/, "es")
       when "child"          then "children"
       when "person"         then "people"
       when "foot"           then "feet"

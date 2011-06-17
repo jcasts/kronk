@@ -12,14 +12,14 @@ class TestCoreExt < Test::Unit::TestCase
   def test_has_path_array
     assert @array.has_path?("**/foo")
     assert @array.has_path?("**/foo=other")
-    assert_nil @array.has_path?("**/foobar")
+    assert !@array.has_path?("**/foobar")
   end
 
 
   def test_has_path_hash
     assert @hash.has_path?("**/foo")
     assert @hash.has_path?("**/foo=other")
-    assert_nil @hash.has_path?("**/foobar")
+    assert !@hash.has_path?("**/foobar")
   end
 
 

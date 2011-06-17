@@ -135,16 +135,19 @@ class Kronk
         pdata = matches.delete path
 
         if mkey == PARENT
-          path = path[0..-2]
-          sdata = data_at_path path[0..-2], data
-          matches[path] = sdata[path.last]
-          yield sdata, path.last, path if block_given?
+          path    = path[0..-2]
+          subdata = data_at_path path[0..-2], data
+
+          #!! Avoid yielding parent more than once
+          yield subdata, path.last, path if block_given? && !matches[path]
+
+          matches[path] = subdata[path.last]
           next
         end
 
         find_match pdata, mkey, mvalue, recur, path do |sdata, key, spath|
-          matches[spath] = sdata[key]
           yield sdata, key, spath if block_given?
+          matches[spath] = sdata[key]
         end
       end
     end
@@ -161,6 +164,9 @@ class Kronk
       end
 
       c_data
+
+    rescue NoMethodError, TypeError
+       nil
     end
 
 
@@ -177,7 +183,7 @@ class Kronk
         # We need to iterate through the array this way
         # in case items in it get deleted.
 
-        i = 0
+#       i = 0
 
         (data.length - 1).downto(0) do |i|
           block.call i, data[i]
@@ -204,7 +210,7 @@ class Kronk
     # Returns an Array of path arrays.
 
     def self.find_match data, mkey, mvalue, recur=false, path=nil, &block
-      return [] unless data.respond_to? :[]
+      return [] unless Array === data || Hash === data
 
       paths  = []
       path ||= []
@@ -267,15 +273,15 @@ class Kronk
         if String === str && (regex_opts || str =~ PATH_CHAR_MATCHER)
 
           # Remove extra suffix characters
-          str.gsub! /(^|[^#{RECH}])(\*+\?+|\?+\*+)/, '\1*'
-          str.gsub! /(^|[^#{RECH}])\*+/, '\1*'
+          str.gsub! %r{(^|[^#{RECH}])(\*+\?+|\?+\*+)}, '\1*'
+          str.gsub! %r{(^|[^#{RECH}])\*+}, '\1*'
 
           str = Regexp.escape str
 
           # Remove escaping from special path characters
-          str.gsub! /#{RECH}([#{PATH_CHARS}])/, '\1'
-          str.gsub! /#{RECH}([#{RESC_CHARS}])/, '\1'
-          str.gsub! /(^|[^#{RECH}])([#{SUFF_CHARS}])/, '\1.\2'
+          str.gsub! %r{#{RECH}([#{PATH_CHARS}])}, '\1'
+          str.gsub! %r{#{RECH}([#{RESC_CHARS}])}, '\1'
+          str.gsub! %r{(^|[^#{RECH}])([#{SUFF_CHARS}])}, '\1.\2'
 
           Regexp.new "\\A(#{str})\\Z", regex_opts
 

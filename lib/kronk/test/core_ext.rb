@@ -9,14 +9,14 @@ class Kronk
 
       ##
       # Checks if the given path exists and returns the first matching path
-      # as an array of keys. Returns nil if no path is found.
+      # as an array of keys. Returns false if no path is found.
 
       def has_path? path
-        Kronk::DataSet.new(self).find_data path do |d,k,p|
+        Kronk::Path.find path, self do |d,k,p|
           return !!p
         end
 
-        nil
+        false
       end
 
 
@@ -49,7 +49,7 @@ class Kronk
       def find_data path
         found = {}
 
-        Kronk::DataSet.new(self).find_data path do |d,k,p|
+        Kronk::Path.find path, self do |d,k,p|
           found[p] = d[k]
           yield d, k, p if block_given?
         end

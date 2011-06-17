@@ -227,7 +227,7 @@ class Kronk
       while sequences.length > dist
         item = sequences.pop
         next unless item
-        item.each &block
+        item.each(&block)
       end
     end
 
