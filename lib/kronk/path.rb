@@ -2,20 +2,18 @@ class Kronk
 
   # TODO: Consider the following methods:
   #
-  #   #path_delete path
   #   #transaction
   #
   #   # only valuable if it creates missing data points in the path
   #   # and/or assignment of multiple values is possible
   #   data.path_set "foo/bar/0..2", "value1", "value2", "value3"
   #   data.path_set "foo/bar/*", "value1", "value2", "value3"
-  #   data.path_set "foo/bar/val*", "value1", "value2", "value3"
+  #   data.assign_path "foo/bar/val-%d", "value1", "value2", "value3"
   #   data.path_set %w{foo/bar/%s/val a b c}, "value1", "value2", "value3"
   #
   #   Path.transaction data do |tran|
-  #     tran.find_data "foo/bar", limit
-  #     tran.path_delete "**=foo", limit
-  #     tran.find_and_replace "**=foo", "bar", limit
+  #     tran.delete "**=foo", limit
+  #     tran.select "**=foo", "bar", limit
   #   end
 
   ##
