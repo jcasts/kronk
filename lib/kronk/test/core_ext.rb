@@ -56,10 +56,8 @@ class Kronk
       # Returns true if matches were replaced, otherwise false.
       #
       #   data = {:foo => "bar", :foobar => [:a, :b, {:foo => "other bar"}, :c]}
-      #   data.find_and_replace "**=*bar", "BAR"
-      #
-      #   # returns:
-      #   true
+      #   data.replace_at_path "**=*bar", "BAR"
+      #   #=> true
       #
       #   data
       #   #=> {:foo => "BAR", :foobar => [:a, :b, {:foo => "BAR"}, :c]}
@@ -69,12 +67,38 @@ class Kronk
       # It's also important to realize that arrays are modified starting with
       # the last index, going down.
 
-      def find_and_replace path, value, limit=nil
+      def replace_at_path path, value, limit=nil
         count = 0
 
         Kronk::Path.find path, self do |data, key, path_arr|
+          count     = count.next
           data[key] = value
-          count = count.next
+
+          return true if limit && count >= limit
+        end
+
+        return count > 0
+      end
+
+
+      ##
+      # Similar to DataExt#replace_at_path but deletes found items.
+      # Returns a hash of path/value pairs of deleted items.
+      #
+      #   data = {:foo => "bar", :foobar => [:a, :b, {:foo => "other bar"}, :c]}
+      #   data.replace_at_path "**=*bar", "BAR"
+      #   #=> {[:foo] => "bar", [:foobar, 2, :foo] => "other bar"}
+
+      def delete_at_path path, limit=nil
+        count = 0
+        out   = {}
+
+        Kronk::Path.find path, self do |data, key, path_arr|
+          count         = count.next
+          out[path_arr] = data[key]
+
+          data.respond_to :delete_at ? data.delete_at key : data.delete key
+
           return true if limit && count >= limit
         end
 

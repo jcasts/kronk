@@ -2,9 +2,6 @@ class Kronk
 
   # TODO: Consider the following methods:
   #
-  #   #path_set path, value
-  #   #path_set! path, value
-  #   #replace path, value
   #   #path_delete path
   #   #transaction
   #
@@ -14,9 +11,6 @@ class Kronk
   #   data.path_set "foo/bar/*", "value1", "value2", "value3"
   #   data.path_set "foo/bar/val*", "value1", "value2", "value3"
   #   data.path_set %w{foo/bar/%s/val a b c}, "value1", "value2", "value3"
-  #
-  #   # could be useful for batch deletion
-  #   data.path_delete "**=*foo*"
   #
   #   Path.transaction data do |tran|
   #     tran.find_data "foo/bar", limit
