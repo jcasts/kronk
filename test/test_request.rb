@@ -82,16 +82,6 @@ class TestRequest < Test::Unit::TestCase
   end
 
 
-  def test_retrieve_file_cache
-    File.expects(:open).with(Kronk::DEFAULT_CACHE_FILE, "rb").
-      yields StringIO.new(mock_200_response)
-
-    resp = Kronk::Request.retrieve_file :cache
-    assert_equal mock_200_response, resp.raw
-    assert_equal "200", resp.code
-  end
-
-
   def test_retrieve_file_redirect
     resp2 = Kronk::Request.retrieve_file "test/mocks/200_response.txt"
     Kronk::Request.expects(:follow_redirect).returns resp2

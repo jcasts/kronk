@@ -17,6 +17,12 @@ class Kronk
   #
   #   # could be useful for batch deletion
   #   data.path_delete "**=*foo*"
+  #
+  #   Path.transaction data do |tran|
+  #     tran.find_data "foo/bar", limit
+  #     tran.path_delete "**=foo", limit
+  #     tran.find_and_replace "**=foo", "bar", limit
+  #   end
 
   ##
   # Finds specific data points from a nested Hash or Array data structure

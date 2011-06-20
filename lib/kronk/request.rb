@@ -41,7 +41,7 @@ class Kronk
 
 
     ##
-    # Returns the value from a url, file, or cache as a String.
+    # Returns the value from a url, file, or IO as a String.
     # Options supported are:
     # :data:: Hash/String - the data to pass to the http request
     # :query:: Hash/String - the data to append to the http request path
@@ -55,7 +55,7 @@ class Kronk
     def self.retrieve uri, options={}
       if IO === uri || StringIO === uri
         resp = retrieve_io uri, options
-      elsif uri == :cache || File.file?(uri)
+      elsif File.file? uri
         resp = retrieve_file uri, options
       else
         resp = retrieve_uri uri, options
@@ -87,9 +87,7 @@ class Kronk
       Kronk::Cmd.verbose "Reading file:  #{path}\n"
 
       options = options.dup
-
-      path = Kronk::DEFAULT_CACHE_FILE if path == :cache
-      resp = nil
+      resp    = nil
 
       File.open(path, "rb") do |file|
 

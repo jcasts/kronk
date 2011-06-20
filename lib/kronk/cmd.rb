@@ -188,7 +188,7 @@ Parse and run diffs against data from live and cached http responses.
 
 
         opt.on('--prev', 'Use last response to diff against') do
-          options[:uris].unshift :cache
+          options[:uris].unshift Kronk.config[:cache_file]
         end
 
 
@@ -317,6 +317,11 @@ Parse and run diffs against data from live and cached http responses.
       options[:uris].concat argv
       options[:uris].slice!(2..-1)
 
+      if options[:uris].empty? && File.file?(Kronk.config[:cache_file])
+        verbose "No URI specified - using kronk cache"
+        options[:uris] << Kronk.config[:cache_file]
+      end
+
       argv.clear
 
       raise OptionParser::MissingArgument, "You must enter at least one URI" if
@@ -378,9 +383,6 @@ Parse and run diffs against data from live and cached http responses.
     # Runs the kronk command with the given terminal args.
 
     def self.run argv=ARGV
-
-      options = parse_args argv
-
       begin
         Kronk.load_config
 
@@ -399,6 +401,8 @@ Parse and run diffs against data from live and cached http responses.
         $stderr << "Edit file if necessary and try again.\n"
         exit 2
       end
+
+      options = parse_args argv
 
       Kronk.load_cookie_jar
 
