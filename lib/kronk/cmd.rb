@@ -100,8 +100,6 @@ Parse and run diffs against data from live and cached http responses.
 
   Arguments after -- will be used to focus the diff on specific data points.
   If the data paths start with a '-' the matched data points will be removed.
-  If the data paths start with a ":" the parent of the matched data is used.
-  The ':' and '-' modifiers may be used together in that order (':-').
 
   Options:
         STR

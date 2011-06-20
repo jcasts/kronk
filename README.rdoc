@@ -186,10 +186,9 @@ flag it to remove data:
   }
 
 If you would like to exclude or include only items with a specific child
-attribute, you can do so by prepending the path with a ':'.
-Both ':' and '-' can be combined as ':-'.
+attribute, you can do so by appending "/.." to the path.
 
-  $ kronk http://host.com -- :data/path2/1/child
+  $ kronk http://host.com -- data/path2/1/child/..
 
   {
     "data" => {
@@ -213,32 +212,34 @@ are supported:
 
 * \*\*/ matches any key recursively down the data structure
 
+* ../ matches the parent of the previously matched item
+
+* 2..5, 2...6 and 2,3 match any Integer or String from 2 to 5
+
 * ? matches zero or one character
 
 * | effectively works as an "OR" character, matches /^val1|val2$/
 
-* \= is used to match values and may be used in conjuction with a key or not.
+* \= is used to match values and may be used in conjuction with a key or not
 
-* Parentheses are ok to use if in conjunction with other special characters
+* Parentheses may be used in conjunction with other special characters
   for a given path item, such as: /path(1|2)
 
-Check out Kronk::DataSet for more details on data traversing.
+* \\ escapes any special path character
+
+Check out Kronk::Path and Kronk::DataSet for more details on data traversing.
 
 Note: Bash may try to parse your data paths, especially if they start with
 wildcards or if they contain the pipe "|" character, so you may need to put
 single quotes around some of your paths.
-  
-== REQUIREMENTS:
 
-* activesupport gem
+== REQUIREMENTS:
 
 * nokogiri gem
 
 * plist gem
 
 * json gem
-
-* rack gem
 
 * cookiejar gem
 
