@@ -2,11 +2,21 @@ class Kronk
 
   # TODO: Consider the following methods:
   #
-  #   #set path, value
-  #   #set! path, value
-  #   #move from_path, to_path
-  #   #move! from_path, to_path
-  #   #delete path
+  #   #path_set path, value
+  #   #path_set! path, value
+  #   #replace path, value
+  #   #path_delete path
+  #   #transaction
+  #
+  #   # only valuable if it creates missing data points in the path
+  #   # and/or assignment of multiple values is possible
+  #   data.path_set "foo/bar/0..2", "value1", "value2", "value3"
+  #   data.path_set "foo/bar/*", "value1", "value2", "value3"
+  #   data.path_set "foo/bar/val*", "value1", "value2", "value3"
+  #   data.path_set %w{foo/bar/%s/val a b c}, "value1", "value2", "value3"
+  #
+  #   # could be useful for batch deletion
+  #   data.path_delete "**=*foo*"
 
   ##
   # Finds specific data points from a nested Hash or Array data structure

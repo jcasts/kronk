@@ -3,7 +3,7 @@
 * Enhancements:
 
   * Rewrote data path parsing to be more efficient and powerful. Added support
-    for ../ and ./ paradygms in favor of the :path notation.
+    for ../ and ./ paradygms replacing the :path notation.
 
   * Removed explicit dependencies for ActiveSupport. Will attempt loading only
     if String#pluralize isn't defined. Otherwise uses naïve pluralization.
