@@ -46,15 +46,8 @@ class Kronk
       #   # returns:
       #   # {[:foo] => "bar", [:foobar, 2, :foo] => "other bar"}
 
-      def find_data path
-        found = {}
-
-        Kronk::Path.find path, self do |d,k,p|
-          found[p] = d[k]
-          yield d, k, p if block_given?
-        end
-
-        found
+      def find_data path, &block
+        Kronk::Path.find path, self, &block
       end
     end
   end

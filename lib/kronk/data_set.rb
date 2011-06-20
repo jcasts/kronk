@@ -1,5 +1,9 @@
 class Kronk
 
+  # TODO:
+  #  * apply ignore and only in the order given in the cmd line?
+  #  * cleanup the affect_parent implementation
+
   ##
   # Wraps a complex data structure to provide a search-driven interface.
 

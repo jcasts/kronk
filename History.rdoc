@@ -5,6 +5,8 @@
   * Rewrote data path parsing to be more efficient and powerful. Added support
     for ../ and ./ paradygms replacing the :path notation.
 
+  * Added path modifiers for case-insensitive and multiline matcher support.
+
   * Removed explicit dependencies for ActiveSupport. Will attempt loading only
     if String#pluralize isn't defined. Otherwise uses naïve pluralization.
 
