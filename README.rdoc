@@ -75,7 +75,7 @@ Parse the data and run an IRB console with the response:
 
 == CONFIGURATION:
 
-Kronk pulls it's config from $HOME/.kronk and supports the following:
+Kronk pulls it's config from $HOME/.kronk/rc and supports the following:
 
 Set the file to save the last http response retrieved in:
 
@@ -165,9 +165,7 @@ something like:
         nil,
         {
           "child" => "child value"
-        },
-        nil,
-        nil
+        }
       ]
     }
   }
@@ -204,6 +202,40 @@ attribute, you can do so by appending "/.." to the path.
       ]
     }
   }
+
+Path matcher parsing may also be affected by appending Regexp options to the
+end of the path in the following fashion:
+
+  # Make path case insensitive
+  $ kronk host.com -- data/path2/1//i
+
+  {
+    "data" => {
+      "PATH2" => [
+        nil,
+        "item at index 1"
+      ],
+        
+      "path2" => [
+        nil,
+        {
+          "first_child" => "first value",
+          "child" => "child value",
+          "last_child" => "last value"
+        }
+      ]
+    }
+  }
+
+  # Make path case insensitive and multiline
+  $ kronk host.com -- data/**=*foobar*//im
+
+  {
+    "data" => {
+      "subdata" => "test for\nFOOBAR\nmultiline"
+    }
+  }
+
 
 There are additionally a variety of wildcard and special characters that
 are supported:
