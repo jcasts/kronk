@@ -97,7 +97,7 @@ class Kronk
           count         = count.next
           out[path_arr] = data[key]
 
-          data.respond_to :delete_at ? data.delete_at key : data.delete key
+          data.respond_to(:delete_at) ? data.delete_at(key) : data.delete(key)
 
           return true if limit && count >= limit
         end
