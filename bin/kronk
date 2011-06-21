@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+$: << File.join(File.dirname(__FILE__), "../lib") if $0 =~ %r{bin/kronk$}
+
 begin
   require 'kronk'
 

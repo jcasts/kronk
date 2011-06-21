@@ -329,8 +329,13 @@ class Kronk
   # Returns a diff object.
 
   def self.compare uri1, uri2, options={}
-    str1 = retrieve_data_string uri1, options
-    str2 = retrieve_data_string uri2, options
+    str1 = str2 = ""
+
+    t1 = Thread.new{ str1 = retrieve_data_string uri1, options }
+    t2 = Thread.new{ str2 = retrieve_data_string uri2, options }
+
+    t1.join
+    t2.join
 
     Diff.new str1, str2
   end

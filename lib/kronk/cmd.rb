@@ -425,6 +425,7 @@ Parse and run diffs against data from live and cached http responses.
 
       if uri1 && uri2
         diff = Kronk.compare uri1, uri2, options
+
         puts "#{diff.formatted}\n" unless Kronk.config[:brief]
 
         if Kronk.config[:verbose] || Kronk.config[:brief]
