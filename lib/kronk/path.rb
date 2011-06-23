@@ -25,7 +25,7 @@ class Kronk
   #
   # :foo/ - walk down tree by one level from key "foo"
   # :*/foo - walk down tree from any parent with key "foo" as a child
-  # :foo|foo2 - return elements with key value of "foo1" or "foo2"
+  # :foo1|foo2 - return elements with key value of "foo1" or "foo2"
   # :foo(1|2) - same behavior as above
   # :foo=val - return elements where key has a value of val
   # :foo\* - return root-level element with key "foo*" ('*' char is escaped)
@@ -115,7 +115,7 @@ class Kronk
 
     def initialize path_str, regex_opts=nil
       path_str = path_str.dup
-      @path = self.class.parse_path_str! path_str, regex_opts
+      @path = self.class.parse_path_str path_str, regex_opts
     end
 
 
@@ -145,11 +145,11 @@ class Kronk
     def find_in data
       matches = {[] => data}
 
-      @path.each_with_index do |(mkey, mvalue, recur), i|
+      @path.each_with_index do |(mkey, mvalue, recur, last_item), i|
         args = [matches, data, mkey, mvalue, recur]
 
         self.class.assign_find(*args) do |sdata, key, spath|
-          yield sdata, key, spath if i >= @path.length - 1 && block_given?
+          yield sdata, key, spath if last_item && block_given?
         end
       end
 
@@ -167,9 +167,9 @@ class Kronk
       path_str = path_str.dup
       matches = {[] => data}
 
-      parse_path_str! path_str, regex_opts do |mkey, mvalue, recur|
+      parse_path_str path_str, regex_opts do |mkey, mvalue, recur, last_item|
         assign_find matches, data, mkey, mvalue, recur do |sdata, key, spath|
-          yield sdata, key, spath if path_str.empty? && block_given?
+          yield sdata, key, spath if last_item && block_given?
         end
       end
 
@@ -339,15 +339,16 @@ class Kronk
     # matchers for key, value, and any special modifiers
     # such as recursion.
     #
-    #   Path.parse_path_str! "/path/**/to/*=bar/../../**/last"
+    #   Path.parse_path_str "/path/**/to/*=bar/../../**/last"
     #   #=> [["path",ANY_VALUE,false],["to",ANY_VALUE,true],[/.*/,"bar",false],
     #   #    [PARENT,ANY_VALUE,false],[PARENT,ANY_VALUE,false],
     #   #    ["last",ANY_VALUE,true]]
     #
-    # Note: Path.parse_path_str! will slice the original path string
+    # Note: Path.parse_path_str will slice the original path string
     # until it is empty.
 
-    def self.parse_path_str! path, regex_opts=nil
+    def self.parse_path_str path, regex_opts=nil
+      path = path.dup
       regex_opts = parse_regex_opts! path, regex_opts
 
       parsed = []
@@ -407,7 +408,9 @@ class Kronk
                         parse_path_item(value, regex_opts),
                         recur ]
 
-            yield(*parsed.last) if block_given?
+            yield_args = (parsed.last.dup << path.empty?)
+
+            yield(*yield_args) if block_given?
           end
 
           key   = ""

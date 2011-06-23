@@ -267,25 +267,17 @@ class TestPath < Test::Unit::TestCase
   def test_parse_path_str_yield
     all_args = []
 
-    Kronk::Path.parse_path_str! "path/**/to=foo/item" do |*args|
+    Kronk::Path.parse_path_str "path/**/to=foo/item" do |*args|
       all_args << args
     end
 
     expected = [
-      ["path", ANY_VALUE, false],
-      ["to", "foo", true],
-      ["item", ANY_VALUE, false],
+      ["path", ANY_VALUE, false, false],
+      ["to", "foo", true, false],
+      ["item", ANY_VALUE, false, true],
     ]
 
     assert_equal expected, all_args
-  end
-
-
-  def test_parse_path_str_modif
-    path = "path/to/item"
-    Kronk::Path.parse_path_str! path
-
-    assert path.empty?
   end
 
 
@@ -373,6 +365,6 @@ class TestPath < Test::Unit::TestCase
       i
     end
 
-    assert_equal match, Kronk::Path.parse_path_str!(path, regexp_opt)
+    assert_equal match, Kronk::Path.parse_path_str(path, regexp_opt)
   end
 end
