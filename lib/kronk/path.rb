@@ -145,8 +145,9 @@ class Kronk
     def find_in data
       matches = {[] => data}
 
-      @path.each_with_index do |(mkey, mvalue, recur, last_item), i|
-        args = [matches, data, mkey, mvalue, recur]
+      @path.each_with_index do |(mkey, mvalue, recur), i|
+        args      = [matches, data, mkey, mvalue, recur]
+        last_item = i == @path.length - 1
 
         self.class.assign_find(*args) do |sdata, key, spath|
           yield sdata, key, spath if last_item && block_given?
@@ -164,7 +165,6 @@ class Kronk
     # See Path#find_in for usage.
 
     def self.find path_str, data, regex_opts=nil, &block
-      path_str = path_str.dup
       matches = {[] => data}
 
       parse_path_str path_str, regex_opts do |mkey, mvalue, recur, last_item|
