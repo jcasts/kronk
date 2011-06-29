@@ -1,0 +1,1730 @@
+  {
+  "bounding_box" => {
+[31m-  "ne" => "34.17254,-118.202965",[0m
+[31m-  "sw" => "34.139355,-118.28604"[0m
+[32m+  "max_lat" => 34.169865,[0m
+[32m+  "max_lon" => -118.23289,[0m
+[32m+  "min_lat" => 34.130444,[0m
+[32m+  "min_lon" => -118.369736,[0m
+[32m+  "ne" => "34.169865,-118.23289",[0m
+[32m+  "sw" => "34.130444,-118.369736"[0m
+   },
+  "bounding_box_gutter" => {
+[31m-  "ne" => "34.1797684926427,-118.194228076349",[0m
+[31m-  "sw" => "34.1321265073573,-118.294773491022"[0m
+[31m-  },[0m
+[31m- "businesses" => [[0m
+[32m+  "max_lat" => 34.1770934926427,[0m
+[32m+  "max_lon" => -118.224153353258,[0m
+[32m+  "min_lat" => 34.1232155073573,[0m
+[32m+  "min_lon" => -118.378468570234,[0m
+[32m+  "ne" => "34.1770934926427,-118.224153353258",[0m
+[32m+  "sw" => "34.1232155073573,-118.378468570234"[0m
+[32m+  },[0m
+[32m+ "businesses" => [[0m
+[32m+  {[0m
+[32m+   "address" => "4745 Lankershim Blvd",[0m
+[32m+   "average_rating" => 4.0,[0m
+[32m+   "city" => "North Hollywood",[0m
+[32m+   "description" => {[0m
+[32m+    "additional_urls" => [[0m
+[32m+     {[0m
+[32m+      "destination" => "http://www.littletonis.com",[0m
+[32m+      "url_click" => "http://beta-syndication.yellowpages.com/log/businesses/15724831/click?link_type=6&redirect=http%3A%2F%2Fwww.littletonis.com&transaction_id=7d63f1b0-3074-012e-858f-0014c2c2d805&ypc%5Bauth_hash%5D=MC0Q6hw7O8MVqResNQm1sHMsVQkqdpsiGHgw4kJ3F32qzQ%3D%3D%0A&ypc%5Bhashed_visitor%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+[32m+      }[0m
+[32m+     ],[0m
+[32m+    "op_hours" => "KITCHEN CLOSES DAILY AT 1:20 AM,OPEN 7 DAYS,MON-SAT 5PM-2AM,SUN 4PM-2AM",[0m
+[32m+    "payment_text" => "DISCOVER, AMEX, VISA, MASTERCARD",[0m
+[32m+    "services" => [[0m
+[32m+     "Ravioli, Pizza, Lasagna, Steaks, Spaghetti, Beer & Wine, Take Out Available, Special Orders, Special Entrees, Special Dinners, Side Orders, Seafood, Sandwiches, Salad, House Specialties, Garlic Toast, Desserts, Soup"[0m
+[32m+     ][0m
+[32m+    },[0m
+[32m+   "distance" => 6.56,[0m
+[32m+   "has_detail_page" => true,[0m
+[32m+   "headings" => [[0m
+[32m+    "Pizza",[0m
+[32m+    "Restaurants",[0m
+[32m+    "Take Out Restaurants",[0m
+[32m+    "Cocktail Lounges",[0m
+[32m+    "Bars"[0m
+[32m+    ],[0m
+[32m+   "id" => "15724831",[0m
+[32m+   "impression_data" => {[0m
+[32m+    "appearance_id" => "800000000035867085",[0m
+[32m+    "content_provider" => "SP",[0m
+[32m+    "directory_code" => "GLN",[0m
+[32m+    "heading_code" => "8002304",[0m
+[32m+    "impression_id" => "7d643680-3074-012e-858f-0014c2c2d805",[0m
+[32m+    "latitude" => "34.156807",[0m
+[32m+    "listing_id" => "171590833",[0m
+[32m+    "listing_type" => "1",[0m
+[32m+    "longitude" => "-118.369736",[0m
+[32m+    "match_type" => "3",[0m
+[32m+    "request_id" => "7d63e700-3074-012e-858f-0014c2c2d805",[0m
+[32m+    "transaction_id" => "7d63f1b0-3074-012e-858f-0014c2c2d805",[0m
+[32m+    "ypid" => "15724831"[0m
+[32m+    },[0m
+[32m+   "impression_id" => "7d643680-3074-012e-858f-0014c2c2d805",[0m
+[32m+   "improvable" => true,[0m
+[32m+   "latitude" => 34.156807,[0m
+[32m+   "listing_id" => "171590833",[0m
+[32m+   "listing_type" => "advertiser",[0m
+[32m+   "longitude" => -118.369736,[0m
+[32m+   "mappable" => true,[0m
+[32m+   "name" => "Little Toni's Pizzeria Restaurant",[0m
+[32m+   "neighborhood" => [[0m
+[32m+    "South Valley"[0m
+[32m+    ],[0m
+[32m+   "omit_address" => false,[0m
+[32m+   "omit_phone" => false,[0m
+[32m+   "phone" => "8187630131",[0m
+[32m+   "rateable" => true,[0m
+[32m+   "rating_count" => 20,[0m
+[32m+   "red_listing" => false,[0m
+[32m+   "source" => "SP",[0m
+[32m+   "state" => "CA",[0m
+[32m+   "tier" => 40,[0m
+[32m+   "website" => "http://beta-syndication.yellowpages.com/log/businesses/15724831/click?link_type=6&redirect=http%3A%2F%2Fwww.yellowpages.com%2Fnorth-hollywood-ca%2Fmip%2Flittle-tonis-pizzeria-restaurant-15724831%3Ffrom%3DMOBWEB&transaction_id=7d63f1b0-3074-012e-858f-0014c2c2d805&ypc%5Bauth_hash%5D=MC36NJIH9M2OoVYjYhO2ilBUdTNJrt6sXmbgDHz2VxLdxw%3D%3D%0A&ypc%5Bhashed_visitor%5D=d41d8cd98f00b204e9800998ecf8427e",[0m
+[32m+   "zip" => "91602"[0m
+[32m+   },[0m
+   {
+    "address" => "740 E Broadway",
+    "average_rating" => 4.5,
+    "city" => "Glendale",
+[31m-   "coupon_flag" => "N",[0m
+    "description" => {
+     "additional_text" => [
+      "FULL SERVICE DELICATESSEN"
+      ],
+     "additional_urls" => [
+      {
+       "destination" => "http://www.mariosdeli.com",
+[31m-      "url_click" => "http://syndication.yellowpages.com/log/businesses/461724648/click?link_type=6&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.mariosdeli.com&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC1l29LaHSeood4IFBg0gKheWvBb6dkV6bMm8EtlCauntg%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+[31m-      },[0m
+[31m-     {[0m
+[31m-      "destination" => "http://www.mariosdeli.com",[0m
+[31m-      "url_click" => "http://syndication.yellowpages.com/log/businesses/461724648/click?link_type=6&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.mariosdeli.com&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC1l29LaHSeood4IFBg0gKheWvBb6dkV6bMm8EtlCauntg%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+[32m+      "url_click" => "http://beta-syndication.yellowpages.com/log/businesses/461724648/click?link_type=6&redirect=http%3A%2F%2Fwww.mariosdeli.com&transaction_id=7d63f1b0-3074-012e-858f-0014c2c2d805&ypc%5Bauth_hash%5D=MC1l29LaHSeood4IFBg0gKheWvBb6dkV6bMm8EtlCauntg%3D%3D%0A&ypc%5Bhashed_visitor%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+       }
+      ],
+     "email" => "mariosdeli@pncbell.net",
+     "general_info" => "Mario's Deli has been voted Glendale's Best Italian Deli and LA's Best Italian Deli for Years.That's because our selection is great and the quality of our food is second to none.We also feature a large assortment of vintage Italian wines and hard-to-find imported items, coffee and olive oils.We are a family business serving the Glendale area for 45 years.Voted Glendale's Best Italian Deli1996-1999, 2002, 2003, 2005Voted LA's Best Italian DeliJune 2000. March 2001.",
+     "services" => [
+      "Catering For All Occasions*2/8' Party Subs*Deli Platters*Eggplant Parmigianna*Italian Antipasto Platters*Lasagna*Stuffed Shells*Pizza Homemade Salads*Italian Specialties*Homemade Sausage*Cannoli*Tiramisu"
+      ]
+     },
+    "distance" => 0.57,
+    "external_url" => {
+     "url" => "http://www.mariosdeli.com",
+[31m-    "url_click" => "http://syndication.yellowpages.com/log/businesses/461724648/click?link_type=6&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.mariosdeli.com&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC1l29LaHSeood4IFBg0gKheWvBb6dkV6bMm8EtlCauntg%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+[32m+    "url_click" => "http://beta-syndication.yellowpages.com/log/businesses/461724648/click?link_type=6&redirect=http%3A%2F%2Fwww.mariosdeli.com&transaction_id=7d63f1b0-3074-012e-858f-0014c2c2d805&ypc%5Bauth_hash%5D=MC1l29LaHSeood4IFBg0gKheWvBb6dkV6bMm8EtlCauntg%3D%3D%0A&ypc%5Bhashed_visitor%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+     },
+    "graphic" => {
+     "image" => "http://c66.yellowpages.com/displaygif/sbc/MariosItalianD_329156_BW.gif",
+[31m-    "link" => "http://syndication.yellowpages.com/log/businesses/461724648/click?link_type=19&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.mariosdeli.com&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC1l29LaHSeood4IFBg0gKheWvBb6dkV6bMm8EtlCauntg%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e",[0m
+[32m+    "link" => "http://beta-syndication.yellowpages.com/log/businesses/461724648/click?link_type=19&redirect=http%3A%2F%2Fwww.mariosdeli.com&transaction_id=7d63f1b0-3074-012e-858f-0014c2c2d805&ypc%5Bauth_hash%5D=MC1l29LaHSeood4IFBg0gKheWvBb6dkV6bMm8EtlCauntg%3D%3D%0A&ypc%5Bhashed_visitor%5D=d41d8cd98f00b204e9800998ecf8427e",[0m
+     "small_image" => "http://c66.yellowpages.com/newdisplay_distr/sbc/MariosItalianD_329156_BW.gif"
+     },
+    "has_detail_page" => true,
+    "headings" => [
+     "Caterers",
+     "Italian Restaurants",
+     "Delicatessens",
+     "Restaurants",
+     "Pizza"
+     ],
+    "id" => "461724648",
+    "impression_data" => {
+     "appearance_id" => "800000000036005498",
+     "content_provider" => "SP",
+     "directory_code" => "GLN",
+     "heading_code" => "8002304",
+[31m-    "impression_id" => "eb34bc6f96e4bec78f683ddbeff26073c97032be",[0m
+[32m+    "impression_id" => "7d645920-3074-012e-858f-0014c2c2d805",[0m
+     "latitude" => "34.146313",
+     "listing_id" => "171729251",
+     "listing_type" => "1",
+     "longitude" => "-118.24619",
+     "match_type" => "3",
+[31m-    "request_id" => "78e25750-3074-012e-e420-00163e10e185",[0m
+[31m-    "transaction_id" => "7904b950-3074-012e-e420-00163e10e185",[0m
+[32m+    "request_id" => "7d63e700-3074-012e-858f-0014c2c2d805",[0m
+[32m+    "transaction_id" => "7d63f1b0-3074-012e-858f-0014c2c2d805",[0m
+     "ypid" => "461724648"
+     },
+[31m-   "impression_id" => "eb34bc6f96e4bec78f683ddbeff26073c97032be",[0m
+[32m+   "impression_id" => "7d645920-3074-012e-858f-0014c2c2d805",[0m
+    "improvable" => true,
+    "latitude" => 34.146313,
+    "listing_id" => "171729251",
+    "listing_type" => "advertiser",
+    "longitude" => -118.24619,
+    "mappable" => true,
+    "name" => "Mario's Italian Deli & Catering",
+    "neighborhood" => [
+     "Citrus Grove"
+     ],
+    "omit_address" => false,
+    "omit_phone" => false,
+    "phone" => "8182424114",
+    "print_ad" => {
+     "image" => "/displaygif/sbc/MariosItalianD_522695_PW.jpg",
+[31m-    "page" => "http://syndication.yellowpages.com/log/businesses/461724648/click?link_type=6&partner_id=MOBWEB&redirect=%2Fdisplaygif%2Fsbc%2FMariosItalianD_522695_PW.jpg&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC0HJkA9VXU%2B5QgX0Up4bTJBfqpajNq%2BtJ%2BIhMtCdXRBcQ%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+[32m+    "page" => "http://beta-syndication.yellowpages.com/log/businesses/461724648/click?link_type=6&redirect=%2Fdisplaygif%2Fsbc%2FMariosItalianD_522695_PW.jpg&transaction_id=7d63f1b0-3074-012e-858f-0014c2c2d805&ypc%5Bauth_hash%5D=MC0HJkA9VXU%2B5QgX0Up4bTJBfqpajNq%2BtJ%2BIhMtCdXRBcQ%3D%3D%0A&ypc%5Bhashed_visitor%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+     },
+    "rateable" => true,
+    "rating_count" => 10,
+    "red_listing" => false,
+    "source" => "SP",
+    "state" => "CA",
+    "tier" => 30,
+[31m-   "website" => "http://syndication.yellowpages.com/log/businesses/461724648/click?link_type=6&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.yellowpages.com%2Fglendale-ca%2Fmip%2Fmarios-italian-deli-catering-461724648%3Ffrom%3DMOBWEB&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC1RBHXk5WGWVapdZACUxp4Ip%2B8hzG1ys%2F5nOCCeQDqmjA%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e",[0m
+[32m+   "website" => "http://beta-syndication.yellowpages.com/log/businesses/461724648/click?link_type=6&redirect=http%3A%2F%2Fwww.yellowpages.com%2Fglendale-ca%2Fmip%2Fmarios-italian-deli-catering-461724648%3Ffrom%3DMOBWEB&transaction_id=7d63f1b0-3074-012e-858f-0014c2c2d805&ypc%5Bauth_hash%5D=MC1RBHXk5WGWVapdZACUxp4Ip%2B8hzG1ys%2F5nOCCeQDqmjA%3D%3D%0A&ypc%5Bhashed_visitor%5D=d41d8cd98f00b204e9800998ecf8427e",[0m
+    "zip" => "91205"
+    },
+   {
+[31m-   "address" => "740 E Broadway",[0m
+[32m+   "address" => "3116 W Magnolia Blvd",[0m
+    "average_rating" => 4.5,
+[31m-   "city" => "Glendale",[0m
+[31m-   "coupon_flag" => "N",[0m
+[32m+   "city" => "Burbank",[0m
+    "description" => {
+[31m-    "additional_text" => [[0m
+[31m-     "Full Service Delicatessen"[0m
+[31m-     ],[0m
+     "additional_urls" => [
+      {
+[31m-      "destination" => "http://www.mariosdeli.com",[0m
+[31m-      "url_click" => "http://syndication.yellowpages.com/log/businesses/2293864/click?link_type=6&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.mariosdeli.com&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC1l29LaHSeood4IFBg0gKheWvBb6dkV6bMm8EtlCauntg%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+[31m-      },[0m
+[31m-     {[0m
+[31m-      "destination" => "http://www.mariosdeli.com",[0m
+[31m-      "url_click" => "http://syndication.yellowpages.com/log/businesses/2293864/click?link_type=6&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.mariosdeli.com&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC1l29LaHSeood4IFBg0gKheWvBb6dkV6bMm8EtlCauntg%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+[32m+      "destination" => "http://www.tonysbellavista.com",[0m
+[32m+      "url_click" => "http://beta-syndication.yellowpages.com/log/businesses/4602386/click?link_type=6&redirect=http%3A%2F%2Fwww.tonysbellavista.com&transaction_id=7d63f1b0-3074-012e-858f-0014c2c2d805&ypc%5Bauth_hash%5D=MC1VrJZ1LQBq%2B8Mv473TDipk%2FLS6mcRF8EjlXwW2Lut9TA%3D%3D%0A&ypc%5Bhashed_visitor%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+       }
+      ],
+[31m-    "general_info" => "Mario's Italian Deli & Caterins is Italian owned & operated by Mario and family. We have been serving the Los Angeles and San Fernando Valley since 1961. Additionally we are well known for our daily lunch and catering menus, which include homemade hot entrees. Our grocery store includes national as well as international brands of pastas, olive oils, wines, coffees, waters, and sodas. MONDAY THRU SATURDAY - 8:30AM-6:00PM",[0m
+[31m-    "payment_text" => "CHECK, DISCOVER, AMEX, VISA, DEBIT, MASTERCARD",[0m
+[32m+    "op_hours" => "OPEN LUNCH & DINNER M-F 11:30-10,SAT & SUN 4:30-10",[0m
+     "services" => [
+[31m-     "Our full service delicatessen includes homemade specialty items such as: Lasagna, Jumbo Shells, Chicken Parmigianna, Meat Balls, Ravioli, & Italian Sausage. We center on a vast array of quality meats & cheeses that are used in making platters, 8-foot subs, and Italian antipasto trays. Not to mention our desserts which include Tiramisu, cookies, Spumoni, Gelato, and seasonal goodies."[0m
+[31m-     ],[0m
+[31m-    "slogan" => "Great Food, Great Products, Great Prices!"[0m
+[32m+     "Pizza, Pasta, Over 45 Years, One of Burbank's Finest Eating Places, Fresh Seafood, For All Occasions, Beer & Fine Wines, Banquet Room Available"[0m
+[32m+     ][0m
+     },
+[31m-   "distance" => 0.57,[0m
+[32m+   "distance" => 5.22,[0m
+    "external_url" => {
+[31m-    "url" => "http://www.mariosdeli.com",[0m
+[31m-    "url_click" => "http://syndication.yellowpages.com/log/businesses/2293864/click?link_type=6&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.mariosdeli.com&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC1l29LaHSeood4IFBg0gKheWvBb6dkV6bMm8EtlCauntg%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+[32m+    "url" => "http://www.tonysbellavista.com",[0m
+[32m+    "url_click" => "http://beta-syndication.yellowpages.com/log/businesses/4602386/click?link_type=6&redirect=http%3A%2F%2Fwww.tonysbellavista.com&transaction_id=7d63f1b0-3074-012e-858f-0014c2c2d805&ypc%5Bauth_hash%5D=MC1VrJZ1LQBq%2B8Mv473TDipk%2FLS6mcRF8EjlXwW2Lut9TA%3D%3D%0A&ypc%5Bhashed_visitor%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+     },
+    "graphic" => {
+[31m-    "image" => "http://c66.yellowpages.com/displaygif/sbc/CA1510534.gif",[0m
+[31m-    "link" => "http://syndication.yellowpages.com/log/businesses/2293864/click?link_type=19&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.mariosdeli.com&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC1l29LaHSeood4IFBg0gKheWvBb6dkV6bMm8EtlCauntg%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e",[0m
+[31m-    "small_image" => "http://c66.yellowpages.com/newdisplay_distr/sbc/CA1510534.gif"[0m
+[32m+    "image" => "http://c66.yellowpages.com/displaygif/sbc/CA1533840.gif",[0m
+[32m+    "link" => "http://beta-syndication.yellowpages.com/log/businesses/4602386/click?link_type=19&redirect=http%3A%2F%2Fwww.tonysbellavista.com&transaction_id=7d63f1b0-3074-012e-858f-0014c2c2d805&ypc%5Bauth_hash%5D=MC1VrJZ1LQBq%2B8Mv473TDipk%2FLS6mcRF8EjlXwW2Lut9TA%3D%3D%0A&ypc%5Bhashed_visitor%5D=d41d8cd98f00b204e9800998ecf8427e",[0m
+[32m+    "small_image" => "http://c66.yellowpages.com/newdisplay_distr/sbc/CA1533840.gif"[0m
+     },
+    "has_detail_page" => true,
+    "headings" => [
+[32m+    "Pizza",[0m
+     "Caterers",
+[32m+    "Restaurants",[0m
+     "Italian Restaurants",
+[31m-    "Restaurants",[0m
+[31m-    "Pizza",[0m
+[31m-    "Delicatessens"[0m
+[32m+    "Take Out Restaurants",[0m
+[32m+    "Banquet Halls & Reception Facilities"[0m
+     ],
+[31m-   "id" => "2293864",[0m
+[32m+   "id" => "4602386",[0m
+    "impression_data" => {
+[31m-    "appearance_id" => "800000000035920104",[0m
+[32m+    "appearance_id" => "800000000036006983",[0m
+     "content_provider" => "SP",
+[31m-    "directory_code" => "LA",[0m
+[31m-    "heading_code" => "8004225",[0m
+[31m-    "impression_id" => "da94aac57a08b79c2fbe8d3c7d3ce9950e6ba03f",[0m
+[31m-    "latitude" => "34.146313",[0m
+[31m-    "listing_id" => "171643852",[0m
+[32m+    "directory_code" => "GLN",[0m
+[32m+    "heading_code" => "8002304",[0m
+[32m+    "impression_id" => "7d647870-3074-012e-858f-0014c2c2d805",[0m
+[32m+    "latitude" => "34.169865",[0m
+[32m+    "listing_id" => "171730736",[0m
+     "listing_type" => "1",
+[31m-    "longitude" => "-118.24619",[0m
+[32m+    "longitude" => "-118.34109",[0m
+     "match_type" => "3",
+[31m-    "request_id" => "78e25750-3074-012e-e420-00163e10e185",[0m
+[31m-    "transaction_id" => "7904b950-3074-012e-e420-00163e10e185",[0m
+[31m-    "ypid" => "2293864"[0m
+[32m+    "request_id" => "7d63e700-3074-012e-858f-0014c2c2d805",[0m
+[32m+    "transaction_id" => "7d63f1b0-3074-012e-858f-0014c2c2d805",[0m
+[32m+    "ypid" => "4602386"[0m
+     },
+[31m-   "impression_id" => "da94aac57a08b79c2fbe8d3c7d3ce9950e6ba03f",[0m
+[32m+   "impression_id" => "7d647870-3074-012e-858f-0014c2c2d805",[0m
+    "improvable" => true,
+[31m-   "latitude" => 34.146313,[0m
+[31m-   "listing_id" => "171643852",[0m
+[32m+   "latitude" => 34.169865,[0m
+[32m+   "listing_id" => "171730736",[0m
+    "listing_type" => "advertiser",
+[31m-   "longitude" => -118.24619,[0m
+[32m+   "longitude" => -118.34109,[0m
+    "mappable" => true,
+[31m-   "name" => "Mario's Italian Deli",[0m
+[31m-   "neighborhood" => [[0m
+[31m-    "Citrus Grove"[0m
+[31m-    ],[0m
+[32m+   "name" => "Tony's Bella Vista",[0m
+    "omit_address" => false,
+    "omit_phone" => false,
+[31m-   "phone" => "8182424114",[0m
+[32m+   "phone" => "8188430164",[0m
+    "rateable" => true,
+[31m-   "rating_count" => 7,[0m
+[32m+   "rating_count" => 4,[0m
+    "red_listing" => false,
+    "source" => "SP",
+    "state" => "CA",
+    "tier" => 30,
+[31m-   "video_ad" => {[0m
+[31m-    "image_url" => "http://c66.yellowpages.com/videos/SP147037414/SP147037414.png",[0m
+[31m-    "page" => "http://syndication.yellowpages.com/log/businesses/2293864/click?link_type=6&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.yellowpages.com%2Flistings%2Fvideo_ad%2F171643852&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC0y4xMC6%2BLva%2BCzEjsmWjxyB7rU6YX5VIbI5AHF5cfL1w%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e",[0m
+[31m-    "page_size" => "400x200",[0m
+[31m-    "video_id" => "SP147037414",[0m
+[31m-    "video_url" => "http://c66.yellowpages.com/videos/SP147037414/SP147037414_long.flv"[0m
+[31m-    },[0m
+[31m-   "website" => "http://syndication.yellowpages.com/log/businesses/2293864/click?link_type=6&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.yellowpages.com%2Fglendale-ca%2Fmip%2Fmarios-italian-deli-2293864%3Ffrom%3DMOBWEB&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC1RBHXk5WGWVapdZACUxp4Ip%2B8hzG1ys%2F5nOCCeQDqmjA%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e",[0m
+[31m-   "zip" => "91205"[0m
+[32m+   "website" => "http://beta-syndication.yellowpages.com/log/businesses/4602386/click?link_type=6&redirect=http%3A%2F%2Fwww.yellowpages.com%2Fburbank-ca%2Fmip%2Ftonys-bella-vista-4602386%3Ffrom%3DMOBWEB&transaction_id=7d63f1b0-3074-012e-858f-0014c2c2d805&ypc%5Bauth_hash%5D=MC0gaB0sZf9CN0DfaGajOEtu12LfoiJq4cHqi0IMNcJxpw%3D%3D%0A&ypc%5Bhashed_visitor%5D=d41d8cd98f00b204e9800998ecf8427e",[0m
+[32m+   "zip" => "91505"[0m
+    },
+   {
+[31m-   "address" => "1650 Colorado Blvd",[0m
+[31m-   "average_rating" => 4.0,[0m
+[31m-   "city" => "Los Angeles",[0m
+[31m-   "coupon_flag" => "N",[0m
+[32m+   "address" => "320 S Central Ave # A",[0m
+[32m+   "average_rating" => 0.0,[0m
+[32m+   "city" => "Glendale",[0m
+[32m+   "coupons" => [[0m
+[32m+    {[0m
+[32m+     "coupon_attrs" => {[0m
+[32m+      "coupon_active_date" => "05/04/2010",[0m
+[32m+      "coupon_business_tracking_url" => "http://www.savings.com/mpclick?placementid=11508505&url=http%3A%2F%2Fwww.savings.com%2Fmpofferref%3Fofferid%3D306669",[0m
+[32m+      "coupon_free_shipping" => "0",[0m
+[32m+      "coupon_printable" => "0",[0m
+[32m+      "coupon_rating" => "6",[0m
+[32m+      "coupon_seven_day_rating" => "1",[0m
+[32m+      "coupon_site_wide" => "1",[0m
+[32m+      "coupon_staff_pick" => "0",[0m
+[32m+      "coupon_third_day_rating" => "0"[0m
+[32m+      },[0m
+[32m+     "coupon_description" => "Papa Johns Coupon<br />Get all large specialty or create your own pizzas for only $10. Your choice of toppings (no double toppings!)--limitations may apply. Click on link and place your order online.",[0m
+[32m+     "coupon_source_code" => "SAV",[0m
+[32m+     "coupon_source_id" => "236522/419065",[0m
+[32m+     "coupon_title" => "Get Any Large Specialty Pizza for $10",[0m
+[32m+     "coupon_type" => "0",[0m
+[32m+     "coupon_updated_date" => "2010-05-26",[0m
+[32m+     "coupon_url" => "http://www.savings.com/mpclick?placementid=11508505&url=http%3A%2F%2Fwww.savings.com%2Fmpofferref%3Fofferid%3D2150594",[0m
+[32m+     "created_at" => "2011-01-10",[0m
+[32m+     "id" => "615DCED7-5AB2-4949-46B0-B554F6E22000",[0m
+[32m+     "updated_at" => "2011-03-13"[0m
+[32m+     },[0m
+[32m+    {[0m
+[32m+     "coupon_attrs" => {[0m
+[32m+      "coupon_active_date" => "04/29/2010",[0m
+[32m+      "coupon_business_tracking_url" => "http://www.savings.com/mpclick?placementid=11508505&url=http%3A%2F%2Fwww.savings.com%2Fmpofferref%3Fofferid%3D306669",[0m
+[32m+      "coupon_code" => "cheese",[0m
+[32m+      "coupon_free_shipping" => "0",[0m
+[32m+      "coupon_printable" => "0",[0m
+[32m+      "coupon_rating" => "4",[0m
+[32m+      "coupon_seven_day_rating" => "1",[0m
+[32m+      "coupon_site_wide" => "1",[0m
+[32m+      "coupon_staff_pick" => "0",[0m
+[32m+      "coupon_third_day_rating" => "0"[0m
+[32m+      },[0m
+[32m+     "coupon_description" => "Papa Johns Coupon<br />Use code at checkout to get a free order of cheesy bread with any regularly-priced large pizza purchase.",[0m
+[32m+     "coupon_source_code" => "SAV",[0m
+[32m+     "coupon_source_id" => "236522/416014",[0m
+[32m+     "coupon_title" => "Get a Free Order of Cheesy Bread with Purchase of Large Pizza",[0m
+[32m+     "coupon_type" => "0",[0m
+[32m+     "coupon_updated_date" => "2010-04-29",[0m
+[32m+     "coupon_url" => "http://www.savings.com/mpclick?placementid=11508505&url=http%3A%2F%2Fwww.savings.com%2Fmpofferref%3Fofferid%3D2133992",[0m
+[32m+     "created_at" => "2011-01-10",[0m
+[32m+     "id" => "D90B1B31-B929-6649-46B0-B554F6E22000",[0m
+[32m+     "updated_at" => "2011-03-13"[0m
+[32m+     }[0m
+[32m+    ],[0m
+    "description" => {
+[31m-    "additional_text" => [[0m
+[31m-     "PIZZA-SPAGHETTI-RAVIOLI-LASAGNA Tues-Wed-Thurs 4pm-12am Fri & Sat 4pm-1am Closed Sundays & Mondays"[0m
+[31m-     ],[0m
+     "additional_urls" => [
+      {
+[31m-      "destination" => "http://www.casabiancapizza.com/",[0m
+[31m-      "url_click" => "http://syndication.yellowpages.com/log/businesses/13519/click?link_type=6&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.casabiancapizza.com%2F&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC1BBMvEPMf%2BjBcH5%2Buh0Sff3KxP5mER0J7lma8SgXOqaA%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+[31m-      },[0m
+[31m-     {[0m
+[31m-      "destination" => "http://www.casabiancapizza.com/",[0m
+[31m-      "url_click" => "http://syndication.yellowpages.com/log/businesses/13519/click?link_type=6&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.casabiancapizza.com%2F&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC1BBMvEPMf%2BjBcH5%2Buh0Sff3KxP5mER0J7lma8SgXOqaA%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+[32m+      "destination" => "http://www.papajohns.com",[0m
+[32m+      "url_click" => "http://beta-syndication.yellowpages.com/log/businesses/455587224/click?link_type=6&redirect=http%3A%2F%2Fwww.papajohns.com&transaction_id=7d63f1b0-3074-012e-858f-0014c2c2d805&ypc%5Bauth_hash%5D=MC1PvqdVu6kdNaAtlgNOg0MOVuaL7H%2B5C2vMlGKYRdU2QA%3D%3D%0A&ypc%5Bhashed_visitor%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+       }
+      ],
+[31m-    "op_hours" => "4pm-12am-Tues-Wed-Thurs,Fridays & Sat 4pm-1am,Closed Sundays & Mondays"[0m
+[32m+    "general_info" => "Papa John's is a take out and delivery restaurant with a red and white counter. They serve Italian cuisine with an emphasis on freshly baked traditional,  gourmet and thin crust pizzas,  with a variety of toppings. Other menu items include: garlic sauce,  dipping sauce,  hot peppers,  cheesesticks and chickenstrips and desserts. <BR> <BR> <BR>Accomodates Private Parties <BR> <BR>",[0m
+[32m+    "op_hours" => "Daily 11am-10pm",[0m
+[32m+    "services" => [[0m
+[32m+     "Features: Take Out <BR> <BR> <BR>"[0m
+[32m+     ][0m
+     },
+[31m-   "distance" => 2.95,[0m
+[31m-   "external_url" => {[0m
+[31m-    "url" => "http://www.casabiancapizza.com/",[0m
+[31m-    "url_click" => "http://syndication.yellowpages.com/log/businesses/13519/click?link_type=6&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.casabiancapizza.com%2F&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC1BBMvEPMf%2BjBcH5%2Buh0Sff3KxP5mER0J7lma8SgXOqaA%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+[31m-    },[0m
+[31m-   "graphic" => {[0m
+[31m-    "image" => "http://c66.yellowpages.com/displaygif/sbc/CasaBiancaPizz_540994_BW.gif",[0m
+[31m-    "link" => "http://syndication.yellowpages.com/log/businesses/13519/click?link_type=19&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.casabiancapizza.com%2F&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC1BBMvEPMf%2BjBcH5%2Buh0Sff3KxP5mER0J7lma8SgXOqaA%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e",[0m
+[31m-    "small_image" => "http://c66.yellowpages.com/newdisplay_distr/sbc/CasaBiancaPizz_540994_BW.gif"[0m
+[31m-    },[0m
+[32m+   "distance" => 0.17,[0m
+    "has_detail_page" => true,
+    "headings" => [
+     "Pizza",
+[31m-    "Italian Restaurants",[0m
+[31m-    "Restaurants"[0m
+[32m+    "Restaurants",[0m
+[32m+    "Restaurant Delivery Service",[0m
+[32m+    "Take Out Restaurants",[0m
+[32m+    "Food Delivery Service"[0m
+     ],
+[31m-   "id" => "13519",[0m
+[32m+   "id" => "455587224",[0m
+    "impression_data" => {
+[31m-    "appearance_id" => "800000000036055249",[0m
+[31m-    "content_provider" => "SP",[0m
+[31m-    "directory_code" => "LA",[0m
+[32m+    "content_provider" => "MDM",[0m
+[32m+    "directory_code" => "GLN",[0m
+     "heading_code" => "8002304",
+[31m-    "impression_id" => "2c5631807596ba6bf06f470a2bc75a4a8ea189f8",[0m
+[31m-    "latitude" => "34.139355",[0m
+[31m-    "listing_id" => "171779004",[0m
+[31m-    "listing_type" => "1",[0m
+[31m-    "longitude" => "-118.202965",[0m
+[32m+    "impression_id" => "7d649740-3074-012e-858f-0014c2c2d805",[0m
+[32m+    "latitude" => "34.14168",[0m
+[32m+    "listing_id" => "455587224",[0m
+[32m+    "listing_type" => "2",[0m
+[32m+    "longitude" => "-118.25785",[0m
+     "match_type" => "3",
+[31m-    "request_id" => "78e25750-3074-012e-e420-00163e10e185",[0m
+[31m-    "transaction_id" => "7904b950-3074-012e-e420-00163e10e185",[0m
+[31m-    "ypid" => "13519"[0m
+[32m+    "request_id" => "7d63e700-3074-012e-858f-0014c2c2d805",[0m
+[32m+    "transaction_id" => "7d63f1b0-3074-012e-858f-0014c2c2d805",[0m
+[32m+    "ypid" => "455587224"[0m
+     },
+[31m-   "impression_id" => "2c5631807596ba6bf06f470a2bc75a4a8ea189f8",[0m
+[32m+   "impression_id" => "7d649740-3074-012e-858f-0014c2c2d805",[0m
+    "improvable" => true,
+[31m-   "latitude" => 34.139355,[0m
+[31m-   "listing_id" => "171779004",[0m
+[31m-   "listing_type" => "advertiser",[0m
+[31m-   "longitude" => -118.202965,[0m
+[32m+   "latitude" => 34.14168,[0m
+[32m+   "listing_id" => "455587224",[0m
+[32m+   "listing_type" => "free",[0m
+[32m+   "longitude" => -118.25785,[0m
+    "mappable" => true,
+[31m-   "name" => "Casa Bianca Pizza Pie",[0m
+[32m+   "name" => "Papa John's Pizza",[0m
+    "neighborhood" => [
+[31m-    "East LA"[0m
+[32m+    "Pacific - Edison"[0m
+     ],
+    "omit_address" => false,
+    "omit_phone" => false,
+[31m-   "phone" => "3232569617",[0m
+[32m+   "phone" => "8182417272",[0m
+    "rateable" => true,
+[31m-   "rating_count" => 8,[0m
+[31m-   "red_listing" => false,[0m
+[31m-   "source" => "SP",[0m
+[31m-   "state" => "CA",[0m
+[31m-   "tier" => 50,[0m
+[31m-   "website" => "http://syndication.yellowpages.com/log/businesses/13519/click?link_type=6&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.yellowpages.com%2Flos-angeles-ca%2Fmip%2Fcasa-bianca-pizza-pie-13519%3Ffrom%3DMOBWEB&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC1xZMlLyctG7LjTKx777gWT%2FML%2FRL2jssoMPvcPIHqlTg%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e",[0m
+[31m-   "zip" => "90041"[0m
+[31m-   },[0m
+[31m-  {[0m
+[31m-   "address" => "101 N Brand Blvd",[0m
+[31m-   "average_rating" => 3.5,[0m
+[31m-   "city" => "Glendale",[0m
+[31m-   "coupon_flag" => "N",[0m
+[31m-   "description" => {[0m
+[31m-    "additional_urls" => [[0m
+[31m-     {[0m
+[31m-      "destination" => "http://www.cpk.com/",[0m
+[31m-      "url_click" => "http://syndication.yellowpages.com/log/businesses/7553237/click?link_type=6&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.cpk.com%2F&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC3YtRHw0KmaYSon8GOx3d1Ia0w%2FcZO3kxEvQOn%2BCNF3ew%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+[31m-      },[0m
+[31m-     {[0m
+[31m-      "destination" => "http://www.cpk.com/",[0m
+[31m-      "url_click" => "http://syndication.yellowpages.com/log/businesses/7553237/click?link_type=6&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.cpk.com%2F&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC3YtRHw0KmaYSon8GOx3d1Ia0w%2FcZO3kxEvQOn%2BCNF3ew%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+[31m-      }[0m
+[31m-     ],[0m
+[31m-    "op_hours" => "Mon-Thu 11am-10pm, Fri 11am-11pm, Sat 11am-11pm, Sun 11am-10pm",[0m
+[31m-    "services" => [[0m
+[31m-     "* Full Bar<BR>* 2 hr Parking with Validation<BR>* Delivery Service<BR>* Call Ahead Wait List<BR>* Has Curbside Service<BR>* Kids Menu"[0m
+[31m-     ][0m
+[31m-    },[0m
+[31m-   "distance" => 0.29,[0m
+[31m-   "has_detail_page" => true,[0m
+[31m-   "headings" => [[0m
+[31m-    "Pizza",[0m
+[31m-    "American Restaurants",[0m
+[31m-    "Restaurants",[0m
+[31m-    "Take Out Restaurants"[0m
+[31m-    ],[0m
+[31m-   "id" => "7553237",[0m
+[31m-   "impression_data" => {[0m
+[31m-    "appearance_id" => "",[0m
+[31m-    "content_provider" => "MDM",[0m
+[31m-    "directory_code" => "GLN",[0m
+[31m-    "heading_code" => "8002304",[0m
+[31m-    "impression_id" => "cdf2ead6eee73188ec7aa373e06d2db44875f9d8",[0m
+[31m-    "latitude" => "34.14668",[0m
+[31m-    "listing_id" => "7553237",[0m
+[31m-    "listing_type" => "2",[0m
+[31m-    "longitude" => "-118.25509",[0m
+[31m-    "match_type" => "3",[0m
+[31m-    "request_id" => "78e25750-3074-012e-e420-00163e10e185",[0m
+[31m-    "transaction_id" => "7904b950-3074-012e-e420-00163e10e185",[0m
+[31m-    "ypid" => "7553237"[0m
+[31m-    },[0m
+[31m-   "impression_id" => "cdf2ead6eee73188ec7aa373e06d2db44875f9d8",[0m
+[31m-   "improvable" => true,[0m
+[31m-   "latitude" => 34.14668,[0m
+[31m-   "listing_id" => "7553237",[0m
+[31m-   "listing_type" => "free",[0m
+[31m-   "longitude" => -118.25509,[0m
+[31m-   "mappable" => true,[0m
+[31m-   "name" => "California Pizza Kitchen",[0m
+[31m-   "neighborhood" => [[0m
+[31m-    "City Center"[0m
+[31m-    ],[0m
+[31m-   "omit_address" => false,[0m
+[31m-   "omit_phone" => false,[0m
+[31m-   "phone" => "8185459219",[0m
+[31m-   "rateable" => true,[0m
+[31m-   "rating_count" => 25,[0m
+[32m+   "rating_count" => 0,[0m
+    "red_listing" => false,
+    "source" => "MDM",
+    "state" => "CA",
+    "tier" => 999,
+[31m-   "website" => "http://syndication.yellowpages.com/log/businesses/7553237/click?link_type=6&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.yellowpages.com%2Fglendale-ca%2Fmip%2Fcalifornia-pizza-kitchen-7553237%3Ffrom%3DMOBWEB&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC1RBHXk5WGWVapdZACUxp4Ip%2B8hzG1ys%2F5nOCCeQDqmjA%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e",[0m
+[31m-   "zip" => "91203"[0m
+[32m+   "website" => "http://beta-syndication.yellowpages.com/log/businesses/455587224/click?link_type=6&redirect=http%3A%2F%2Fwww.yellowpages.com%2Fglendale-ca%2Fmip%2Fpapa-johns-pizza-455587224%3Ffrom%3DMOBWEB&transaction_id=7d63f1b0-3074-012e-858f-0014c2c2d805&ypc%5Bauth_hash%5D=MC1RBHXk5WGWVapdZACUxp4Ip%2B8hzG1ys%2F5nOCCeQDqmjA%3D%3D%0A&ypc%5Bhashed_visitor%5D=d41d8cd98f00b204e9800998ecf8427e",[0m
+[32m+   "zip" => "91204"[0m
+    },
+   {
+[31m-   "address" => "621 E Glenoaks Blvd Ste E",[0m
+[31m-   "average_rating" => 4.5,[0m
+[32m+   "address" => "723 S Central Ave",[0m
+[32m+   "average_rating" => 0.0,[0m
+    "city" => "Glendale",
+[31m-   "coupon_flag" => "N",[0m
+[31m-   "description" => {[0m
+[31m-    "additional_urls" => [[0m
+[31m-     {[0m
+[31m-      "destination" => "http://www.mistergoodfastpizza.com",[0m
+[31m-      "url_click" => "http://syndication.yellowpages.com/log/businesses/4526532/click?link_type=6&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.mistergoodfastpizza.com&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC1PROFXLTYyLhEIOeadpUdErFLUeypgqCKj8eC6YppI9g%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+[31m-      },[0m
+[31m-     {[0m
+[31m-      "destination" => "http://www.mistergoodfastpizza.com",[0m
+[31m-      "url_click" => "http://syndication.yellowpages.com/log/businesses/4526532/click?link_type=6&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.mistergoodfastpizza.com&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC1PROFXLTYyLhEIOeadpUdErFLUeypgqCKj8eC6YppI9g%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+[31m-      }[0m
+[31m-     ],[0m
+[31m-    "op_hours" => "Mon-Thu 11am-9pm, Fri 11am-10pm, Sat 11am-10pm, Sun 11am-8pm, Open 7 Days",[0m
+[31m-    "services" => [[0m
+[31m-     "<p>Italian Food. Pizza Specialists, Lasanga, Salads, Hot Wings, Spagetti, Garlic Bread, Roasted Potatoes, Chicken Strips, Deserts &amp; More</p>"[0m
+[31m-     ],[0m
+[31m-    "slogan" => "<p>Family Owned Since 1980</p> <p>Best Pizza In Glendale!</p>"[0m
+[31m-    },[0m
+[31m-   "distance" => 1.15,[0m
+[31m-   "has_detail_page" => true,[0m
+[31m-   "headings" => [[0m
+[31m-    "Pizza",[0m
+[31m-    "Italian Restaurants",[0m
+[31m-    "Restaurants"[0m
+[31m-    ],[0m
+[31m-   "id" => "4526532",[0m
+[31m-   "impression_data" => {[0m
+[31m-    "appearance_id" => "",[0m
+[31m-    "content_provider" => "MDM",[0m
+[31m-    "directory_code" => "GLN",[0m
+[31m-    "heading_code" => "8002304",[0m
+[31m-    "impression_id" => "c5f4947a742d2a8a2520d5831786eb39b3c93d4e",[0m
+[31m-    "latitude" => "34.1583",[0m
+[31m-    "listing_id" => "4526532",[0m
+[31m-    "listing_type" => "2",[0m
+[31m-    "longitude" => "-118.24883",[0m
+[31m-    "match_type" => "3",[0m
+[31m-    "request_id" => "78e25750-3074-012e-e420-00163e10e185",[0m
+[31m-    "transaction_id" => "7904b950-3074-012e-e420-00163e10e185",[0m
+[31m-    "ypid" => "4526532"[0m
+[31m-    },[0m
+[31m-   "impression_id" => "c5f4947a742d2a8a2520d5831786eb39b3c93d4e",[0m
+[31m-   "improvable" => true,[0m
+[31m-   "latitude" => 34.1583,[0m
+[31m-   "listing_id" => "4526532",[0m
+[31m-   "listing_type" => "free",[0m
+[31m-   "longitude" => -118.24883,[0m
+[31m-   "mappable" => true,[0m
+[31m-   "name" => "Good Fast Pizza",[0m
+[31m-   "neighborhood" => [[0m
+[31m-    "Rossmoyne"[0m
+[31m-    ],[0m
+[31m-   "omit_address" => false,[0m
+[31m-   "omit_phone" => false,[0m
+[31m-   "phone" => "8185000006",[0m
+[31m-   "rateable" => true,[0m
+[31m-   "rating_count" => 9,[0m
+[31m-   "red_listing" => false,[0m
+[31m-   "source" => "MDM",[0m
+[31m-   "state" => "CA",[0m
+[31m-   "tier" => 999,[0m
+[31m-   "website" => "http://syndication.yellowpages.com/log/businesses/4526532/click?link_type=6&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.yellowpages.com%2Fglendale-ca%2Fmip%2Fgood-fast-pizza-4526532%3Ffrom%3DMOBWEB&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC1RBHXk5WGWVapdZACUxp4Ip%2B8hzG1ys%2F5nOCCeQDqmjA%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e",[0m
+[31m-   "zip" => "91207"[0m
+[31m-   },[0m
+[31m-  {[0m
+[31m-   "address" => "1524 E Colorado St",[0m
+[31m-   "average_rating" => 4.0,[0m
+[31m-   "city" => "Glendale",[0m
+[31m-   "coupon_flag" => "N",[0m
+[31m-   "distance" => 1.37,[0m
+[31m-   "has_detail_page" => true,[0m
+[31m-   "headings" => [[0m
+[31m-    "Pizza",[0m
+[31m-    "Italian Restaurants",[0m
+[31m-    "Restaurants"[0m
+[31m-    ],[0m
+[31m-   "id" => "7278704",[0m
+[31m-   "impression_data" => {[0m
+[31m-    "appearance_id" => "",[0m
+[31m-    "content_provider" => "MDM",[0m
+[31m-    "directory_code" => "GLN",[0m
+[31m-    "heading_code" => "8002304",[0m
+[31m-    "impression_id" => "b8231b245879db2656666a4430185efca226375e",[0m
+[31m-    "latitude" => "34.14277",[0m
+[31m-    "listing_id" => "7278704",[0m
+[31m-    "listing_type" => "2",[0m
+[31m-    "longitude" => "-118.23083",[0m
+[31m-    "match_type" => "3",[0m
+[31m-    "request_id" => "78e25750-3074-012e-e420-00163e10e185",[0m
+[31m-    "transaction_id" => "7904b950-3074-012e-e420-00163e10e185",[0m
+[31m-    "ypid" => "7278704"[0m
+[31m-    },[0m
+[31m-   "impression_id" => "b8231b245879db2656666a4430185efca226375e",[0m
+[31m-   "improvable" => true,[0m
+[31m-   "latitude" => 34.14277,[0m
+[31m-   "listing_id" => "7278704",[0m
+[31m-   "listing_type" => "free",[0m
+[31m-   "longitude" => -118.23083,[0m
+[31m-   "mappable" => true,[0m
+[31m-   "name" => "Scarantino's Italian Inn",[0m
+[31m-   "neighborhood" => [[0m
+[31m-    "Citrus Grove"[0m
+[31m-    ],[0m
+[31m-   "omit_address" => false,[0m
+[31m-   "omit_phone" => false,[0m
+[31m-   "phone" => "8182479777",[0m
+[31m-   "rateable" => true,[0m
+[31m-   "rating_count" => 10,[0m
+[31m-   "red_listing" => false,[0m
+[31m-   "source" => "MDM",[0m
+[31m-   "state" => "CA",[0m
+[31m-   "tier" => 999,[0m
+[31m-   "website" => "http://syndication.yellowpages.com/log/businesses/7278704/click?link_type=6&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.yellowpages.com%2Fglendale-ca%2Fmip%2Fscarantinos-italian-inn-7278704%3Ffrom%3DMOBWEB&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC1RBHXk5WGWVapdZACUxp4Ip%2B8hzG1ys%2F5nOCCeQDqmjA%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e",[0m
+[31m-   "zip" => "91205"[0m
+[31m-   },[0m
+[31m-  {[0m
+[31m-   "address" => "627 East Colorado St",[0m
+[31m-   "average_rating" => 4.0,[0m
+[31m-   "city" => "Glendale",[0m
+[31m-   "coupon_flag" => "N",[0m
+[31m-   "description" => {[0m
+[31m-    "additional_urls" => [[0m
+[31m-     {[0m
+[31m-      "destination" => "http://www.pizzamanglendale.com",[0m
+[31m-      "url_click" => "http://syndication.yellowpages.com/log/businesses/7624974/click?link_type=6&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.pizzamanglendale.com&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC1a6AyM4%2BZfHgJkSwnOeN9Otcum6FxXi%2BNJTCRhUwUZ8w%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+[31m-      },[0m
+[31m-     {[0m
+[31m-      "destination" => "http://www.pizzamanglendale.com",[0m
+[31m-      "url_click" => "http://syndication.yellowpages.com/log/businesses/7624974/click?link_type=6&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.pizzamanglendale.com&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC1a6AyM4%2BZfHgJkSwnOeN9Otcum6FxXi%2BNJTCRhUwUZ8w%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+[31m-      }[0m
+[31m-     ],[0m
+[31m-    "op_hours" => "Mon-Fri 10am-11pm, Sat 10am-12am, Sun 10am-12am, Open 7 Days",[0m
+[31m-    "services" => [[0m
+[31m-     "Sub Sandwiches, Salads, Pizza, Pasta, Catering Service, Buffalo Wings"[0m
+[31m-     ][0m
+[31m-    },[0m
+[31m-   "distance" => 0.44,[0m
+[31m-   "has_detail_page" => true,[0m
+[31m-   "headings" => [[0m
+[31m-    "Pizza",[0m
+[31m-    "Italian Restaurants",[0m
+[31m-    "Restaurants"[0m
+[31m-    ],[0m
+[31m-   "id" => "7624974",[0m
+[31m-   "impression_data" => {[0m
+[31m-    "appearance_id" => "",[0m
+[31m-    "content_provider" => "MDM",[0m
+[31m-    "directory_code" => "GLN",[0m
+[31m-    "heading_code" => "8002304",[0m
+[31m-    "impression_id" => "a6f40cef0c6b7d5bb65791b8007e057d842a0e24",[0m
+[31m-    "latitude" => "34.14267",[0m
+[31m-    "listing_id" => "7624974",[0m
+[31m-    "listing_type" => "2",[0m
+[31m-    "longitude" => "-118.247246",[0m
+[31m-    "match_type" => "3",[0m
+[31m-    "request_id" => "78e25750-3074-012e-e420-00163e10e185",[0m
+[31m-    "transaction_id" => "7904b950-3074-012e-e420-00163e10e185",[0m
+[31m-    "ypid" => "7624974"[0m
+[31m-    },[0m
+[31m-   "impression_id" => "a6f40cef0c6b7d5bb65791b8007e057d842a0e24",[0m
+[31m-   "improvable" => true,[0m
+[31m-   "latitude" => 34.14267,[0m
+[31m-   "listing_id" => "7624974",[0m
+[31m-   "listing_type" => "free",[0m
+[31m-   "longitude" => -118.247246,[0m
+[31m-   "mappable" => true,[0m
+[31m-   "name" => "Pizza Man",[0m
+[31m-   "neighborhood" => [[0m
+[31m-    "Citrus Grove"[0m
+[31m-    ],[0m
+[31m-   "omit_address" => false,[0m
+[31m-   "omit_phone" => false,[0m
+[31m-   "phone" => "8182470000",[0m
+[31m-   "rateable" => true,[0m
+[31m-   "rating_count" => 6,[0m
+[31m-   "red_listing" => false,[0m
+[31m-   "source" => "MDM",[0m
+[31m-   "state" => "CA",[0m
+[31m-   "tier" => 999,[0m
+[31m-   "website" => "http://syndication.yellowpages.com/log/businesses/7624974/click?link_type=6&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.yellowpages.com%2Fglendale-ca%2Fmip%2Fpizza-man-7624974%3Ffrom%3DMOBWEB&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC1RBHXk5WGWVapdZACUxp4Ip%2B8hzG1ys%2F5nOCCeQDqmjA%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e",[0m
+[31m-   "zip" => "91205"[0m
+[31m-   },[0m
+[31m-  {[0m
+[31m-   "address" => "1418 W Kenneth Rd",[0m
+[31m-   "average_rating" => 3.0,[0m
+[31m-   "city" => "Glendale",[0m
+[31m-   "coupon_flag" => "N",[0m
+[31m-   "description" => {[0m
+[31m-    "op_hours" => "Mon-Sat 10:30am-10pm, Sun 11:30am-9pm"[0m
+[31m-    },[0m
+[31m-   "distance" => 2.49,[0m
+[31m-   "has_detail_page" => true,[0m
+[31m-   "headings" => [[0m
+[31m-    "Pizza",[0m
+[31m-    "Italian Restaurants",[0m
+[31m-    "Clubs",[0m
+[31m-    "Restaurants",[0m
+[31m-    "Mediterranean Restaurants"[0m
+[31m-    ],[0m
+[31m-   "id" => "22178848",[0m
+[31m-   "impression_data" => {[0m
+[31m-    "appearance_id" => "",[0m
+[31m-    "content_provider" => "MDM",[0m
+[31m-    "directory_code" => "GLN",[0m
+[31m-    "heading_code" => "8002304",[0m
+[31m-    "impression_id" => "33dae70824480579cd510f9e7fdf9651c144cb81",[0m
+[31m-    "latitude" => "34.17254",[0m
+[31m-    "listing_id" => "22178848",[0m
+[31m-    "listing_type" => "2",[0m
+[31m-    "longitude" => "-118.27933",[0m
+[31m-    "match_type" => "3",[0m
+[31m-    "request_id" => "78e25750-3074-012e-e420-00163e10e185",[0m
+[31m-    "transaction_id" => "7904b950-3074-012e-e420-00163e10e185",[0m
+[31m-    "ypid" => "22178848"[0m
+[31m-    },[0m
+[31m-   "impression_id" => "33dae70824480579cd510f9e7fdf9651c144cb81",[0m
+[31m-   "improvable" => true,[0m
+[31m-   "latitude" => 34.17254,[0m
+[31m-   "listing_id" => "22178848",[0m
+[31m-   "listing_type" => "free",[0m
+[31m-   "longitude" => -118.27933,[0m
+[31m-   "mappable" => true,[0m
+[31m-   "name" => "Georges Cucina Italiana",[0m
+[31m-   "neighborhood" => [[0m
+[31m-    "El Miradero"[0m
+[31m-    ],[0m
+[31m-   "omit_address" => false,[0m
+[31m-   "omit_phone" => false,[0m
+[31m-   "phone" => "8182467777",[0m
+[31m-   "rateable" => true,[0m
+[31m-   "rating_count" => 6,[0m
+[31m-   "red_listing" => false,[0m
+[31m-   "source" => "MDM",[0m
+[31m-   "state" => "CA",[0m
+[31m-   "tier" => 999,[0m
+[31m-   "website" => "http://syndication.yellowpages.com/log/businesses/22178848/click?link_type=6&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.yellowpages.com%2Fglendale-ca%2Fmip%2Fgeorges-cucina-italiana-22178848%3Ffrom%3DMOBWEB&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC1RBHXk5WGWVapdZACUxp4Ip%2B8hzG1ys%2F5nOCCeQDqmjA%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e",[0m
+[31m-   "zip" => "91201"[0m
+[31m-   },[0m
+[31m-  {[0m
+[31m-   "address" => "600 W Glenoaks Blvd",[0m
+[31m-   "average_rating" => 4.0,[0m
+[31m-   "city" => "Glendale",[0m
+[31m-   "coupon_flag" => "Y",[0m
+    "coupons" => [
+     {
+      "coupon_attrs" => {
+       "coupon_active_date" => "05/14/2010",
+       "coupon_business_tracking_url" => "http://www.savings.com/mpclick?placementid=11508505&url=http%3A%2F%2Fwww.savings.com%2Fmpofferref%3Fofferid%3D171497",
+       "coupon_free_shipping" => "0",
+       "coupon_printable" => "0",
+       "coupon_rating" => "6",
+       "coupon_seven_day_rating" => "0",
+       "coupon_site_wide" => "1",
+       "coupon_staff_pick" => "0",
+       "coupon_third_day_rating" => "0"
+       },
+      "coupon_description" => "Dominos Pizza Coupon<br />Click on link to activate offer when you order two medium 2-topping pizzas online. Only $5.99 each, 2 pizza minimum.",
+      "coupon_source_code" => "SAV",
+      "coupon_source_id" => "224426/423764",
+      "coupon_title" => "Get Two Medium 2-Topping Pizzas for $5.99 each",
+      "coupon_type" => "0",
+      "coupon_updated_date" => "2010-09-28",
+      "coupon_url" => "http://www.savings.com/mpclick?placementid=11508505&url=http%3A%2F%2Fwww.savings.com%2Fmpofferref%3Fofferid%3D2176380",
+      "created_at" => "2011-01-10",
+      "id" => "CD226A9B-EA8D-02AC-06B0-59CFF6E22000",
+      "updated_at" => "2011-03-13"
+      },
+     {
+      "coupon_attrs" => {
+       "coupon_active_date" => "03/14/2009",
+       "coupon_business_tracking_url" => "http://www.savings.com/mpclick?placementid=11508505&url=http%3A%2F%2Fwww.savings.com%2Fmpofferref%3Fofferid%3D171497",
+       "coupon_free_shipping" => "0",
+       "coupon_printable" => "0",
+       "coupon_rating" => "3",
+       "coupon_seven_day_rating" => "1",
+       "coupon_site_wide" => "1",
+       "coupon_staff_pick" => "0",
+       "coupon_third_day_rating" => "1"
+       },
+      "coupon_description" => "Dominos Pizza Coupon<br />Follow this link and enter your address to see the list of Domino's Pizza coupons currently available.",
+      "coupon_source_code" => "SAV",
+      "coupon_source_id" => "224426/203632",
+      "coupon_title" => "Find Promos and Special Offers for Your Area",
+      "coupon_type" => "0",
+      "coupon_updated_date" => "2009-03-14",
+      "coupon_url" => "http://www.savings.com/mpclick?placementid=11508505&url=http%3A%2F%2Fwww.savings.com%2Fmpofferref%3Fofferid%3D300106",
+      "created_at" => "2011-01-10",
+      "id" => "F8508214-27FD-C6F6-06B0-CFB2F6E22000",
+      "updated_at" => "2011-03-13"
+      }
+     ],
+    "description" => {
+     "additional_urls" => [
+      {
+       "destination" => "http://www.dominospizza.com",
+[31m-      "url_click" => "http://syndication.yellowpages.com/log/businesses/1044985/click?link_type=6&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.dominospizza.com&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC1C75VEMffX724PIV%2Btjhtr41cxQyLeYG2cgtgBV9APgA%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+[32m+      "url_click" => "http://beta-syndication.yellowpages.com/log/businesses/14292721/click?link_type=6&redirect=http%3A%2F%2Fwww.dominospizza.com&transaction_id=7d63f1b0-3074-012e-858f-0014c2c2d805&ypc%5Bauth_hash%5D=MC1C75VEMffX724PIV%2Btjhtr41cxQyLeYG2cgtgBV9APgA%3D%3D%0A&ypc%5Bhashed_visitor%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+[32m+      }[0m
+[32m+     ],[0m
+[32m+    "general_info" => "Founded as a single store in 1960, **Domino's Pizza** today stands as the recognized world leader in pizza delivery.",[0m
+[32m+    "services" => [[0m
+[32m+     "Glendale Pizza, pizza delivery, pizza restaurants, sandwiches, crunchy thin crust, pizza menu, pizza coupons, breadsticks, hand tossed pizza"[0m
+[32m+     ],[0m
+[32m+    "slogan" => "The Pizza Turnaround - Oh, Yes We Did"[0m
+[32m+    },[0m
+[32m+   "distance" => 0.38,[0m
+[32m+   "has_detail_page" => true,[0m
+[32m+   "headings" => [[0m
+[32m+    "Pizza",[0m
+[32m+    "Fast Food Restaurants",[0m
+[32m+    "Restaurant Delivery Service",[0m
+[32m+    "Take Out Restaurants"[0m
+[32m+    ],[0m
+[32m+   "id" => "14292721",[0m
+[32m+   "impression_data" => {[0m
+[32m+    "content_provider" => "MDM",[0m
+[32m+    "directory_code" => "GLN",[0m
+[32m+    "heading_code" => "8002304",[0m
+[32m+    "impression_id" => "7d64b600-3074-012e-858f-0014c2c2d805",[0m
+[32m+    "latitude" => "34.137474",[0m
+[32m+    "listing_id" => "14292721",[0m
+[32m+    "listing_type" => "2",[0m
+[32m+    "longitude" => "-118.25786",[0m
+[32m+    "match_type" => "3",[0m
+[32m+    "request_id" => "7d63e700-3074-012e-858f-0014c2c2d805",[0m
+[32m+    "transaction_id" => "7d63f1b0-3074-012e-858f-0014c2c2d805",[0m
+[32m+    "ypid" => "14292721"[0m
+[32m+    },[0m
+[32m+   "impression_id" => "7d64b600-3074-012e-858f-0014c2c2d805",[0m
+[32m+   "improvable" => true,[0m
+[32m+   "latitude" => 34.137474,[0m
+[32m+   "listing_id" => "14292721",[0m
+[32m+   "listing_type" => "free",[0m
+[32m+   "longitude" => -118.25786,[0m
+[32m+   "mappable" => true,[0m
+[32m+   "name" => "Domino's Pizza",[0m
+[32m+   "neighborhood" => [[0m
+[32m+    "Pacific - Edison"[0m
+[32m+    ],[0m
+[32m+   "omit_address" => false,[0m
+[32m+   "omit_phone" => false,[0m
+[32m+   "phone" => "8182463850",[0m
+[32m+   "rateable" => true,[0m
+[32m+   "rating_count" => 0,[0m
+[32m+   "red_listing" => false,[0m
+[32m+   "source" => "MDM",[0m
+[32m+   "state" => "CA",[0m
+[32m+   "tier" => 999,[0m
+[32m+   "website" => "http://beta-syndication.yellowpages.com/log/businesses/14292721/click?link_type=6&redirect=http%3A%2F%2Fwww.yellowpages.com%2Fglendale-ca%2Fmip%2Fdominos-pizza-14292721%3Ffrom%3DMOBWEB&transaction_id=7d63f1b0-3074-012e-858f-0014c2c2d805&ypc%5Bauth_hash%5D=MC1RBHXk5WGWVapdZACUxp4Ip%2B8hzG1ys%2F5nOCCeQDqmjA%3D%3D%0A&ypc%5Bhashed_visitor%5D=d41d8cd98f00b204e9800998ecf8427e",[0m
+[32m+   "zip" => "91204"[0m
+[32m+   },[0m
+[32m+  {[0m
+[32m+   "address" => "1261 S Central Ave",[0m
+[32m+   "average_rating" => 4.0,[0m
+[32m+   "city" => "Glendale",[0m
+[32m+   "coupons" => [[0m
+[32m+    {[0m
+[32m+     "coupon_attrs" => {[0m
+[32m+      "coupon_active_date" => "05/05/2010",[0m
+[32m+      "coupon_business_tracking_url" => "http://www.savings.com/mpclick?placementid=11508505&url=http%3A%2F%2Fwww.savings.com%2Fmpofferref%3Fofferid%3D300036",[0m
+[32m+      "coupon_code" => "PIZZAMIA599",[0m
+[32m+      "coupon_free_shipping" => "0",[0m
+[32m+      "coupon_printable" => "0",[0m
+[32m+      "coupon_rating" => "4",[0m
+[32m+      "coupon_seven_day_rating" => "1",[0m
+[32m+      "coupon_site_wide" => "1",[0m
+[32m+      "coupon_staff_pick" => "0",[0m
+[32m+      "coupon_third_day_rating" => "3"[0m
+       },
+[32m+     "coupon_description" => "Pizza Hut Coupon Code<br />Use code at checkout to get medium one-topping Pizza Mia pizzas for only $5 when you order three or more.",[0m
+[32m+     "coupon_source_code" => "SAV",[0m
+[32m+     "coupon_source_id" => "236446/419802",[0m
+[32m+     "coupon_title" => "Three or More Medium 1-Topping Pizza Mia Pizza for $5 Each",[0m
+[32m+     "coupon_type" => "0",[0m
+[32m+     "coupon_updated_date" => "2010-05-05",[0m
+[32m+     "coupon_url" => "http://www.savings.com/mpclick?placementid=11508505&url=http%3A%2F%2Fwww.savings.com%2Fmpofferref%3Fofferid%3D2154507",[0m
+[32m+     "created_at" => "2011-01-10",[0m
+[32m+     "id" => "143ADAB4-149D-A8DD-E86B-69A9F6E22000",[0m
+[32m+     "updated_at" => "2011-03-13"[0m
+[32m+     }[0m
+[32m+    ],[0m
+[32m+   "description" => {[0m
+[32m+    "additional_urls" => [[0m
+[32m+     {[0m
+[32m+      "destination" => "http://www.pizzahut.com",[0m
+[32m+      "url_click" => "http://beta-syndication.yellowpages.com/log/businesses/5299939/click?link_type=6&redirect=http%3A%2F%2Fwww.pizzahut.com&transaction_id=7d63f1b0-3074-012e-858f-0014c2c2d805&ypc%5Bauth_hash%5D=MC18jz1oK452IOnHM0dK%2Fbe7IbiDzPQXl%2BI7WXyubIKNQA%3D%3D%0A&ypc%5Bhashed_visitor%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+[32m+      }[0m
+[32m+     ],[0m
+[32m+    "general_info" => "Today, millions around the world love our four core pizzas: Pan Pizza, Thin 'N Crispy, Hand-Tossed Style and Stuffed Crust. We also strive to present the products when and where the customer wants. To achieve this goal, we've developed a number of services through the years. With our Personal Pan Pizza, we made quick, affordable pizza a lunch alternative for millions of Americans.",[0m
+[32m+    "op_hours" => "Daily 10am-11pm",[0m
+[32m+    "services" => [[0m
+[32m+     "Pizza Hut's menu includes but is not limited to:<BR><BR><BR>**Specialties**<BR>* Cheese Lover's Pizza<BR>* Meat Lover's Pizza<BR>* Pepperoni Lover's Pizza<BR>* Veggie Lover's Pizza<BR>* Supreme Pizza<BR><BR>**Signature Crusts**<BR>* Hand-Tossed Style Pizza<BR>* Pan Pizza<BR>* Personal Pan Pizza<BR>* Stuffed Crust Pizza<BR>* Thin 'N Crispy Pizza<BR><BR>**Pizza Toppings**<BR>* Meat:<BR>* Bacon, Beef Topping, Chicken, Ham, Italian Sausage, Pepperoni, Pork Topping <BR>* Veggies & Fruit:<BR>* Banana Peppers, Black Olives, Green Olives, Green Peppers, Jalapenos, Mushrooms, Pineapple, Red Onion, Tomatoes<BR><BR>**Appetizers & Sauces**<BR>* Quepapas Potato Bites<BR>* Breadsticks<BR>* Cheese Sticks<BR><BR>**Wingstreet Wings**<BR>* Buffalo Burnin' Hot<BR>* Buffalo Medium<BR>* Buffalo Mild<BR>* Honey BBQ<BR>* Garlic Parmesan<BR>* Spicy BBQ<BR>* Cajun<BR>* Spicy Asian<BR><BR>**Wingstreet Sides & Dips**<BR>* Taters<BR>* Fried Cheese Sticks <BR>* Apple Pies <BR><BR>**Desserts & Drinks**<BR>* Baked Cinnamon Sticks<BR>* Aquafina<BR>* Diet Pepsi<BR>* Pepsi<BR>* Wild Cherry Pepsi<BR>* Mountain Dew<BR>* Mug Root Beer<BR>* Sierra Mist"[0m
+[32m+     ][0m
+[32m+    },[0m
+[32m+   "distance" => 0.85,[0m
+[32m+   "has_detail_page" => true,[0m
+[32m+   "headings" => [[0m
+[32m+    "Pizza",[0m
+[32m+    "Restaurant Delivery Service",[0m
+[32m+    "Restaurants",[0m
+[32m+    "Take Out Restaurants"[0m
+[32m+    ],[0m
+[32m+   "id" => "5299939",[0m
+[32m+   "impression_data" => {[0m
+[32m+    "content_provider" => "MDM",[0m
+[32m+    "directory_code" => "GLN",[0m
+[32m+    "heading_code" => "8002304",[0m
+[32m+    "impression_id" => "7d64d450-3074-012e-858f-0014c2c2d805",[0m
+[32m+    "latitude" => "34.130444",[0m
+[32m+    "listing_id" => "5299939",[0m
+[32m+    "listing_type" => "2",[0m
+[32m+    "longitude" => "-118.25779",[0m
+[32m+    "match_type" => "3",[0m
+[32m+    "request_id" => "7d63e700-3074-012e-858f-0014c2c2d805",[0m
+[32m+    "transaction_id" => "7d63f1b0-3074-012e-858f-0014c2c2d805",[0m
+[32m+    "ypid" => "5299939"[0m
+[32m+    },[0m
+[32m+   "impression_id" => "7d64d450-3074-012e-858f-0014c2c2d805",[0m
+[32m+   "improvable" => true,[0m
+[32m+   "latitude" => 34.130444,[0m
+[32m+   "listing_id" => "5299939",[0m
+[32m+   "listing_type" => "free",[0m
+[32m+   "longitude" => -118.25779,[0m
+[32m+   "mappable" => true,[0m
+[32m+   "name" => "Pizza Hut",[0m
+[32m+   "neighborhood" => [[0m
+[32m+    "Tropico"[0m
+[32m+    ],[0m
+[32m+   "omit_address" => false,[0m
+[32m+   "omit_phone" => false,[0m
+[32m+   "phone" => "8182444477",[0m
+[32m+   "rateable" => true,[0m
+[32m+   "rating_count" => 1,[0m
+[32m+   "red_listing" => false,[0m
+[32m+   "source" => "MDM",[0m
+[32m+   "state" => "CA",[0m
+[32m+   "tier" => 999,[0m
+[32m+   "website" => "http://beta-syndication.yellowpages.com/log/businesses/5299939/click?link_type=6&redirect=http%3A%2F%2Fwww.yellowpages.com%2Fglendale-ca%2Fmip%2Fpizza-hut-5299939%3Ffrom%3DMOBWEB&transaction_id=7d63f1b0-3074-012e-858f-0014c2c2d805&ypc%5Bauth_hash%5D=MC1RBHXk5WGWVapdZACUxp4Ip%2B8hzG1ys%2F5nOCCeQDqmjA%3D%3D%0A&ypc%5Bhashed_visitor%5D=d41d8cd98f00b204e9800998ecf8427e",[0m
+[32m+   "zip" => "91204"[0m
+[32m+   },[0m
+[32m+  {[0m
+[32m+   "address" => "1428 E Colorado St Ste D",[0m
+[32m+   "average_rating" => 0.0,[0m
+[32m+   "city" => "Glendale",[0m
+[32m+   "coupons" => [[0m
+[32m+    {[0m
+[32m+     "coupon_attrs" => {[0m
+[32m+      "coupon_active_date" => "05/14/2010",[0m
+[32m+      "coupon_business_tracking_url" => "http://www.savings.com/mpclick?placementid=11508505&url=http%3A%2F%2Fwww.savings.com%2Fmpofferref%3Fofferid%3D171497",[0m
+[32m+      "coupon_free_shipping" => "0",[0m
+[32m+      "coupon_printable" => "0",[0m
+[32m+      "coupon_rating" => "6",[0m
+[32m+      "coupon_seven_day_rating" => "0",[0m
+[32m+      "coupon_site_wide" => "1",[0m
+[32m+      "coupon_staff_pick" => "0",[0m
+[32m+      "coupon_third_day_rating" => "0"[0m
+[32m+      },[0m
+[32m+     "coupon_description" => "Dominos Pizza Coupon<br />Click on link to activate offer when you order two medium 2-topping pizzas online. Only $5.99 each, 2 pizza minimum.",[0m
+[32m+     "coupon_source_code" => "SAV",[0m
+[32m+     "coupon_source_id" => "224426/423764",[0m
+[32m+     "coupon_title" => "Get Two Medium 2-Topping Pizzas for $5.99 each",[0m
+[32m+     "coupon_type" => "0",[0m
+[32m+     "coupon_updated_date" => "2010-09-28",[0m
+[32m+     "coupon_url" => "http://www.savings.com/mpclick?placementid=11508505&url=http%3A%2F%2Fwww.savings.com%2Fmpofferref%3Fofferid%3D2176380",[0m
+[32m+     "created_at" => "2011-01-10",[0m
+[32m+     "id" => "CD226A9B-EA8D-02AC-06B0-59CFF6E22000",[0m
+[32m+     "updated_at" => "2011-03-13"[0m
+[32m+     },[0m
+[32m+    {[0m
+[32m+     "coupon_attrs" => {[0m
+[32m+      "coupon_active_date" => "03/14/2009",[0m
+[32m+      "coupon_business_tracking_url" => "http://www.savings.com/mpclick?placementid=11508505&url=http%3A%2F%2Fwww.savings.com%2Fmpofferref%3Fofferid%3D171497",[0m
+[32m+      "coupon_free_shipping" => "0",[0m
+[32m+      "coupon_printable" => "0",[0m
+[32m+      "coupon_rating" => "3",[0m
+[32m+      "coupon_seven_day_rating" => "1",[0m
+[32m+      "coupon_site_wide" => "1",[0m
+[32m+      "coupon_staff_pick" => "0",[0m
+[32m+      "coupon_third_day_rating" => "1"[0m
+[32m+      },[0m
+[32m+     "coupon_description" => "Dominos Pizza Coupon<br />Follow this link and enter your address to see the list of Domino's Pizza coupons currently available.",[0m
+[32m+     "coupon_source_code" => "SAV",[0m
+[32m+     "coupon_source_id" => "224426/203632",[0m
+[32m+     "coupon_title" => "Find Promos and Special Offers for Your Area",[0m
+[32m+     "coupon_type" => "0",[0m
+[32m+     "coupon_updated_date" => "2009-03-14",[0m
+[32m+     "coupon_url" => "http://www.savings.com/mpclick?placementid=11508505&url=http%3A%2F%2Fwww.savings.com%2Fmpofferref%3Fofferid%3D300106",[0m
+[32m+     "created_at" => "2011-01-10",[0m
+[32m+     "id" => "F8508214-27FD-C6F6-06B0-CFB2F6E22000",[0m
+[32m+     "updated_at" => "2011-03-13"[0m
+[32m+     }[0m
+[32m+    ],[0m
+[32m+   "description" => {[0m
+[32m+    "additional_urls" => [[0m
+      {
+       "destination" => "http://www.dominospizza.com",
+[31m-      "url_click" => "http://syndication.yellowpages.com/log/businesses/1044985/click?link_type=6&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.dominospizza.com&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC1C75VEMffX724PIV%2Btjhtr41cxQyLeYG2cgtgBV9APgA%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+[32m+      "url_click" => "http://beta-syndication.yellowpages.com/log/businesses/7502001/click?link_type=6&redirect=http%3A%2F%2Fwww.dominospizza.com&transaction_id=7d63f1b0-3074-012e-858f-0014c2c2d805&ypc%5Bauth_hash%5D=MC1C75VEMffX724PIV%2Btjhtr41cxQyLeYG2cgtgBV9APgA%3D%3D%0A&ypc%5Bhashed_visitor%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+[32m+      }[0m
+[32m+     ],[0m
+[32m+    "general_info" => "Founded as a single store in 1960, **Domino's Pizza** today stands as the recognized world leader in pizza delivery.",[0m
+[32m+    "services" => [[0m
+[32m+     "Glendale Pizza, pizza delivery, pizza restaurants, sandwiches, crunchy thin crust, pizza menu, pizza coupons, breadsticks, hand tossed pizza"[0m
+[32m+     ],[0m
+[32m+    "slogan" => "The Pizza Turnaround - Oh, Yes We Did"[0m
+[32m+    },[0m
+[32m+   "distance" => 1.25,[0m
+[32m+   "has_detail_page" => true,[0m
+[32m+   "headings" => [[0m
+[32m+    "Pizza",[0m
+[32m+    "Fast Food Restaurants",[0m
+[32m+    "Restaurant Delivery Service",[0m
+[32m+    "Take Out Restaurants"[0m
+[32m+    ],[0m
+[32m+   "id" => "7502001",[0m
+[32m+   "impression_data" => {[0m
+[32m+    "content_provider" => "MDM",[0m
+[32m+    "directory_code" => "GLN",[0m
+[32m+    "heading_code" => "8002304",[0m
+[32m+    "impression_id" => "7d64f250-3074-012e-858f-0014c2c2d805",[0m
+[32m+    "latitude" => "34.14277",[0m
+[32m+    "listing_id" => "7502001",[0m
+[32m+    "listing_type" => "2",[0m
+[32m+    "longitude" => "-118.23289",[0m
+[32m+    "match_type" => "3",[0m
+[32m+    "request_id" => "7d63e700-3074-012e-858f-0014c2c2d805",[0m
+[32m+    "transaction_id" => "7d63f1b0-3074-012e-858f-0014c2c2d805",[0m
+[32m+    "ypid" => "7502001"[0m
+[32m+    },[0m
+[32m+   "impression_id" => "7d64f250-3074-012e-858f-0014c2c2d805",[0m
+[32m+   "improvable" => true,[0m
+[32m+   "latitude" => 34.14277,[0m
+[32m+   "listing_id" => "7502001",[0m
+[32m+   "listing_type" => "free",[0m
+[32m+   "longitude" => -118.23289,[0m
+[32m+   "mappable" => true,[0m
+[32m+   "name" => "Domino's Pizza",[0m
+[32m+   "neighborhood" => [[0m
+[32m+    "Citrus Grove"[0m
+[32m+    ],[0m
+[32m+   "omit_address" => false,[0m
+[32m+   "omit_phone" => false,[0m
+[32m+   "phone" => "8182479500",[0m
+[32m+   "rateable" => true,[0m
+[32m+   "rating_count" => 0,[0m
+[32m+   "red_listing" => false,[0m
+[32m+   "source" => "MDM",[0m
+[32m+   "state" => "CA",[0m
+[32m+   "tier" => 999,[0m
+[32m+   "website" => "http://beta-syndication.yellowpages.com/log/businesses/7502001/click?link_type=6&redirect=http%3A%2F%2Fwww.yellowpages.com%2Fglendale-ca%2Fmip%2Fdominos-pizza-7502001%3Ffrom%3DMOBWEB&transaction_id=7d63f1b0-3074-012e-858f-0014c2c2d805&ypc%5Bauth_hash%5D=MC1RBHXk5WGWVapdZACUxp4Ip%2B8hzG1ys%2F5nOCCeQDqmjA%3D%3D%0A&ypc%5Bhashed_visitor%5D=d41d8cd98f00b204e9800998ecf8427e",[0m
+[32m+   "zip" => "91205"[0m
+[32m+   },[0m
+[32m+  {[0m
+[32m+   "address" => "600 W Glenoaks Blvd",[0m
+[32m+   "average_rating" => 4.0,[0m
+[32m+   "city" => "Glendale",[0m
+[32m+   "coupons" => [[0m
+[32m+    {[0m
+[32m+     "coupon_attrs" => {[0m
+[32m+      "coupon_active_date" => "05/14/2010",[0m
+[32m+      "coupon_business_tracking_url" => "http://www.savings.com/mpclick?placementid=11508505&url=http%3A%2F%2Fwww.savings.com%2Fmpofferref%3Fofferid%3D171497",[0m
+[32m+      "coupon_free_shipping" => "0",[0m
+[32m+      "coupon_printable" => "0",[0m
+[32m+      "coupon_rating" => "6",[0m
+[32m+      "coupon_seven_day_rating" => "0",[0m
+[32m+      "coupon_site_wide" => "1",[0m
+[32m+      "coupon_staff_pick" => "0",[0m
+[32m+      "coupon_third_day_rating" => "0"[0m
+[32m+      },[0m
+[32m+     "coupon_description" => "Dominos Pizza Coupon<br />Click on link to activate offer when you order two medium 2-topping pizzas online. Only $5.99 each, 2 pizza minimum.",[0m
+[32m+     "coupon_source_code" => "SAV",[0m
+[32m+     "coupon_source_id" => "224426/423764",[0m
+[32m+     "coupon_title" => "Get Two Medium 2-Topping Pizzas for $5.99 each",[0m
+[32m+     "coupon_type" => "0",[0m
+[32m+     "coupon_updated_date" => "2010-09-28",[0m
+[32m+     "coupon_url" => "http://www.savings.com/mpclick?placementid=11508505&url=http%3A%2F%2Fwww.savings.com%2Fmpofferref%3Fofferid%3D2176380",[0m
+[32m+     "created_at" => "2011-01-10",[0m
+[32m+     "id" => "CD226A9B-EA8D-02AC-06B0-59CFF6E22000",[0m
+[32m+     "updated_at" => "2011-03-13"[0m
+[32m+     },[0m
+[32m+    {[0m
+[32m+     "coupon_attrs" => {[0m
+[32m+      "coupon_active_date" => "03/14/2009",[0m
+[32m+      "coupon_business_tracking_url" => "http://www.savings.com/mpclick?placementid=11508505&url=http%3A%2F%2Fwww.savings.com%2Fmpofferref%3Fofferid%3D171497",[0m
+[32m+      "coupon_free_shipping" => "0",[0m
+[32m+      "coupon_printable" => "0",[0m
+[32m+      "coupon_rating" => "3",[0m
+[32m+      "coupon_seven_day_rating" => "1",[0m
+[32m+      "coupon_site_wide" => "1",[0m
+[32m+      "coupon_staff_pick" => "0",[0m
+[32m+      "coupon_third_day_rating" => "1"[0m
+[32m+      },[0m
+[32m+     "coupon_description" => "Dominos Pizza Coupon<br />Follow this link and enter your address to see the list of Domino's Pizza coupons currently available.",[0m
+[32m+     "coupon_source_code" => "SAV",[0m
+[32m+     "coupon_source_id" => "224426/203632",[0m
+[32m+     "coupon_title" => "Find Promos and Special Offers for Your Area",[0m
+[32m+     "coupon_type" => "0",[0m
+[32m+     "coupon_updated_date" => "2009-03-14",[0m
+[32m+     "coupon_url" => "http://www.savings.com/mpclick?placementid=11508505&url=http%3A%2F%2Fwww.savings.com%2Fmpofferref%3Fofferid%3D300106",[0m
+[32m+     "created_at" => "2011-01-10",[0m
+[32m+     "id" => "F8508214-27FD-C6F6-06B0-CFB2F6E22000",[0m
+[32m+     "updated_at" => "2011-03-13"[0m
+[32m+     }[0m
+[32m+    ],[0m
+[32m+   "description" => {[0m
+[32m+    "additional_urls" => [[0m
+[32m+     {[0m
+[32m+      "destination" => "http://www.dominospizza.com",[0m
+[32m+      "url_click" => "http://beta-syndication.yellowpages.com/log/businesses/1044985/click?link_type=6&redirect=http%3A%2F%2Fwww.dominospizza.com&transaction_id=7d63f1b0-3074-012e-858f-0014c2c2d805&ypc%5Bauth_hash%5D=MC1C75VEMffX724PIV%2Btjhtr41cxQyLeYG2cgtgBV9APgA%3D%3D%0A&ypc%5Bhashed_visitor%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+       }
+      ],
+     "general_info" => "Founded in 1960, Domino's Pizza is the recognized world leader in pizza delivery operating a network of company-owned and franchise-owned stores in the United States and international markets.",
+     "op_hours" => "Su-Th 11am-12am Fr-Sa 11am-1am",
+     "services" => [
+      "Domino's Pizza features but is not limited to the following menu items: <BR><BR>**Pizzas**<BR>* Crusts: Classic Hand Tossed, Ultimate Deep Dish, Crunchy Thin Crust or Brooklyn Style<BR>* Sizes: Medium (12"
+      ]
+     },
+    "distance" => 1.36,
+    "has_detail_page" => true,
+    "headings" => [
+     "Pizza",
+     "Fast Food Restaurants",
+     "Restaurant Delivery Service",
+     "Take Out Restaurants"
+     ],
+    "id" => "1044985",
+    "impression_data" => {
+[31m-    "appearance_id" => "",[0m
+     "content_provider" => "MDM",
+     "directory_code" => "GLN",
+     "heading_code" => "8002304",
+[31m-    "impression_id" => "feabbc57f4647db259e9b39c6106f7669d76a004",[0m
+[32m+    "impression_id" => "7d651030-3074-012e-858f-0014c2c2d805",[0m
+     "latitude" => "34.15958",
+     "listing_id" => "1044985",
+     "listing_type" => "2",
+     "longitude" => "-118.26698",
+     "match_type" => "3",
+[31m-    "request_id" => "78e25750-3074-012e-e420-00163e10e185",[0m
+[31m-    "transaction_id" => "7904b950-3074-012e-e420-00163e10e185",[0m
+[32m+    "request_id" => "7d63e700-3074-012e-858f-0014c2c2d805",[0m
+[32m+    "transaction_id" => "7d63f1b0-3074-012e-858f-0014c2c2d805",[0m
+     "ypid" => "1044985"
+     },
+[31m-   "impression_id" => "feabbc57f4647db259e9b39c6106f7669d76a004",[0m
+[32m+   "impression_id" => "7d651030-3074-012e-858f-0014c2c2d805",[0m
+    "improvable" => true,
+    "latitude" => 34.15958,
+    "listing_id" => "1044985",
+    "listing_type" => "free",
+    "longitude" => -118.26698,
+    "mappable" => true,
+    "name" => "Domino's Pizza",
+    "neighborhood" => [
+     "Glenwood"
+     ],
+    "omit_address" => false,
+    "omit_phone" => false,
+    "phone" => "8185022646",
+    "rateable" => true,
+    "rating_count" => 3,
+    "red_listing" => false,
+    "source" => "MDM",
+    "state" => "CA",
+    "tier" => 999,
+[31m-   "website" => "http://syndication.yellowpages.com/log/businesses/1044985/click?link_type=6&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.yellowpages.com%2Fglendale-ca%2Fmip%2Fdominos-pizza-1044985%3Ffrom%3DMOBWEB&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC1RBHXk5WGWVapdZACUxp4Ip%2B8hzG1ys%2F5nOCCeQDqmjA%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e",[0m
+[32m+   "website" => "http://beta-syndication.yellowpages.com/log/businesses/1044985/click?link_type=6&redirect=http%3A%2F%2Fwww.yellowpages.com%2Fglendale-ca%2Fmip%2Fdominos-pizza-1044985%3Ffrom%3DMOBWEB&transaction_id=7d63f1b0-3074-012e-858f-0014c2c2d805&ypc%5Bauth_hash%5D=MC1RBHXk5WGWVapdZACUxp4Ip%2B8hzG1ys%2F5nOCCeQDqmjA%3D%3D%0A&ypc%5Bhashed_visitor%5D=d41d8cd98f00b204e9800998ecf8427e",[0m
+    "zip" => "91202"
+    },
+   {
+[31m-   "address" => "1504 W Glenoaks Blvd",[0m
+[31m-   "average_rating" => 5.0,[0m
+[32m+   "address" => "1244 W Glenoaks Blvd",[0m
+[32m+   "average_rating" => 0.0,[0m
+    "city" => "Glendale",
+[31m-   "coupon_flag" => "N",[0m
+[32m+   "coupons" => [[0m
+[32m+    {[0m
+[32m+     "coupon_attrs" => {[0m
+[32m+      "coupon_active_date" => "05/14/2010",[0m
+[32m+      "coupon_business_tracking_url" => "http://www.savings.com/mpclick?placementid=11508505&url=http%3A%2F%2Fwww.savings.com%2Fmpofferref%3Fofferid%3D171497",[0m
+[32m+      "coupon_free_shipping" => "0",[0m
+[32m+      "coupon_printable" => "0",[0m
+[32m+      "coupon_rating" => "6",[0m
+[32m+      "coupon_seven_day_rating" => "0",[0m
+[32m+      "coupon_site_wide" => "1",[0m
+[32m+      "coupon_staff_pick" => "0",[0m
+[32m+      "coupon_third_day_rating" => "0"[0m
+[32m+      },[0m
+[32m+     "coupon_description" => "Dominos Pizza Coupon<br />Click on link to activate offer when you order two medium 2-topping pizzas online. Only $5.99 each, 2 pizza minimum.",[0m
+[32m+     "coupon_source_code" => "SAV",[0m
+[32m+     "coupon_source_id" => "224426/423764",[0m
+[32m+     "coupon_title" => "Get Two Medium 2-Topping Pizzas for $5.99 each",[0m
+[32m+     "coupon_type" => "0",[0m
+[32m+     "coupon_updated_date" => "2010-09-28",[0m
+[32m+     "coupon_url" => "http://www.savings.com/mpclick?placementid=11508505&url=http%3A%2F%2Fwww.savings.com%2Fmpofferref%3Fofferid%3D2176380",[0m
+[32m+     "created_at" => "2011-01-10",[0m
+[32m+     "id" => "CD226A9B-EA8D-02AC-06B0-59CFF6E22000",[0m
+[32m+     "updated_at" => "2011-03-13"[0m
+[32m+     },[0m
+[32m+    {[0m
+[32m+     "coupon_attrs" => {[0m
+[32m+      "coupon_active_date" => "03/14/2009",[0m
+[32m+      "coupon_business_tracking_url" => "http://www.savings.com/mpclick?placementid=11508505&url=http%3A%2F%2Fwww.savings.com%2Fmpofferref%3Fofferid%3D171497",[0m
+[32m+      "coupon_free_shipping" => "0",[0m
+[32m+      "coupon_printable" => "0",[0m
+[32m+      "coupon_rating" => "3",[0m
+[32m+      "coupon_seven_day_rating" => "1",[0m
+[32m+      "coupon_site_wide" => "1",[0m
+[32m+      "coupon_staff_pick" => "0",[0m
+[32m+      "coupon_third_day_rating" => "1"[0m
+[32m+      },[0m
+[32m+     "coupon_description" => "Dominos Pizza Coupon<br />Follow this link and enter your address to see the list of Domino's Pizza coupons currently available.",[0m
+[32m+     "coupon_source_code" => "SAV",[0m
+[32m+     "coupon_source_id" => "224426/203632",[0m
+[32m+     "coupon_title" => "Find Promos and Special Offers for Your Area",[0m
+[32m+     "coupon_type" => "0",[0m
+[32m+     "coupon_updated_date" => "2009-03-14",[0m
+[32m+     "coupon_url" => "http://www.savings.com/mpclick?placementid=11508505&url=http%3A%2F%2Fwww.savings.com%2Fmpofferref%3Fofferid%3D300106",[0m
+[32m+     "created_at" => "2011-01-10",[0m
+[32m+     "id" => "F8508214-27FD-C6F6-06B0-CFB2F6E22000",[0m
+[32m+     "updated_at" => "2011-03-13"[0m
+[32m+     }[0m
+[32m+    ],[0m
+    "description" => {
+[31m-    "op_hours" => "Mon-Sat 10am-10pm, Sun 12am-12am"[0m
+[32m+    "additional_urls" => [[0m
+[32m+     {[0m
+[32m+      "destination" => "http://www.dominospizza.com",[0m
+[32m+      "url_click" => "http://beta-syndication.yellowpages.com/log/businesses/118038/click?link_type=6&redirect=http%3A%2F%2Fwww.dominospizza.com&transaction_id=7d63f1b0-3074-012e-858f-0014c2c2d805&ypc%5Bauth_hash%5D=MC1C75VEMffX724PIV%2Btjhtr41cxQyLeYG2cgtgBV9APgA%3D%3D%0A&ypc%5Bhashed_visitor%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+[32m+      }[0m
+[32m+     ],[0m
+[32m+    "general_info" => "Founded in 1960, Domino's Pizza is the recognized world leader in pizza delivery operating a network of company-owned and franchise-owned stores in the United States and international markets.",[0m
+[32m+    "op_hours" => "Su-Th 11am-12am Fr-Sa 11am-1am",[0m
+[32m+    "services" => [[0m
+[32m+     "Domino's Pizza features but is not limited to the following menu items: <BR><BR>**Pizzas**<BR>* Crusts: Classic Hand Tossed, Ultimate Deep Dish, Crunchy Thin Crust or Brooklyn Style<BR>* Sizes: Medium (12"[0m
+[32m+     ],[0m
+[32m+    "slogan" => "The Pizza Turnaround - Oh, Yes We Did"[0m
+     },
+[31m-   "distance" => 2.5,[0m
+[32m+   "distance" => 2.25,[0m
+    "has_detail_page" => true,
+    "headings" => [
+     "Pizza",
+[31m-    "Restaurants"[0m
+[32m+    "Fast Food Restaurants",[0m
+[32m+    "Restaurant Delivery Service",[0m
+[32m+    "Take Out Restaurants"[0m
+     ],
+[31m-   "id" => "3656865",[0m
+[32m+   "id" => "118038",[0m
+    "impression_data" => {
+[31m-    "appearance_id" => "",[0m
+     "content_provider" => "MDM",
+     "directory_code" => "GLN",
+     "heading_code" => "8002304",
+[31m-    "impression_id" => "db3f1274b7740ecebf3dd9cff1406a003b7bbed0",[0m
+[31m-    "latitude" => "34.168358",[0m
+[31m-    "listing_id" => "3656865",[0m
+[32m+    "impression_id" => "7d652e50-3074-012e-858f-0014c2c2d805",[0m
+[32m+    "latitude" => "34.165928",[0m
+[32m+    "listing_id" => "118038",[0m
+     "listing_type" => "2",
+[31m-    "longitude" => "-118.28604",[0m
+[32m+    "longitude" => "-118.28271",[0m
+     "match_type" => "3",
+[31m-    "request_id" => "78e25750-3074-012e-e420-00163e10e185",[0m
+[31m-    "transaction_id" => "7904b950-3074-012e-e420-00163e10e185",[0m
+[31m-    "ypid" => "3656865"[0m
+[32m+    "request_id" => "7d63e700-3074-012e-858f-0014c2c2d805",[0m
+[32m+    "transaction_id" => "7d63f1b0-3074-012e-858f-0014c2c2d805",[0m
+[32m+    "ypid" => "118038"[0m
+     },
+[31m-   "impression_id" => "db3f1274b7740ecebf3dd9cff1406a003b7bbed0",[0m
+[32m+   "impression_id" => "7d652e50-3074-012e-858f-0014c2c2d805",[0m
+    "improvable" => true,
+[31m-   "latitude" => 34.168358,[0m
+[31m-   "listing_id" => "3656865",[0m
+[32m+   "latitude" => 34.165928,[0m
+[32m+   "listing_id" => "118038",[0m
+    "listing_type" => "free",
+[31m-   "longitude" => -118.28604,[0m
+[32m+   "longitude" => -118.28271,[0m
+    "mappable" => true,
+[31m-   "name" => "Mr. K's Pizza",[0m
+[32m+   "name" => "Domino's Pizza",[0m
+    "neighborhood" => [
+     "Grandview"
+     ],
+    "omit_address" => false,
+    "omit_phone" => false,
+[31m-   "phone" => "8182421744",[0m
+[32m+   "phone" => "8182473340",[0m
+    "rateable" => true,
+[31m-   "rating_count" => 2,[0m
+[32m+   "rating_count" => 0,[0m
+    "red_listing" => false,
+    "source" => "MDM",
+    "state" => "CA",
+    "tier" => 999,
+[31m-   "website" => "http://syndication.yellowpages.com/log/businesses/3656865/click?link_type=6&partner_id=MOBWEB&redirect=http%3A%2F%2Fwww.yellowpages.com%2Fglendale-ca%2Fmip%2Fmr-ks-pizza-3656865%3Ffrom%3DMOBWEB&transaction_id=78e25750-3074-012e-e420-00163e10e185&visitor_id=d41d8cd98f00b204e9800998ecf8427e&ypc%5Bauth_hash%5D=MC1RBHXk5WGWVapdZACUxp4Ip%2B8hzG1ys%2F5nOCCeQDqmjA%3D%3D%0A&ypc%5Bvisitor_id%5D=d41d8cd98f00b204e9800998ecf8427e",[0m
+[32m+   "website" => "http://beta-syndication.yellowpages.com/log/businesses/118038/click?link_type=6&redirect=http%3A%2F%2Fwww.yellowpages.com%2Fglendale-ca%2Fmip%2Fdominos-pizza-118038%3Ffrom%3DMOBWEB&transaction_id=7d63f1b0-3074-012e-858f-0014c2c2d805&ypc%5Bauth_hash%5D=MC1RBHXk5WGWVapdZACUxp4Ip%2B8hzG1ys%2F5nOCCeQDqmjA%3D%3D%0A&ypc%5Bhashed_visitor%5D=d41d8cd98f00b204e9800998ecf8427e",[0m
+[32m+   "zip" => "91201"[0m
+[32m+   },[0m
+[32m+  {[0m
+[32m+   "address" => "1428 W Glenoaks Blvd",[0m
+[32m+   "average_rating" => 0.0,[0m
+[32m+   "city" => "Glendale",[0m
+[32m+   "coupons" => [[0m
+[32m+    {[0m
+[32m+     "coupon_attrs" => {[0m
+[32m+      "coupon_active_date" => "05/05/2010",[0m
+[32m+      "coupon_business_tracking_url" => "http://www.savings.com/mpclick?placementid=11508505&url=http%3A%2F%2Fwww.savings.com%2Fmpofferref%3Fofferid%3D300036",[0m
+[32m+      "coupon_code" => "PIZZAMIA599",[0m
+[32m+      "coupon_free_shipping" => "0",[0m
+[32m+      "coupon_printable" => "0",[0m
+[32m+      "coupon_rating" => "4",[0m
+[32m+      "coupon_seven_day_rating" => "1",[0m
+[32m+      "coupon_site_wide" => "1",[0m
+[32m+      "coupon_staff_pick" => "0",[0m
+[32m+      "coupon_third_day_rating" => "3"[0m
+[32m+      },[0m
+[32m+     "coupon_description" => "Pizza Hut Coupon Code<br />Use code at checkout to get medium one-topping Pizza Mia pizzas for only $5 when you order three or more.",[0m
+[32m+     "coupon_source_code" => "SAV",[0m
+[32m+     "coupon_source_id" => "236446/419802",[0m
+[32m+     "coupon_title" => "Three or More Medium 1-Topping Pizza Mia Pizza for $5 Each",[0m
+[32m+     "coupon_type" => "0",[0m
+[32m+     "coupon_updated_date" => "2010-05-05",[0m
+[32m+     "coupon_url" => "http://www.savings.com/mpclick?placementid=11508505&url=http%3A%2F%2Fwww.savings.com%2Fmpofferref%3Fofferid%3D2154507",[0m
+[32m+     "created_at" => "2011-01-10",[0m
+[32m+     "id" => "143ADAB4-149D-A8DD-E86B-69A9F6E22000",[0m
+[32m+     "updated_at" => "2011-03-13"[0m
+[32m+     }[0m
+[32m+    ],[0m
+[32m+   "description" => {[0m
+[32m+    "additional_urls" => [[0m
+[32m+     {[0m
+[32m+      "destination" => "http://www.pizzahut.com",[0m
+[32m+      "url_click" => "http://beta-syndication.yellowpages.com/log/businesses/5624859/click?link_type=6&redirect=http%3A%2F%2Fwww.pizzahut.com&transaction_id=7d63f1b0-3074-012e-858f-0014c2c2d805&ypc%5Bauth_hash%5D=MC18jz1oK452IOnHM0dK%2Fbe7IbiDzPQXl%2BI7WXyubIKNQA%3D%3D%0A&ypc%5Bhashed_visitor%5D=d41d8cd98f00b204e9800998ecf8427e"[0m
+[32m+      }[0m
+[32m+     ],[0m
+[32m+    "op_hours" => "Daily 10am-11pm"[0m
+[32m+    },[0m
+[32m+   "distance" => 2.43,[0m
+[32m+   "has_detail_page" => true,[0m
+[32m+   "headings" => [[0m
+[32m+    "Pizza",[0m
+[32m+    "Restaurant Delivery Service",[0m
+[32m+    "Restaurants",[0m
+[32m+    "Take Out Restaurants"[0m
+[32m+    ],[0m
+[32m+   "id" => "5624859",[0m
+[32m+   "impression_data" => {[0m
+[32m+    "content_provider" => "MDM",[0m
+[32m+    "directory_code" => "GLN",[0m
+[32m+    "heading_code" => "8002304",[0m
+[32m+    "impression_id" => "7d654c10-3074-012e-858f-0014c2c2d805",[0m
+[32m+    "latitude" => "34.1677",[0m
+[32m+    "listing_id" => "5624859",[0m
+[32m+    "listing_type" => "2",[0m
+[32m+    "longitude" => "-118.28514",[0m
+[32m+    "match_type" => "3",[0m
+[32m+    "request_id" => "7d63e700-3074-012e-858f-0014c2c2d805",[0m
+[32m+    "transaction_id" => "7d63f1b0-3074-012e-858f-0014c2c2d805",[0m
+[32m+    "ypid" => "5624859"[0m
+[32m+    },[0m
+[32m+   "impression_id" => "7d654c10-3074-012e-858f-0014c2c2d805",[0m
+[32m+   "improvable" => true,[0m
+[32m+   "latitude" => 34.1677,[0m
+[32m+   "listing_id" => "5624859",[0m
+[32m+   "listing_type" => "free",[0m
+[32m+   "longitude" => -118.28514,[0m
+[32m+   "mappable" => true,[0m
+[32m+   "name" => "Pizza Hut",[0m
+[32m+   "neighborhood" => [[0m
+[32m+    "Grandview"[0m
+[32m+    ],[0m
+[32m+   "omit_address" => false,[0m
+[32m+   "omit_phone" => false,[0m
+[32m+   "phone" => "8182411900",[0m
+[32m+   "rateable" => true,[0m
+[32m+   "rating_count" => 0,[0m
+[32m+   "red_listing" => false,[0m
+[32m+   "source" => "MDM",[0m
+[32m+   "state" => "CA",[0m
+[32m+   "tier" => 999,[0m
+[32m+   "website" => "http://beta-syndication.yellowpages.com/log/businesses/5624859/click?link_type=6&redirect=http%3A%2F%2Fwww.yellowpages.com%2Fglendale-ca%2Fmip%2Fpizza-hut-5624859%3Ffrom%3DMOBWEB&transaction_id=7d63f1b0-3074-012e-858f-0014c2c2d805&ypc%5Bauth_hash%5D=MC1RBHXk5WGWVapdZACUxp4Ip%2B8hzG1ys%2F5nOCCeQDqmjA%3D%3D%0A&ypc%5Bhashed_visitor%5D=d41d8cd98f00b204e9800998ecf8427e",[0m
+    "zip" => "91201"
+    }
+   ],
+[31m- "centroid" => "34.1559544953876,-118.244510661385",[0m
+[32m+ "centroid" => "34.1501734801808,-118.301328966779",[0m
+[32m+ "facets" => {[0m
+[32m+  "average_rating" => [[0m
+[32m+   {[0m
+[32m+    "count" => 376,[0m
+[32m+    "name" => "1.0"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 350,[0m
+[32m+    "name" => "2.0"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 321,[0m
+[32m+    "name" => "3.0"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 231,[0m
+[32m+    "name" => "4.0"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 82,[0m
+[32m+    "name" => "5.0"[0m
+[32m+    }[0m
+[32m+   ],[0m
+[32m+  "features" => [[0m
+[32m+   {[0m
+[32m+    "count" => 166,[0m
+[32m+    "name" => "COUPON"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 4,[0m
+[32m+    "name" => "PRINT_AD"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 1,[0m
+[32m+    "name" => "VIDEO"[0m
+[32m+    }[0m
+[32m+   ],[0m
+[32m+  "heading_text" => [[0m
+[32m+   {[0m
+[32m+    "count" => 792,[0m
+[32m+    "name" => "Pizza"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 638,[0m
+[32m+    "name" => "Restaurants"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 298,[0m
+[32m+    "name" => "Take Out Restaurants"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 210,[0m
+[32m+    "name" => "Restaurant Delivery Service"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 204,[0m
+[32m+    "name" => "Italian Restaurants"[0m
+[32m+    }[0m
+[32m+   ],[0m
+[32m+  "listing_name" => [[0m
+[32m+   {[0m
+[32m+    "count" => 7,[0m
+[32m+    "name" => "0-9"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 18,[0m
+[32m+    "name" => "A"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 42,[0m
+[32m+    "name" => "B"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 62,[0m
+[32m+    "name" => "C"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 91,[0m
+[32m+    "name" => "D"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 7,[0m
+[32m+    "name" => "E"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 15,[0m
+[32m+    "name" => "F"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 33,[0m
+[32m+    "name" => "G"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 12,[0m
+[32m+    "name" => "H"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 8,[0m
+[32m+    "name" => "I"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 20,[0m
+[32m+    "name" => "J"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 7,[0m
+[32m+    "name" => "K"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 89,[0m
+[32m+    "name" => "L"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 34,[0m
+[32m+    "name" => "M"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 25,[0m
+[32m+    "name" => "N"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 9,[0m
+[32m+    "name" => "O"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 188,[0m
+[32m+    "name" => "P"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 3,[0m
+[32m+    "name" => "Q"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 35,[0m
+[32m+    "name" => "R"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 44,[0m
+[32m+    "name" => "S"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 26,[0m
+[32m+    "name" => "T"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 1,[0m
+[32m+    "name" => "U"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 15,[0m
+[32m+    "name" => "V"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 2,[0m
+[32m+    "name" => "W"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 1,[0m
+[32m+    "name" => "X"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 1,[0m
+[32m+    "name" => "Y"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 4,[0m
+[32m+    "name" => "Z"[0m
+[32m+    }[0m
+[32m+   ],[0m
+[32m+  "neighborhood" => [[0m
+[32m+   {[0m
+[32m+    "count" => 229,[0m
+[32m+    "name" => "Central LA"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 93,[0m
+[32m+    "name" => "South Valley"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 69,[0m
+[32m+    "name" => "West LA"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 51,[0m
+[32m+    "name" => "Mid-Wilshire"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 46,[0m
+[32m+    "name" => "East LA"[0m
+[32m+    }[0m
+[32m+   ],[0m
+[32m+  "radius" => [[0m
+[32m+   {[0m
+[32m+    "count" => 24,[0m
+[32m+    "name" => "1.0"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 36,[0m
+[32m+    "name" => "2.0"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 140,[0m
+[32m+    "name" => "5.0"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 572,[0m
+[32m+    "name" => "10.0"[0m
+[32m+    },[0m
+[32m+   {[0m
+[32m+    "count" => 791,[0m
+[32m+    "name" => "25.0"[0m
+[32m+    }[0m
+[32m+   ][0m
+[32m+  },[0m
+[32m+ "filters" => [[0m
+[32m+  "Pizza",[0m
+[32m+  "Restaurants",[0m
+[32m+  "Take Out Restaurants",[0m
+[32m+  "Restaurant Delivery Service",[0m
+[32m+  "Italian Restaurants"[0m
+[32m+  ],[0m
+  "geo_info" => {
+[32m+  "boxes" => {[0m
+[32m+   "large" => {[0m
+[32m+    "max_lat" => "34.359084",[0m
+[32m+    "max_lon" => "-117.992384",[0m
+[32m+    "min_lat" => "33.925375",[0m
+[32m+    "min_lon" => "-118.517766"[0m
+[32m+    },[0m
+[32m+   "medium" => {[0m
+[32m+    "max_lat" => "34.286954",[0m
+[32m+    "max_lon" => "-118.080098",[0m
+[32m+    "min_lat" => "33.997814",[0m
+[32m+    "min_lon" => "-118.430052"[0m
+[32m+    },[0m
+[32m+   "small" => {[0m
+[32m+    "max_lat" => "34.214762",[0m
+[32m+    "max_lon" => "-118.167662",[0m
+[32m+    "min_lat" => "34.070192",[0m
+[32m+    "min_lon" => "-118.342488"[0m
+[32m+    }[0m
+[32m+   },[0m
+   "canonical_description" => "Glendale, CA",
+   "city" => "Glendale",
+   "latitude" => 34.1425078,
+   "longitude" => -118.255075,
+[32m+  "radius" => 5000,[0m
+   "state" => "CA"
+   },
+  "headings" => [
+   {
+    "Code" => "8002304",
+    "Name" => "Pizza",
+    "Rank" => 100009877,
+    "Relevance" => 1.0
+    }
+   ],
+[32m+ "listings_box" => {[0m
+[32m+  "centroid" => "34.1501734801808,-118.301328966779",[0m
+[32m+  "coordinates" => {[0m
+[32m+   "max_lat" => 34.169865,[0m
+[32m+   "max_lon" => -118.23289,[0m
+[32m+   "min_lat" => 34.130444,[0m
+[32m+   "min_lon" => -118.369736,[0m
+[32m+   "ne" => "34.169865,-118.23289",[0m
+[32m+   "sw" => "34.130444,-118.369736"[0m
+[32m+   },[0m
+[32m+  "description" => "Glendale, CA",[0m
+[32m+  "gutter" => {[0m
+[32m+   "max_lat" => 34.1770934926427,[0m
+[32m+   "max_lon" => -118.224153353258,[0m
+[32m+   "min_lat" => 34.1232155073573,[0m
+[32m+   "min_lon" => -118.378468570234,[0m
+[32m+   "ne" => "34.1770934926427,-118.224153353258",[0m
+[32m+   "sw" => "34.1232155073573,-118.378468570234"[0m
+[32m+   },[0m
+[32m+  "latitude" => 34.1501734801808,[0m
+[32m+  "longitude" => -118.301328966779[0m
+[32m+  },[0m
+  "location_name" => "Glendale, CA",
+  "original_request" => {
+   "format" => "json",
+   "geo_location" => "glendale ca",
+   "search_term" => "pizza"
+   },
+[31m- "request_id" => "78e25750-3074-012e-e420-00163e10e185",[0m
+[32m+ "request_id" => "7d63e700-3074-012e-858f-0014c2c2d805",[0m
+  "search_type" => "CATEGORY_SEARCH",
+[32m+ "searched_term" => "pizza",[0m
+  "total_available" => 792
+  }

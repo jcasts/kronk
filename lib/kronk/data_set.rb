@@ -1,9 +1,5 @@
 class Kronk
 
-  # TODO:
-  #  * apply ignore and only in the order given in the cmd line?
-  #  * cleanup the affect_parent implementation
-
   ##
   # Wraps a complex data structure to provide a search-driven interface.
 
@@ -27,13 +23,13 @@ class Kronk
     # Modify the data object by passing inclusive or exclusive data paths.
     # Supports the following options:
     # :only_data:: String/Array - keep data that matches the paths
-    # :only_data_with:: String/Array - keep data with a matched child
     # :ignore_data:: String/Array - remove data that matches the paths
+    #
+    # Deprecated options:
+    # :only_data_with:: String/Array - keep data with a matched child
     # :ignore_data_with:: String/Array - remove data with a matched child
     #
     # Note: the data is processed in the following order:
-    # * only_data_with
-    # * ignore_data_with
     # * only_data
     # * ignore_data
 
@@ -49,6 +45,33 @@ class Kronk
       delete_data_points options[:ignore_data] if options[:ignore_data]
 
       @data
+    end
+
+
+    def modify options
+      options[:only_data]   = [*options[:only_data]].compact
+      options[:ignore_data] = [*options[:ignore_data]].compact
+
+      options[:only_data].concat(
+        [*options[:only_data_with]].map!{|path| path << "/.."}
+      ) if options[:only_data_with]
+
+      options[:ignore_data].concat(
+        [*options[:ignore_data_with]].map!{|path| path << "/.."}
+      ) if options[:ignore_data_with]
+
+
+      if options[:ignore_data_with] || options[:only_data_with]
+        Kronk::Cmd.warn "The ':path' notation is deprecated, use 'path/..'"
+      end
+
+
+      trans = Path::Transaction.new @data
+
+      trans.run do |t|
+        t.select(*options[:only_data])   unless options[:only_data].empty?
+        t.delete(*options[:ignore_data]) unless options[:ignore_data].empty?
+      end
     end
 
 

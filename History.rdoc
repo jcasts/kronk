@@ -7,6 +7,9 @@
 
   * Added path modifiers for case-insensitive and multiline matcher support.
 
+  * Created non-destructive path transactions in favor of DataSet
+    in-place modification.
+
   * Removed explicit dependencies for ActiveSupport. Will attempt loading only
     if String#pluralize isn't defined. Otherwise uses naïve pluralization.
 
