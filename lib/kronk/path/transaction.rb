@@ -10,21 +10,22 @@ class Kronk::Path::Transaction
   end
 
 
-  def run &block
+  def run opts={}, &block
     clear
     yield self
-    results
+    results opts
   end
 
 
-  def results
+  def results opts
     new_data = transaction_select @data, *@actions[:select]
     new_data = transaction_delete new_data, *@actions[:delete]
-    remake_arrays new_data
+    new_data = remake_arrays new_data, opts[:show_indicies]
+    new_data
   end
 
 
-  def remake_arrays new_data
+  def remake_arrays new_data, except_modified=false
     @make_array.each do |(data, path_arr, i)|
       key = path_arr[i]
       next unless Hash === data[key]
@@ -87,12 +88,7 @@ class Kronk::Path::Transaction
             new_curr_data.delete key
 
           else
-            if i == path.length - 2 &&
-                !@make_array.include?([new_curr_data, path, i])
-              new_curr_data[key] = curr_data[key].dup
-            else
-              new_curr_data[key] = curr_data[key]
-            end
+            new_curr_data[key] = curr_data[key].dup
 
             if Array === new_curr_data[key]
               new_curr_data[key] = ary_to_hash new_curr_data[key]

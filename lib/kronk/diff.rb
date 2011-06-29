@@ -25,14 +25,17 @@ class Kronk
       when Hash
         output = "{\n"
 
+        sorted_keys = sort_any data.keys
+
         data_values =
-          data.map do |key, value|
-            pad = " " * indent
+          sorted_keys.map do |key|
+            value   = data[key]
+            pad     = " " * indent
             subdata = ordered_data_string value, struct_only, indent + 1
             "#{pad}#{key.inspect} => #{subdata}"
           end
 
-        output << data_values.sort.join(",\n") << "\n" unless data_values.empty?
+        output << data_values.join(",\n") << "\n" unless data_values.empty?
         output << "#{" " * indent}}"
 
       when Array
@@ -51,6 +54,64 @@ class Kronk
         return data.inspect unless struct_only
         return "Boolean" if data == true || data == false
         data.class
+      end
+    end
+
+
+    ##
+    # Sorts an array of any combination of string, integer, or symbols.
+
+    def self.sort_any arr
+      i = 1
+      until i >= arr.length
+        j        = i-1
+        val      = arr[i]
+        prev_val = arr[j]
+
+        loop do
+          if smaller?(val, arr[j])
+            arr[j+1] = arr[j]
+            j = j - 1
+            break if j < 0
+
+          else
+            break
+          end
+        end
+
+        arr[j+1] = val
+
+        i = i.next
+      end
+
+      arr
+    end
+
+
+    ##
+    # Compares Numerics, Strings, and Symbols and returns true if the left
+    # side is 'smaller' than the right side.
+
+    def self.smaller? left, right
+      case left
+      when Numeric
+        case right
+        when Numeric then right > left
+        else              true
+        end
+
+      when Symbol
+        case right
+        when Numeric then false
+        when Symbol  then right.to_s > left.to_s
+        else              true
+        end
+
+      when String
+        case right
+        when String  then right > left
+        else              false
+        end
       end
     end
 
