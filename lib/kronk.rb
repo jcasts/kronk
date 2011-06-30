@@ -352,7 +352,7 @@ class Kronk
     resp = Request.retrieve uri, options
 
     if options[:irb]
-      irb resp
+      Cmd.irb resp
 
     elsif options[:raw]
       resp.selective_string options
