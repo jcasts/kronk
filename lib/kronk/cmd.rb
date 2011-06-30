@@ -90,7 +90,7 @@ Parse and run diffs against data from live and cached http responses.
   Usage:
     #{opt.program_name} --help
     #{opt.program_name} --version
-    #{opt.program_name} uri1 [uri2] [options...] [-- data-paths]
+    #{opt.program_name} uri1 [uri2] [options] [-- data-paths]
 
   Examples:
     #{opt.program_name} http://example.com/A

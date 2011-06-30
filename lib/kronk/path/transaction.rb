@@ -1,9 +1,44 @@
+##
+# Path Transactions are a convenient way to apply selections and deletions
+# to complex data structures without having to know what state the data will
+# be in after each operation.
+#
+#   data = [
+#     {:name => "Jamie", :id => "12345"},
+#     {:name => "Adam",  :id => "54321"},
+#     {:name => "Kari",  :id => "12345"},
+#     {:name => "Grant", :id => "12345"},
+#     {:name => "Tory",  :id => "12345"},
+#   ]
+#
+#   # Select all element names but delete the one at index 2
+#   Transaction.run data do |t|
+#     t.select "*/name"
+#     t.delete "2"
+#   end
+#
+#   # => [
+#   #  {:name => "Jamie"},
+#   #  {:name => "Adam"},
+#   #  {:name => "Grant"},
+#   #  {:name => "Tory"},
+#   # ]
+
 class Kronk::Path::Transaction
+
+  ##
+  # Create new Transaction instance and run it with a block.
+  # Equivalent to:
+  #   Transaction.new(data).run(opts)
 
   def self.run data, opts={}, &block
     new(data).run opts, &block
   end
 
+
+  ##
+  # Create a new Transaction instance with a the data object to perform
+  # operations on.
 
   def initialize data
     @data    = data
@@ -13,12 +48,21 @@ class Kronk::Path::Transaction
   end
 
 
+  ##
+  # Run operations as a transaction.
+  # See Transaction#results for supported options.
+
   def run opts={}, &block
     clear
     yield self
     results opts
   end
 
+
+  ##
+  # Returns the results of the transaction operations.
+  # To keep the original indicies of modified arrays, and return them as hashes,
+  # pass the :keep_indicies => true option.
 
   def results opts={}
     new_data = transaction_select @data, *@actions[:select]
@@ -28,7 +72,7 @@ class Kronk::Path::Transaction
   end
 
 
-  def remake_arrays new_data, except_modified=false
+  def remake_arrays new_data, except_modified=false # :nodoc:
     @make_array.each do |(data, path_arr, i)|
       key = path_arr[i]
 
@@ -45,7 +89,7 @@ class Kronk::Path::Transaction
   end
 
 
-  def transaction_select data, *data_paths
+  def transaction_select data, *data_paths # :nodoc:
     return data if data_paths.empty?
 
     new_data = Hash.new
@@ -80,7 +124,7 @@ class Kronk::Path::Transaction
   end
 
 
-  def transaction_delete data, *data_paths
+  def transaction_delete data, *data_paths # :nodoc:
     return data if data_paths.empty?
 
     new_data = data.dup
@@ -118,17 +162,20 @@ class Kronk::Path::Transaction
   end
 
 
-  def ary_to_hash ary
+  def ary_to_hash ary # :nodoc:
     hash = {}
     ary.each_with_index{|val, i| hash[i] = val}
     hash
   end
 
 
-  def hash_to_ary hash
+  def hash_to_ary hash # :nodoc:
     hash.keys.sort.map{|k| hash[k] }
   end
 
+
+  ##
+  # Clears the queued actions and cache.
 
   def clear
     @actions.clear
@@ -136,10 +183,16 @@ class Kronk::Path::Transaction
   end
 
 
+  ##
+  # Queues path selects for transaction.
+
   def select *paths
     @actions[:select].concat paths
   end
 
+
+  ##
+  # Queues path deletes for transaction.
 
   def delete *paths
     @actions[:delete].concat paths
