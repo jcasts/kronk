@@ -27,6 +27,8 @@ class TestDataSet < Test::Unit::TestCase
     @dataset = Kronk::DataSet.new @data
 
     @dataset_mock = Kronk::DataSet.new mock_data
+
+    Kronk::Cmd.expects :warn
   end
 
 
@@ -47,12 +49,14 @@ class TestDataSet < Test::Unit::TestCase
 
 
   def test_modify_only_data_with
+    Kronk::Cmd.expects :warn
     data = @dataset_mock.modify :only_data_with => "subs/1"
     assert_equal({"subs" => ["a", "b"]}, data)
   end
 
 
   def test_modify_only_and_ignored_data
+    Kronk::Cmd.expects :warn
     data = @dataset_mock.modify :ignore_data => "subs/1", :only_data => "subs/1"
     assert_equal({"subs" => [nil]}, data)
   end

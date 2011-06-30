@@ -80,6 +80,9 @@ class Kronk
     # Keep only specific data points from the data structure.
 
     def collect_data_points data_paths, affect_parent=false
+      Kronk::Cmd.warn "DataSet#collect_data_points deprecated. "+
+                      "Use Path::Transaction"
+
       new_data = @data.class.new
 
       [*data_paths].each do |data_path|
@@ -110,6 +113,9 @@ class Kronk
     # Remove specific data points from the data structure.
 
     def delete_data_points data_paths, affect_parent=false
+      Kronk::Cmd.warn "DataSet#delete_data_points deprecated. "+
+                      "Use Path::Transaction"
+
       [*data_paths].each do |data_path|
         opts = Path.parse_regex_opts! data_path
         data_path << "/.." if affect_parent
