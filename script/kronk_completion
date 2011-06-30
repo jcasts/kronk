@@ -8,8 +8,8 @@ _kronk()
 
   cur="${COMP_WORDS[COMP_CWORD]}"
 
-  old_kronk_keys="$HOME/.kronk_history"
   kronk_keys="$HOME/.kronk/history"
+  test -f "$kronk_keys" || kronk_keys="$HOME/.kronk_history"
 
   if [ -f "$kronk_keys" ]; then
     COMPREPLY=( $(compgen -W "$(cat $kronk_keys $old_kronk_keys)" -- ${cur}) )
