@@ -1,12 +1,15 @@
 class Kronk::Path::Transaction
 
-  def initialize data, &block
+  def self.run data, opts={}, &block
+    new(data).run opts, &block
+  end
+
+
+  def initialize data
     @data    = data
     @actions = Hash.new{|h,k| h[k] = []}
 
     @make_array = []
-
-    run(&block) if block_given?
   end
 
 
@@ -17,7 +20,7 @@ class Kronk::Path::Transaction
   end
 
 
-  def results opts
+  def results opts={}
     new_data = transaction_select @data, *@actions[:select]
     new_data = transaction_delete new_data, *@actions[:delete]
     new_data = remake_arrays new_data, opts[:show_indicies]
@@ -28,7 +31,12 @@ class Kronk::Path::Transaction
   def remake_arrays new_data, except_modified=false
     @make_array.each do |(data, path_arr, i)|
       key = path_arr[i]
+
       next unless Hash === data[key]
+      next if except_modified &&
+        data[key].length !=
+          Kronk::Path.data_at_path(path_arr[0..i], @data).length
+
       data[key] = hash_to_ary data[key]
     end
 
