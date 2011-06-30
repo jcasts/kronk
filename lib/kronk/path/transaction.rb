@@ -73,18 +73,22 @@ class Kronk::Path::Transaction
 
 
   def remake_arrays new_data, except_modified=false # :nodoc:
-    @make_array.each do |(data, path_arr, i)|
-      key = path_arr[i]
+    @make_array.each do |path_arr|
+      key  = path_arr.last
+      obj = Kronk::Path.data_at_path path_arr[0..-2], new_data
 
-      next unless Hash === data[key]
+      next unless Hash === obj[key]
       next if except_modified &&
-        data[key].length !=
-          Kronk::Path.data_at_path(path_arr[0..i], @data).length
+        obj[key].length !=
+          Kronk::Path.data_at_path(path_arr, @data).length
 
-      data[key] = hash_to_ary data[key]
+      obj[key] = hash_to_ary obj[key]
     end
 
-    new_data = hash_to_ary new_data if Array === @data && Hash === new_data
+    new_data = hash_to_ary new_data if
+      Array === @data && Hash === new_data &&
+      (!except_modified || @data.length == new_data.length)
+
     new_data
   end
 
@@ -94,7 +98,7 @@ class Kronk::Path::Transaction
 
     new_data = Hash.new
 
-    [*data_paths].each do |data_path|
+    data_paths.each do |data_path|
       Kronk::Path.find data_path, data do |obj, k, path|
 
         curr_data     = data
@@ -110,7 +114,7 @@ class Kronk::Path::Transaction
             # Tag data item for conversion to Array.
             # Hashes are used to conserve position of Array elements.
             if Array === curr_data[key]
-              @make_array << [new_curr_data, path, i]
+              @make_array << path[0..i]
             end
 
             new_curr_data = new_curr_data[key]
@@ -133,7 +137,7 @@ class Kronk::Path::Transaction
       new_data = ary_to_hash new_data
     end
 
-    [*data_paths].each do |data_path|
+    data_paths.each do |data_path|
       Kronk::Path.find data_path, data do |obj, k, path|
 
         curr_data     = data
@@ -148,7 +152,7 @@ class Kronk::Path::Transaction
 
             if Array === new_curr_data[key]
               new_curr_data[key] = ary_to_hash new_curr_data[key]
-              @make_array << [new_curr_data, path, i]
+              @make_array << path[0..i]
             end
 
             new_curr_data = new_curr_data[key]
