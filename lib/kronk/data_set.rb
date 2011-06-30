@@ -66,7 +66,7 @@ class Kronk
       end
 
 
-      Path::Transaction.run @data do |t|
+      Path::Transaction.run @data, options do |t|
         t.select(*options[:only_data])
         t.delete(*options[:ignore_data])
       end

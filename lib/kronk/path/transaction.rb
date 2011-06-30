@@ -23,7 +23,7 @@ class Kronk::Path::Transaction
   def results opts={}
     new_data = transaction_select @data, *@actions[:select]
     new_data = transaction_delete new_data, *@actions[:delete]
-    new_data = remake_arrays new_data, opts[:show_indicies]
+    new_data = remake_arrays new_data, opts[:keep_indicies]
     new_data
   end
 

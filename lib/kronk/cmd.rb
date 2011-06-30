@@ -166,6 +166,11 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
+        opt.on('--indicies', 'Show modified array original indicies') do
+          options[:keep_indicies] = true
+        end
+
+
         opt.on('--irb', 'Start an IRB console') do
           options[:irb] = true
         end
