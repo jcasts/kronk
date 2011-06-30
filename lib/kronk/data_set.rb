@@ -34,6 +34,9 @@ class Kronk
     # * ignore_data
 
     def modify options
+      warn_path_deprecation! if options[:ignore_data_with] ||
+                                options[:only_data_with]
+
       collect_data_points options[:only_data_with], true if
         options[:only_data_with]
 
@@ -48,7 +51,13 @@ class Kronk
     end
 
 
-    def modify options
+    ##
+    # New implementation of DataSet#modify
+
+    def fetch options
+      warn_path_deprecation! if options[:ignore_data_with] ||
+                                options[:only_data_with]
+
       options[:only_data]   = [*options[:only_data]].compact
       options[:ignore_data] = [*options[:ignore_data]].compact
 
@@ -59,12 +68,6 @@ class Kronk
       options[:ignore_data].concat(
         [*options[:ignore_data_with]].map!{|path| path << "/.."}
       ) if options[:ignore_data_with]
-
-
-      if options[:ignore_data_with] || options[:only_data_with]
-        Kronk::Cmd.warn "The ':path' notation is deprecated, use 'path/..'"
-      end
-
 
       Path::Transaction.run @data, options do |t|
         t.select(*options[:only_data])
@@ -120,6 +123,14 @@ class Kronk
       end
 
       @data
+    end
+
+
+    private
+
+    def warn_path_deprecation!
+      Kronk::Cmd.warn "The :ignore_data_with and :only_data_with options "+
+                      "are deprecated. Use the '/..' path notation."
     end
   end
 end

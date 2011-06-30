@@ -226,7 +226,7 @@ class Kronk
           data = [parsed_header(options[:with_headers]), data].compact
         end
 
-        DataSet.new(data).modify options
+        DataSet.new(data).fetch options
       end
     end
   end

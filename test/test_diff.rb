@@ -75,16 +75,16 @@ class TestDiff < Test::Unit::TestCase
    ]
   ],
  {
+  :tests => [
+   "D3a",
+   "D3b"
+   ],
   "test" => [
    [
     "D1a\\nContent goes here",
     "D1b"
     ],
    "D2"
-   ],
-  :tests => [
-   "D3a",
-   "D3b"
    ]
   }
  ],
@@ -93,14 +93,14 @@ class TestDiff < Test::Unit::TestCase
  "b"
  ],
 "tests" => {
+ :foo => :bar,
  "test" => [
   [
    1,
    2
    ],
   2.123
-  ],
- :foo => :bar
+  ]
  }
 }
 STR
@@ -140,15 +140,15 @@ STR
    ]
   ],
  {
+  :tests => [
+   String,
+   String
+   ],
   "test" => [
    [
     String,
     String
     ],
-   String
-   ],
-  :tests => [
-   String,
    String
    ]
   }
@@ -158,14 +158,14 @@ STR
  String
  ],
 "tests" => {
+ :foo => Symbol,
  "test" => [
   [
    Fixnum,
    Fixnum
    ],
   Float
-  ],
- :foo => Symbol
+  ]
  }
 }
 STR

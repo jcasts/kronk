@@ -83,7 +83,11 @@ class Kronk::Path::Transaction
   def transaction_delete data, *data_paths
     return data if data_paths.empty?
 
-    new_data = Hash.new
+    new_data = data.dup
+
+    if Array === new_data
+      new_data = ary_to_hash new_data
+    end
 
     [*data_paths].each do |data_path|
       Kronk::Path.find data_path, data do |obj, k, path|
