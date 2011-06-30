@@ -356,9 +356,11 @@ Parse and run diffs against data from live and cached http responses.
           (options[:ignore_data] ||= []) << path[1..-1]
 
         elsif path[0,2] == ":-"
+          warn "The :path notation is deprecated, use path/.."
           (options[:ignore_data_with] ||= []) << path[2..-1]
 
         elsif path[0,1] == ":"
+          warn "The :path notation is deprecated, use path/.."
           (options[:only_data_with] ||= []) << path[1..-1]
 
         else

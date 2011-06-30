@@ -1,6 +1,8 @@
 class Kronk
 
   ##
+  # THIS CLASS IS DEPRECATED AND WILL BE REMOVED IN KRONK-1.5.x
+  #
   # Wraps a complex data structure to provide a search-driven interface.
 
   class DataSet
