@@ -1,12 +1,5 @@
 class Kronk
 
-  # TODO: Consider the following methods:
-  #
-  #   data.path_set "foo/bar/0..2", "value1", "value2", "value3"
-  #   data.path_set "foo/bar/*", "value1", "value2", "value3"
-  #   data.assign_path "foo/bar/val-%d", "value1", "value2", "value3"
-  #   data.path_set %w{foo/bar/%s/val a b c}, "value1", "value2", "value3"
-
   ##
   # Finds specific data points from a nested Hash or Array data structure
   # through the use of a file-glob-like path selector.

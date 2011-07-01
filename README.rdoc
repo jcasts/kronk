@@ -162,7 +162,6 @@ something like:
     "data" => {
       "path1" => "value1",
       "path2" => [
-        nil,
         {
           "child" => "child value"
         }
@@ -197,8 +196,6 @@ attribute, you can do so by appending "/.." to the path.
           "child" => "child value",
           "last_child" => "last value"
         },
-        nil,
-        nil
       ]
     }
   }
@@ -212,12 +209,10 @@ end of the path in the following fashion:
   {
     "data" => {
       "PATH2" => [
-        nil,
         "item at index 1"
       ],
         
       "path2" => [
-        nil,
         {
           "first_child" => "first value",
           "child" => "child value",

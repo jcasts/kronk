@@ -8,10 +8,8 @@
   * Added path modifiers for case-insensitive and multiline matcher support.
     Paths are once again case-sensitive by default.
 
-  * Created non-destructive path transactions in favor of the DataSet
+  * Created non-destructive path transactions to replace the DataSet
     in-place modification.
-
-  * Option to view original index in modified array data outputs.
 
   * Support for displaying data indicies of modified Arrays.
 

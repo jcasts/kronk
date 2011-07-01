@@ -313,19 +313,19 @@ class Kronk
   # Supports the following options:
   # :data:: Hash/String - the data to pass to the http request
   # :query:: Hash/String - the data to append to the http request path
-  # :follow_redirects:: Integer/Bool - number of times to follow redirects
+  # :follow_redirects:: Integer/Boolean - number of times to follow redirects
   # :headers:: Hash - extra headers to pass to the request
   # :http_method:: Symbol - the http method to use; defaults to :get
   # :user_agent:: String - user agent string or alias; defaults to 'kronk'
   # :auth:: Hash - must contain :username and :password; defaults to nil
   # :proxy:: Hash/String - http proxy to use; defaults to nil
   # :only_data:: String/Array - extracts the data from given data paths
-  # :only_data_with:: String/Array - extracts the data from given parent paths
   # :ignore_data:: String/Array - defines which data points to exclude
-  # :ignore_data_with:: String/Array - defines which parent data to exclude
-  # :with_headers:: Bool/String/Array - defines which headers to include
-  # :parser:: Object/String - The parser to use for the body; default nil
-  # :raw:: Bool - run diff on raw strings
+  # :keep_indicies:: Boolean - keep the original indicies of modified arrays,
+  #   and return them as hashes.
+  # :with_headers:: Boolean/String/Array - defines which headers to include
+  # :parser:: Object/String - the parser to use for the body; default nil
+  # :raw:: Boolean - run diff on raw strings
   #
   # Returns a diff object.
 

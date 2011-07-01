@@ -302,8 +302,8 @@ class TestTransaction < Test::Unit::TestCase
 
     @trans.clear
 
-    assert_empty @trans.instance_variable_get(:@actions)
-    assert_empty @trans.instance_variable_get(:@make_array)
+    assert @trans.instance_variable_get(:@actions).empty?
+    assert @trans.instance_variable_get(:@make_array).empty?
   end
 
 
