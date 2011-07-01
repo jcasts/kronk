@@ -28,6 +28,30 @@ class TestTransaction < Test::Unit::TestCase
   end
 
 
+  def test_run
+    expected = {
+      :key1=>{:key1a=>["foo", "foobar", {}]},
+      :key2=>"foobar",
+      "findme"=>[123, 456, {:findme=>123456}]
+    }
+
+    result = @trans.run do |t|
+      t.delete "key3/key*/2", "**=thing"
+      t.select "**=foo*", "**/findme"
+    end
+
+    assert_equal expected, result
+    assert_equal @data, @trans.run
+
+    result2 = @trans.run do |t|
+      t.delete "key3/key*/2", "**=thing"
+      t.select "**=foo*", "**/findme"
+    end
+
+    assert_equal expected, result2
+  end
+
+
   def test_results
     @trans.clear
     @trans.delete "key3/key*/2", "**=thing"

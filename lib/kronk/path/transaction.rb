@@ -54,7 +54,7 @@ class Kronk::Path::Transaction
 
   def run opts={}, &block
     clear
-    yield self
+    yield self if block_given?
     results opts
   end
 
