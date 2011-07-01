@@ -28,6 +28,20 @@ class TestTransaction < Test::Unit::TestCase
   end
 
 
+  def test_class_run
+    block = lambda do |t|
+      t.delete "key3/key*/2", "**=thing"
+      t.select "**=foo*", "**/findme"
+    end
+
+    assert_equal @trans.run(&block),
+      Kronk::Path::Transaction.run(@data, &block)
+
+    assert_equal @trans.run(:keep_indicies => true, &block),
+      Kronk::Path::Transaction.run(@data, :keep_indicies => true, &block)
+  end
+
+
   def test_run
     expected = {
       :key1=>{:key1a=>["foo", "foobar", {}]},
