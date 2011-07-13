@@ -226,7 +226,10 @@ class Kronk
           data = [parsed_header(options[:with_headers]), data].compact
         end
 
-        DataSet.new(data).fetch options
+        Path::Transaction.run data, options do |t|
+          t.select(*options[:only_data])
+          t.delete(*options[:ignore_data])
+        end
       end
     end
   end

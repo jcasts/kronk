@@ -94,6 +94,7 @@ class Kronk::Path::Transaction
 
 
   def transaction_select data, *data_paths # :nodoc:
+    data_paths = data_paths.compact
     return data if data_paths.empty?
 
     new_data = Hash.new
@@ -129,6 +130,7 @@ class Kronk::Path::Transaction
 
 
   def transaction_delete data, *data_paths # :nodoc:
+    data_paths = data_paths.compact
     return data if data_paths.empty?
 
     new_data = data.dup

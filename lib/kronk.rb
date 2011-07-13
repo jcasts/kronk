@@ -16,7 +16,6 @@ class Kronk
   require 'kronk/cmd'
   require 'kronk/path'
   require 'kronk/path/transaction'
-  require 'kronk/data_set'
   require 'kronk/diff/ascii_format'
   require 'kronk/diff/color_format'
   require 'kronk/diff'
@@ -49,6 +48,13 @@ class Kronk
     'plist'   => 'PlistParser',
     'xml'     => 'XMLParser'
   }
+
+
+  # Recursive Hash merge proc.
+  DEEP_MERGE =
+    proc do |key,v1,v2|
+      Hash === v1 && Hash === v2 ? v1.merge(v2,&DEEP_MERGE) : v2
+    end
 
 
   # Aliases for various user-agents. Thanks Mechanize! :)
@@ -175,7 +181,7 @@ class Kronk
           out_opts[key] = Request.parse_nested_query out_opts[key] if
             String === out_opts[key]
 
-          out_opts[key] = val.merge out_opts[key], &DataSet::DEEP_MERGE
+          out_opts[key] = val.merge out_opts[key], &DEEP_MERGE
 
         # Hashes
         when :headers, :auth
