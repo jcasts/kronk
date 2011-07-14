@@ -15,16 +15,8 @@ class Kronk
       @max_threads = opts[:max_threads]
       @max_threads = 10 if !@max_threads || @max_threads <= 0
 
-      @silent      = opts[:silent]
-
       @queue       = []
       @threads     = []
-
-      @successes   = []
-      @failures    = []
-      @errors      = []
-
-      @time        = nil
     end
 
 
@@ -52,22 +44,22 @@ class Kronk
     def run uri1, uri2
       start_time = Time.now
 
-      @queue.each_with_index do |args, i|
+      error_count   = 0
+      failure_count = 0
 
-        if Array === args && IO === args[0]
-        end
+      threaded_each @queue do |args|
+        status = process_request uri1, uri2, args
 
-        threaded do
-          process_request uri1, uri2, args.merge(:result_index => i)
-          threads.delete Thread.current
-        end
+        error_count   += 1 if status == "E"
+        failure_count += 1 if status == "F"
       end
 
-      @threads.each{|t| t.join}
+      time = Time.now - start_time
+      @stdout.puts "\nFinished in #{time.to_f} seconds.\n"
 
-      @time = Time.now - start_time
+      @stderr.flush
 
-      print_report unless @silent
+      @stdout.puts "\n#{failure_count} failures, #{error_count}, errors"
 
       return success?
     end
@@ -76,68 +68,50 @@ class Kronk
     ##
     # Run anything from the thread pool.
 
-    def threaded &block
-      while @threads.length >= @max_threads
-        sleep 0.2
-      end
+    def threaded_each arr
+      arr.each do |item|
+        while @threads.length >= @max_threads
+          sleep 0.2
+        end
 
-      @threads << Thread.new do
-        block.call
-        @threads.delete Thread.current
-      end
-    end
-
-
-    def print_report
-      @stdout << "\nFinished in #{@time.to_f} seconds.\n\n"
-
-      size = @failures.length > @errors.length ?
-              @failures.length : @errors.length
-
-      count = 0
-
-      0.upto(size-1) do |i|
-        count = count.next
-
-        if @failures[i]
-        elsif @errors[i]
+        @threads << Thread.new do
+          yield item
+          @threads.delete Thread.current
         end
       end
 
-      @stdout << "#{@failures.compact.length} failures, "
-      @stdout << "#{@errors.compact.length} errors"
+      @threads.each{|t| t.join}
     end
 
 
-    def process_compare uri1, uri2, opts
-      index = opts.delete(:result_index)
-
-      # TODO: implement instantiation for Kronk and Kronk::Request classes.
+    def process_compare uri1, uri2, opts={}
+      status = '.'
 
       begin
-        k = Kronk.compare uri1, uri2, opts
+        diff = Kronk.compare uri1, uri2, opts
         # OR k = Kronk.request uri, opts
 
-        if k.diff?
-          @stdout << "F" unless @silent
-          index ? @failures[index] = k : @failures << k
-
-        else
-          @stdout << "." unless @silent
-          index ? @successes[index] = k : @successes << k
+        if diff.count > 0
+          status = 'F'
+          @stderr << failure_text(uri1, uri2, opts, diff)
         end
 
       rescue => e
-        @stdout << "E" unless @silent
-        index ? @errors[index] = k : @errors << k
+        status = 'E'
+        @stderr << error_text(e)
       end
 
-      @stdout.flush unless @silent
+      @stdout << status
+      @stdout.flush
+      status
     end
 
 
-    def success?
-      @failures.length == 0 && @errors.length == 0 && @successes.length > 0
+    def failure_text uri1, uri2, opts, diff
+    end
+
+
+    def error_text err
     end
   end
 end

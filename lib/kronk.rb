@@ -158,7 +158,7 @@ class Kronk
   # Returns cmd_opts Hash if none found.
 
   def self.merge_options_for_uri uri, cmd_opts={}
-    return cmd_opts if Kronk.config[:no_uri_options]
+    return cmd_opts.dup if Kronk.config[:no_uri_options]
 
     out_opts = Hash.new.merge cmd_opts
 
