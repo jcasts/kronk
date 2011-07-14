@@ -190,7 +190,6 @@ attribute, you can do so by appending "/.." to the path.
   {
     "data" => {
       "path2" => [
-        nil,
         {
           "first_child" => "first value",
           "child" => "child value",
