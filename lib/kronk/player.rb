@@ -83,19 +83,30 @@ class Kronk
     end
 
 
+    def print_report
+    end
+
+
     def process_compare uri1, uri2, opts
       index = opts.delete(:result_index)
 
-      # TODO: implement
-      k = Kronk.compare uri1, uri2, opts
-      # OR k = Kronk.request uri, opts
+      # TODO: implement instantiation for Kronk and Kronk::Request classes.
 
-      if k.diff?
-        @stdout << "F" unless @silent
-        index ? @failures[index] = k : @failures << k
+      begin
+        k = Kronk.compare uri1, uri2, opts
+        # OR k = Kronk.request uri, opts
 
-      else
-        @stdout << "." unless @silent
+        if k.diff?
+          @stdout << "F" unless @silent
+          index ? @failures[index] = k : @failures << k
+
+        else
+          @stdout << "." unless @silent
+        end
+
+      rescue => e
+        @stdout << "E" unless @silent
+        index ? @errors[index] = k : @errors << k
       end
 
       @stdout.flush unless @silent
