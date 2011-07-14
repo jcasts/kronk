@@ -18,9 +18,11 @@ class Kronk
       @silent      = opts[:silent]
 
       @queue       = []
+      @threads     = []
+
+      @successes   = []
       @failures    = []
       @errors      = []
-      @threads     = []
     end
 
 
@@ -64,7 +66,7 @@ class Kronk
 
       print_report unless @silent
 
-      return @failures.length == 0 && @errors.length == 0
+      return success?
     end
 
 
@@ -102,6 +104,7 @@ class Kronk
 
         else
           @stdout << "." unless @silent
+          index ? @successes[index] = k : @successes << k
         end
 
       rescue => e
@@ -110,6 +113,11 @@ class Kronk
       end
 
       @stdout.flush unless @silent
+    end
+
+
+    def success?
+      @failures.length == 0 && @errors.length == 0 && @successes.length > 0
     end
   end
 end
