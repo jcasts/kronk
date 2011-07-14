@@ -23,6 +23,8 @@ class Kronk
       @successes   = []
       @failures    = []
       @errors      = []
+
+      @time        = nil
     end
 
 
@@ -48,8 +50,7 @@ class Kronk
     # Returns true if no diffs were found (success), otherwise false.
 
     def run uri1, uri2
-      @failures.clear
-      @errors.clear
+      start_time = Time.now
 
       @queue.each_with_index do |args, i|
 
@@ -63,6 +64,8 @@ class Kronk
       end
 
       @threads.each{|t| t.join}
+
+      @time = Time.now - start_time
 
       print_report unless @silent
 
@@ -86,6 +89,23 @@ class Kronk
 
 
     def print_report
+      @stdout << "\nFinished in #{@time.to_f} seconds.\n\n"
+
+      size = @failures.length > @errors.length ?
+              @failures.length : @errors.length
+
+      count = 0
+
+      0.upto(size-1) do |i|
+        count = count.next
+
+        if @failures[i]
+        elsif @errors[i]
+        end
+      end
+
+      @stdout << "#{@failures.compact.length} failures, "
+      @stdout << "#{@errors.compact.length} errors"
     end
 
 
