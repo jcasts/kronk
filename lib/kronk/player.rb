@@ -6,17 +6,15 @@ class Kronk
     # Assigns http method to $1 and path info to $2.
     LOG_MATCHER = %r{([A-Za-z]+) (/[^\s"]+)[\s"]}
 
-    attr_accessor :max_threads, :queue, :results
+    attr_accessor :max_threads, :max_requests, :queue
 
     def initialize opts={}
-      @stderr      = opts[:errout] || $stderr
-      @stdout      = opts[:stdout] || $stdout
+      @max_requests = opts[:max_requests]
+      @max_threads  = opts[:max_threads]
+      @max_threads  = 10 if !@max_threads || @max_threads <= 0
 
-      @max_threads = opts[:max_threads]
-      @max_threads = 10 if !@max_threads || @max_threads <= 0
-
-      @queue       = []
-      @threads     = []
+      @queue   = []
+      @threads = []
     end
 
 
@@ -24,45 +22,46 @@ class Kronk
     # Adds kronk request options to queue.
 
     def queue_req kronk_opts
-      @queue << kronk_opts.dup
+      @queue << kronk_opts
     end
 
 
     ##
     # Adds an IO instance to the queue.
 
-    def queue_io io, opts={}
-      matcher = opts.delete(:matcher) || LOG_MATCHER
+    def queue_io io, matcher=nil
+      matcher ||= LOG_MATCHER
       @queue << [io, matcher]
     end
 
 
     ##
-    # Process the comparison queue.
-    # Returns true if no diffs were found (success), otherwise false.
+    # Process the queue to compare two uris.
+    # Returns the number of failures + errors.
+    # If options are given, they are merged into every request.
 
-    def run uri1, uri2
+    def compare uri1, uri2, opts={}
       start_time = Time.now
 
       error_count   = 0
       failure_count = 0
 
-      @stdout.puts "Started"
+      $stdout.puts "Started"
 
-      threaded_each @queue do |args|
+      threaded_each @queue do |kronk_opts|
         bad_count = error_count + failure_count + 1
-        status = process_request uri1, uri2, args
+        status = process_request uri1, uri2, kronk_opts.merge(opts)
 
         error_count   += 1 if status == "E"
         failure_count += 1 if status == "F"
       end
 
       time = Time.now - start_time
-      @stdout.puts "\nFinished in #{time.to_f} seconds.\n"
+      $stdout.puts "\nFinished in #{time.to_f} seconds.\n"
 
-      @stderr.flush
+      $stderr.flush
 
-      @stdout.puts "\n#{failure_count} failures, #{error_count}, errors"
+      $stdout.puts "\n#{failure_count} failures, #{error_count}, errors"
 
       @queue.clear
 
@@ -97,16 +96,16 @@ class Kronk
 
         if diff.count > 0
           status = 'F'
-          @stderr << failure_text(count, uri1, uri2, opts, diff)
+          $stderr << failure_text(count, uri1, uri2, opts, diff)
         end
 
       rescue => e
         status = 'E'
-        @stderr << error_text(count, e)
+        $stderr << error_text(count, e)
       end
 
-      @stdout << status
-      @stdout.flush
+      $stdout << status
+      $stdout.flush
       status
     end
 
@@ -133,7 +132,7 @@ Diffs: #{diff.count}
 
 
     def opts_to_s opts
-"PLACEHOLDER"
+"OPTIONS PLACEHOLDER"
     end
   end
 end
