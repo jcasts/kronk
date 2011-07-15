@@ -47,7 +47,10 @@ class Kronk
       error_count   = 0
       failure_count = 0
 
+      @stdout.puts "Started"
+
       threaded_each @queue do |args|
+        bad_count = error_count + failure_count + 1
         status = process_request uri1, uri2, args
 
         error_count   += 1 if status == "E"
@@ -61,7 +64,9 @@ class Kronk
 
       @stdout.puts "\n#{failure_count} failures, #{error_count}, errors"
 
-      return success?
+      @queue.clear
+
+      error_count + failure_count
     end
 
 
@@ -84,21 +89,20 @@ class Kronk
     end
 
 
-    def process_compare uri1, uri2, opts={}
+    def process_compare count, uri1, uri2, opts={}
       status = '.'
 
       begin
         diff = Kronk.compare uri1, uri2, opts
-        # OR k = Kronk.request uri, opts
 
         if diff.count > 0
           status = 'F'
-          @stderr << failure_text(uri1, uri2, opts, diff)
+          @stderr << failure_text(count, uri1, uri2, opts, diff)
         end
 
       rescue => e
         status = 'E'
-        @stderr << error_text(e)
+        @stderr << error_text(count, e)
       end
 
       @stdout << status
@@ -107,11 +111,29 @@ class Kronk
     end
 
 
-    def failure_text uri1, uri2, opts, diff
+    def failure_text count, uri1, uri2, opts, diff
+      <<-STR
+  #{count}) Failure:
+Compare: #{uri1}
+         #{uri2}
+
+Options: #{opts_to_s(opts)}
+
+Diffs: #{diff.count}
+      STR
     end
 
 
-    def error_text err
+    def error_text count, err
+      <<-STR
+  #{count}) Error:
+#{err.class}: #{err.message}
+      STR
+    end
+
+
+    def opts_to_s opts
+"PLACEHOLDER"
     end
   end
 end
