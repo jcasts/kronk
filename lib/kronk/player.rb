@@ -97,7 +97,7 @@ class Kronk
           sleep 0.1
         end
 
-        #TODO check if we can populate queue by reading from IO
+        try_read_from_io
 
         kronk_opts = @queue.shift
 
@@ -110,6 +110,39 @@ class Kronk
       end
 
       @threads.each{|t| t.join}
+    end
+
+
+    ##
+    # Attempt to fill the queue by reading from the IO instance.
+
+    def try_read_from_io
+      return if !@io || @io.eof? ||
+                @queue.length >= @max_threads * 2
+
+      max_new = @max_threads * 2 - @queue.length
+
+      max_new.times do
+        @queue << request_from_io
+      end
+    end
+
+
+    ##
+    # Get one line from the IO instance and parse it into a kronk_opts hash.
+
+    def request_from_io
+      line = @io.readline
+
+      if @io_parser.respond_to? :call
+        @io_parser.call line
+
+      elsif Regexp === @io_parser && line =~ @io_parser
+        {:http_method => $1, :uri_suffix => $2}
+
+      else
+        {:uri_suffix => line}
+      end
     end
 
 
