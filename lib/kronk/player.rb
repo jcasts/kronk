@@ -13,13 +13,17 @@ class Kronk
       @max_threads  = opts[:max_threads]
       @max_threads  = 10 if !@max_threads || @max_threads <= 0
 
-      @queue   = []
-      @threads = []
+      @queue      = []
+      @threads    = []
+      @io         = nil
+      @io_parser  = LOG_MATCHER
+      @io_timeout = opts[:io_timeout] || 5
     end
 
 
     ##
-    # Adds kronk request options to queue.
+    # Adds kronk request hash options to queue.
+    # See Kronk#compare for supported options.
 
     def queue_req kronk_opts
       @queue << kronk_opts
@@ -27,11 +31,19 @@ class Kronk
 
 
     ##
-    # Adds an IO instance to the queue.
+    # Populate the queue by reading from the given IO instance and
+    # parsing it into kronk options.
+    #
+    # Parser can be a..
+    # * Regexp: $1 used as http_method, $2 used as path_info
+    # * Proc: return value should be a kronk options hash.
+    #   See Kronk#compare for supported options.
+    #
+    # Default parser is LOG_MATCHER.
 
-    def queue_io io, matcher=nil
-      matcher ||= LOG_MATCHER
-      @queue << [io, matcher]
+    def from_io io, parser=nil
+      @io = io
+      @io_parser = parser
     end
 
 
@@ -47,16 +59,19 @@ class Kronk
 
       $stdout.puts "Started"
 
-      threaded_each @queue do |kronk_opts|
+      process_queue do |kronk_opts|
         bad_count = error_count + failure_count + 1
         start     = Time.now
 
-        status    = process_request uri1, uri2, kronk_opts.merge(opts)
+        status    = process_compare uri1, uri2, kronk_opts.merge(opts)
         elapsed   = Time.now - start_time
 
         total_time    += elapsed.to_f
         error_count   += 1 if status == "E"
         failure_count += 1 if status == "F"
+
+        $stdout << status
+        $stdout.flush
       end
 
       $stdout.puts "\nFinished in #{total_time} seconds.\n"
@@ -72,21 +87,38 @@ class Kronk
 
 
     ##
-    # Run anything from the thread pool.
+    # Start processing the queue and reading from IO if available.
 
-    def threaded_each arr
-      arr.each do |item|
+    def process_queue
+      count = 0
+
+      until finished? count
         while @threads.length >= @max_threads
-          sleep 0.2
+          sleep 0.1
         end
+
+        #TODO check if we can populate queue by reading from IO
+
+        kronk_opts = @queue.shift
 
         @threads << Thread.new do
-          yield item
+          yield kronk_opts
           @threads.delete Thread.current
         end
+
+        count += 1
       end
 
       @threads.each{|t| t.join}
+    end
+
+
+    ##
+    # Returns true if processing queue should be stopped, otherwise false.
+
+    def finished? count
+      (@max_requests && @max_requests >= count) || @queue.empty? &&
+      (!@io || @io && @io.eof?)
     end
 
 
@@ -106,8 +138,6 @@ class Kronk
         $stderr << error_text(count, e)
       end
 
-      $stdout << status
-      $stdout.flush
       status
     end
 
@@ -129,6 +159,11 @@ Diffs: #{diff.count}
       <<-STR
   #{count}) Error:
 #{err.class}: #{err.message}
+
+Compare: #{uri1}
+         #{uri2}
+
+Options: #{opts_to_s(opts)}
       STR
     end
 
