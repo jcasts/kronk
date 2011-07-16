@@ -41,8 +41,7 @@ class Kronk
     # If options are given, they are merged into every request.
 
     def compare uri1, uri2, opts={}
-      start_time = Time.now
-
+      total_time    = 0
       error_count   = 0
       failure_count = 0
 
@@ -50,14 +49,17 @@ class Kronk
 
       threaded_each @queue do |kronk_opts|
         bad_count = error_count + failure_count + 1
-        status = process_request uri1, uri2, kronk_opts.merge(opts)
+        start     = Time.now
 
+        status    = process_request uri1, uri2, kronk_opts.merge(opts)
+        elapsed   = Time.now - start_time
+
+        total_time    += elapsed.to_f
         error_count   += 1 if status == "E"
         failure_count += 1 if status == "F"
       end
 
-      time = Time.now - start_time
-      $stdout.puts "\nFinished in #{time.to_f} seconds.\n"
+      $stdout.puts "\nFinished in #{total_time} seconds.\n"
 
       $stderr.flush
 
