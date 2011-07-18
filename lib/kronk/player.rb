@@ -73,7 +73,8 @@ class Kronk
         $stdout.flush
       end
 
-      output_results
+      success = output_results
+      exit 1 unless success
     end
 
 
@@ -99,7 +100,8 @@ class Kronk
         $stdout.flush
       end
 
-      output_results
+      success = output_results
+      exit 1 unless success
     end
 
 
@@ -215,6 +217,8 @@ class Kronk
       $stderr.puts err_buffer
       $stdout.puts "#{@results.length} cases, " +
                    "#{failure_count} failures, #{error_count} errors"
+
+      return bad_count == 0
     end
 
 
