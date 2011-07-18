@@ -453,7 +453,11 @@ Parse and run diffs against data from live and cached http responses.
 
     def self.compare uri1, uri2, options
       diff = Kronk.compare uri1, uri2, options
+      diff_output diff
+    end
 
+
+    def self.diff_output diff
       puts "#{diff.formatted}\n" unless Kronk.config[:brief]
 
       if Kronk.config[:verbose] || Kronk.config[:brief]
@@ -466,8 +470,13 @@ Parse and run diffs against data from live and cached http responses.
 
     def self.request uri, options
       out = Kronk.retrieve_data_string uri, options
-      out = Diff.insert_line_nums out if Kronk.config[:show_lines]
-      puts out
+      resp_output out
+    end
+
+
+    def self.resp_output str
+      str = Diff.insert_line_nums out if Kronk.config[:show_lines]
+      puts str
     end
 
 

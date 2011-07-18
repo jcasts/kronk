@@ -19,7 +19,9 @@ class Kronk
       @io_parser  = LOG_MATCHER
       #@io_timeout = opts[:io_timeout] || 5
 
-      @results = []
+      @results       = []
+      @last_request  = nil
+      @last_response = nil
     end
 
 
@@ -185,6 +187,8 @@ class Kronk
     # Process and output the results.
 
     def output_results
+      return output_last_result if @results.length == 1 && @results[0][0] != "E"
+
       total_time    = 0
       bad_count     = 0
       failure_count = 0
@@ -214,6 +218,20 @@ class Kronk
     end
 
 
+    def output_last_result
+      case @last_result
+      when Kronk::Diff
+        Kronk::Cmd.diff_output @last_result
+
+      when Net::HTTPResponse
+        str = Kronk.stringified_response @last_request.first,
+                                         @last_result,
+                                         @last_request.last
+        Kronk::Cmd.resp_output str
+      end
+    end
+
+
     ##
     # Run a single compare and return a result array.
 
@@ -224,6 +242,9 @@ class Kronk
         start   = Time.now
         diff    = Kronk.compare uri1, uri2, opts
         elapsed = Time.now - start
+
+        @last_result  = diff
+        @last_request = [uri2, opts]
 
         if diff.count > 0
           status = 'F'
@@ -250,6 +271,9 @@ class Kronk
         start   = Time.now
         resp    = Kronk::Request.retrieve uri, opts
         elapsed = Time.now - start
+
+        @last_result  = resp
+        @last_request = [uri, opts]
 
         unless resp.code =~ /^2\d\d$/
           status = 'F'

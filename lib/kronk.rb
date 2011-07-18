@@ -355,9 +355,16 @@ class Kronk
 
   def self.retrieve_data_string uri, options={}
     options = merge_options_for_uri uri, options
+    resp    = Request.retrieve uri, options
 
-    resp = Request.retrieve uri, options
+    stringified_response uri, resp, options
+  end
 
+
+  ##
+  # Transform a Response instance into a pretty string.
+
+  def self.stringified_response uri, resp, options={}
     if options[:irb]
       Cmd.irb resp
 
