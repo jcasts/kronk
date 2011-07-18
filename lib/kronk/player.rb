@@ -133,11 +133,6 @@ class Kronk
     # Get one line from the IO instance and parse it into a kronk_opts hash.
 
     def request_from_io
-#      if @io == $stdin && $stdin.tty?
-#        $stdout << "\n> "
-#        $stdout.flush
-#      end
-
       line = @io.gets.strip
 
       if @io_parser.respond_to? :call
@@ -160,6 +155,9 @@ class Kronk
       (!@io || @io && @io.eof?) && count > 0
     end
 
+
+    ##
+    # Process and output the results.
 
     def output_results
       total_time    = 0
@@ -191,6 +189,9 @@ class Kronk
     end
 
 
+    ##
+    # Run a single compare and return a result array.
+
     def process_compare uri1, uri2, opts={}
       status = '.'
 
@@ -201,7 +202,7 @@ class Kronk
 
         if diff.count > 0
           status = 'F'
-          return [status, elapsed, failure_text(uri1, uri2, opts, diff)]
+          return [status, elapsed, failure_text(opts, diff)]
         end
 
         return [status, elapsed]
@@ -209,12 +210,12 @@ class Kronk
       rescue => e
         status  = 'E'
         elapsed = Time.now - start
-        return [status, elapsed, error_text(uri1, uri2, opts, e)]
+        return [status, elapsed, error_text(opts, e)]
       end
     end
 
 
-    def failure_text uri1, uri2, opts, diff
+    def failure_text opts, diff
       <<-STR
   Options: #{opts.inspect}
   Diffs: #{diff.count}
@@ -223,7 +224,7 @@ class Kronk
     end
 
 
-    def error_text uri1, uri2, opts, err
+    def error_text opts, err
       <<-STR
 #{err.class}: #{err.message}
   Options: #{opts.inspect}
