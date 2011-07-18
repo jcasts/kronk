@@ -13,6 +13,7 @@ lib/kronk/diff/ascii_format.rb
 lib/kronk/diff/color_format.rb
 lib/kronk/path.rb
 lib/kronk/path/transaction.rb
+lib/kronk/player.rb
 lib/kronk/plist_parser.rb
 lib/kronk/request.rb
 lib/kronk/response.rb

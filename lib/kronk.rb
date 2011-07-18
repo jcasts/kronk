@@ -10,9 +10,10 @@ require 'yaml'
 class Kronk
 
   # This gem's version.
-  VERSION = '1.4.0'
+  VERSION = '1.5.0'
 
 
+  require 'kronk/player'
   require 'kronk/cmd'
   require 'kronk/path'
   require 'kronk/path/transaction'
