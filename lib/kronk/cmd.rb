@@ -436,7 +436,7 @@ Parse and run diffs against data from live and cached http responses.
         Kronk.config[:cache_file] if Kronk.config[:cache_file]
 
       uri1, uri2 = options.delete :uris
-      runner = options[:player] ? options[:player] : self
+      runner = options[:player] ? options.delete(:player) : self
 
       if uri1 && uri2
         runner.compare uri1, uri2, options
