@@ -59,6 +59,11 @@ class Kronk
 
       $stdout.puts "Started"
 
+      trap 'INT' do
+        output_results
+        exit 2
+      end
+
       process_queue do |kronk_opts|
         result = process_compare uri1, uri2, kronk_opts.merge(opts)
 
