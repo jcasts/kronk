@@ -11,13 +11,13 @@ class Kronk
     def initialize opts={}
       @max_requests = opts[:max_requests]
       @max_threads  = opts[:max_threads]
-      @max_threads  = 10 if !@max_threads || @max_threads <= 0
+      @max_threads  = 4 if !@max_threads || @max_threads <= 0
 
       @queue      = []
       @threads    = []
       @io         = nil
       @io_parser  = LOG_MATCHER
-      @io_timeout = opts[:io_timeout] || 5
+      #@io_timeout = opts[:io_timeout] || 5
     end
 
 
@@ -43,7 +43,7 @@ class Kronk
 
     def from_io io, parser=nil
       @io = io
-      @io_parser = parser
+      @io_parser = parser if parser
     end
 
 
@@ -63,8 +63,8 @@ class Kronk
         bad_count = error_count + failure_count + 1
         start     = Time.now
 
-        status    = process_compare uri1, uri2, kronk_opts.merge(opts)
-        elapsed   = Time.now - start_time
+        status    = process_compare bad_count, uri1, uri2, kronk_opts.merge(opts)
+        elapsed   = Time.now - start
 
         total_time    += elapsed.to_f
         error_count   += 1 if status == "E"
@@ -78,7 +78,7 @@ class Kronk
 
       $stderr.flush
 
-      $stdout.puts "\n#{failure_count} failures, #{error_count}, errors"
+      $stdout.puts "\n#{failure_count} failures, #{error_count} errors"
 
       @queue.clear
 
@@ -123,6 +123,7 @@ class Kronk
       max_new = @max_threads * 2 - @queue.length
 
       max_new.times do
+        break if @io.eof?
         @queue << request_from_io
       end
     end
@@ -132,7 +133,7 @@ class Kronk
     # Get one line from the IO instance and parse it into a kronk_opts hash.
 
     def request_from_io
-      line = @io.readline
+      line = @io.gets
 
       if @io_parser.respond_to? :call
         @io_parser.call line
@@ -163,12 +164,12 @@ class Kronk
 
         if diff.count > 0
           status = 'F'
-          $stderr << failure_text(count, uri1, uri2, opts, diff)
+          $stderr.write failure_text(count, uri1, uri2, opts, diff)
         end
 
       rescue => e
         status = 'E'
-        $stderr << error_text(count, e)
+        $stderr.write error_text(count, uri1, uri2, opts, e)
       end
 
       status
@@ -188,7 +189,7 @@ Diffs: #{diff.count}
     end
 
 
-    def error_text count, err
+    def error_text count, uri1, uri2, opts, err
       <<-STR
   #{count}) Error:
 #{err.class}: #{err.message}

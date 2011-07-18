@@ -202,6 +202,13 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
+        opt.on('--replay [file]',
+                'Replay the given file or STDIN against URIs') do |file|
+          options[:player] = Kronk::Player.new
+          options[:player].from_io(file && File.open(file, "r") || $stdin)
+        end
+
+
         opt.on('-r', '--require lib1,lib2', Array,
                'Require a library or gem') do |value|
           options[:requires] ||= []
@@ -314,7 +321,7 @@ Parse and run diffs against data from live and cached http responses.
 
       opts.parse! argv
 
-      unless $stdin.tty?
+      unless $stdin.tty? || options[:player]
         io = StringIO.new $stdin.read
         options[:uris] << io
       end
@@ -429,27 +436,38 @@ Parse and run diffs against data from live and cached http responses.
         Kronk.config[:cache_file] if Kronk.config[:cache_file]
 
       uri1, uri2 = options.delete :uris
+      runner = options[:player] ? options[:player] : self
 
       if uri1 && uri2
-        diff = Kronk.compare uri1, uri2, options
-
-        puts "#{diff.formatted}\n" unless Kronk.config[:brief]
-
-        if Kronk.config[:verbose] || Kronk.config[:brief]
-          $stdout << "Found #{diff.count} diff(s).\n"
-        end
-
-        exit 1 if diff.count > 0
+        runner.compare uri1, uri2, options
 
       else
-        out = Kronk.retrieve_data_string uri1, options
-        out = Diff.insert_line_nums out if Kronk.config[:show_lines]
-        puts out
+        runner.request uri1, options
       end
 
     rescue Request::Exception, Response::MissingParser, Errno::ECONNRESET => e
       $stderr << "\nError: #{e.message}\n"
       exit 2
+    end
+
+
+    def self.compare uri1, uri2, options
+      diff = Kronk.compare uri1, uri2, options
+
+      puts "#{diff.formatted}\n" unless Kronk.config[:brief]
+
+      if Kronk.config[:verbose] || Kronk.config[:brief]
+        $stdout << "Found #{diff.count} diff(s).\n"
+      end
+
+      exit 1 if diff.count > 0
+    end
+
+
+    def self.request uri, options
+      out = Kronk.retrieve_data_string uri, options
+      out = Diff.insert_line_nums out if Kronk.config[:show_lines]
+      puts out
     end
 
 
