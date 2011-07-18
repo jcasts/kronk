@@ -51,7 +51,6 @@ class Kronk
 
     ##
     # Process the queue to compare two uris.
-    # Returns the number of failures + errors.
     # If options are given, they are merged into every request.
 
     def compare uri1, uri2, opts={}
@@ -66,6 +65,32 @@ class Kronk
 
       process_queue do |kronk_opts|
         result = process_compare uri1, uri2, kronk_opts.merge(opts)
+
+        @results << result
+        $stdout  << result[0]
+        $stdout.flush
+      end
+
+      output_results
+    end
+
+
+    ##
+    # Process the queue to request uris.
+    # If options are given, they are merged into every request.
+
+    def request uri, opts={}
+      @results.clear
+
+      $stdout.puts "Started"
+
+      trap 'INT' do
+        output_results
+        exit 2
+      end
+
+      process_queue do |kronk_opts|
+        result = process_request uri, kronk_opts.merge(opts)
 
         @results << result
         $stdout  << result[0]
@@ -202,7 +227,7 @@ class Kronk
 
         if diff.count > 0
           status = 'F'
-          return [status, elapsed, failure_text(opts, diff)]
+          return [status, elapsed, diff_text(opts, diff)]
         end
 
         return [status, elapsed]
@@ -215,7 +240,44 @@ class Kronk
     end
 
 
-    def failure_text opts, diff
+    ##
+    # Run a single request and return a result array.
+
+    def process_request uri, opts={}
+      status = '.'
+
+      begin
+        start   = Time.now
+        resp    = Kronk::Request.retrieve uri, opts
+        elapsed = Time.now - start
+
+        unless resp.code =~ /^2\d\d$/
+          status = 'F'
+          return [status, elapsed, status_text(opts, resp)]
+        end
+
+        return [status, elapsed]
+
+      rescue => e
+        status  = 'E'
+        elapsed = Time.now - start
+        return [status, elapsed, error_text(opts, e)]
+      end
+    end
+
+
+    private
+
+    def status_text opts, resp
+      <<-STR
+  Options: #{opts.inspect}
+  Status: #{resp.code}
+
+      STR
+    end
+
+
+    def diff_text opts, diff
       <<-STR
   Options: #{opts.inspect}
   Diffs: #{diff.count}
