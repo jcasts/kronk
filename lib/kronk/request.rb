@@ -207,6 +207,8 @@ class Kronk
       options[:timeout] ||= Kronk.config[:timeout]
       req.read_timeout = options[:timeout] if options[:timeout]
 
+      elapsed_time = nil
+
       resp = req.start do |http|
         socket = http.instance_variable_get "@socket"
         socket.debug_output = socket_io = StringIO.new
@@ -221,7 +223,10 @@ class Kronk
 
         Kronk::Cmd.verbose "Retrieving URL:  #{uri}\n"
 
+        start_time = Time.now
         http.request req, data
+
+        elapsed_time = Time.now - start_time
       end
 
       Kronk.cookie_jar.set_cookies_from_headers uri.to_s, resp.to_hash if
@@ -229,6 +234,8 @@ class Kronk
 
       resp.extend Response::Helpers
       resp.set_helper_attribs socket_io
+      resp.request_time = elapsed_time.to_f
+      resp.request_uri  = uri.to_s
 
       resp
     end

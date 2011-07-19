@@ -33,6 +33,18 @@ class Kronk
 
     module Helpers
 
+      # The URI of the request that returned this response.
+      attr_accessor :request_uri
+
+      # Time the request took in seconds.
+      attr_writer :request_time
+
+      def request_time
+        @request_time ||= 0.0
+        @request_time
+      end
+
+
       ##
       # Read the raw response from a debug_output instance and return an array
       # containing the raw request, response, and number of bytes received.
