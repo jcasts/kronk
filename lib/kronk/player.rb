@@ -63,6 +63,8 @@ class Kronk
       $stdout.puts "Started"
 
       trap 'INT' do
+        @threads.each{|t| t.join}
+        @threads.clear
         output_results
         exit 2
       end
@@ -90,6 +92,8 @@ class Kronk
       $stdout.puts "Started"
 
       trap 'INT' do
+        @threads.each{|t| t.join}
+        @threads.clear
         output_results
         exit 2
       end
