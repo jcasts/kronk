@@ -22,6 +22,8 @@ class Kronk
       @results       = []
       @last_request  = nil
       @last_response = nil
+
+      @player_start_time = nil
     end
 
 
@@ -109,6 +111,8 @@ class Kronk
     # Start processing the queue and reading from IO if available.
 
     def process_queue
+      @player_start_time = Time.now
+
       reader_thread = try_read_from_io
 
       count = 0
@@ -191,6 +195,7 @@ class Kronk
     def output_results
       return output_last_result if @results.length == 1 && @results[0][0] != "E"
 
+      player_time   = (Time.now - @player_start_time).to_f
       total_time    = 0
       bad_count     = 0
       failure_count = 0
@@ -215,12 +220,13 @@ class Kronk
 
       avg_time = total_time / @results.length
 
-      $stdout.puts "\nFinished in #{total_time} seconds.\n\n"
+      $stdout.puts "\nFinished in #{player_time} seconds.\n\n"
       $stderr.puts err_buffer
       $stdout.puts "#{@results.length} cases, " +
                    "#{failure_count} failures, #{error_count} errors"
 
       $stdout.puts "Avg Time: #{avg_time}"
+      $stdout.puts "Avg QPS: #{@results.length / player_time}"
 
       return bad_count == 0
     end
