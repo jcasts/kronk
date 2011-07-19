@@ -213,10 +213,14 @@ class Kronk
         end
       end
 
+      avg_time = total_time / @results.length
+
       $stdout.puts "\nFinished in #{total_time} seconds.\n\n"
       $stderr.puts err_buffer
       $stdout.puts "#{@results.length} cases, " +
                    "#{failure_count} failures, #{error_count} errors"
+
+      $stdout.puts "Avg Time: #{avg_time}"
 
       return bad_count == 0
     end

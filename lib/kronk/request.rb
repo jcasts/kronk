@@ -224,9 +224,10 @@ class Kronk
         Kronk::Cmd.verbose "Retrieving URL:  #{uri}\n"
 
         start_time = Time.now
-        http.request req, data
-
+        resp = http.request req, data
         elapsed_time = Time.now - start_time
+
+        resp
       end
 
       Kronk.cookie_jar.set_cookies_from_headers uri.to_s, resp.to_hash if
