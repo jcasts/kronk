@@ -55,7 +55,7 @@ class Kronk
     def self.retrieve uri, options={}
       if IO === uri || StringIO === uri
         resp = retrieve_io uri, options
-      elsif File.file? uri
+      elsif File.file? uri.to_s
         resp = retrieve_file uri, options
       else
         resp = retrieve_uri uri, options
@@ -241,7 +241,7 @@ class Kronk
     def self.build_uri uri, options={}
       suffix = options[:uri_suffix]
 
-      uri = "http://#{uri}"   unless uri =~ %r{^(\w+://|/)}
+      uri = "http://#{uri}"   unless uri.to_s =~ %r{^(\w+://|/)}
       uri = "#{uri}#{suffix}" if suffix
       uri = URI.parse uri unless URI === uri
       uri = URI.parse(Kronk.config[:default_host]) + uri unless uri.host

@@ -65,6 +65,15 @@ class TestRequest < Test::Unit::TestCase
   end
 
 
+  def test_retrieve_live_uri
+    query   = URI.parse "http://example.com"
+    options = {:foo => "bar"}
+    Kronk::Request.expects(:retrieve_uri).with query, options
+
+    Kronk::Request.retrieve query, options
+  end
+
+
   def test_retrieve_cached
     query   = "path/to/file.txt"
     options = {:foo => "bar"}
@@ -157,6 +166,60 @@ class TestRequest < Test::Unit::TestCase
             :data => 'test=thing', :headers => {'X-THING' => 'thing'}
 
     assert_equal mock_200_response, resp.raw
+  end
+
+
+  def test_build_uri
+    uri = Kronk::Request.build_uri "https://example.com"
+    assert_equal URI.parse("https://example.com"), uri
+  end
+
+
+  def test_build_uri_string
+    uri = Kronk::Request.build_uri "example.com"
+    assert_equal "http://example.com", uri.to_s
+  end
+
+
+  def test_build_uri_localhost
+    uri = Kronk::Request.build_uri "/path/to/resource"
+    assert_equal "http://localhost:3000/path/to/resource", uri.to_s
+  end
+
+
+  def test_build_uri_query_hash
+    query = {'a' => '1', 'b' => '2'}
+    uri   = Kronk::Request.build_uri "example.com/path", :query => query
+
+    assert_equal query, Kronk::Request.parse_nested_query(uri.query)
+  end
+
+
+  def test_build_uri_query_hash_str
+    query = {'a' => '1', 'b' => '2'}
+    uri   = Kronk::Request.build_uri "example.com/path?c=3", :query => query
+
+    assert_equal({'a' => '1', 'b' => '2', 'c' => '3'},
+      Kronk::Request.parse_nested_query(uri.query))
+  end
+
+
+  def test_build_uri_suffix
+    uri = Kronk::Request.build_uri "http://example.com/path",
+             :uri_suffix => "/to/resource"
+
+    assert_equal "http://example.com/path/to/resource", uri.to_s
+  end
+
+
+  def test_build_uri_from_uri
+    query = {'a' => '1', 'b' => '2'}
+    uri   = Kronk::Request.build_uri URI.parse("http://example.com/path"),
+              :query => query, :uri_suffix => "/to/resource"
+
+    assert_equal "example.com",       uri.host
+    assert_equal "/path/to/resource", uri.path
+    assert_equal query, Kronk::Request.parse_nested_query(uri.query)
   end
 
 
