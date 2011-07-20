@@ -292,11 +292,12 @@ class Kronk
       Kronk.cookie_jar.set_cookies_from_headers @uri.to_s, @_res.to_hash if
         self.use_cookies
 
-      @response = Response.from_net_http_io socket_io
+      @response = Response.from_net_http_io @_res, socket_io
       @response.time    = elapsed_time
       @response.request = self
 
-      @response
+      @response.redirect? && @response.redirect!(@follow_redirects) ||
+        @response
     end
 
 
