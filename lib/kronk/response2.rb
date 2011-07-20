@@ -15,9 +15,7 @@ class Kronk
     def self.read_file path, options={}
       Kronk::Cmd.verbose "Reading file:  #{path}\n"
 
-      options = options.dup
       resp    = nil
-
       File.open(path, "rb") do |file|
         resp = new file
       end
