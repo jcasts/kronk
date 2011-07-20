@@ -16,7 +16,6 @@ class Kronk
     class TimeoutError < Exception; end
 
 
-
     ##
     # Creates a query string from data.
 
@@ -68,9 +67,35 @@ class Kronk
 
 
     ##
-    # Parses a raw HTTP request string into a Kronk::Request instance.
+    # Parses a raw HTTP request-like string into a Kronk::Request instance.
 
     def self.parse str
+      uri   = URI.new
+      opts  = {:headers => {}}
+      lines = str.split("\n")
+
+      body_start = nil
+
+      opts[:http_method], uri.request_uri = lines.shift.split
+
+      lines.each_with_index do |line, i|
+        case line
+        when "Host"
+          uri.host = line.split(": ", 1)[1].strip
+
+        when ""
+          body_start = i+1
+          break
+
+        else
+          name, value = line.split(": ", 1)
+          opts[:headers][name] = value.strip
+        end
+      end
+
+      otps[:data] = lines[body_start..-1].join("\n")
+
+      new uri, opts
     end
 
 
@@ -305,6 +330,11 @@ class Kronk
     # Returns the raw HTTP request String.
 
     def to_s
+      out = "#{@http_method} #{@uri.request_uri} HTTP/1.1\r\n"
+      out << "Host: #{@uri.host}\r\n"
+      @headers.each{|name, val| out << "#{name}: #{value}\r\n" }
+      out << "\r\n\r\n"
+      out << @body.to_s
     end
 
 
