@@ -1,8 +1,7 @@
 class Kronk
 
   ##
-  # Performs HTTP requests or retrieves HTTP responses
-  # from a file or IO instance.
+  # Performs HTTP requests or retrieves HTTP responses.
 
   class Request
 
@@ -81,7 +80,7 @@ class Kronk
       lines.each_with_index do |line, i|
         case line
         when "Host"
-          uri.host = line.split(": ", 1)[1].strip
+          uri.host = line.split(": ", 2)[1].strip
 
         when ""
           body_start = i+1
@@ -317,9 +316,8 @@ class Kronk
       Kronk.cookie_jar.set_cookies_from_headers @uri.to_s, @_res.to_hash if
         self.use_cookies
 
-      @response = Response.from_net_http_io @_res, socket_io
-      @response.time    = elapsed_time
-      @response.request = self
+      @response      = Response.new socket_io, @_res, self
+      @response.time = elapsed_time
 
       @response.redirect? && @response.redirect!(@follow_redirects) ||
         @response
