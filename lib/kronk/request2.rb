@@ -161,8 +161,7 @@ class Kronk
     end
 
 
-    attr_accessor :auth, :body, :follow_redirects, :headers,
-                  :response, :timeout
+    attr_accessor :auth, :body, :headers, :response, :timeout
 
     attr_reader :http_method, :uri, :use_cookies, :user_agent
 
@@ -175,8 +174,6 @@ class Kronk
       @response = nil
       @_req     = nil
       @_res     = nil
-
-      @follow_redirects = options[:follow_redirects]
 
       @headers = options[:headers] || {}
       @timeout = options[:timeout] || Kronk.config[:timeout]

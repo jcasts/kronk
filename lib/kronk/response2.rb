@@ -151,14 +151,7 @@ class Kronk
     # Returns nil if not redirect-able.
 
     def follow_redirect opts={}
-      rdir  = opts[:follow_redirects]
-      count = rdir - 1 if Fixnum === rdir && rdir > 0
-
-      return if !redirect? || count
-
-      opts = opts.merge :follow_redirects => (count || rdir),
-                        :http_method      => :get
-
+      return if !redirect?
       Request.new(@header['Location'], opts).retrieve
     end
 
