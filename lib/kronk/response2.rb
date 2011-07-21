@@ -5,8 +5,6 @@ class Kronk
 
   class Response
 
-  #TODO: implement redirect? and redirect!(follows=true) methods
-
     class MissingParser < Exception; end
 
     ##
@@ -24,7 +22,7 @@ class Kronk
     end
 
 
-    attr_accessor :body, :bytes, :request, :time, :headers, :raw
+    attr_accessor :body, :code, :bytes, :request, :time, :headers, :raw
 
     ##
     # Create a new Response object from a String or IO.
@@ -33,7 +31,6 @@ class Kronk
       return unless io
       io = StringIO.new io if String === io
 
-      # TODO: implement rescue for headless responses
       @_res     = res || request_from_io io
       @headers  = @_res.to_hash
 
@@ -47,6 +44,8 @@ class Kronk
 
       @body     = udpate_encoding(@_res.body) if @_res.body
       @body   ||= @raw.split("\r\n\r\n",2)[1]
+
+      @code = @_res.code
     end
 
 
@@ -58,7 +57,7 @@ class Kronk
     def encoding
       return @encoding if @encoding
 
-      content_types = @_res.to_hash["content-type"]
+      content_types = @_res.to_hash["Content-Type"]
 
       return @encoding = "utf-8" if !content_types
 
@@ -136,6 +135,31 @@ class Kronk
       when true
         headers
       end
+    end
+
+
+    ##
+    # Check if this is a redirect response.
+
+    def redirect?
+      @code =~ /^30\d$/
+    end
+
+
+    ##
+    # Follow the redirect and return a new Response instance.
+    # Returns nil if not redirect-able.
+
+    def follow_redirect opts={}
+      rdir  = opts[:follow_redirects]
+      count = rdir - 1 if Fixnum === rdir && rdir > 0
+
+      return if !redirect? || count
+
+      opts = opts.merge :follow_redirects => (count || rdir),
+                        :http_method      => :get
+
+      Request.new(@header['Location'], opts).retrieve
     end
 
 
@@ -306,7 +330,7 @@ class Kronk
     # Interface method only. Returns empty hash.
 
     def to_hash
-      Hash.new
+      @header
     end
   end
 end

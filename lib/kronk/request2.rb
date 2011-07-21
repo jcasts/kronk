@@ -285,7 +285,6 @@ class Kronk
 
     ##
     # Retrieve this requests' response.
-    # Will perform redirects as needed up to the number of @follow_redirect.
 
     def retrieve
       @_req = @HTTP.new @uri.host, @uri.port
@@ -319,8 +318,7 @@ class Kronk
       @response      = Response.new socket_io, @_res, self
       @response.time = elapsed_time
 
-      @response.redirect? && @response.redirect!(@follow_redirects) ||
-        @response
+      @response
     end
 
 
