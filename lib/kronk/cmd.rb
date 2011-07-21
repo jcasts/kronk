@@ -445,7 +445,7 @@ Parse and run diffs against data from live and cached http responses.
         runner.request uri1, options
       end
 
-    rescue Request::Exception, Response::MissingParser, Errno::ECONNRESET => e
+    rescue Kronk::Exception, Response::MissingParser, Errno::ECONNRESET => e
       $stderr << "\nError: #{e.message}\n"
       exit 2
     end
@@ -469,8 +469,7 @@ Parse and run diffs against data from live and cached http responses.
 
 
     def self.request uri, options
-      out = Kronk.retrieve_data_string uri, options
-      resp_output out
+      resp_output retrieve(uri, options).stringify(options)
     end
 
 

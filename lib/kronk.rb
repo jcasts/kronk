@@ -159,8 +159,6 @@ class Kronk
   # Returns cmd_opts Hash if none found.
 
   def self.merge_options_for_uri uri, cmd_opts={}
-    return cmd_opts.dup if Kronk.config[:no_uri_options]
-
     out_opts = Hash.new.merge cmd_opts
 
     Kronk.config[:uri_options].each do |matcher, opts|
@@ -339,48 +337,13 @@ class Kronk
   def self.compare uri1, uri2, options={}
     str1 = str2 = ""
 
-    t1 = Thread.new{ str1 = retrieve_data_string uri1, options }
-    t2 = Thread.new{ str2 = retrieve_data_string uri2, options }
+    t1 = Thread.new{ str1 = retrieve(uri1, options).stringify options }
+    t2 = Thread.new{ str2 = retrieve(uri2, options).stringify options }
 
     t1.join
     t2.join
 
     Diff.new str1, str2
-  end
-
-
-  ##
-  # Return a data string, parsed or raw.
-  # See Kronk.compare for supported options.
-
-  def self.retrieve_data_string uri, options={}
-    options = merge_options_for_uri uri, options
-    resp    = retrieve uri, options
-
-    stringified_response uri, resp, options
-  end
-
-
-  ##
-  # Transform a Response instance into a pretty string.
-
-  def self.stringified_response uri, resp, options={}
-    if options[:irb]
-      Cmd.irb resp
-
-    elsif options[:raw]
-      resp.selective_string options
-
-    else
-      begin
-        data = resp.selective_data options
-        Diff.ordered_data_string data, options[:struct]
-
-      rescue Response::MissingParser
-        Cmd.verbose "Warning: No parser for #{resp['Content-Type']} [#{uri}]"
-        resp.selective_string options
-      end
-    end
   end
 
 
@@ -408,25 +371,35 @@ class Kronk
   # :cache_response:: String - the filepath to save the raw response to
 
   def self.retrieve uri, options={}
+    options = merge_options_for_uri uri, options unless
+      Kronk.config[:no_uri_options]
+
     if IO === uri || StringIO === uri
+      Cmd.verbose "Reading IO #{uri}"
       resp = Response.new uri
 
     elsif File.file? uri.to_s
+      Cmd.verbose "Reading file:  #{uri}\n"
       resp = Response.read_file uri
 
     else
-      resp = Request.new(uri, options).retrieve
+      req = Request.new uri, options
+      Cmd.verbose "Retrieving URL:  #{req.uri}\n"
+      resp = req.retrieve
       Kronk.history << uri
     end
 
     max_rdir = options[:follow_redirects]
     while resp.redirect? && (max_rdir == true || max_rdir.to_i > 0)
+      Cmd.verbose "Following redirect..."
       resp     = resp.follow_redirect
       max_rdir = max_rdir - 1
     end
 
     cache_file = options[:cache_response]
     cache_response cache_file, resp if cache_file
+
+    Cmd.irb resp if options[:irb]
 
     resp
 

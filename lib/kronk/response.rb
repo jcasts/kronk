@@ -15,15 +15,17 @@ class Kronk
     def self.read_file path
       Kronk::Cmd.verbose "Reading file:  #{path}\n"
 
-      file = File.open(path, "rb")
-      resp = new file
+      file     = File.open(path, "rb")
+      resp     = new file
+      resp.uri = path
       file.close
 
       resp
     end
 
 
-    attr_accessor :body, :code, :bytes, :request, :time, :headers, :raw
+    attr_accessor :body, :bytes, :code, :headers, :parser,
+                  :raw, :request, :time, :uri
 
     ##
     # Returns the encoding provided in the Content-Type header or
@@ -69,6 +71,10 @@ class Kronk
       @body   ||= @raw.split("\r\n\r\n",2)[1]
 
       @code = @_res.code
+
+      @parser = Kronk.parser_for @_res['Content-Type']
+
+      @uri = @request.uri if @request && @request.uri
     end
 
 
@@ -122,7 +128,7 @@ class Kronk
         parser = Kronk.parser_for(parser) || Kronk.find_const(parser)
       end
 
-      parser ||= Kronk.parser_for @_res['Content-Type']
+      parser ||= @parser
 
       raise MissingParser,
         "No parser for Content-Type: #{@_res['Content-Type']}" unless parser
@@ -237,6 +243,33 @@ class Kronk
         t.select(*options[:only_data])
         t.delete(*options[:ignore_data])
       end
+    end
+
+
+    ##
+    # Returns a String representation of the response, the response body,
+    # or the response headers, parsed or in raw format.
+    # Options supported are:
+    # :parser:: Object/String - the parser for the body; default nil (raw)
+    # :struct:: Boolean - Return data types instead of values
+    # :only_data:: String/Array - extracts the data from given data paths
+    # :ignore_data:: String/Array - defines which data points to exclude
+    # :raw:: Boolean - Force using the unparsed raw response
+    # :keep_indicies:: Boolean - keep the original indicies of modified arrays,
+    #   and return them as hashes.
+    # :with_headers:: Boolean/String/Array - defines which headers to include
+
+    def stringify options={}
+      if !options[:raw] && (options[:parser] || @parser)
+        data = selective_data options
+        Diff.ordered_data_string data, options[:struct]
+      else
+        selective_string options
+      end
+
+    rescue MissingParser
+      Cmd.verbose "Warning: No parser for #{@_res['Content-Type']} [#{@uri}]"
+        selective_string options
     end
 
 

@@ -241,10 +241,8 @@ class Kronk
       when Kronk::Diff
         Kronk::Cmd.diff_output @last_result
 
-      when Net::HTTPResponse
-        str = Kronk.stringified_response @last_request.first,
-                                         @last_result,
-                                         @last_request.last
+      when Kronk::Response
+        str = @last_result.stringify @last_request.last
         Kronk::Cmd.resp_output str
       end
     end

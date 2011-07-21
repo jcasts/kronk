@@ -315,4 +315,88 @@ class TestResponse < Test::Unit::TestCase
     assert_equal expected_encoding, res.body.encoding
     assert_equal expected_encoding, res.raw.encoding
   end
+
+
+  def test_stringify_string
+    str = Kronk::Response.read_file("test/mocks/200_response.json").stringify
+    expected = <<-STR
+{
+"business" => {
+ "address" => "3845 Rivertown Pkwy SW Ste 500",
+ "city" => "Grandville",
+ "description" => {
+  "additional_urls" => [
+   {
+    "destination" => "http://example.com",
+    "url_click" => "http://example.com"
+    }
+   ],
+  "general_info" => "<p>A Paint Your Own Pottery Studios..</p>",
+  "op_hours" => "Fri 1pm-7pm, Sat 10am-6pm, Sun 1pm-4pm, Appointments Available",
+  "payment_text" => "DISCOVER, AMEX, VISA, MASTERCARD",
+  "slogan" => "<p>Pottery YOU dress up</p>"
+  },
+ "distance" => 0.0,
+ "has_detail_page" => true,
+ "headings" => [
+  "Pottery"
+  ],
+ "id" => "1234",
+ "impression_id" => "mock_iid",
+ "improvable" => true,
+ "latitude" => 42.882561,
+ "listing_id" => "1234",
+ "listing_type" => "free",
+ "longitude" => -85.759586,
+ "mappable" => true,
+ "name" => "Naked Plates",
+ "omit_address" => false,
+ "omit_phone" => false,
+ "phone" => "6168055326",
+ "rateable" => true,
+ "rating_count" => 0,
+ "red_listing" => false,
+ "state" => "MI",
+ "website" => "http://example.com",
+ "year_established" => "1996",
+ "zip" => "49418"
+ },
+"original_request" => {
+ "id" => "1234"
+ },
+"request_id" => "mock_rid"
+}
+STR
+    assert_equal expected.strip, str
+  end
+
+
+  def test_stringify_raw
+    str = Kronk::Response.
+      read_file("test/mocks/200_response.json").stringify :raw => 1
+
+    expected = File.read("test/mocks/200_response.json").split("\r\n\r\n")[1]
+    assert_equal expected, str
+  end
+
+
+  def test_stringify_struct
+    str = Kronk::Response.read_file("test/mocks/200_response.json").
+            stringify :struct => true
+
+    expected = JSON.parse \
+      File.read("test/mocks/200_response.json").split("\r\n\r\n")[1]
+
+    expected = Kronk::Diff.ordered_data_string expected, true
+
+    assert_equal expected, str
+  end
+
+
+  def test_stringify_missing_parser
+    str = Kronk::Response.read_file("test/mocks/200_response.txt").stringify
+    expected = File.read("test/mocks/200_response.txt").split("\r\n\r\n")[1]
+
+    assert_equal expected, str
+  end
 end
