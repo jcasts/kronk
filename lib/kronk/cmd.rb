@@ -469,12 +469,12 @@ Parse and run diffs against data from live and cached http responses.
 
 
     def self.request uri, options
-      resp_output retrieve(uri, options).stringify(options)
+      resp_output Kronk.retrieve(uri, options).stringify(options)
     end
 
 
     def self.resp_output str
-      str = Diff.insert_line_nums out if Kronk.config[:show_lines]
+      str = Diff.insert_line_nums str if Kronk.config[:show_lines]
       puts str
     end
 
