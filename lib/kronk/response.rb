@@ -60,6 +60,14 @@ class Kronk
 
 
     ##
+    # Cookie header accessor.
+
+    def cookie
+      @_res['Cookie']
+    end
+
+
+    ##
     # Returns the encoding provided in the Content-Type header or
     # "binary" if charset is unavailable.
     # Returns "utf-8" if no content type header is missing.
