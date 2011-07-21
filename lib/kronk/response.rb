@@ -24,6 +24,9 @@ class Kronk
 
     attr_accessor :body, :code, :bytes, :request, :time, :headers, :raw
 
+    alias to_hash headers
+
+
     ##
     # Create a new Response object from a String or IO.
 

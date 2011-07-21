@@ -3,24 +3,21 @@ require 'test/test_helper'
 class TestResponse < Test::Unit::TestCase
 
   def setup
-    @html_resp  = Kronk::Request.retrieve_file "test/mocks/200_response.txt"
-    @json_resp  = Kronk::Request.retrieve_file "test/mocks/200_response.json"
-    @plist_resp = Kronk::Request.retrieve_file "test/mocks/200_response.plist"
-    @xml_resp   = Kronk::Request.retrieve_file "test/mocks/200_response.xml"
+    @html_resp  = Kronk::Response.read_file "test/mocks/200_response.txt"
+    @json_resp  = Kronk::Response.read_file "test/mocks/200_response.json"
+    @plist_resp = Kronk::Response.read_file "test/mocks/200_response.plist"
+    @xml_resp   = Kronk::Response.read_file "test/mocks/200_response.xml"
   end
 
 
-  def test_read_new
-    File.open "test/mocks/200_response.txt", "r" do |file|
-      resp = Kronk::Response.read_new file
+  def test_read_file
+    resp = Kronk::Response.read_file "test/mocks/200_response.txt"
 
+    expected_header = "#{mock_200_response.split("\r\n\r\n", 2)[0]}\r\n"
 
-      expected_header = "#{mock_200_response.split("\r\n\r\n", 2)[0]}\r\n"
-
-      assert Net::HTTPResponse === resp
-      assert_equal mock_200_response, resp.raw
-      assert_equal expected_header, resp.raw_header
-    end
+    assert Net::HTTPResponse === resp.instance_variable_get("@_res")
+    assert_equal mock_200_response, resp.raw
+    assert_equal expected_header, resp.raw_header
   end
 
 
@@ -33,8 +30,8 @@ class TestResponse < Test::Unit::TestCase
 
     io = StringIO.new str
 
-    resp = Kronk::Response.read_new StringIO.new(mock_200_response)
-    req, resp, bytes = resp.read_raw_from io
+    resp = Kronk::Response.new mock_200_response
+    req, resp, bytes = resp.send :read_raw_from, io
 
     assert_equal "mock debug request", req
     assert_equal mock_200_response, resp
