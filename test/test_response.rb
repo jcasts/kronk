@@ -296,4 +296,23 @@ class TestResponse < Test::Unit::TestCase
 
     assert_equal mock_200_response, res2.raw
   end
+
+
+  def test_force_encoding
+    return unless "".respond_to? :encoding
+
+    res = Kronk::Response.new mock_200_response
+    expected_encoding = Encoding.find "ISO-8859-1"
+
+    assert_equal expected_encoding, res.encoding
+    assert_equal expected_encoding, res.body.encoding
+    assert_equal expected_encoding, res.raw.encoding
+
+    res.force_encoding "utf-8"
+    expected_encoding = Encoding.find "utf-8"
+
+    assert_equal expected_encoding, res.encoding
+    assert_equal expected_encoding, res.body.encoding
+    assert_equal expected_encoding, res.raw.encoding
+  end
 end

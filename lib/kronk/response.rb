@@ -7,6 +7,8 @@ class Kronk
 
     class MissingParser < Exception; end
 
+    ENCODING_MATCHER = /(^|;\s?)charset=(.*?)\s*(;|$)/
+
     ##
     # Read http response from a file and return a HTTPResponse instance.
 
@@ -22,6 +24,12 @@ class Kronk
 
 
     attr_accessor :body, :code, :bytes, :request, :time, :headers, :raw
+
+    ##
+    # Returns the encoding provided in the Content-Type header or
+    # "binary" if charset is unavailable.
+    # Returns "utf-8" if no content type header is missing.
+    attr_reader :encoding
 
     alias to_hash headers
 
@@ -41,18 +49,23 @@ class Kronk
 
       @headers  = @_res.to_hash
 
+      @encoding = "utf-8" unless @_res["Content-Type"]
+      c_type = @headers["content-type"].find{|ct| ct =~ ENCODING_MATCHER}
+      @encoding = $2 if c_type
+      @encoding ||= "binary"
+      @encoding = Encoding.find @encoding
+
       raw_req, raw_resp, bytes = read_raw_from debug_io
       @bytes    = bytes.to_i
-      @raw      = udpate_encoding raw_resp
+      @raw      = try_force_encoding raw_resp
 
       @request  = request ||
-                  raw_req = udpate_encoding(raw_req) &&
+                  raw_req = try_force_encoding(raw_req) &&
                   Request.parse(raw_req)
 
       @time     = nil
-      @encoding = nil
 
-      @body     = udpate_encoding(@_res.body) if @_res.body
+      @body     = try_force_encoding(@_res.body) if @_res.body
       @body   ||= @raw.split("\r\n\r\n",2)[1]
 
       @code = @_res.code
@@ -68,22 +81,14 @@ class Kronk
 
 
     ##
-    # Returns the encoding provided in the Content-Type header or
-    # "binary" if charset is unavailable.
-    # Returns "utf-8" if no content type header is missing.
+    # Force the encoding of the raw response and body
 
-    def encoding
-      return @encoding if @encoding
-
-      content_types = @_res["Content-Type"]
-
-      return @encoding = "utf-8" if !content_types
-
-      content_types.each do |c_type|
-        return @encoding = $2 if c_type =~ /(^|;\s?)charset=(.*?)\s*(;|$)/
-      end
-
-      @encoding = "binary"
+    def force_encoding new_encoding
+      new_encoding = Encoding.find new_encoding unless Encoding === new_encoding
+      @encoding = new_encoding
+      try_force_encoding @body
+      try_force_encoding @raw
+      @encoding
     end
 
 
@@ -296,8 +301,8 @@ class Kronk
     # it responds to 'force_encoding'.
     # Returns the string given with the new encoding.
 
-    def udpate_encoding str
-      str.force_encoding self.encoding if str.respond_to? :force_encoding
+    def try_force_encoding str
+      str.force_encoding @encoding if str.respond_to? :force_encoding
       str
     end
   end
