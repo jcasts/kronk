@@ -12,7 +12,7 @@ class Kronk
     ##
     # Read http response from a file and return a HTTPResponse instance.
 
-    def self.read_file path, options={}
+    def self.read_file path
       Kronk::Cmd.verbose "Reading file:  #{path}\n"
 
       file = File.open(path, "rb")
@@ -32,7 +32,7 @@ class Kronk
     attr_reader :encoding
 
     alias to_hash headers
-
+    alias to_s raw
 
     ##
     # Create a new Response object from a String or IO.
@@ -63,7 +63,7 @@ class Kronk
                   raw_req = try_force_encoding(raw_req) &&
                   Request.parse(raw_req)
 
-      @time     = nil
+      @time     = 0
 
       @body     = try_force_encoding(@_res.body) if @_res.body
       @body   ||= @raw.split("\r\n\r\n",2)[1]
@@ -165,7 +165,7 @@ class Kronk
     # Check if this is a redirect response.
 
     def redirect?
-      @code =~ /^30\d$/
+      @code.to_s =~ /^30\d$/
     end
 
 
