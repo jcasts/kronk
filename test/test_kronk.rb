@@ -309,11 +309,11 @@ class TestKronk < Test::Unit::TestCase
                          :with_headers => true,
                          :raw => true
 
-    resp1 = Kronk::Request.retrieve "test/mocks/200_response.json",
+    resp1 = Kronk.retrieve "test/mocks/200_response.json",
                              :with_headers => true,
                              :raw => true
 
-    resp2 = Kronk::Request.retrieve "test/mocks/200_response.xml",
+    resp2 = Kronk.retrieve "test/mocks/200_response.xml",
                              :with_headers => true,
                              :raw => true
 
@@ -385,10 +385,10 @@ class TestKronk < Test::Unit::TestCase
                          "test/mocks/200_response.xml",
                          :with_headers => true
 
-    resp1 = Kronk::Request.retrieve "test/mocks/200_response.json",
+    resp1 = Kronk.retrieve "test/mocks/200_response.json",
                              :with_headers => true
 
-    resp2 = Kronk::Request.retrieve "test/mocks/200_response.xml",
+    resp2 = Kronk.retrieve "test/mocks/200_response.xml",
                              :with_headers => true
 
     exp_diff = Kronk::Diff.new_from_data \

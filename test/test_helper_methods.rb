@@ -7,8 +7,8 @@ class TestHelperMethods < Test::Unit::TestCase
   def setup
     io          = StringIO.new mock_resp("200_response.json")
     @json       = JSON.parse mock_resp("200_response.json").split("\r\n\r\n")[1]
-    @mock_resp  = Kronk::Response.read_new io
-    @mock_resp2 = Kronk::Response.read_new \
+    @mock_resp  = Kronk::Response.new io
+    @mock_resp2 = Kronk::Response.new \
                     StringIO.new mock_resp("200_response.json")
 
     Kronk::Request.stubs(:retrieve).returns @mock_resp
@@ -134,7 +134,7 @@ class TestHelperMethods < Test::Unit::TestCase
 
 
   def test_retrieve_unparsable
-    mock_resp = Kronk::Response.read_new StringIO.new(mock_200_response)
+    mock_resp = Kronk::Response.new StringIO.new(mock_200_response)
 
     Kronk::Request.expects(:retrieve).
       with("host.com", :foo => "bar").returns mock_resp
@@ -152,7 +152,7 @@ class TestHelperMethods < Test::Unit::TestCase
 
 
   def test_retrieve_two_unparsable
-    mock_resp = Kronk::Response.read_new StringIO.new(mock_200_response)
+    mock_resp = Kronk::Response.new StringIO.new(mock_200_response)
 
     Kronk::Request.expects(:retrieve).
       with("host1.com", :foo => "bar").returns mock_resp

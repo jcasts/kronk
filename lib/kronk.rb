@@ -355,7 +355,7 @@ class Kronk
 
   def self.retrieve_data_string uri, options={}
     options = merge_options_for_uri uri, options
-    resp    = Request.retrieve uri, options
+    resp    = retrieve uri, options
 
     stringified_response uri, resp, options
   end
@@ -380,6 +380,74 @@ class Kronk
         Cmd.verbose "Warning: No parser for #{resp['Content-Type']} [#{uri}]"
         resp.selective_string options
       end
+    end
+  end
+
+
+  # Generic Request exception.
+  class Exception < ::Exception; end
+
+  # Raised when the URI was not resolvable.
+  class NotFoundError < Exception; end
+
+  # Raised when HTTP times out.
+  class TimeoutError < Exception; end
+
+
+  ##
+  # Returns the value from a url, file, or IO as a String.
+  # Options supported are:
+  # :data:: Hash/String - the data to pass to the http request
+  # :query:: Hash/String - the data to append to the http request path
+  # :follow_redirects:: Integer/Bool - number of times to follow redirects
+  # :user_agent:: String - user agent string or alias; defaults to 'kronk'
+  # :auth:: Hash - must contain :username and :password; defaults to nil
+  # :headers:: Hash - extra headers to pass to the request
+  # :http_method:: Symbol - the http method to use; defaults to :get
+  # :proxy:: Hash/String - http proxy to use; defaults to nil
+  # :cache_response:: String - the filepath to save the raw response to
+
+  def self.retrieve uri, options={}
+    if IO === uri || StringIO === uri
+      resp = Response.new uri
+
+    elsif File.file? uri.to_s
+      resp = Response.read_file uri
+
+    else
+      resp = Request.new(uri, options).retrieve
+      Kronk.history << uri
+    end
+
+    max_rdir = options[:follow_redirects]
+    while resp.redirect? && (max_rdir == true || max_rdir.to_i > 0)
+      resp     = resp.follow_redirect
+      max_rdir = max_rdir - 1
+    end
+
+    cache_file = options[:cache_response]
+    cache_response cache_file, resp if cache_file
+
+    resp
+
+  rescue SocketError, Errno::ENOENT, Errno::ECONNREFUSED
+    raise NotFoundError, "#{uri} could not be found"
+
+  rescue Timeout::Error
+    raise TimeoutError, "#{uri} took too long to respond"
+  end
+
+
+  ##
+  # Saves the raw http response to a cache file.
+
+  def self.cache_response filepath, resp
+    begin
+      File.open(filepath, "wb+") do |file|
+        file.write resp.raw
+      end
+    rescue => e
+      $stderr << "#{e.class}: #{e.message}"
     end
   end
 end

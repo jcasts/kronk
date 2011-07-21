@@ -59,9 +59,9 @@ class TestAssertions < Test::Unit::TestCase
 
   def test_assert_equal_responses
     io        = StringIO.new mock_resp("200_response.json")
-    mock_resp = Kronk::Response.read_new io
+    mock_resp = Kronk::Response.new io
 
-    Kronk::Request.expects(:retrieve).times(2).
+    Kronk.expects(:retrieve).times(2).
       with("host.com", :foo => "bar").returns mock_resp
 
     assert_equal_responses "host.com", "host.com", :foo => "bar"
@@ -69,16 +69,16 @@ class TestAssertions < Test::Unit::TestCase
 
 
   def test_assert_equal_responses_failure
-    mock_resp1 = Kronk::Response.read_new \
+    mock_resp1 = Kronk::Response.new \
                   StringIO.new mock_resp("200_response.json")
 
-    mock_resp2 = Kronk::Response.read_new \
+    mock_resp2 = Kronk::Response.new \
                   StringIO.new mock_resp("301_response.txt")
 
-    Kronk::Request.expects(:retrieve).
+    Kronk.expects(:retrieve).
       with("host1.com", :foo => "bar").returns mock_resp1
 
-    Kronk::Request.expects(:retrieve).
+    Kronk.expects(:retrieve).
       with("host2.com", :foo => "bar").returns mock_resp2
 
     left  = Kronk::Diff.ordered_data_string mock_resp1.selective_data

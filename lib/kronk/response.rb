@@ -73,6 +73,22 @@ class Kronk
 
 
     ##
+    # Accessor for the HTTPResponse instance []
+
+    def [] key
+      @_res[key]
+    end
+
+
+    ##
+    # Accessor for the HTTPResponse instance []
+
+    def []= key, value
+      @_res[key] = value
+    end
+
+
+    ##
     # Cookie header accessor.
 
     def cookie

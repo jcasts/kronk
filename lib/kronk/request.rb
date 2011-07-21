@@ -183,6 +183,8 @@ class Kronk
     def initialize uri, options={}
       @HTTP = Net::HTTP
       @auth = options[:auth]
+
+      @body = nil
       @body = self.class.build_query options[:data] if options[:data]
 
       @response = nil
