@@ -53,7 +53,7 @@ class Kronk
 
       uri = "http://#{uri}"   unless uri.to_s =~ %r{^(\w+://|/)}
       uri = "#{uri}#{suffix}" if suffix
-      uri = URI.parse uri unless URI === uri
+      uri = URI.parse uri     unless URI === uri
       uri = URI.parse(Kronk.config[:default_host]) + uri unless uri.host
 
       if options[:query]
@@ -69,13 +69,13 @@ class Kronk
     # Parses a raw HTTP request-like string into a Kronk::Request instance.
 
     def self.parse str
-      uri   = URI.new
       opts  = {:headers => {}}
       lines = str.split("\n")
 
       body_start = nil
 
-      opts[:http_method], uri.request_uri = lines.shift.split
+      opts[:http_method], path = lines.shift.split
+      uri = URI.parse path
 
       lines.each_with_index do |line, i|
         case line
@@ -163,7 +163,7 @@ class Kronk
 
     attr_accessor :auth, :body, :headers, :response, :timeout
 
-    attr_reader :http_method, :uri, :use_cookies, :user_agent
+    attr_reader :http_method, :uri, :use_cookies
 
 
     def initialize uri, options={}
@@ -178,14 +178,14 @@ class Kronk
       @headers = options[:headers] || {}
       @timeout = options[:timeout] || Kronk.config[:timeout]
 
-      self.uri = uri
+      @uri = self.class.build_uri uri, options
 
       self.user_agent ||= options[:user_agent]
 
       self.http_method = options[:http_method] || (@body ? "POST" : "GET")
 
       self.use_cookies = options.has_key?(:no_cookies) ?
-                          Kronk.config[:use_cookies] : !options[:no_cookies]
+                          !options[:no_cookies] : Kronk.config[:use_cookies]
 
       if Hash === options[:proxy]
         self.use_proxy options[:proxy][:address], options[:proxy]
@@ -235,7 +235,7 @@ class Kronk
     # Assign the uri and io based on if the uri is a file, io, or url.
 
     def uri= new_uri
-      @uri = self.class.build_uri uri
+      @uri = self.class.build_uri new_uri
     end
 
 
@@ -256,11 +256,20 @@ class Kronk
 
 
     ##
-    # Assign a new User Agent
+    # Assign a User Agent header.
 
     def user_agent= new_ua
-      @user_agent = new_ua && Kronk.config[:user_agents][new_ua.to_s] ||
-                      new_ua || Kronk.config[:user_agents]['kronk']
+      @headers['User-Agent'] =
+        new_ua && Kronk.config[:user_agents][new_ua.to_s] ||
+        new_ua || Kronk.config[:user_agents]['kronk']
+    end
+
+
+    ##
+    # Read the User Agent header.
+
+    def user_agent
+      @headers['User-Agent']
     end
 
 
@@ -285,7 +294,9 @@ class Kronk
 
     def retrieve
       @_req = @HTTP.new @uri.host, @uri.port
-      @_req.read_timeout = @timeout
+
+      @_req.read_timeout = @timeout if @timeout
+      @_req.use_ssl      = true     if @uri.scheme =~ /^https$/
 
       elapsed_time = nil
       socket       = nil
@@ -303,7 +314,7 @@ class Kronk
         Kronk::Cmd.verbose "Retrieving URL:  #{uri}\n"
 
         start_time = Time.now
-        res = http.request req, data
+        res = http.request req, @body
         elapsed_time = Time.now - start_time
 
         res

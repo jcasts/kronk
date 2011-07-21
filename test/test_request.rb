@@ -1,7 +1,7 @@
 require 'test/test_helper'
 
 class TestRequest < Test::Unit::TestCase
-
+=begin
   def test_follow_redirect
     resp = mock "resp"
     resp.expects(:[]).with("Location").returns "http://example.com"
@@ -156,14 +156,16 @@ class TestRequest < Test::Unit::TestCase
       :data => {:test => "thing"},
       :headers => {'X-THING' => 'thing'}
   end
+=end
 
 
-  def test_call_post
+  def test_retrieve_post
     expect_request "POST", "http://example.com/request/path?foo=bar",
       :data => {'test' => 'thing'}, :headers => {'X-THING' => 'thing'}
 
-    resp = Kronk::Request.call :post, "http://example.com/request/path?foo=bar",
-            :data => 'test=thing', :headers => {'X-THING' => 'thing'}
+    resp = Kronk::Request.new("http://example.com/request/path?foo=bar",
+            :data => 'test=thing', :headers => {'X-THING' => 'thing'},
+            :http_method => :post).retrieve
 
     assert_equal mock_200_response, resp.raw
   end
@@ -223,15 +225,16 @@ class TestRequest < Test::Unit::TestCase
   end
 
 
-  def test_call_get
+  def test_retrieve_get
     expect_request "GET", "http://example.com/request/path?foo=bar"
-    resp = Kronk::Request.call :get, "http://example.com/request/path?foo=bar"
+    resp =
+      Kronk::Request.new("http://example.com/request/path?foo=bar").retrieve
 
     assert_equal mock_200_response, resp.raw
   end
 
 
-  def test_call_cookies
+  def test_retrieve_cookies
     Kronk.cookie_jar.expects(:get_cookie_header).
       with("http://example.com/request/path?foo=bar").returns "mock_cookie"
 
@@ -241,24 +244,24 @@ class TestRequest < Test::Unit::TestCase
     expect_request "GET", "http://example.com/request/path?foo=bar",
       :headers => {'Cookie' => "mock_cookie", 'User-Agent' => "kronk"}
 
-    resp = Kronk::Request.call :get, "http://example.com/request/path",
-            :query => "foo=bar", :headers => {'User-Agent' => "kronk"}
+    resp = Kronk::Request.new("http://example.com/request/path",
+            :query => "foo=bar", :headers => {'User-Agent' => "kronk"}).retrieve
   end
 
 
-  def test_call_no_cookies_found
+  def test_retrieve_no_cookies_found
     Kronk.cookie_jar.expects(:get_cookie_header).
       with("http://example.com/request/path?foo=bar").returns ""
 
     expect_request "GET", "http://example.com/request/path?foo=bar",
       :headers => {'User-Agent' => "kronk"}
 
-    resp = Kronk::Request.call :get, "http://example.com/request/path",
-            :query => "foo=bar", :headers => {'User-Agent' => "kronk"}
+    resp = Kronk::Request.new("http://example.com/request/path",
+            :query => "foo=bar", :headers => {'User-Agent' => "kronk"}).retrieve
   end
 
 
-  def test_call_no_cookies
+  def test_retrieve_no_cookies
     Kronk.cookie_jar.expects(:get_cookie_header).
       with("http://example.com/request/path?foo=bar").never
 
@@ -267,13 +270,13 @@ class TestRequest < Test::Unit::TestCase
     expect_request "GET", "http://example.com/request/path?foo=bar",
       :headers => {'User-Agent' => "kronk"}
 
-    resp = Kronk::Request.call :get, "http://example.com/request/path",
+    resp = Kronk::Request.new("http://example.com/request/path",
             :query => "foo=bar", :headers => {'User-Agent' => "kronk"},
-            :no_cookies => true
+            :no_cookies => true).retrieve
   end
 
 
-  def test_call_no_cookies_config
+  def test_retrieve_no_cookies_config
     old_config = Kronk.config[:use_cookies]
     Kronk.config[:use_cookies] = false
 
@@ -285,14 +288,14 @@ class TestRequest < Test::Unit::TestCase
     expect_request "GET", "http://example.com/request/path?foo=bar",
       :headers => {'User-Agent' => "kronk"}
 
-    resp = Kronk::Request.call :get, "http://example.com/request/path",
-            :query => "foo=bar", :headers => {'User-Agent' => "kronk"}
+    resp = Kronk::Request.new("http://example.com/request/path",
+            :query => "foo=bar", :headers => {'User-Agent' => "kronk"}).retrieve
 
     Kronk.config[:use_cookies] = old_config
   end
 
 
-  def test_call_no_cookies_config_override
+  def test_retrieve_no_cookies_config_override
     old_config = Kronk.config[:use_cookies]
     Kronk.config[:use_cookies] = false
 
@@ -304,61 +307,61 @@ class TestRequest < Test::Unit::TestCase
     expect_request "GET", "http://example.com/request/path?foo=bar",
       :headers => {'User-Agent' => "kronk"}
 
-    resp = Kronk::Request.call :get, "http://example.com/request/path",
+    resp = Kronk::Request.new("http://example.com/request/path",
             :query => "foo=bar", :headers => {'User-Agent' => "kronk"},
-            :no_cookies => false
+            :no_cookies => false).retrieve
 
     Kronk.config[:use_cookies] = old_config
   end
 
 
-  def test_call_cookies_already_set
+  def test_retrieve_cookies_already_set
     Kronk.cookie_jar.expects(:get_cookie_header).
       with("http://example.com/request/path?foo=bar").never
 
     expect_request "GET", "http://example.com/request/path?foo=bar",
-      :headers => {'User-Agent' => "kronk", 'Cookie' => "mock_cookie"}
+      :headers => {'User-Agent' => "kronk"}
 
-    resp = Kronk::Request.call :get, "http://example.com/request/path",
+    resp = Kronk::Request.new("http://example.com/request/path",
             :query => "foo=bar",
             :headers => {'User-Agent' => "kronk", 'Cookie' => "mock_cookie"},
-            :no_cookies => true
+            :no_cookies => true).retrieve
   end
 
 
-  def test_call_query
+  def test_retrieve_query
     expect_request "GET", "http://example.com/path?foo=bar"
-    Kronk::Request.call :get, "http://example.com/path",
-      :query => {:foo => :bar}
+    Kronk::Request.new("http://example.com/path",
+      :query => {:foo => :bar}).retrieve
   end
 
 
-  def test_call_query_appended
+  def test_retrieve_query_appended
     expect_request "GET", "http://example.com/path?foo=bar&test=thing"
-    Kronk::Request.call :get, "http://example.com/path?foo=bar",
-      :query => {:test => :thing}
+    Kronk::Request.new("http://example.com/path?foo=bar",
+      :query => {:test => :thing}).retrieve
   end
 
 
-  def test_call_query_appended_string
+  def test_retrieve_query_appended_string
     expect_request "GET", "http://example.com/path?foo=bar&test=thing"
-    Kronk::Request.call :get, "http://example.com/path?foo=bar",
-      :query => "test=thing"
+    Kronk::Request.new("http://example.com/path?foo=bar",
+      :query => "test=thing").retrieve
   end
 
 
-  def test_call_basic_auth
+  def test_retrieve_basic_auth
     auth_opts = {:username => "user", :password => "pass"}
 
     expect_request "GET", "http://example.com" do |http, req, resp|
       req.expects(:basic_auth).with auth_opts[:username], auth_opts[:password]
     end
 
-    resp = Kronk::Request.call :get, "http://example.com", :auth => auth_opts
+    resp = Kronk::Request.new("http://example.com", :auth => auth_opts).retrieve
   end
 
 
-  def test_call_bad_basic_auth
+  def test_retrieve_bad_basic_auth
     auth_opts = {:password => "pass"}
 
     expect_request "GET", "http://example.com" do |http, req, resp|
@@ -366,81 +369,81 @@ class TestRequest < Test::Unit::TestCase
         never
     end
 
-    resp = Kronk::Request.call :get, "http://example.com", :auth => auth_opts
+    resp = Kronk::Request.new("http://example.com", :auth => auth_opts).retrieve
   end
 
 
-  def test_call_no_basic_auth
+  def test_retrieve_no_basic_auth
     expect_request "GET", "http://example.com" do |http, req, resp|
       req.expects(:basic_auth).never
     end
 
-    resp = Kronk::Request.call :get, "http://example.com"
+    resp = Kronk::Request.new("http://example.com").retrieve
   end
 
 
-  def test_call_ssl
+  def test_retrieve_ssl
     expr = expect_request "GET", "https://example.com" do |http, req, resp|
       req.expects(:use_ssl=).with true
     end
 
-    resp = Kronk::Request.call :get, "https://example.com"
+    resp = Kronk::Request.new("https://example.com").retrieve
 
     assert_equal mock_200_response, resp.raw
   end
 
 
-  def test_call_no_ssl
+  def test_retrieve_no_ssl
     expect_request "GET", "http://example.com" do |http, req, resp|
       req.expects(:use_ssl=).with(true).never
     end
 
-    resp = Kronk::Request.call :get, "http://example.com"
+    resp = Kronk::Request.new("http://example.com").retrieve
 
     assert_equal mock_200_response, resp.raw
   end
 
 
-  def test_call_user_agent_default
+  def test_retrieve_user_agent_default
     expect_request "GET", "http://example.com",
     :headers => {
       'User-Agent' =>
         "Kronk/#{Kronk::VERSION} (http://github.com/yaksnrainbows/kronk)"
     }
 
-    resp = Kronk::Request.call :get, "http://example.com"
+    resp = Kronk::Request.new("http://example.com").retrieve
   end
 
 
-  def test_call_user_agent_alias
+  def test_retrieve_user_agent_alias
     expect_request "GET", "http://example.com",
     :headers => {'User-Agent' => "Mozilla/5.0 (compatible; Konqueror/3; Linux)"}
 
-    resp = Kronk::Request.call :get, "http://example.com",
-             :user_agent => 'linux_konqueror'
+    resp = Kronk::Request.new("http://example.com",
+             :user_agent => 'linux_konqueror').retrieve
   end
 
 
-  def test_call_user_agent_custom
+  def test_retrieve_user_agent_custom
     expect_request "GET", "http://example.com",
     :headers => {'User-Agent' => "custom user agent"}
 
-    resp = Kronk::Request.call :get, "http://example.com",
-             :user_agent => 'custom user agent'
+    resp = Kronk::Request.new("http://example.com",
+             :user_agent => 'custom user agent').retrieve
   end
 
 
-  def test_call_user_agent_header_already_set
+  def test_retrieve_user_agent_header_already_set
     expect_request "GET", "http://example.com",
     :headers => {'User-Agent' => "custom user agent"}
 
-    resp = Kronk::Request.call :get, "http://example.com",
+    resp = Kronk::Request.new("http://example.com",
              :user_agent => 'mac_safari',
-             :headers    => {'User-Agent' => "custom user agent"}
+             :headers    => {'User-Agent' => "custom user agent"}).retrieve
   end
 
 
-  def test_call_proxy
+  def test_retrieve_proxy
     proxy = {
       :address  => "proxy.com",
       :username => "john",
@@ -452,11 +455,11 @@ class TestRequest < Test::Unit::TestCase
     Net::HTTP.expects(:Proxy).with("proxy.com", 8080, "john", "smith").
       returns Net::HTTP
 
-    Kronk::Request.call :get, "http://example.com", :proxy => proxy
+    Kronk::Request.new("http://example.com", :proxy => proxy).retrieve
   end
 
 
-  def test_call_proxy_string
+  def test_retrieve_proxy_string
     proxy = "proxy.com:8888"
 
     expect_request "GET", "http://example.com"
@@ -464,17 +467,17 @@ class TestRequest < Test::Unit::TestCase
     Net::HTTP.expects(:Proxy).with("proxy.com", "8888", nil, nil).
       returns Net::HTTP
 
-    Kronk::Request.call :get, "http://example.com", :proxy => proxy
+    Kronk::Request.new("http://example.com", :proxy => proxy).retrieve
   end
 
 
   def test_proxy_nil
-    assert_equal Net::HTTP, Kronk::Request.proxy(nil)
+    assert_equal Net::HTTP, Kronk::Request.new("host.com").use_proxy(nil)
   end
 
 
   def test_proxy_string
-    proxy_class = Kronk::Request.proxy("myproxy.com:80")
+    proxy_class = Kronk::Request.new("host.com").use_proxy("myproxy.com:80")
 
     assert_equal "myproxy.com",
       proxy_class.instance_variable_get("@proxy_address")
@@ -487,7 +490,7 @@ class TestRequest < Test::Unit::TestCase
 
 
   def test_proxy_no_port
-    proxy_class = Kronk::Request.proxy("myproxy.com")
+    proxy_class = Kronk::Request.new("host.com").use_proxy("myproxy.com")
 
     assert_equal "myproxy.com",
       proxy_class.instance_variable_get("@proxy_address")
@@ -500,10 +503,13 @@ class TestRequest < Test::Unit::TestCase
 
 
   def test_proxy_hash
-    proxy_class = Kronk::Request.proxy "myproxy.com",
-                                       :port      => 8080,
-                                       :username  => "john",
-                                       :password  => "smith"
+    req = Kronk::Request.new "http://example.com",
+            :proxy => { :address  => "myproxy.com",
+                        :port     => 8080,
+                        :username => "john",
+                        :password => "smith" }
+
+    proxy_class = req.instance_variable_get "@HTTP"
 
     assert_equal "myproxy.com",
       proxy_class.instance_variable_get("@proxy_address")
@@ -554,14 +560,15 @@ class TestRequest < Test::Unit::TestCase
   def expect_request req_method, url, options={}
     uri  = URI.parse url
 
-    resp_io = StringIO.new(mock_200_response)
-    resp = Kronk::Response.read_new resp_io #mock 'resp'
+    resp = Kronk::Response.new mock_200_response #mock 'resp'
     resp.stubs(:code).returns(options[:status] || '200')
-    resp.stubs(:to_hash).returns Hash.new
 
     http   = mock 'http'
     socket = mock 'socket'
     req    = mock 'req'
+    res    = mock 'res'
+
+    res.stubs(:to_hash).returns Hash.new
 
     data   = options[:data]
     data &&= Hash === data ? Kronk::Request.build_query(data) : data.to_s
@@ -572,16 +579,16 @@ class TestRequest < Test::Unit::TestCase
     socket.expects(:debug_output=)
 
     Kronk::Request::VanillaRequest.expects(:new).
-      with(req_method, uri.request_uri, headers).returns req
+      with(req_method.to_s.upcase, uri.request_uri, headers).returns req
 
-    http.expects(:request).with(req, data).returns resp
+    http.expects(:request).with(req, data).returns res
 
     http.expects(:instance_variable_get).with("@socket").returns socket
 
     Net::HTTP.expects(:new).with(uri.host, uri.port).returns req
-    req.expects(:start).yields(http).returns resp
+    req.expects(:start).yields(http).returns res
 
-    resp.expects(:read_raw_from).returns [nil, mock_200_response, nil]
+    Kronk::Response.expects(:new).returns resp
 
     yield http, req, resp if block_given?
 

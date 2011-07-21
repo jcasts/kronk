@@ -31,14 +31,22 @@ class Kronk
       return unless io
       io = StringIO.new io if String === io
 
-      @_res     = res || request_from_io io
+      if io && res
+        @_res, debug_io = res, io
+      else
+        @_res, debug_io = request_from_io(io)
+      end
+
       @headers  = @_res.to_hash
 
-      raw_req, raw_resp, bytes = read_raw_from io
+      raw_req, raw_resp, bytes = read_raw_from debug_io
       @bytes    = bytes.to_i
       @raw      = udpate_encoding raw_resp
 
-      @request  = request || Request.parse update_encoding(raw_req)
+      @request  = request ||
+                  raw_req = udpate_encoding(raw_req) &&
+                  Request.parse(raw_req)
+
       @time     = nil
       @encoding = nil
 
@@ -216,8 +224,8 @@ class Kronk
         resp_io.instance_eval "def path; '#{path}'; end"
       end
 
-      io = Net::BufferedIO === resp_io ? resp_io : Net::BufferedIO.new resp_io
-      io.debug_output = socket_io = StringIO.new
+      io = Net::BufferedIO === resp_io ? resp_io : Net::BufferedIO.new(resp_io)
+      io.debug_output = debug_io = StringIO.new
 
       begin
         resp = Net::HTTPResponse.read_new io
@@ -236,9 +244,9 @@ class Kronk
       read   = resp.instance_variable_get "@read"
 
       resp.instance_variable_set "@socket", true unless socket
-      resp.instance_variable_get "@read",   true
+      resp.instance_variable_set "@read",   true
 
-      resp
+      [resp, debug_io]
     end
 
 
@@ -246,13 +254,13 @@ class Kronk
     # Read the raw response from a debug_output instance and return an array
     # containing the raw request, response, and number of bytes received.
 
-    def read_raw_from io
+    def read_raw_from debug_io
       req = nil
       resp = ""
       bytes = nil
 
-      io.rewind
-      output = io.read.split "\n"
+      debug_io.rewind
+      output = debug_io.read.split "\n"
 
       if output.first =~ %r{<-\s(.*)}
         req = instance_eval $1
@@ -290,8 +298,6 @@ class Kronk
   # Mock response object without a header for body-only http responses.
 
   class HeadlessResponse
-
-    include Response::Helpers
 
     attr_accessor :body, :code
 
