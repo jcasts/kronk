@@ -40,3 +40,42 @@ def mock_data
     "subs"=>["a", "b"]
   }
 end
+
+
+def expect_request req_method, url, options={}
+  uri  = URI.parse url
+
+  resp = Kronk::Response.new mock_200_response #mock 'resp'
+  resp.stubs(:code).returns(options[:status] || '200')
+
+  http   = mock 'http'
+  socket = mock 'socket'
+  req    = mock 'req'
+  res    = mock 'res'
+
+  res.stubs(:to_hash).returns Hash.new
+
+  data   = options[:data]
+  data &&= Hash === data ? Kronk::Request.build_query(data) : data.to_s
+
+  headers = options[:headers] || Hash.new
+  headers['User-Agent'] ||= Kronk.config[:user_agents]['kronk']
+
+  socket.expects(:debug_output=)
+
+  Kronk::Request::VanillaRequest.expects(:new).
+    with(req_method.to_s.upcase, uri.request_uri, headers).returns req
+
+  http.expects(:request).with(req, data).returns res
+
+  http.expects(:instance_variable_get).with("@socket").returns socket
+
+  Net::HTTP.expects(:new).with(uri.host, uri.port).returns req
+  req.expects(:start).yields(http).returns res
+
+  Kronk::Response.expects(:new).returns resp
+
+  yield http, req, resp if block_given?
+
+  resp
+end

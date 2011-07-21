@@ -13,10 +13,9 @@ class Kronk
     def self.read_file path, options={}
       Kronk::Cmd.verbose "Reading file:  #{path}\n"
 
-      resp    = nil
-      File.open(path, "rb") do |file|
-        resp = new file
-      end
+      file = File.open(path, "rb")
+      resp = new file
+      file.close
 
       resp
     end
@@ -68,7 +67,7 @@ class Kronk
     def encoding
       return @encoding if @encoding
 
-      content_types = @_res.to_hash["Content-Type"]
+      content_types = @_res["Content-Type"]
 
       return @encoding = "utf-8" if !content_types
 
@@ -163,7 +162,7 @@ class Kronk
 
     def follow_redirect opts={}
       return if !redirect?
-      Request.new(@header['Location'], opts).retrieve
+      Request.new(@_res['Location'], opts).retrieve
     end
 
 

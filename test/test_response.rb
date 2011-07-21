@@ -266,12 +266,34 @@ class TestResponse < Test::Unit::TestCase
   end
 
 
-
   def test_selective_data_collected_and_ignored
     expected = {"business" => {"id" => "1234"}}
 
     assert_equal expected,
       @json_resp.selective_data(:only_data => "**/id",
         :ignore_data => "original_request")
+  end
+
+
+  def test_redirect?
+    res = Kronk::Response.new mock_301_response
+    assert res.redirect?
+
+    res = Kronk::Response.new mock_302_response
+    assert res.redirect?
+
+    res = Kronk::Response.new mock_200_response
+    assert !res.redirect?
+  end
+
+
+  def test_follow_redirect
+    res1 = Kronk::Response.new mock_301_response
+    assert res1.redirect?
+
+    expect_request "GET", "http://www.google.com/"
+    res2 = res1.follow_redirect
+
+    assert_equal mock_200_response, res2.raw
   end
 end
