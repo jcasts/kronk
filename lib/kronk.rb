@@ -356,6 +356,9 @@ class Kronk
   # Raised when HTTP times out.
   class TimeoutError < Exception; end
 
+  # Raised when a missing (but non-mandatory) dependency can't be loaded.
+  class MissingDependency < Exception; end
+
 
   ##
   # Returns the value from a url, file, or IO as a String.

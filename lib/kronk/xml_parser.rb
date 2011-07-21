@@ -10,7 +10,13 @@ class Kronk
     # loaded if String#pluralize is not defined.
 
     def self.require_gems
-      require 'nokogiri'
+      begin
+        require 'nokogiri'
+      rescue LoadError => e
+        raise unless e.message =~ /-- nokogiri/
+        raise MissingDependency, "Please install the nokogiri gem and try again"
+      end
+
 
       return if "".respond_to?(:pluralize)
 
