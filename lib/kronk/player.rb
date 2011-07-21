@@ -63,7 +63,7 @@ class Kronk
       $stdout.puts "Started"
 
       trap 'INT' do
-        @threads.each{|t| t.join}
+        @threads.each{|t| t.kill}
         @threads.clear
         output_results
         exit 2
@@ -92,7 +92,7 @@ class Kronk
       $stdout.puts "Started"
 
       trap 'INT' do
-        @threads.each{|t| t.join}
+        @threads.each{|t| t.kill}
         @threads.clear
         output_results
         exit 2
@@ -287,7 +287,7 @@ class Kronk
 
       begin
         start   = Time.now
-        resp    = Kronk::Request.retrieve uri, opts
+        resp    = Kronk.retrieve uri, opts
         elapsed = Time.now - start
 
         @last_result  = resp
