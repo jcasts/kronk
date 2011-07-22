@@ -196,7 +196,10 @@ class Kronk
     # Process and output the results.
 
     def output_results
-      Cmd.render @last if @results.length == 1 && @results[0][0] != "E"
+      if @results.length == 1 && @results[0][0] != "E"
+        puts "\n"
+        Cmd.render @last
+      end
 
       player_time   = (Time.now - @player_start_time).to_f
       total_time    = 0
