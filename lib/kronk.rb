@@ -72,68 +72,6 @@ class Kronk
 
 
   ##
-  # Returns merged config-defined options for a given uri.
-  # Values in cmd_opts take precedence.
-  # Returns cmd_opts Hash if none found.
-
-  def self.merge_options_for_uri uri, cmd_opts={}
-    out_opts = Hash.new.merge cmd_opts
-
-    Kronk.config[:uri_options].each do |matcher, opts|
-      next unless (uri == matcher || uri =~ %r{#{matcher}}) && Hash === opts
-
-      opts.each do |key, val|
-        if !out_opts[key]
-          out_opts[key] = val
-          next
-        end
-
-
-        case key
-
-        # Hash or uri query String
-        when :data, :query
-          val = Request.parse_nested_query val if String === val
-
-          out_opts[key] = Request.parse_nested_query out_opts[key] if
-            String === out_opts[key]
-
-          out_opts[key] = val.merge out_opts[key], &DEEP_MERGE
-
-        # Hashes
-        when :headers, :auth
-          out_opts[key] = val.merge out_opts[key]
-
-        # Proxy hash or String
-        when :proxy
-          if Hash === val && Hash === out_opts[key]
-            out_opts[key] = val.merge out_opts[key]
-
-          elsif Hash === val && String === out_opts[key]
-            val[:address] = out_opts[key]
-            out_opts[key] = val
-
-          elsif String === val && Hash === out_opts[key]
-            out_opts[key][:address] ||= val
-          end
-
-        # Response headers - Boolean, String, or Array
-        when :with_headers
-          next if out_opts[key] == true || out_opts[key] && val == true
-          out_opts[key] = [*out_opts[key]] | [*val]
-
-        # String or Array
-        when :only_data, :ignore_data
-          out_opts[key] = [*out_opts[key]] | [*val]
-        end
-      end
-    end
-
-    out_opts
-  end
-
-
-  ##
   # Find a fully qualified ruby namespace/constant.
 
   def self.find_const namespace
@@ -229,9 +167,29 @@ class Kronk
 
 
   ##
-  # Make requests, parse the responses and compare the data.
-  # Query arguments may be set to the special value :cache to use the
-  # last live http response retrieved.
+  # See Kronk#compare. Short for:
+  #   Kronk.new(opts).compare(uri1, uri2)
+
+  def self.compare uri1, uri2, opts={}
+    new(opts).compare uri1, uri2
+  end
+
+
+  ##
+  # See Kronk#retrieve. Short for:
+  #   Kronk.new(opts).retrieve(uri)
+
+  def self.retrieve uri, opts={}
+    new(opts).retrieve uri
+  end
+
+
+  attr_accessor :options
+
+
+  ##
+  # Create a Kronk instance to keep references to all request, response,
+  # and diff data.
   #
   # Supports the following options:
   # :data:: Hash/String - the data to pass to the http request
@@ -249,38 +207,50 @@ class Kronk
   # :with_headers:: Boolean/String/Array - defines which headers to include
   # :parser:: Object/String - the parser to use for the body; default nil
   # :raw:: Boolean - run diff on raw strings
+  # :cache_response:: String - the filepath to save the raw response to
+
+  def initialize opts={}
+    @options   = opts
+    @diff      = nil
+    @responses = []
+    @response  = nil
+  end
+
+
+  ##
+  # Make requests, parse the responses and compare the data.
+  # Query arguments may be set to the special value :cache to use the
+  # last live http response retrieved.
   #
   # Returns a diff object.
 
-  def self.compare uri1, uri2, options={}
+  def compare uri1, uri2
     str1 = str2 = ""
+    res1 = res2 = nil
 
-    t1 = Thread.new{ str1 = retrieve(uri1, options).stringify options }
-    t2 = Thread.new{ str2 = retrieve(uri2, options).stringify options }
+    t1 = Thread.new do
+          res1 = retrieve uri1, false
+          str1 = res1.stringify @options
+         end
+
+    t2 = Thread.new do
+          res2 = retrieve uri2, false
+          str2 = res2.stringify @options
+         end
 
     t1.join
     t2.join
 
-    Diff.new str1, str2
+    post_process_responses res1, res2
+    @diff = Diff.new str1, str2
   end
 
 
   ##
   # Returns a Response instance from a url, file, or IO as a String.
-  # Options supported are:
-  # :data:: Hash/String - the data to pass to the http request
-  # :query:: Hash/String - the data to append to the http request path
-  # :follow_redirects:: Integer/Bool - number of times to follow redirects
-  # :user_agent:: String - user agent string or alias; defaults to 'kronk'
-  # :auth:: Hash - must contain :username and :password; defaults to nil
-  # :headers:: Hash - extra headers to pass to the request
-  # :http_method:: Symbol - the http method to use; defaults to :get
-  # :proxy:: Hash/String - http proxy to use; defaults to nil
-  # :cache_response:: String - the filepath to save the raw response to
 
-  def self.retrieve uri, options={}
-    options = merge_options_for_uri uri, options unless
-      Kronk.config[:no_uri_options]
+  def retrieve uri, do_post_process=true
+    options = Kronk.config[:no_uri_options] ? options_for_uri(uri) : @options
 
     if IO === uri || StringIO === uri
       Cmd.verbose "Reading IO #{uri}"
@@ -304,10 +274,7 @@ class Kronk
       max_rdir = max_rdir - 1
     end
 
-    cache_file = options[:cache_response]
-    cache_response cache_file, resp if cache_file
-
-    Cmd.irb resp if options[:irb]
+    post_process_responses resp if do_post_process
 
     resp
 
@@ -322,7 +289,10 @@ class Kronk
   ##
   # Saves the raw http response to a cache file.
 
-  def self.cache_response filepath, resp
+  def cache_response resp=@response
+    return unless @options[:cache_response]
+    filepath = @options[:cache_response]
+
     begin
       File.open(filepath, "wb+") do |file|
         file.write resp.raw
@@ -330,5 +300,79 @@ class Kronk
     rescue => e
       $stderr << "#{e.class}: #{e.message}"
     end
+  end
+
+
+  ##
+  # Returns merged config-defined options for a given uri.
+  # Values in cmd_opts take precedence.
+  # Returns cmd_opts Hash if none found.
+
+  def options_for_uri uri
+    out_opts = @options.dup
+
+    Kronk.config[:uri_options].each do |matcher, opts|
+      next unless (uri == matcher || uri =~ %r{#{matcher}}) && Hash === opts
+
+      opts.each do |key, val|
+        if !out_opts[key]
+          out_opts[key] = val
+          next
+        end
+
+
+        case key
+
+        # Hash or uri query String
+        when :data, :query
+          val = Request.parse_nested_query val if String === val
+
+          out_opts[key] = Request.parse_nested_query out_opts[key] if
+            String === out_opts[key]
+
+          out_opts[key] = val.merge out_opts[key], &DEEP_MERGE
+
+        # Hashes
+        when :headers, :auth
+          out_opts[key] = val.merge out_opts[key]
+
+        # Proxy hash or String
+        when :proxy
+          if Hash === val && Hash === out_opts[key]
+            out_opts[key] = val.merge out_opts[key]
+
+          elsif Hash === val && String === out_opts[key]
+            val[:address] = out_opts[key]
+            out_opts[key] = val
+
+          elsif String === val && Hash === out_opts[key]
+            out_opts[key][:address] ||= val
+          end
+
+        # Response headers - Boolean, String, or Array
+        when :with_headers
+          next if out_opts[key] == true || out_opts[key] && val == true
+          out_opts[key] = [*out_opts[key]] | [*val]
+
+        # String or Array
+        when :only_data, :ignore_data
+          out_opts[key] = [*out_opts[key]] | [*val]
+        end
+      end
+    end
+
+    out_opts
+  end
+
+
+  ##
+  # Assign responses to instance variables, cache the last
+  # response, and launch IRB if needed.
+
+  def post_process_responses *resps
+    @responses = resps
+    @response  = resps.last
+    cache_response
+    Cmd.irb resp if @options[:irb]
   end
 end

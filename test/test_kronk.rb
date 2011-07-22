@@ -126,18 +126,18 @@ class TestKronk < Test::Unit::TestCase
   end
 
 
-  def test_merge_options_for_uri
+  def test_options_for_uri
     with_uri_options do
       assert_equal mock_uri_options['example'],
-        Kronk.merge_options_for_uri("http://example.com/path")
+        Kronk.new.options_for_uri("http://example.com/path")
 
       assert_equal Hash.new,
-        Kronk.merge_options_for_uri("http://thing.com/path")
+        Kronk.new.options_for_uri("http://thing.com/path")
     end
   end
 
 
-  def test_merge_options_for_uri_query
+  def test_options_for_uri_query
     data = {
       "add" => "this",
       "foo" => {
@@ -156,22 +156,22 @@ class TestKronk < Test::Unit::TestCase
       }
 
       %w{uri_query hash_query}.each do |qtype|
-        opts = Kronk.merge_options_for_uri("http://#{qtype}.com",
-                :query => data, :data => data)
+        opts = Kronk.new(:query => data, :data => data).
+                options_for_uri("http://#{qtype}.com")
 
         assert_equal expected, opts
       end
 
-      opts = Kronk.merge_options_for_uri("http://uri_query.com")
+      opts = Kronk.new.options_for_uri("http://uri_query.com")
       assert_equal mock_uri_options['uri_query'], opts
     end
   end
 
 
-  def test_merge_options_for_uri_headers
+  def test_options_for_uri_headers
     with_uri_options do
-      opts = Kronk.merge_options_for_uri("http://headers.example.com",
-              :headers => {'hdr2' => 2, 'hdr3' => 3})
+      opts = Kronk.new(:headers => {'hdr2' => 2, 'hdr3' => 3}).
+              options_for_uri("http://headers.example.com")
 
       expected = {
         :headers => {
@@ -187,10 +187,10 @@ class TestKronk < Test::Unit::TestCase
   end
 
 
-  def test_merge_options_for_uri_auth
+  def test_options_for_uri_auth
     with_uri_options do
-      opts = Kronk.merge_options_for_uri("http://auth.example.com",
-              :auth => {:username => "bob"})
+      opts = Kronk.new(:auth => {:username => "bob"}).
+              options_for_uri("http://auth.example.com")
 
       expected = {
         :auth => {
@@ -205,7 +205,7 @@ class TestKronk < Test::Unit::TestCase
   end
 
 
-  def test_merge_options_for_uri_proxy
+  def test_options_for_uri_proxy
     with_uri_options do
       expected = {
         :proxy => {
@@ -216,20 +216,20 @@ class TestKronk < Test::Unit::TestCase
         }
       }
 
-      opts = Kronk.merge_options_for_uri("http://proxy.com",
-              :proxy => "proxy.com")
+      opts = Kronk.new(:proxy => "proxy.com").
+              options_for_uri("http://proxy.com")
 
       assert_equal expected, opts
 
-      opts = Kronk.merge_options_for_uri("http://proxy.com",
-              :proxy => {:address => "proxy.com"})
+      opts = Kronk.new(:proxy => {:address => "proxy.com"}).
+              options_for_uri("http://proxy.com")
 
       assert_equal expected, opts
     end
   end
 
 
-  def test_merge_options_for_uri_str_proxy
+  def test_options_for_uri_str_proxy
     with_uri_options do
       expected = {
         :proxy => {
@@ -239,24 +239,24 @@ class TestKronk < Test::Unit::TestCase
         }
       }
 
-      opts = Kronk.merge_options_for_uri("http://strprox.com",
-              :proxy => {:username => "user", :password => "pass"})
+      opts = Kronk.new(:proxy => {:username => "user", :password => "pass"}).
+              options_for_uri("http://strprox.com")
 
       assert_equal expected, opts
 
-      opts = Kronk.merge_options_for_uri("http://strprox.com",
-              :proxy => "proxy.com")
+      opts = Kronk.new(:proxy => "proxy.com").
+              options_for_uri("http://strprox.com")
 
       assert_equal "proxy.com", opts[:proxy]
     end
   end
 
 
-  def test_merge_options_for_uri_with_headers
+  def test_options_for_uri_with_headers
     with_uri_options do
       %w{withhdrs withstrhdrs withtruehdrs}.each do |type|
-        opts = Kronk.merge_options_for_uri "http://#{type}.com",
-                :with_headers => true
+        opts = Kronk.new(:with_headers => true).
+                options_for_uri "http://#{type}.com"
 
         assert_equal true, opts[:with_headers]
       end
@@ -264,32 +264,32 @@ class TestKronk < Test::Unit::TestCase
   end
 
 
-  def test_merge_options_for_uri_with_headers_arr
+  def test_options_for_uri_with_headers_arr
     with_uri_options do
       %w{withhdrs withstrhdrs}.each do |type|
-        opts = Kronk.merge_options_for_uri "http://#{type}.com",
-                :with_headers => %w{hdr2 hdr3}
+        opts = Kronk.new(:with_headers => %w{hdr2 hdr3}).
+                options_for_uri "http://#{type}.com"
 
         assert_equal %w{hdr1 hdr2 hdr3}.sort, opts[:with_headers].sort
       end
 
-      opts = Kronk.merge_options_for_uri "http://withtruehdrs.com",
-              :with_headers => %w{hdr2 hdr3}
+      opts = Kronk.new(:with_headers => %w{hdr2 hdr3}).
+              options_for_uri "http://withtruehdrs.com"
 
       assert_equal %w{hdr2 hdr3}, opts[:with_headers]
     end
   end
 
 
-  def test_merge_options_for_uri_data_paths
+  def test_options_for_uri_data_paths
     expected = {
-      :only_data        => %w{path1 path2 path3},
-      :ignore_data      => "ign1",
+      :only_data   => %w{path1 path2 path3},
+      :ignore_data => "ign1",
     }
 
     with_uri_options do
-      opts = Kronk.merge_options_for_uri "http://focus_data.com",
-              :only_data => %w{path2 path3}
+      opts = Kronk.new(:only_data => %w{path2 path3}).
+              options_for_uri "http://focus_data.com"
 
       opts[:only_data].sort!
 
