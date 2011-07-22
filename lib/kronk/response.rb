@@ -55,7 +55,7 @@ class Kronk
       c_type = @headers["content-type"].find{|ct| ct =~ ENCODING_MATCHER}
       @encoding = $2 if c_type
       @encoding ||= "binary"
-      @encoding = Encoding.find @encoding
+      @encoding = Encoding.find(@encoding) if defined?(Encoding)
 
       raw_req, raw_resp, bytes = read_raw_from debug_io
       @bytes    = bytes.to_i

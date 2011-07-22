@@ -5,16 +5,6 @@ class Kronk
 
   class Request
 
-    # Generic Request exception.
-    class Exception < ::Exception; end
-
-    # Raised when the URI was not resolvable.
-    class NotFoundError < Exception; end
-
-    # Raised when HTTP times out.
-    class TimeoutError < Exception; end
-
-
     ##
     # Creates a query string from data.
 
