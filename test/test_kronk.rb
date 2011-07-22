@@ -396,9 +396,7 @@ class TestKronk < Test::Unit::TestCase
 
   def test_parse_data_path_args
     options = {}
-    argv = %w{this is --argv -- one -two -- -three four :parents :-not_parents}
-
-    Kronk::Cmd.expects(:warn).times(2)
+    argv = %w{this is --argv -- one -two -- -three four}
 
     options = Kronk::Cmd.parse_data_path_args options, argv
 

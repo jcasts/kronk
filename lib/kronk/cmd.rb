@@ -48,21 +48,6 @@ class Kronk
 
 
     ##
-    # Moves the old config file to the new directory structure.
-
-    def self.move_config_file
-      require 'fileutils'
-
-      kronk_tmp_config = ".kronk.tmp"
-      File.rename Kronk::CONFIG_DIR, kronk_tmp_config
-
-      Dir.mkdir Kronk::CONFIG_DIR
-
-      FileUtils.mv kronk_tmp_config, Kronk::DEFAULT_CONFIG_FILE
-    end
-
-
-    ##
     # Parse ARGV
 
     def self.parse_args argv
@@ -361,15 +346,6 @@ Parse and run diffs against data from live and cached http responses.
       data_paths.each do |path|
         if path[0,1] == "-"
           (options[:ignore_data] ||= []) << path[1..-1]
-
-        elsif path[0,2] == ":-"
-          warn "The :path notation is deprecated, use path/.."
-          (options[:ignore_data_with] ||= []) << path[2..-1]
-
-        elsif path[0,1] == ":"
-          warn "The :path notation is deprecated, use path/.."
-          (options[:only_data_with] ||= []) << path[1..-1]
-
         else
           (options[:only_data] ||= []) << path
         end
@@ -405,13 +381,6 @@ Parse and run diffs against data from live and cached http responses.
 
         $stderr << "\nNo config file was found.\n"
         $stderr << "Created default config in #{DEFAULT_CONFIG_FILE}\n"
-        $stderr << "Edit file if necessary and try again.\n"
-        exit 2
-
-      rescue Errno::ENOTDIR
-        move_config_file
-
-        $stderr << "\nOld config file was moved to #{DEFAULT_CONFIG_FILE}\n"
         $stderr << "Edit file if necessary and try again.\n"
         exit 2
       end

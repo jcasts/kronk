@@ -375,4 +375,16 @@ class Kronk
     cache_response
     Cmd.irb resp if @options[:irb]
   end
+
+
+  ##
+  # Renders a String in a command line output format based on if
+  # a diff or request was made.
+
+  def render
+    if @diff
+    elsif @request
+    else
+    end
+  end
 end
