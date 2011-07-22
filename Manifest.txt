@@ -6,6 +6,7 @@ Rakefile
 bin/kronk
 bin/yzma
 lib/kronk.rb
+lib/kronk/constants.rb
 lib/kronk/cmd.rb
 lib/kronk/data_set.rb
 lib/kronk/diff.rb

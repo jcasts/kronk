@@ -284,19 +284,14 @@ class TestKronk < Test::Unit::TestCase
   def test_merge_options_for_uri_data_paths
     expected = {
       :only_data        => %w{path1 path2 path3},
-      :only_data_with   => %w{only1 only2},
       :ignore_data      => "ign1",
-      :ignore_data_with => %w{ign2 ign3}
     }
 
     with_uri_options do
       opts = Kronk.merge_options_for_uri "http://focus_data.com",
-              :only_data        => %w{path2 path3},
-              :only_data_with   => "only2",
-              :ignore_data_with => %w{ign2 ign3}
+              :only_data => %w{path2 path3}
 
       opts[:only_data].sort!
-      opts[:only_data_with].sort!
 
       assert_equal expected, opts
     end
@@ -410,9 +405,6 @@ class TestKronk < Test::Unit::TestCase
     assert_equal %w{one four}, options[:only_data]
     assert_equal %w{two - three}, options[:ignore_data]
 
-    assert_equal %w{parents}, options[:only_data_with]
-    assert_equal %w{not_parents}, options[:ignore_data_with]
-
     assert_equal %w{this is --argv}, argv
   end
 
@@ -475,7 +467,6 @@ class TestKronk < Test::Unit::TestCase
       },
       'focus_data'   => {
         :only_data      => %w{path1 path2},
-        :only_data_with => "only1",
         :ignore_data    => "ign1"
       }
     }
