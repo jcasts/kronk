@@ -19,9 +19,8 @@ class Kronk
       @io_parser  = LOG_MATCHER
       #@io_timeout = opts[:io_timeout] || 5
 
-      @results       = []
-      @last_request  = nil
-      @last_response = nil
+      @results = []
+      @last    = nil
 
       @player_start_time = nil
     end
@@ -197,7 +196,7 @@ class Kronk
     # Process and output the results.
 
     def output_results
-      return output_last_result if @results.length == 1 && @results[0][0] != "E"
+      Cmd.render @last if @results.length == 1 && @results[0][0] != "E"
 
       player_time   = (Time.now - @player_start_time).to_f
       total_time    = 0
@@ -236,18 +235,6 @@ class Kronk
     end
 
 
-    def output_last_result
-      case @last_result
-      when Kronk::Diff
-        Kronk::Cmd.diff_output @last_result
-
-      when Kronk::Response
-        str = @last_result.stringify @last_request.last
-        Kronk::Cmd.resp_output str
-      end
-    end
-
-
     ##
     # Run a single compare and return a result array.
 
@@ -255,24 +242,23 @@ class Kronk
       status = '.'
 
       begin
-        start   = Time.now
-        diff    = Kronk.compare uri1, uri2, opts
-        elapsed = Time.now - start
+        kronk   = Kronk.new opts
+        diff    = kronk.compare uri1, uri2
+        elapsed =
+          (kronk.responses[0].time.to_f + kronk.responses[0].time.to_f) / 2
 
-        @last_result  = diff
-        @last_request = [uri2, opts]
+        @last  = kronk
 
         if diff.count > 0
           status = 'F'
-          return [status, elapsed, diff_text(opts, diff)]
+          return [status, elapsed, diff_text(kronk)]
         end
 
         return [status, elapsed]
 
       rescue => e
         status  = 'E'
-        elapsed = Time.now - start
-        return [status, elapsed, error_text(opts, e)]
+        return [status, 0, error_text(kronk, e)]
       end
     end
 
@@ -284,52 +270,52 @@ class Kronk
       status = '.'
 
       begin
-        start   = Time.now
-        resp    = Kronk.retrieve uri, opts
-        elapsed = Time.now - start
+        kronk   = Kronk.new opts
+        resp    = kronk.retrieve uri
+        elapsed = resp.time.to_f
 
-        @last_result  = resp
-        @last_request = [uri, opts]
+        @last = kronk
 
         unless resp.code =~ /^2\d\d$/
           status = 'F'
-          return [status, elapsed, status_text(opts, resp)]
+          return [status, elapsed, status_text(kronk)]
         end
 
         return [status, elapsed]
 
       rescue => e
         status  = 'E'
-        elapsed = Time.now - start
-        return [status, elapsed, error_text(opts, e)]
+        return [status, 0, error_text(kronk, e)]
       end
     end
 
 
     private
 
-    def status_text opts, resp
+    def status_text kronk
       <<-STR
-  Options: #{opts.inspect}
-  Status: #{resp.code}
+  Request: #{kronk.response.code} - #{kronk.response.uri}
+  Options: #{kronk.options.inspect}
 
       STR
     end
 
 
-    def diff_text opts, diff
+    def diff_text kronk
       <<-STR
-  Options: #{opts.inspect}
-  Diffs: #{diff.count}
+  Request: #{kronk.responses[0].code} - #{kronk.responses[0].uri}
+           #{kronk.responses[1].code} - #{kronk.responses[1].uri}
+  Options: #{kronk.options.inspect}
+  Diffs: #{kronk.diff.count}
 
       STR
     end
 
 
-    def error_text opts, err
+    def error_text kronk, err
       <<-STR
 #{err.class}: #{err.message}
-  Options: #{opts.inspect}
+  Options: #{kronk.options.inspect}
 
       STR
     end

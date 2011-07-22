@@ -273,6 +273,14 @@ class Kronk
     end
 
 
+    ##
+    # Check if this is a 2XX response.
+
+    def success?
+      @code.to_s =~ /^2\d\d$/
+    end
+
+
     private
 
 

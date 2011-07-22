@@ -400,16 +400,14 @@ Parse and run diffs against data from live and cached http responses.
         exit 2
       end
 
-
       options[:cache_response] =
         Kronk.config[:cache_file] if Kronk.config[:cache_file]
 
       uri1, uri2 = options.delete :uris
-      runner = options[:player] ? options.delete(:player) : self
+      runner     = options.delete(:player) || self
 
       if uri1 && uri2
         runner.compare uri1, uri2, options
-
       else
         runner.request uri1, options
       end
@@ -421,30 +419,46 @@ Parse and run diffs against data from live and cached http responses.
 
 
     def self.compare uri1, uri2, options
-      diff = Kronk.compare uri1, uri2, options
-      diff_output diff
-    end
-
-
-    def self.diff_output diff
-      puts "#{diff.formatted}\n" unless Kronk.config[:brief]
-
-      if Kronk.config[:verbose] || Kronk.config[:brief]
-        $stdout << "Found #{diff.count} diff(s).\n"
-      end
-
-      exit 1 if diff.count > 0
+      kronk = Kronk.new options
+      kronk.compare uri1, uri2
+      render kronk
     end
 
 
     def self.request uri, options
-      resp_output Kronk.retrieve(uri, options).stringify(options)
+      kronk = Kronk.new options
+      kronk.retrieve uri
+      render kronk
     end
 
 
-    def self.resp_output str
+    def self.render kronk
+      if kronk.diff
+        render_diff kronk
+
+      elsif kronk.response
+        render_response kronk
+      end
+    end
+
+
+    def self.render_diff kronk
+      puts "#{kronk.diff.formatted}\n" unless Kronk.config[:brief]
+
+      if Kronk.config[:verbose] || Kronk.config[:brief]
+        $stdout << "Found #{kronk.diff.count} diff(s).\n"
+      end
+
+      exit 1 if kronk.diff.count > 0
+    end
+
+
+    def self.render_response kronk
+      str = kronk.response.stringify kronk.options
       str = Diff.insert_line_nums str if Kronk.config[:show_lines]
       puts str
+
+      exit 1 unless kronk.response.success?
     end
 
 

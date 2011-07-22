@@ -399,4 +399,13 @@ STR
 
     assert_equal expected, str
   end
+
+
+  def test_success?
+    resp = Kronk::Response.read_file("test/mocks/200_response.txt")
+    assert resp.success?
+
+    resp = Kronk::Response.read_file("test/mocks/302_response.txt")
+    assert !resp.success?
+  end
 end
