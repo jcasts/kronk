@@ -443,10 +443,10 @@ Parse and run diffs against data from live and cached http responses.
 
 
     def self.render_diff kronk
-      puts "#{kronk.diff.formatted}\n" unless Kronk.config[:brief]
+      puts kronk.diff.formatted unless Kronk.config[:brief]
 
       if Kronk.config[:verbose] || Kronk.config[:brief]
-        $stdout << "Found #{kronk.diff.count} diff(s).\n"
+        puts "Found #{kronk.diff.count} diff(s)."
       end
 
       exit 1 if kronk.diff.count > 0
@@ -457,6 +457,8 @@ Parse and run diffs against data from live and cached http responses.
       str = kronk.response.stringify kronk.options
       str = Diff.insert_line_nums str if Kronk.config[:show_lines]
       puts str
+
+      verbose "\nResp. Time: #{kronk.response.time.to_f}"
 
       exit 1 unless kronk.response.success?
     end

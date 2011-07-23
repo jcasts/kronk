@@ -315,7 +315,7 @@ class Kronk
       next unless (uri == matcher || uri =~ %r{#{matcher}}) && Hash === opts
 
       opts.each do |key, val|
-        if !out_opts[key]
+        if out_opts[key].nil?
           out_opts[key] = val
           next
         end

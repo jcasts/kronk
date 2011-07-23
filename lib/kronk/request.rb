@@ -317,8 +317,6 @@ class Kronk
         req.basic_auth @auth[:username], @auth[:password] if
           @auth && @auth[:username]
 
-        Kronk::Cmd.verbose "Retrieving URL:  #{uri}\n"
-
         start_time = Time.now
         res = http.request req, @body
         elapsed_time = Time.now - start_time
