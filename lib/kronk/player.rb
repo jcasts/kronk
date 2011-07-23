@@ -60,27 +60,10 @@ class Kronk
     # If options are given, they are merged into every request.
 
     def compare uri1, uri2, opts={}
-      @results.clear
-
-      $stdout.puts "Started"
-
-      trap 'INT' do
-        @threads.each{|t| t.kill}
-        @threads.clear
-        output_results
-        exit 2
+      process_queue do |kronk_opts, suite|
+        return Cmd.compare(uri1, uri2, kronk_opts.merge(opts)) unless suite
+        process_compare uri1, uri2, kronk_opts.merge(opts)
       end
-
-      process_queue do |kronk_opts|
-        result = process_compare uri1, uri2, kronk_opts.merge(opts)
-
-        @results << result
-        $stdout  << result[0]
-        $stdout.flush
-      end
-
-      success = output_results
-      exit 1 unless success
     end
 
 
@@ -89,9 +72,18 @@ class Kronk
     # If options are given, they are merged into every request.
 
     def request uri, opts={}
-      @results.clear
+      process_queue do |kronk_opts, suite|
+        return Cmd.request(uri1, uri2, kronk_opts.merge(opts)) unless suite
+        process_request uri, kronk_opts.merge(opts)
+      end
+    end
 
-      $stdout.puts "Started"
+
+    ##
+    # Start processing the queue and reading from IO if available.
+
+    def process_queue
+      @results.clear
 
       trap 'INT' do
         @threads.each{|t| t.kill}
@@ -100,23 +92,15 @@ class Kronk
         exit 2
       end
 
-      process_queue do |kronk_opts|
-        result = process_request uri, kronk_opts.merge(opts)
-
-        @results << result
-        $stdout  << result[0]
-        $stdout.flush
+      # First check if we're only processing a single case.
+      # If so, yield a single item and return immediately.
+      @queue << request_from_io if @io
+      if @queue.length == 1 && (!@io || @io.eof?)
+        yield @queue.shift, false
+        return
       end
 
-      success = output_results
-      exit 1 unless success
-    end
-
-
-    ##
-    # Start processing the queue and reading from IO if available.
-
-    def process_queue
+      $stdout.puts "Started"
       @player_start_time = Time.now
 
       reader_thread = try_read_from_io
@@ -132,7 +116,12 @@ class Kronk
         next unless kronk_opts
 
         @threads << Thread.new(kronk_opts) do |thread_opts|
-          yield thread_opts
+          result = yield thread_opts, true
+
+          @results << result
+          $stdout  << result[0]
+          $stdout.flush
+
           @threads.delete Thread.current
         end
 
@@ -143,6 +132,9 @@ class Kronk
       @threads.clear
 
       reader_thread.kill
+
+      success = output_results
+      exit 1 unless success
     end
 
 
@@ -199,11 +191,6 @@ class Kronk
     # Process and output the results.
 
     def output_results
-      if @results.length == 1 && @results[0][0] != "E"
-        puts "\n"
-        Cmd.render @last
-      end
-
       player_time   = (Time.now - @player_start_time).to_f
       total_time    = 0
       bad_count     = 0
