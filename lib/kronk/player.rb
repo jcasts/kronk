@@ -11,12 +11,18 @@ class Kronk
     # Assigns http method to $1 and path info to $2.
     LOG_MATCHER = %r{([A-Za-z]+) (/[^\s"]+)[\s"]*}
 
-    attr_accessor :max_threads, :max_requests, :queue
+    attr_accessor :limit, :concurrency, :queue
+
+    ##
+    # Create a new Player for batch diff or response validation.
+    # Supported options are:
+    # :concurrency:: Fixnum - The maximum number of concurrent requests to make
+    # :limit:: Fixnum - The maximum number of requests to make
 
     def initialize opts={}
-      @max_requests = opts[:max_requests]
-      @max_threads  = opts[:max_threads]
-      @max_threads  = 4 if !@max_threads || @max_threads <= 0
+      @limit        = opts[:limit]
+      @concurrency  = opts[:concurrency]
+      @concurrency  = 1 if !@concurrency || @concurrency <= 0
 
       @queue     = []
       @threads   = []
@@ -107,7 +113,7 @@ class Kronk
       count = 0
 
       until finished? count
-        while @threads.length >= @max_threads || @queue.empty?
+        while @threads.length >= @concurrency || @queue.empty?
           sleep 0.1
         end
 
@@ -145,9 +151,9 @@ class Kronk
       Thread.new do
         loop do
           break if !@io || @io.eof?
-          next  if @queue.length >= @max_threads * 2
+          next  if @queue.length >= @concurrency * 2
 
-          max_new = @max_threads * 2 - @queue.length
+          max_new = @concurrency * 2 - @queue.length
 
           max_new.times do
             break if @io.eof?
@@ -181,7 +187,7 @@ class Kronk
     # Returns true if processing queue should be stopped, otherwise false.
 
     def finished? count
-      (@max_requests && @max_requests >= count) || @queue.empty? &&
+      (@limit && @limit >= count) || @queue.empty? &&
       (!@io || @io && @io.eof?) && count > 0
     end
 
