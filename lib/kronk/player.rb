@@ -2,6 +2,8 @@ class Kronk
 
   # TODO: Add support for full HTTP Request parsing
   #       Only use Player when stream has more than 1 request
+  #       Support output for diff and response suites (separated by \0?)
+  #       Loadtest mode?
 
   class Player
 
@@ -16,14 +18,11 @@ class Kronk
       @max_threads  = opts[:max_threads]
       @max_threads  = 4 if !@max_threads || @max_threads <= 0
 
-      @queue      = []
-      @threads    = []
-      @io         = nil
-      @io_parser  = LOG_MATCHER
-      #@io_timeout = opts[:io_timeout] || 5
-
-      @results = []
-      @last    = nil
+      @queue     = []
+      @threads   = []
+      @results   = []
+      @io        = nil
+      @io_parser = LOG_MATCHER
 
       @player_start_time = nil
     end
@@ -199,10 +198,9 @@ class Kronk
       err_buffer    = ""
 
       @results.each do |(status, time, text)|
-        total_time += time.to_f
-
         case status
         when "F"
+          total_time    += time.to_f
           bad_count     += 1
           failure_count += 1
           err_buffer << "  #{bad_count}) Failure:\n#{text}"
@@ -211,10 +209,15 @@ class Kronk
           bad_count   += 1
           error_count += 1
           err_buffer << "  #{bad_count}) Error:\n#{text}"
+
+        else
+          total_time += time.to_f
         end
       end
 
-      avg_time = total_time / @results.length
+      non_error_count = @results.length - error_count
+
+      avg_time = total_time / non_error_count
 
       $stdout.puts "\nFinished in #{player_time} seconds.\n\n"
       $stderr.puts err_buffer
@@ -222,7 +225,7 @@ class Kronk
                    "#{failure_count} failures, #{error_count} errors"
 
       $stdout.puts "Avg Time: #{avg_time}"
-      $stdout.puts "Avg QPS: #{@results.length / player_time}"
+      $stdout.puts "Avg QPS: #{non_error_count / player_time}"
 
       return bad_count == 0
     end
@@ -239,8 +242,6 @@ class Kronk
         diff    = kronk.compare uri1, uri2
         elapsed =
           (kronk.responses[0].time.to_f + kronk.responses[0].time.to_f) / 2
-
-        @last  = kronk
 
         if diff.count > 0
           status = 'F'
@@ -266,8 +267,6 @@ class Kronk
         kronk   = Kronk.new opts
         resp    = kronk.retrieve uri
         elapsed = resp.time.to_f
-
-        @last = kronk
 
         unless resp.code =~ /^2\d\d$/
           status = 'F'
