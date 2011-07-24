@@ -20,9 +20,10 @@ class Kronk
     # :limit:: Fixnum - The maximum number of requests to make
 
     def initialize opts={}
-      @limit        = opts[:limit]
-      @concurrency  = opts[:concurrency]
-      @concurrency  = 1 if !@concurrency || @concurrency <= 0
+      @limit       = opts[:limit]
+      @concurrency = opts[:concurrency]
+      @concurrency = 1 if !@concurrency || @concurrency <= 0
+      @output      = SuiteOutput.new
 
       @queue     = []
       @threads   = []
