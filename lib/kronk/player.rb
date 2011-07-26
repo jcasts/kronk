@@ -104,7 +104,7 @@ class Kronk
 
     def request uri, opts={}
       process_queue do |kronk_opts, suite|
-        return Cmd.request(uri1, uri2, kronk_opts.merge(opts)) unless suite
+        return Cmd.request(uri, kronk_opts.merge(opts)) unless suite
         process_request uri, kronk_opts.merge(opts)
       end
     end
@@ -249,7 +249,8 @@ class Kronk
 
       non_error_count = @results.length - error_count
 
-      avg_time = total_time / non_error_count
+      avg_time = non_error_count > 0 ? total_time / non_error_count  : "n/a"
+      avg_qps  = non_error_count > 0 ? non_error_count / player_time : "n/a"
 
       $stdout.puts "\nFinished in #{player_time} seconds.\n\n"
       $stderr.puts err_buffer
@@ -257,7 +258,7 @@ class Kronk
                    "#{failure_count} failures, #{error_count} errors"
 
       $stdout.puts "Avg Time: #{avg_time}"
-      $stdout.puts "Avg QPS: #{non_error_count / player_time}"
+      $stdout.puts "Avg QPS: #{avg_qps}"
 
       return bad_count == 0
     end
