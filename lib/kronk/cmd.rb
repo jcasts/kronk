@@ -312,12 +312,14 @@ Parse and run diffs against data from live and cached http responses.
 
       opts.parse! argv
 
+      options.delete :player if options[:player].empty?
+
       if options[:player]
         options[:player] = Player.new options[:player]
 
       elsif !$stdin.tty?
-        #TODO: only use string io on windows?
-        io = StringIO.new $stdin.read
+        io = $stdin
+        io = StringIO.new $stdin.read if windows?
         options[:uris] << io
       end
 
