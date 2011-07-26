@@ -13,6 +13,8 @@ class Kronk
 
     attr_accessor :limit, :concurrency, :queue
 
+    attr_reader :output
+
     ##
     # Create a new Player for batch diff or response validation.
     # Supported options are:
@@ -23,15 +25,38 @@ class Kronk
       @limit       = opts[:limit]
       @concurrency = opts[:concurrency]
       @concurrency = 1 if !@concurrency || @concurrency <= 0
-      @output      = SuiteOutput.new
+      self.output  = opts[:output] || SuiteOutput.new
 
       @queue     = []
       @threads   = []
       @results   = []
-      @io        = nil
+      @io        = opts[:io]
       @io_parser = LOG_MATCHER
 
       @player_start_time = nil
+    end
+
+
+    ##
+    # The kind of output to use. Typically SuiteOutput or StreamOutput.
+    # Takes an output class or a string that represents a class constant.
+
+    def output= new_output
+      return @output = new_output.new if Class === new_output
+
+      klass =
+        case new_output
+        when /^(Player::)?stream(Output)?$/i
+          StreamOutput
+
+        when /^(Player::)?suite(Output)?$/i
+          SuiteOutput
+
+        when String
+          Kronk.find_const new_output
+        end
+
+      @output = klass.new if klass
     end
 
 

@@ -25,8 +25,7 @@ class Kronk
           kronk.response.stringify kronk.options
         end
 
-      output << "\0"
-      $stdout << output
+      $stdout << output << "\0"
       $stdout.flush
     end
 

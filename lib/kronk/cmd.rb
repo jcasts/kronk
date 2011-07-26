@@ -54,6 +54,7 @@ class Kronk
       options = {
         :auth         => {},
         :no_body      => false,
+        :player       => {},
         :proxy        => {},
         :uris         => [],
         :with_headers => false
@@ -171,9 +172,21 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
+        opt.on('-o', '--replay-out [FORMAT]',
+               'Output format used by --replay; default: stream') do |output|
+          options[:player][:output] = output || :stream
+        end
+
+
         opt.on('-P', '--parser STR', String,
-               'Override default parser') do |value|
+               'Override default response body parser') do |value|
           options[:parser] = value
+        end
+
+
+        opt.on('-p', '--replay [file]',
+                'Replay the given file or STDIN against URIs') do |file|
+          options[:player][:io] = file && File.open(file, "r") || $stdin
         end
 
 
@@ -184,13 +197,6 @@ Parse and run diffs against data from live and cached http responses.
 
         opt.on('-R', '--raw', 'Run diff on the raw data returned') do
           options[:raw] = true
-        end
-
-
-        opt.on('--replay [file]',
-                'Replay the given file or STDIN against URIs') do |file|
-          options[:player] = Kronk::Player.new
-          options[:player].from_io(file && File.open(file, "r") || $stdin)
         end
 
 
@@ -306,7 +312,11 @@ Parse and run diffs against data from live and cached http responses.
 
       opts.parse! argv
 
-      unless $stdin.tty? || options[:player]
+      if options[:player]
+        options[:player] = Player.new options[:player]
+
+      elsif !$stdin.tty?
+        #TODO: only use string io on windows?
         io = StringIO.new $stdin.read
         options[:uris] << io
       end
