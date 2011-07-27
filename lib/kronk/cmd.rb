@@ -124,7 +124,7 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
-        opt.on('-i', '--include [header1,header2]', Array,
+        opt.on('-i', '--include [HEADER1,HEADER2]', Array,
                'Include all or given headers in response') do |value|
           options[:with_headers] ||= []
 
@@ -137,7 +137,7 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
-        opt.on('-I', '--head [header1,header2]', Array,
+        opt.on('-I', '--head [HEADER1,HEADER2]', Array,
                'Use all or given headers only in the response') do |value|
           options[:with_headers] ||= []
 
@@ -172,21 +172,9 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
-        opt.on('-o', '--replay-out [FORMAT]',
-               'Output format used by --replay; default: stream') do |output|
-          options[:player][:output] = output || :stream
-        end
-
-
         opt.on('-P', '--parser STR', String,
                'Override default response body parser') do |value|
           options[:parser] = value
-        end
-
-
-        opt.on('-p', '--replay [file]',
-                'Replay the given file or STDIN against URIs') do |file|
-          options[:player][:io] = file && File.open(file, "r") || $stdin
         end
 
 
@@ -200,7 +188,7 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
-        opt.on('-r', '--require lib1,lib2', Array,
+        opt.on('-r', '--require LIB1,LIB2', Array,
                'Require a library or gem') do |value|
           options[:requires] ||= []
           options[:requires].concat value
@@ -214,6 +202,34 @@ Parse and run diffs against data from live and cached http responses.
 
         opt.on('-V', '--verbose', 'Make the operation more talkative') do
           Kronk.config[:verbose] = true
+        end
+
+
+        opt.separator <<-STR
+
+  Player Options:
+        STR
+
+        opt.on('-c', '--concurrency NUM', Integer) do |num|
+          options[:player][:concurrency] = num
+        end
+
+
+        opt.on('-o', '--replay-out [FORMAT]',
+               'Output format used by --replay; default: stream') do |output|
+          options[:player][:output] = output || :stream
+        end
+
+
+        opt.on('-p', '--replay [FILE]',
+                'Replay the given file or STDIN against URIs') do |file|
+          options[:player][:io] = file && File.open(file, "r") || $stdin
+        end
+
+
+        opt.on('--stream [FILE]', 'Same as -p [FILE] -o stream') do |file|
+          options[:player][:io] = file && File.open(file, "r") || $stdin
+          options[:player][:output] = :stream
         end
 
 
@@ -272,7 +288,7 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
-        opt.on('--timeout INT', Integer,
+        opt.on('-t', '--timeout INT', Integer,
                'Timeout for http connection in seconds') do |value|
           Kronk.config[:timeout] = value
         end
