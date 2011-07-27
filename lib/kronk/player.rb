@@ -10,7 +10,7 @@ class Kronk
     # Assigns http method to $1 and path info to $2.
     LOG_MATCHER = %r{([A-Za-z]+) (/[^\s"]+)[\s"]*}
 
-    attr_accessor :number, :concurrency, :queue
+    attr_accessor :number, :concurrency, :queue, :count
 
     attr_reader :output
 
@@ -29,6 +29,7 @@ class Kronk
       @concurrency = 1 if !@concurrency || @concurrency <= 0
       self.output  = opts[:output] || SuiteOutput
 
+      @count     = nil
       @queue     = []
       @threads   = []
       @io        = opts[:io]
@@ -132,9 +133,9 @@ class Kronk
 
       reader_thread = try_read_from_io
 
-      count = 0
+      @count = 0
 
-      until finished? count
+      until finished?
         while @threads.length >= @concurrency || @queue.empty?
           sleep 0.1
         end
@@ -149,7 +150,7 @@ class Kronk
           end
         end
 
-        count += 1
+        @count += 1
       end
 
       @threads.each{|t| t.join}
@@ -175,9 +176,14 @@ class Kronk
           max_new = @concurrency * 2 - @queue.length
 
           max_new.times do
-            break if @io.eof?
             req = request_from_io
             @queue << req if req
+
+            if @io.eof?
+              missing_num = @number.to_i - (@count + @queue.length)
+              @queue.concat Array.new(missing_num, req) if missing_num > 0
+              break
+            end
           end
         end
       end
@@ -205,9 +211,9 @@ class Kronk
     ##
     # Returns true if processing queue should be stopped, otherwise false.
 
-    def finished? count
-      (@number && count > @number) || @queue.empty? &&
-      (!@io || @io && @io.eof?) && count > 0
+    def finished?
+      (@number && @count > @number) || @queue.empty? &&
+      (!@io || @io && @io.eof?) && @count > 0
     end
 
 
