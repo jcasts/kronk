@@ -8,11 +8,14 @@ class Kronk
 
   class Player::StreamOutput
 
-    attr_accessor :player_time
-
     def initialize
-      @results     = []
-      @player_time = 0
+      @results    = []
+      @start_time = Time.now
+    end
+
+
+    def start
+      @start_time = Time.now
     end
 
 

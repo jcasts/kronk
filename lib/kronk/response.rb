@@ -52,7 +52,7 @@ class Kronk
       @headers  = @_res.to_hash
 
       @encoding = "utf-8" unless @_res["Content-Type"]
-      c_type = @headers["content-type"].find{|ct| ct =~ ENCODING_MATCHER}
+      c_type = [*@headers["content-type"]].find{|ct| ct =~ ENCODING_MATCHER}
       @encoding = $2 if c_type
       @encoding ||= "binary"
       @encoding = Encoding.find(@encoding) if defined?(Encoding)

@@ -5,11 +5,15 @@ class Kronk
 
   class Player::SuiteOutput
 
-    attr_accessor :player_time
-
     def initialize
       @results     = []
-      @player_time = 0
+      @start_time  = Time.now
+    end
+
+
+    def start
+      $stdout.puts "Started"
+      @start_time = Time.now
     end
 
 
@@ -25,7 +29,7 @@ class Kronk
 
           [status, time, text]
 
-        elsif kronk.resp
+        elsif kronk.response
           status = "F"             if !kronk.response.success?
           text   = resp_text kronk if status == "F"
           [status, kronk.response.time, text]
@@ -37,11 +41,16 @@ class Kronk
 
 
     def error err, kronk=nil
-      @results << ["E", 0, error_text(err, kronk)]
+      status = "E"
+      @results << [status, 0, error_text(err, kronk)]
+
+      $stdout << status
+      $stdout.flush
     end
 
 
     def completed
+      player_time   = (Time.now - @start_time).to_f
       total_time    = 0
       bad_count     = 0
       failure_count = 0
@@ -68,15 +77,16 @@ class Kronk
 
       non_error_count = @results.length - error_count
 
-      avg_time = total_time / non_error_count
+      avg_time = non_error_count > 0 ? total_time / non_error_count  : "n/a"
+      avg_qps  = non_error_count > 0 ? non_error_count / player_time : "n/a"
 
-      $stdout.puts "\nFinished in #{@player_time} seconds.\n\n"
+      $stdout.puts "\nFinished in #{player_time} seconds.\n\n"
       $stderr.puts err_buffer
       $stdout.puts "#{@results.length} cases, " +
                    "#{failure_count} failures, #{error_count} errors"
 
       $stdout.puts "Avg Time: #{avg_time}"
-      $stdout.puts "Avg QPS: #{non_error_count / @player_time}"
+      $stdout.puts "Avg QPS: #{avg_qps}"
 
       return bad_count == 0
     end
@@ -109,9 +119,9 @@ class Kronk
       str = "#{err.class}: #{err.message}"
 
       if kronk
-        str << "\n  Options: #{kronk.options.inspect}"
+        str << "\n  Options: #{kronk.options.inspect}\n\n"
       else
-        str << "\n #{err.backtrace}"
+        str << "\n #{err.backtrace}\n\n"
       end
 
       str

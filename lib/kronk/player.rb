@@ -25,15 +25,13 @@ class Kronk
       @limit       = opts[:limit]
       @concurrency = opts[:concurrency]
       @concurrency = 1 if !@concurrency || @concurrency <= 0
-      self.output  = opts[:output] || SuiteOutput.new
+      self.output  = opts[:output] || SuiteOutput
 
       @queue     = []
       @threads   = []
       @results   = []
       @io        = opts[:io]
       @io_parser = LOG_MATCHER
-
-      @player_start_time = nil
     end
 
 
@@ -45,14 +43,14 @@ class Kronk
       return @output = new_output.new if Class === new_output
 
       klass =
-        case new_output
+        case new_output.to_s
         when /^(Player::)?stream(Output)?$/i
           StreamOutput
 
         when /^(Player::)?suite(Output)?$/i
           SuiteOutput
 
-        when String
+        else
           Kronk.find_const new_output
         end
 
@@ -131,8 +129,7 @@ class Kronk
         return
       end
 
-      $stdout.puts "Started"
-      @player_start_time = Time.now
+      @output.start
 
       reader_thread = try_read_from_io
 
@@ -147,13 +144,11 @@ class Kronk
         next unless kronk_opts
 
         @threads << Thread.new(kronk_opts) do |thread_opts|
-          result = yield thread_opts, true
-
-          @results << result
-          $stdout  << result[0]
-          $stdout.flush
-
-          @threads.delete Thread.current
+          begin
+            yield thread_opts, true
+          ensure
+            @threads.delete Thread.current
+          end
         end
 
         count += 1
@@ -222,45 +217,7 @@ class Kronk
     # Process and output the results.
 
     def output_results
-      player_time   = (Time.now - @player_start_time).to_f
-      total_time    = 0
-      bad_count     = 0
-      failure_count = 0
-      error_count   = 0
-      err_buffer    = ""
-
-      @results.each do |(status, time, text)|
-        case status
-        when "F"
-          total_time    += time.to_f
-          bad_count     += 1
-          failure_count += 1
-          err_buffer << "  #{bad_count}) Failure:\n#{text}"
-
-        when "E"
-          bad_count   += 1
-          error_count += 1
-          err_buffer << "  #{bad_count}) Error:\n#{text}"
-
-        else
-          total_time += time.to_f
-        end
-      end
-
-      non_error_count = @results.length - error_count
-
-      avg_time = non_error_count > 0 ? total_time / non_error_count  : "n/a"
-      avg_qps  = non_error_count > 0 ? non_error_count / player_time : "n/a"
-
-      $stdout.puts "\nFinished in #{player_time} seconds.\n\n"
-      $stderr.puts err_buffer
-      $stdout.puts "#{@results.length} cases, " +
-                   "#{failure_count} failures, #{error_count} errors"
-
-      $stdout.puts "Avg Time: #{avg_time}"
-      $stdout.puts "Avg QPS: #{avg_qps}"
-
-      return bad_count == 0
+      @output.completed
     end
 
 
@@ -268,25 +225,12 @@ class Kronk
     # Run a single compare and return a result array.
 
     def process_compare uri1, uri2, opts={}
-      status = '.'
+      kronk = Kronk.new opts
+      kronk.compare uri1, uri2
+      @output.result kronk
 
-      begin
-        kronk   = Kronk.new opts
-        diff    = kronk.compare uri1, uri2
-        elapsed =
-          (kronk.responses[0].time.to_f + kronk.responses[0].time.to_f) / 2
-
-        if diff.count > 0
-          status = 'F'
-          return [status, elapsed, diff_text(kronk)]
-        end
-
-        return [status, elapsed]
-
-      rescue => e
-        status  = 'E'
-        return [status, 0, error_text(kronk, e)]
-      end
+    rescue Kronk::Exception, Response::MissingParser, Errno::ECONNRESET => e
+      @output.error e, kronk
     end
 
 
@@ -294,55 +238,12 @@ class Kronk
     # Run a single request and return a result array.
 
     def process_request uri, opts={}
-      status = '.'
+      kronk = Kronk.new opts
+      kronk.retrieve uri
+      @output.result kronk
 
-      begin
-        kronk   = Kronk.new opts
-        resp    = kronk.retrieve uri
-        elapsed = resp.time.to_f
-
-        unless resp.code =~ /^2\d\d$/
-          status = 'F'
-          return [status, elapsed, status_text(kronk)]
-        end
-
-        return [status, elapsed]
-
-      rescue => e
-        status  = 'E'
-        return [status, 0, error_text(kronk, e)]
-      end
-    end
-
-
-    private
-
-    def status_text kronk
-      <<-STR
-  Request: #{kronk.response.code} - #{kronk.response.uri}
-  Options: #{kronk.options.inspect}
-
-      STR
-    end
-
-
-    def diff_text kronk
-      <<-STR
-  Request: #{kronk.responses[0].code} - #{kronk.responses[0].uri}
-           #{kronk.responses[1].code} - #{kronk.responses[1].uri}
-  Options: #{kronk.options.inspect}
-  Diffs: #{kronk.diff.count}
-
-      STR
-    end
-
-
-    def error_text kronk, err
-      <<-STR
-#{err.class}: #{err.message}
-  Options: #{kronk.options.inspect}
-
-      STR
+    rescue Kronk::Exception, Response::MissingParser, Errno::ECONNRESET => e
+      @output.error e, kronk
     end
   end
 end
