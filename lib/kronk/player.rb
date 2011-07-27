@@ -1,7 +1,8 @@
 class Kronk
 
-  # TODO: Add support for full HTTP Request parsing
-  #       Loadtest mode?
+  # TODO: Loadtest mode?
+  #       Add support for full HTTP Request parsing
+  #       Make all parsers a class?
 
   class Player
 
@@ -9,7 +10,7 @@ class Kronk
     # Assigns http method to $1 and path info to $2.
     LOG_MATCHER = %r{([A-Za-z]+) (/[^\s"]+)[\s"]*}
 
-    attr_accessor :limit, :concurrency, :queue
+    attr_accessor :number, :concurrency, :queue
 
     attr_reader :output
 
@@ -17,19 +18,21 @@ class Kronk
     # Create a new Player for batch diff or response validation.
     # Supported options are:
     # :concurrency:: Fixnum - The maximum number of concurrent requests to make
-    # :limit:: Fixnum - The maximum number of requests to make
+    # :number:: Fixnum - The number of requests to make
+    # :io:: IO - The IO instance to read from
+    # :output:: Class - The output class to use (see Player::Output)
+    # :parser:: Class - The IO parser to use.
 
     def initialize opts={}
-      @limit       = opts[:limit]
+      @number      = opts[:number]
       @concurrency = opts[:concurrency]
       @concurrency = 1 if !@concurrency || @concurrency <= 0
       self.output  = opts[:output] || SuiteOutput
 
       @queue     = []
       @threads   = []
-      @results   = []
       @io        = opts[:io]
-      @io_parser = LOG_MATCHER
+      @io_parser = opts[:parser] || LOG_MATCHER
     end
 
 
@@ -110,8 +113,6 @@ class Kronk
     # Start processing the queue and reading from IO if available.
 
     def process_queue
-      @results.clear
-
       trap 'INT' do
         @threads.each{|t| t.kill}
         @threads.clear
@@ -139,7 +140,6 @@ class Kronk
         end
 
         kronk_opts = @queue.shift
-        next unless kronk_opts
 
         @threads << Thread.new(kronk_opts) do |thread_opts|
           begin
@@ -206,7 +206,7 @@ class Kronk
     # Returns true if processing queue should be stopped, otherwise false.
 
     def finished? count
-      (@limit && @limit >= count) || @queue.empty? &&
+      (@number && count > @number) || @queue.empty? &&
       (!@io || @io && @io.eof?) && count > 0
     end
 

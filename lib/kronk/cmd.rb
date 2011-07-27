@@ -210,8 +210,15 @@ Parse and run diffs against data from live and cached http responses.
   Player Options:
         STR
 
-        opt.on('-c', '--concurrency NUM', Integer) do |num|
+        opt.on('-c', '--concurrency NUM', Integer,
+               'Number of concurrent requests to make; default: 1') do |num|
           options[:player][:concurrency] = num
+        end
+
+
+        opt.on('-n', '--number NUM', Integer,
+               'Total number of requests to make') do |num|
+          options[:player][:number] = num
         end
 
 
