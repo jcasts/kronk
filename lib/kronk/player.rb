@@ -212,7 +212,7 @@ class Kronk
     # Returns true if processing queue should be stopped, otherwise false.
 
     def finished?
-      (@number && @count > @number) || @queue.empty? &&
+      (@number && @count >= @number) || @queue.empty? &&
       (!@io || @io && @io.eof?) && @count > 0
     end
 
