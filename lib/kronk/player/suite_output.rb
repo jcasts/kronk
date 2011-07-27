@@ -3,17 +3,11 @@ class Kronk
   ##
   # Outputs Player requests and results in a test-suite like format.
 
-  class Player::SuiteOutput
-
-    def initialize
-      @results     = []
-      @start_time  = Time.now
-    end
-
+  class Player::SuiteOutput < Player::Output
 
     def start
       $stdout.puts "Started"
-      @start_time = Time.now
+      super
     end
 
 

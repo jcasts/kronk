@@ -14,6 +14,7 @@ class Kronk
 
   require 'kronk/constants'
   require 'kronk/player'
+  require 'kronk/player/output'
   require 'kronk/player/suite_output'
   require 'kronk/player/stream_output'
   require 'kronk/cmd'

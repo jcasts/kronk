@@ -6,18 +6,7 @@ class Kronk
   #
   # Note: This output class will not render errors.
 
-  class Player::StreamOutput
-
-    def initialize
-      @results    = []
-      @start_time = Time.now
-    end
-
-
-    def start
-      @start_time = Time.now
-    end
-
+  class Player::StreamOutput < Player::Output
 
     def result kronk
       output =
@@ -30,14 +19,6 @@ class Kronk
 
       $stdout << output << "\0"
       $stdout.flush
-    end
-
-
-    def error err, kronk=nil
-    end
-
-
-    def completed
     end
   end
 end
