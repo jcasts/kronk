@@ -1,8 +1,6 @@
 class Kronk
 
   # TODO: Add support for full HTTP Request parsing
-  #       Only use Player when stream has more than 1 request
-  #       Support output for diff and response suites (separated by \0?)
   #       Loadtest mode?
 
   class Player

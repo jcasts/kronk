@@ -273,11 +273,10 @@ class Kronk
     while resp.redirect? && (max_rdir == true || max_rdir.to_i > 0)
       Cmd.verbose "Following redirect..."
       resp     = resp.follow_redirect
-      max_rdir = max_rdir - 1
+      max_rdir = max_rdir - 1 if Fixnum === max_rdir
     end
 
     post_process_responses resp if do_post_process
-
     resp
 
   rescue SocketError, Errno::ENOENT, Errno::ECONNREFUSED
