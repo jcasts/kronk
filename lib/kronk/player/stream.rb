@@ -21,7 +21,7 @@ class Kronk
   #
   # Note: This output class will not render errors.
 
-  class Player::StreamOutput < Player::Output
+  class Player::Stream < Player::Output
 
     def result kronk
       output =

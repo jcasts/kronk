@@ -3,7 +3,7 @@ class Kronk
   ##
   # Outputs Player requests and results in a test-suite like format.
 
-  class Player::SuiteOutput < Player::Output
+  class Player::Suite < Player::Output
 
     def start
       $stdout.puts "Started"

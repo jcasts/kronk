@@ -27,7 +27,7 @@ class Kronk
       @number      = opts[:number]
       @concurrency = opts[:concurrency]
       @concurrency = 1 if !@concurrency || @concurrency <= 0
-      self.output  = opts[:output] || SuiteOutput
+      self.output  = opts[:output] || Suite
 
       @count     = nil
       @queue     = []
@@ -46,11 +46,11 @@ class Kronk
 
       klass =
         case new_output.to_s
-        when /^(Player::)?stream(Output)?$/i
-          StreamOutput
+        when /^(Player::)?stream$/i
+          Stream
 
-        when /^(Player::)?suite(Output)?$/i
-          SuiteOutput
+        when /^(Player::)?suite$/i
+          Suite
 
         else
           Kronk.find_const new_output
