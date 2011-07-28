@@ -10,6 +10,16 @@ class TestResponse < Test::Unit::TestCase
   end
 
 
+  def test_new_from_one_line_io
+    io   = StringIO.new "just this one line!"
+    resp = Kronk::Response.new io
+
+    assert_equal "just this one line!", resp.body
+    enc = "".encoding rescue "UTF-8"
+    assert_equal ["text/html; charset=#{enc}"], resp['Content-Type']
+  end
+
+
   def test_read_file
     resp = Kronk::Response.read_file "test/mocks/200_response.txt"
 

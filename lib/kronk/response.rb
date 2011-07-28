@@ -304,12 +304,18 @@ class Kronk
         resp.reading_body io, true do;end
 
       rescue Net::HTTPBadResponse
-        raise unless resp_io.respond_to? :path
+        ext = resp_io.respond_to?(:path) ?
+                File.extname(resp_io.path) : "text/html"
 
         resp_io.rewind
-        resp = HeadlessResponse.new resp_io.read, File.extname(resp_io.path)
+        resp = HeadlessResponse.new resp_io.read, ext
 
       rescue EOFError
+        # If no response was read because it's too short
+        unless resp
+          resp_io.rewind
+          resp = HeadlessResponse.new resp_io.read, "text/html"
+        end
       end
 
       socket = resp.instance_variable_get "@socket"
