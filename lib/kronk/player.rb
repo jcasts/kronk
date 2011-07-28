@@ -114,19 +114,19 @@ class Kronk
     # Start processing the queue and reading from IO if available.
 
     def process_queue
+      # First check if we're only processing a single case.
+      # If so, yield a single item and return immediately.
+      @queue << request_from_io if @io && !@number
+      if @queue.length == 1 && (!@io || @io.eof?)
+        yield @queue.shift, false
+        return
+      end
+
       trap 'INT' do
         @threads.each{|t| t.kill}
         @threads.clear
         output_results
         exit 2
-      end
-
-      # First check if we're only processing a single case.
-      # If so, yield a single item and return immediately.
-      @queue << request_from_io if @io
-      if @queue.length == 1 && (!@io || @io.eof?)
-        yield @queue.shift, false
-        return
       end
 
       @output.start
