@@ -1,8 +1,11 @@
 class Kronk
 
   ##
-  # Outputs Player requests and results as a stream of Kronk outputs
-  # separated by the null character \\000.
+  # Outputs Player results as a stream of Kronk outputs
+  # in chunked form, each chunk being one response and the number
+  # of octets being expressed in plain decimal form.
+  #
+  #   "23\r\nthis is the first chunk\r\n"
   #
   # Note: This output class will not render errors.
 
@@ -17,7 +20,8 @@ class Kronk
           kronk.response.stringify kronk.options
         end
 
-      $stdout << output << "\0"
+      output = "#{output.length}\r\n#{output.length}\r\n"
+      $stdout << output
       $stdout.flush
     end
   end
