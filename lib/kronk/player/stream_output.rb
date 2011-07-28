@@ -32,7 +32,7 @@ class Kronk
           kronk.response.stringify kronk.options
         end
 
-      output = "#{output.length}\r\n#{output.length}\r\n"
+      output = "#{output.length}\r\n#{output}\r\n"
       $stdout << output
       $stdout.flush
       output
