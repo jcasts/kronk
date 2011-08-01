@@ -173,7 +173,7 @@ Request Percentages (ms)
         STR
 
         out << "
-Avg. Slowest Paths (ms)
+Avg. Slowest Paths (ms, #)
 #{slowest_paths.map{|arr| "  #{(arr[1])}  #{arr[0]}"}.join "\n" }" if @hostname
 
         out
@@ -221,10 +221,15 @@ Avg. Slowest Paths (ms)
       puts "Finished!"
 
       render_head
+      render_body
+    end
 
-      @results.each do |rset|
-        puts "\n"
-        puts rset.to_s
+
+    def render_body
+      if @results.length > 1
+        puts Diff.new(@results[0].to_s, @results[1].to_s).formatted
+      else
+        puts @results.first.to_s
       end
     end
 
