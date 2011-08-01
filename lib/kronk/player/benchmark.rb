@@ -100,9 +100,25 @@ class Kronk
 
         @percentages = {}
 
+        perc_list   = [50, 66, 75, 80, 90, 95, 98, 99]
+        times_count = 0
+        target_perc = perc_list.first
+
+        i = 0
         @times.keys.sort.each do |time|
-          
+          times_count += @times[time]
+
+          if target_perc <= (100 * times_count / @count)
+            @percentages[target_perc] = time
+            i += 1
+            target_perc = perc_list[i]
+
+            break unless target_perc
+          end
         end
+
+        @percentages[100] = self.slowest
+        @percentages
       end
 
 
@@ -144,15 +160,15 @@ Connection Times (ms)
   Max:       #{self.slowest}
 
 Request Percentages (ms)
-   50%    
-   66%    
-   75%    
-   80%    
-   90%    
-   95%    
-   98%    
-   99%    
-  100%    #{self.slowest} (longest request)
+   50%    #{self.percentages[50]}
+   66%    #{self.percentages[66]}
+   75%    #{self.percentages[75]}
+   80%    #{self.percentages[80]}
+   90%    #{self.percentages[90]}
+   95%    #{self.percentages[95]}
+   98%    #{self.percentages[98]}
+   99%    #{self.percentages[99]}
+  100%    #{self.percentages[100]} (longest request)
         STR
 
         out << "
