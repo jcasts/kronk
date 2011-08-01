@@ -6,12 +6,13 @@ class Kronk
   class Player::Suite < Player::Output
 
     def start
+      @results = []
       $stdout.puts "Started"
       super
     end
 
 
-    def result kronk
+    def result kronk, mutex=nil
       status = "."
 
       @results <<
@@ -34,7 +35,7 @@ class Kronk
     end
 
 
-    def error err, kronk=nil
+    def error err, kronk=nil, mutex=nil
       status = "E"
       @results << [status, 0, error_text(err, kronk)]
 

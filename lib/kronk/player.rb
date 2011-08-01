@@ -1,6 +1,6 @@
 class Kronk
 
-  # TODO: Loadtest mode?
+  # TODO: Allow for non-STDIN player usage
   #       Add support for full HTTP Request parsing
   #       Make all parsers a class?
 
@@ -10,7 +10,7 @@ class Kronk
     # Assigns http method to $1 and path info to $2.
     LOG_MATCHER = %r{([A-Za-z]+) (/[^\s"]+)[\s"]*}
 
-    attr_accessor :number, :concurrency, :queue, :count
+    attr_accessor :number, :concurrency, :queue, :count, :io
 
     attr_reader :output
 
@@ -34,18 +34,23 @@ class Kronk
       @threads   = []
       @io        = opts[:io]
       @io_parser = opts[:parser] || LOG_MATCHER
+
+      @result_mutex = Mutex.new
     end
 
 
     ##
-    # The kind of output to use. Typically SuiteOutput or StreamOutput.
+    # The kind of output to use. Typically Player::Suite or Player::Stream.
     # Takes an output class or a string that represents a class constant.
 
     def output= new_output
-      return @output = new_output.new if Class === new_output
+      return @output = new_output.new(self) if Class === new_output
 
       klass =
         case new_output.to_s
+        when /^(Player::)?benchmark$/i
+          Benchmark
+
         when /^(Player::)?stream$/i
           Stream
 
@@ -56,7 +61,7 @@ class Kronk
           Kronk.find_const new_output
         end
 
-      @output = klass.new if klass
+      @output = klass.new self if klass
     end
 
 
@@ -116,7 +121,7 @@ class Kronk
     def process_queue
       # First check if we're only processing a single case.
       # If so, yield a single item and return immediately.
-      @queue << request_from_io if @io && !@number
+      @queue << next_request if @queue.empty? && (!@number || @number <= 1)
       if @queue.length == 1 && (!@io || @io.eof?)
         yield @queue.shift, false
         return
@@ -131,7 +136,7 @@ class Kronk
 
       @output.start
 
-      reader_thread = try_read_from_io
+      reader_thread = try_fill_queue
 
       @count = 0
 
@@ -167,23 +172,17 @@ class Kronk
     # Attempt to fill the queue by reading from the IO instance.
     # Starts a new thread and returns the thread instance.
 
-    def try_read_from_io
+    def try_fill_queue
       Thread.new do
         loop do
-          break if !@io || @io.eof?
-          next  if @queue.length >= @concurrency * 2
+          break if !@number && (!@io || @io.eof?)
+          next if @queue.length >= @concurrency * 2
 
           max_new = @concurrency * 2 - @queue.length
 
           max_new.times do
-            req = request_from_io
+            req = next_request
             @queue << req if req
-
-            if @io.eof?
-              missing_num = @number.to_i - (@count + @queue.length)
-              @queue.concat Array.new(missing_num, req) if missing_num > 0
-              break
-            end
           end
         end
       end
@@ -193,7 +192,9 @@ class Kronk
     ##
     # Get one line from the IO instance and parse it into a kronk_opts hash.
 
-    def request_from_io
+    def next_request
+      return @queue.last || Hash.new if !@io || @io.eof?
+
       line = @io.gets.strip
 
       if @io_parser.respond_to? :call
@@ -231,10 +232,10 @@ class Kronk
     def process_compare uri1, uri2, opts={}
       kronk = Kronk.new opts
       kronk.compare uri1, uri2
-      @output.result kronk
+      @output.result kronk, @result_mutex
 
     rescue Kronk::Exception, Response::MissingParser, Errno::ECONNRESET => e
-      @output.error e, kronk
+      @output.error e, kronk, @result_mutex
     end
 
 
@@ -244,10 +245,10 @@ class Kronk
     def process_request uri, opts={}
       kronk = Kronk.new opts
       kronk.retrieve uri
-      @output.result kronk
+      @output.result kronk, @result_mutex
 
     rescue Kronk::Exception, Response::MissingParser, Errno::ECONNRESET => e
-      @output.error e, kronk
+      @output.error e, kronk, @result_mutex
     end
   end
 end

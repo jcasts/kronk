@@ -24,14 +24,10 @@ class Kronk
     end
 
 
-    attr_accessor :body, :bytes, :code, :headers, :parser,
-                  :raw, :request, :time, :uri
+    attr_accessor :body, :bytes, :byterate, :code, :headers, :parser,
+                  :raw, :request, :uri
 
-    ##
-    # Returns the encoding provided in the Content-Type header or
-    # "binary" if charset is unavailable.
-    # Returns "utf-8" if no content type header is missing.
-    attr_reader :encoding
+    attr_reader :encoding, :time
 
     alias to_hash headers
     alias to_s raw
@@ -75,6 +71,8 @@ class Kronk
       @parser = Kronk.parser_for @_res['Content-Type']
 
       @uri = @request.uri if @request && @request.uri
+
+      @byterate = 0
     end
 
 
@@ -281,6 +279,16 @@ class Kronk
     end
 
 
+    ##
+    # Assign how long the request took in seconds.
+
+    def time= new_time
+      @time = new_time
+      @byterate = @raw.bytes.count / @time if @raw && @time > 0
+      @time
+    end
+
+
     private
 
 
@@ -382,8 +390,9 @@ class Kronk
     def initialize body, file_ext=nil
       @body = body
       @raw  = body
+      @code = "200"
 
-      encoding = body.encoding rescue "UTF-8"
+      encoding = body.respond_to?(:encoding) ? body.encoding : "UTF-8"
 
       @header = {
         'Content-Type' => ["#{file_ext}; charset=#{encoding}"]

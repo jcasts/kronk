@@ -6,10 +6,10 @@ class Kronk
   class Player::Output
 
     ##
-    # New instance initializes @results and @start_time
+    # New instance initializes @player and @start_time
 
-    def initialize
-      @results    = []
+    def initialize player
+      @player     = player
       @start_time = Time.now
     end
 
@@ -26,14 +26,14 @@ class Kronk
     ##
     # Called after kronk was run without errors.
 
-    def result kronk
+    def result kronk, mutex=nil
     end
 
 
     ##
     # Called if an error was raised while running kronk.
 
-    def error err, kronk=nil
+    def error err, kronk=nil, mutex=nil
     end
 
 

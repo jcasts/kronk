@@ -230,12 +230,22 @@ Parse and run diffs against data from live and cached http responses.
 
         opt.on('-p', '--replay [FILE]',
                 'Replay the given file or STDIN against URIs') do |file|
-          options[:player][:io] = file && File.open(file, "r") || $stdin
+          options[:player][:io]   = File.open(file, "r") if file
+          options[:player][:io] ||= $stdin if !$stdin.tty?
+          options[:player][:number] ||= 1
+        end
+
+
+        opt.on('--benchmark [FILE]', 'Same as -p [FILE] -o benchmark') do |file|
+          options[:player][:io]   = File.open(file, "r") if file
+          options[:player][:io] ||= $stdin if !$stdin.tty?
+          options[:player][:output] = :benchmark
         end
 
 
         opt.on('--stream [FILE]', 'Same as -p [FILE] -o stream') do |file|
-          options[:player][:io] = file && File.open(file, "r") || $stdin
+          options[:player][:io]   = File.open(file, "r") if file
+          options[:player][:io] ||= $stdin if !$stdin.tty?
           options[:player][:output] = :stream
         end
 
@@ -335,14 +345,15 @@ Parse and run diffs against data from live and cached http responses.
 
       opts.parse! argv
 
-      options.delete :player if options[:player].empty?
-
       if options[:player]
         options[:player] = Player.new options[:player]
+      else
+        options.delete :player
+      end
 
-      elsif !$stdin.tty?
+      if !$stdin.tty? && !(options[:player] && options[:player].io)
         io = $stdin
-        io = StringIO.new $stdin.read if windows?
+        io = StringIO.new $stdin.read
         options[:uris] << io
       end
 
@@ -362,8 +373,9 @@ Parse and run diffs against data from live and cached http responses.
       options
 
     rescue => e
-      $stderr << "\nError: #{e.message}\n"
-      $stderr << "See 'kronk --help' for usage\n\n"
+      $stderr.puts "\nError: #{e.message}"
+      $stderr.puts e.backtrace if Kronk.config[:verbose]
+      $stderr.puts "See 'kronk --help' for usage\n\n"
       exit 1
     end
 
@@ -441,6 +453,8 @@ Parse and run diffs against data from live and cached http responses.
       uri1, uri2 = options.delete :uris
       runner     = options.delete(:player) || self
 
+      #runner.queue_req options if Player === runner
+
       if uri1 && uri2
         runner.compare uri1, uri2, options
       else
@@ -449,6 +463,7 @@ Parse and run diffs against data from live and cached http responses.
 
     rescue Kronk::Exception, Response::MissingParser, Errno::ECONNRESET => e
       $stderr << "\nError: #{e.message}\n"
+      $stderr << e.backtrace if Kronk.config[:verbose]
       exit 2
     end
 

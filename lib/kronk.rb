@@ -17,6 +17,7 @@ class Kronk
   require 'kronk/player/output'
   require 'kronk/player/suite'
   require 'kronk/player/stream'
+  require 'kronk/player/benchmark'
   require 'kronk/cmd'
   require 'kronk/path'
   require 'kronk/path/transaction'

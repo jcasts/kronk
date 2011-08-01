@@ -23,7 +23,7 @@ class Kronk
 
   class Player::Stream < Player::Output
 
-    def result kronk
+    def result kronk, mutex=nil
       output =
         if kronk.diff
           kronk.diff.formatted
