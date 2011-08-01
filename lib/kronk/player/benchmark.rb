@@ -66,6 +66,7 @@ class Kronk
 
 
       def log_path path, time
+        path = "/" if !path || path.empty?
         @paths[path] ||= [0, 0]
         pcount = @paths[path][1] + 1
         @paths[path][0] = (@paths[path][0] * @paths[path][1] + time) / pcount
