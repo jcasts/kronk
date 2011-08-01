@@ -55,7 +55,7 @@ class Kronk
         @slowest = time if !@slowest || @slowest < time
         @fastest = time if !@fastest || @fastest > time
 
-        log_path resp.uri, time if resp.uri
+        log_path resp.uri.path, time if resp.uri
 
         @total_bytes += resp.raw.bytes.count
 
@@ -77,8 +77,9 @@ class Kronk
       def deviation
         return @deviation if @deviation
 
-        times = @times.map{|time, count| time * count}
-        mdiff = times.inject(0){|a,b| a + (b-self.mean)**2}
+        mdiff = @times.to_a.inject(0) do |sum, (time, count)|
+                  sum + ((time-self.mean)**2) * count
+                end
 
         @deviation = ((mdiff / @count)**0.5).round @precision
       end
@@ -91,6 +92,17 @@ class Kronk
 
       def median
         @median ||= ((@slowest + @fastest) / 2).round @precision
+      end
+
+
+      def percentages
+        return @percentages if @percentages
+
+        @percentages = {}
+
+        @times.keys.sort.each do |time|
+          
+        end
       end
 
 
@@ -144,8 +156,7 @@ Request Percentages (ms)
         STR
 
         out << "
-
-Slowest Paths (ms)
+Avg. Slowest Paths (ms)
 #{slowest_paths.map{|arr| "  #{(arr[1])}  #{arr[0]}"}.join "\n" }" if @hostname
 
         out
