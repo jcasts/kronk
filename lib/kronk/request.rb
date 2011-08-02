@@ -5,6 +5,8 @@ class Kronk
 
   class Request
 
+    REQUEST_LINE_MATCHER = %r{([A-Za-z]+)?(^|[\s'"])(/[^\s'"]+)[\s"']*}
+
     ##
     # Creates a query string from data.
 
@@ -60,18 +62,27 @@ class Kronk
     # Parses a raw HTTP request-like string into a Kronk::Request instance.
 
     def self.parse str, opts={}
+      opts = parse_to_hash str, opts
+      new opts.delete(:host), opts
+    end
+
+
+    ##
+    # Parses a raw HTTP request-like string into a Kronk::Request options hash.
+
+    def self.parse_to_hash str, opts={}
       opts[:headers] ||= {}
       lines = str.split("\n")
 
       body_start = nil
-      uri        = nil
 
-      opts[:http_method], opts[:uri_suffix] = lines.shift.split
+      lines.shift.strip =~ REQUEST_LINE_MATCHER
+      opts[:http_method], opts[:uri_suffix] = $1, $3
 
       lines.each_with_index do |line, i|
         case line
         when /^Host: /
-          uri = line.split(": ", 2)[1].strip
+          opts[:host] = line.split(": ", 2)[1].strip
 
         when "", "\r"
           body_start = i+1
@@ -85,7 +96,7 @@ class Kronk
 
       opts[:data] = lines[body_start..-1].join("\n") if body_start
 
-      new uri, opts
+      opts
     end
 
 
