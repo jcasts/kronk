@@ -18,7 +18,7 @@ class Kronk
     # Parse a single http request kronk options hash.
 
     def self.parse string
-      Request.parse_to_hash string
+      Kronk::Request.parse_to_hash string
     end
   end
 end

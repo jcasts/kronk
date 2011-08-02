@@ -351,7 +351,7 @@ Parse and run diffs against data from live and cached http responses.
         options.delete :player
       end
 
-      if !$stdin.tty? && !(options[:player] && options[:player].io)
+      if !$stdin.tty? && !(options[:player] && options[:player].input.io)
         io = $stdin
         io = StringIO.new $stdin.read
         options[:uris] << io

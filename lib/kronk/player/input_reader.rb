@@ -9,9 +9,11 @@ class Kronk
 
   class Player::InputReader
 
+    attr_accessor :io, :parser
+
     def initialize string_or_io, parser=nil
       @buffer = []
-      @parser = parser || RequestParser
+      @parser = parser || Kronk::Player::RequestParser
       @io     = string_or_io
       @io     = StringIO.new(@io) if String === @io
     end
@@ -21,7 +23,7 @@ class Kronk
     # Parse the next request in the IO instance.
 
     def get_next
-      return if @io.eof? && @buffer.empty?
+      return if eof?
 
       @buffer << @io.gets if @buffer.empty?
 
@@ -32,6 +34,14 @@ class Kronk
 
       str = @io.eof? ? @buffer.join : @buffer.slice!(0..-2).join
       @parser.parse str
+    end
+
+
+    ##
+    # Returns true if there is no more input to read from.
+
+    def eof?
+      !@io || @io.eof? && @buffer.empty?
     end
   end
 end

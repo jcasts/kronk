@@ -8,7 +8,7 @@ class Kronk
     # Assigns http method to $1 and path info to $2.
     LOG_MATCHER = %r{([A-Za-z]+) (/[^\s"]+)[\s"]*}
 
-    attr_accessor :number, :concurrency, :queue, :count, :io
+    attr_accessor :number, :concurrency, :queue, :count, :input
 
     attr_reader :output
 
@@ -30,8 +30,7 @@ class Kronk
       @count     = nil
       @queue     = []
       @threads   = []
-      @io        = opts[:io]
-      @io_parser = opts[:parser] || LOG_MATCHER
+      @input     = InputReader.new opts[:io], opts[:parser]
 
       @result_mutex = Mutex.new
     end
@@ -78,8 +77,7 @@ class Kronk
     # Default parser is LOG_MATCHER.
 
     def from_io io, parser=nil
-      @io = io
-      @io_parser = parser if parser
+      @input = InputReader.new io, parser
     end
 
 
@@ -114,7 +112,7 @@ class Kronk
       # First check if we're only processing a single case.
       # If so, yield a single item and return immediately.
       @queue << next_request if @queue.empty? && (!@number || @number <= 1)
-      if @queue.length == 1 && (!@io || @io.eof?)
+      if @queue.length == 1 && @input.eof?
         yield @queue.shift, false
         return
       end
@@ -161,7 +159,7 @@ class Kronk
     def try_fill_queue
       Thread.new do
         loop do
-          break if !@number && (!@io || @io.eof?)
+          break if !@number && @input.eof?
           next if @queue.length >= @concurrency * 2
 
           max_new = @concurrency * 2 - @queue.length
@@ -179,19 +177,7 @@ class Kronk
     # Get one line from the IO instance and parse it into a kronk_opts hash.
 
     def next_request
-      return @queue.last || Hash.new if !@io || @io.eof?
-
-      line = @io.gets.strip
-
-      if @io_parser.respond_to? :call
-        @io_parser.call line
-
-      elsif Regexp === @io_parser && line =~ @io_parser
-        {:http_method => $1, :uri_suffix => $2}
-
-      elsif line && !line.empty?
-        {:uri_suffix => line}
-      end
+      @input.get_next || @queue.last || Hash.new
     end
 
 
@@ -200,7 +186,7 @@ class Kronk
 
     def finished?
       (@number && @count >= @number) || @queue.empty? &&
-      (!@io || @io && @io.eof?) && @count > 0
+      @input.eof? && @count > 0
     end
 
 
@@ -238,3 +224,6 @@ class Kronk
     end
   end
 end
+
+require 'kronk/player/request_parser'
+require 'kronk/player/input_reader'
