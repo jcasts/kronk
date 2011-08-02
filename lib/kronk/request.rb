@@ -69,6 +69,7 @@ class Kronk
 
     ##
     # Parses a raw HTTP request-like string into a Kronk::Request options hash.
+    # Also parses most single access log entries.
 
     def self.parse_to_hash str, opts={}
       opts[:headers] ||= {}
