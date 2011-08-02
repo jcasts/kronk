@@ -33,9 +33,18 @@ class Kronk
         end
 
       output = "#{output.length}\r\n#{output}\r\n"
-      $stdout << output
-      $stdout.flush
+
+      mutex.synchronize do
+        $stdout << output
+      end
+
       output
+    end
+
+
+    def completed
+      $stdout.flush
+      true
     end
   end
 end
