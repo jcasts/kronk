@@ -18,6 +18,8 @@ class Kronk
   require 'kronk/player/suite'
   require 'kronk/player/stream'
   require 'kronk/player/benchmark'
+  require 'kronk/player/request_parser'
+  require 'kronk/player/input_reader'
   require 'kronk/cmd'
   require 'kronk/path'
   require 'kronk/path/transaction'

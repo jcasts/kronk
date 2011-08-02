@@ -224,6 +224,3 @@ class Kronk
     end
   end
 end
-
-require 'kronk/player/request_parser'
-require 'kronk/player/input_reader'
