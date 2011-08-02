@@ -222,6 +222,8 @@ Avg. Slowest Paths (ms, #)
 
       render_head
       render_body
+
+      true
     end
 
 

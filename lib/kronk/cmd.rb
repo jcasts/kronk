@@ -453,13 +453,14 @@ Parse and run diffs against data from live and cached http responses.
       uri1, uri2 = options.delete :uris
       runner     = options.delete(:player) || self
 
-      #runner.queue_req options if Player === runner
+      success =
+        if uri1 && uri2
+          runner.compare uri1, uri2, options
+        else
+          runner.request uri1, options
+        end
 
-      if uri1 && uri2
-        runner.compare uri1, uri2, options
-      else
-        runner.request uri1, options
-      end
+      exit 1 unless success
 
     rescue Kronk::Exception, Response::MissingParser, Errno::ECONNRESET => e
       $stderr << "\nError: #{e.message}\n"
@@ -499,7 +500,7 @@ Parse and run diffs against data from live and cached http responses.
         puts "Found #{kronk.diff.count} diff(s)."
       end
 
-      exit 1 if kronk.diff.count > 0
+      kronk.diff.count == 0
     end
 
 
@@ -510,7 +511,7 @@ Parse and run diffs against data from live and cached http responses.
 
       verbose "\nResp. Time: #{kronk.response.time.to_f}"
 
-      exit 1 unless kronk.response.success?
+      kronk.response.success?
     end
 
 

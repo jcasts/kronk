@@ -39,8 +39,11 @@ class Kronk
 
     ##
     # Called after the queue is done being processed.
+    # If the return value is true-ish, command will exit with status 0,
+    # otherwise exits with status 1.
 
     def completed
+      true
     end
   end
 end

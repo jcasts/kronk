@@ -1,7 +1,6 @@
 class Kronk
 
-  # TODO: Allow for non-STDIN player usage
-  #       Add support for full HTTP Request parsing
+  # TODO: Add support for full HTTP Request parsing
   #       Make all parsers a class?
 
   class Player
@@ -163,8 +162,7 @@ class Kronk
 
       reader_thread.kill
 
-      success = output_results
-      exit 1 unless success
+      output_results
     end
 
 
