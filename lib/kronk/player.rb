@@ -1,7 +1,6 @@
 class Kronk
 
   # TODO: Add support for full HTTP Request parsing
-  #       Make all parsers a class?
 
   class Player
 
@@ -47,15 +46,9 @@ class Kronk
 
       klass =
         case new_output.to_s
-        when /^(Player::)?benchmark$/i
-          Benchmark
-
-        when /^(Player::)?stream$/i
-          Stream
-
-        when /^(Player::)?suite$/i
-          Suite
-
+        when /^(Player::)?benchmark$/i then Benchmark
+        when /^(Player::)?stream$/i    then Stream
+        when /^(Player::)?suite$/i     then Suite
         else
           Kronk.find_const new_output
         end
