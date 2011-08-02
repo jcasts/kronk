@@ -58,12 +58,12 @@ class Kronk
           total_time    += time.to_f
           bad_count     += 1
           failure_count += 1
-          err_buffer << "  #{bad_count}) Failure:\n#{text}"
+          err_buffer << "\n  #{bad_count}) Failure:\n#{text}"
 
         when "E"
           bad_count   += 1
           error_count += 1
-          err_buffer << "  #{bad_count}) Error:\n#{text}"
+          err_buffer << "\n  #{bad_count}) Error:\n#{text}"
 
         else
           total_time += time.to_f
@@ -75,9 +75,9 @@ class Kronk
       avg_time = non_error_count > 0 ? total_time / non_error_count  : "n/a"
       avg_qps  = non_error_count > 0 ? non_error_count / player_time : "n/a"
 
-      $stdout.puts "\nFinished in #{player_time} seconds.\n\n"
-      $stderr.puts err_buffer
-      $stdout.puts "#{@results.length} cases, " +
+      $stdout.puts "\nFinished in #{player_time} seconds.\n"
+      $stderr.puts err_buffer unless err_buffer.empty?
+      $stdout.puts "\n#{@results.length} cases, " +
                    "#{failure_count} failures, #{error_count} errors"
 
       $stdout.puts "Avg Time: #{avg_time}"
@@ -94,7 +94,6 @@ class Kronk
       <<-STR
   Request: #{kronk.response.code} - #{kronk.response.uri}
   Options: #{kronk.options.inspect}
-
       STR
     end
 
@@ -105,7 +104,6 @@ class Kronk
            #{kronk.responses[1].code} - #{kronk.responses[1].uri}
   Options: #{kronk.options.inspect}
   Diffs: #{kronk.diff.count}
-
       STR
     end
 
