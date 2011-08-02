@@ -39,6 +39,7 @@ class Kronk
     # path and options.
 
     def self.build_uri uri, options={}
+      uri  ||= Kronk.config[:default_host]
       suffix = options[:uri_suffix]
 
       uri = "http://#{uri}"   unless uri.to_s =~ %r{^(\w+://|/)}
@@ -58,31 +59,31 @@ class Kronk
     ##
     # Parses a raw HTTP request-like string into a Kronk::Request instance.
 
-    def self.parse str
-      opts  = {:headers => {}}
+    def self.parse str, opts={}
+      opts[:headers] ||= {}
       lines = str.split("\n")
 
       body_start = nil
+      uri        = nil
 
-      opts[:http_method], path = lines.shift.split
-      uri = URI.parse path
+      opts[:http_method], opts[:uri_suffix] = lines.shift.split
 
       lines.each_with_index do |line, i|
         case line
-        when "Host"
-          uri.host = line.split(": ", 2)[1].strip
+        when /^Host: /
+          uri = line.split(": ", 2)[1].strip
 
-        when ""
+        when "", "\r"
           body_start = i+1
           break
 
         else
-          name, value = line.split(": ", 1)
+          name, value = line.split(": ", 2)
           opts[:headers][name] = value.strip
         end
       end
 
-      otps[:data] = lines[body_start..-1].join("\n")
+      opts[:data] = lines[body_start..-1].join("\n") if body_start
 
       new uri, opts
     end
@@ -339,9 +340,13 @@ class Kronk
 
     def to_s
       out = "#{@http_method} #{@uri.request_uri} HTTP/1.1\r\n"
-      out << "Host: #{@uri.host}\r\n"
-      @headers.each{|name, val| out << "#{name}: #{value}\r\n" }
-      out << "\r\n\r\n"
+      out << "Host: #{@uri.host}:#{@uri.port}\r\n"
+
+      @headers.each do |name, value|
+        out << "#{name}: #{value}\r\n" unless name =~ /host/i
+      end
+
+      out << "\r\n"
       out << @body.to_s
     end
 
