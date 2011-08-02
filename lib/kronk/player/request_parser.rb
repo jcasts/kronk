@@ -2,39 +2,22 @@ class Kronk
 
   ##
   # Stream-friendly HTTP Request parser for piping into the Kronk player.
-  #
+  # Uses Kronk::Request for parsing.
 
   class Player::RequestParser
 
-    def initialize string_or_io=nil
-      @buffer = []
-      @io     = string_or_io
-      @io     = StringIO.new(@io) if String === @io
+    ##
+    # Returns true-ish if the line given is the start of a new request.
+
+    def self.start_new? line
+      line =~ Request::REQUEST_LINE_MATCHER
     end
 
 
     ##
-    # Parse the next request in the IO instance.
+    # Parse a single http request kronk options hash.
 
-    def get_next
-      return if !@io || @io.eof? && @buffer.empty?
-
-      @buffer << @io.gets if @buffer.empty?
-
-      line = ""
-      until line =~ Request::REQUEST_LINE_MATCHER || @io.eof?
-        @buffer << (line = @io.gets)
-      end
-
-      str = @io.eof? ? @buffer.join : @buffer.slice!(0..-2).join
-      parse str
-    end
-
-
-    ##
-    # Parse a single http request.
-
-    def parse string
+    def self.parse string
       Request.parse_to_hash string
     end
   end
