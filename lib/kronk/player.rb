@@ -140,18 +140,13 @@ class Kronk
       @count = 0
 
       until finished?
-        while @threads.length >= @concurrency || @queue.empty?
-          sleep 0.1
-        end
+        @threads.delete_if{|t| !t.alive? }
+        next if @threads.length >= @concurrency || @queue.empty?
 
         kronk_opts = @queue.shift
 
         @threads << Thread.new(kronk_opts) do |thread_opts|
-          begin
-            yield thread_opts, true
-          ensure
-            @threads.delete Thread.current
-          end
+          yield thread_opts, true
         end
 
         @count += 1
