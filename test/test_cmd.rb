@@ -131,6 +131,91 @@ class TestCmd < Test::Unit::TestCase
   end
 
 
+  def test_parse_args_diff_format_mapping
+    with_config Hash.new do
+      opts = Kronk::Cmd.parse_args %w{uri --ascii}
+      assert_equal :ascii_diff, Kronk.config[:diff_format]
+
+      opts = Kronk::Cmd.parse_args %w{uri --color}
+      assert_equal :color_diff, Kronk.config[:diff_format]
+
+      opts = Kronk::Cmd.parse_args %w{uri --format color}
+      assert_equal 'color', Kronk.config[:diff_format]
+    end
+  end
+
+
+  def test_parse_args_completion
+    with_config Hash.new do
+      file = File.join(File.dirname(__FILE__), "../script/kronk_completion")
+      $stdout.expects(:puts).with File.expand_path(file)
+
+      assert_exit 2 do
+        Kronk::Cmd.parse_args %w{--completion}
+      end
+    end
+  end
+
+
+  def test_parse_args_config
+    with_config Hash.new do
+      YAML.expects(:load_file).with("foobar").returns :foo => "bar"
+      Kronk::Cmd.parse_args %w{uri --config foobar}
+      assert_equal "bar", Kronk.config[:foo]
+    end
+  end
+
+
+  def test_parse_args_kronk_configs
+    with_config Hash.new do
+      Kronk::Cmd.parse_args %w{uri -q -l --no-opts -V -t 1234}
+      assert Kronk.config[:brief]
+      assert Kronk.config[:show_lines]
+      assert Kronk.config[:no_uri_options]
+      assert Kronk.config[:verbose]
+      assert_equal 1234, Kronk.config[:timeout]
+    end
+  end
+
+
+  def test_parse_args_headers
+    opts = Kronk::Cmd.parse_args %w{uri -i FOO -i BAR -iTWO,PART}
+    assert_equal %w{FOO BAR TWO PART}, opts[:with_headers]
+    assert_equal false, opts[:no_body]
+
+    opts = Kronk::Cmd.parse_args %w{uri -I}
+    assert_equal true, opts[:with_headers]
+    assert_equal true, opts[:no_body]
+
+    opts = Kronk::Cmd.parse_args %w{uri -I FOO -I BAR -ITWO,PART}
+    assert_equal %w{FOO BAR TWO PART}, opts[:with_headers]
+    assert_equal true, opts[:no_body]
+
+    opts = Kronk::Cmd.parse_args %w{uri -i}
+    assert_equal true, opts[:with_headers]
+    assert_equal false, opts[:no_body]
+  end
+
+
+  def test_parse_args_kronk_options
+    opts = Kronk::Cmd.parse_args %w{uri1 uri2 --indicies --irb -P FOO
+             --prev -R --struct -r lib1,lib2 -rlib3}
+
+    assert_equal [Kronk.config[:cache_file], "uri1"], opts[:uris]
+    assert_equal true, opts[:keep_indicies]
+    assert_equal true, opts[:irb]
+    assert_equal true, opts[:raw]
+    assert_equal true, opts[:struct]
+    assert_equal %w{lib1 lib2 lib3}, opts[:requires]
+    assert_equal "FOO", opts[:parser]
+  end
+
+
+  def test_parse_args_player_options
+    
+  end
+
+
   def test_compare
     io1  = StringIO.new(mock_200_response)
     io2  = StringIO.new(mock_200_response)

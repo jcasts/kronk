@@ -44,7 +44,7 @@ class Kronk
   # Load a config file and apply to Kronk.config.
 
   def self.load_config filepath=DEFAULT_CONFIG_FILE
-    conf = YAML.load_file DEFAULT_CONFIG_FILE
+    conf = YAML.load_file filepath
 
     self.config[:requires].concat [*conf.delete(:requires)] if conf[:requires]
 

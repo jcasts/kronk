@@ -101,7 +101,9 @@ Parse and run diffs against data from live and cached http responses.
 
 
         opt.on('--completion', 'Print bash completion file path and exit') do
-          file = File.join(File.dirname(__FILE__), "../script/kronk_completion")
+          file = File.join(File.dirname(__FILE__),
+                    "../../script/kronk_completion")
+
           puts File.expand_path(file)
           exit 2
         end
@@ -134,6 +136,8 @@ Parse and run diffs against data from live and cached http responses.
           else
             options[:with_headers] = true
           end
+
+          options[:no_body] = false
         end
 
 

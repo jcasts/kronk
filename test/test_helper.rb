@@ -70,6 +70,28 @@ def assert_require req, msg=nil
 end
 
 
+$catch_exit = nil
+alias kernel_exit exit
+def exit status=true
+  if $catch_exit
+    throw :exited, status
+  end
+  kernel_exit status
+end
+
+
+def assert_exit num=true
+  $catch_exit = true
+  status = catch :exited do
+    yield if block_given?
+  end
+  $catch_exit = false
+
+  assert_equal num,status,
+    "Expected exit status #{num.inspect} but got #{status.inspect}"
+end
+
+
 IRB = Module.new
 def with_irb_mock
   mock_require "irb"
@@ -87,10 +109,12 @@ end
 
 
 def with_config config={}
-  old_conf = Kronk.config.dup
-  Kronk.config.merge! config
+  old_conf = Kronk.config
+  Kronk.instance_variable_set "@config", Kronk.config.merge(config)
   yield
-  Kronk.config.replace old_conf
+
+ensure
+  Kronk.instance_variable_set "@config", old_conf
 end
 
 
