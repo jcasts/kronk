@@ -39,8 +39,11 @@ test/mocks/200_response.txt
 test/mocks/200_response.xml
 test/mocks/301_response.txt
 test/mocks/302_response.txt
+test/mocks/cookies.yml
+test/mocks/irb.rb
 test/test_assertions.rb
 test/test_core_ext.rb
+test/test_cmd.rb
 test/test_helper_methods.rb
 test/test_data_set.rb
 test/test_diff.rb

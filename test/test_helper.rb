@@ -42,6 +42,23 @@ def mock_data
 end
 
 
+
+IRB = Module.new
+def with_irb_mock
+  $:.unshift "test/mocks"
+
+  $stdout.expects(:puts).with "\nHTTP Response is in $http_response"
+  $stdout.expects(:puts).with "Response data is in $response\n\n"
+  ::IRB.expects :start
+
+  yield
+
+  $http_response = nil
+  $response = nil
+  $:.delete "test/mocks"
+end
+
+
 def expect_request req_method, url, options={}
   uri  = URI.parse url
 

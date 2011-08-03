@@ -372,12 +372,11 @@ class Kronk
 
   ##
   # Assign responses to instance variables, cache the last
-  # response, and launch IRB if needed.
+  # response.
 
   def post_process_responses *resps
     @responses = resps
     @response  = resps.last
     cache_response
-    Cmd.irb @response if @options[:irb]
   end
 end

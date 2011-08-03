@@ -22,7 +22,6 @@ class Kronk
       puts "Response data is in $response\n\n"
 
       IRB.start
-      exit 1
     end
 
 
@@ -472,18 +471,23 @@ Parse and run diffs against data from live and cached http responses.
     def self.compare uri1, uri2, options
       kronk = Kronk.new options
       kronk.compare uri1, uri2
-      render kronk
+      render kronk, options
     end
 
 
     def self.request uri, options
       kronk = Kronk.new options
       kronk.retrieve uri
-      render kronk
+      render kronk, options
     end
 
 
-    def self.render kronk
+    def self.render kronk, options
+      if options[:irb]
+        irb kronk.response
+        return false
+      end
+
       if kronk.diff
         render_diff kronk
 
