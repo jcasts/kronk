@@ -22,6 +22,7 @@ class Kronk
       puts "Response data is in $response\n\n"
 
       IRB.start
+      false
     end
 
 
@@ -435,7 +436,7 @@ Parse and run diffs against data from live and cached http responses.
 
       Kronk.load_cookie_jar
 
-      load_requires options[:requires]
+      load_requires options.delete(:requires)
 
       at_exit do
         Kronk.save_cookie_jar
@@ -468,14 +469,14 @@ Parse and run diffs against data from live and cached http responses.
     end
 
 
-    def self.compare uri1, uri2, options
+    def self.compare uri1, uri2, options={}
       kronk = Kronk.new options
       kronk.compare uri1, uri2
       render kronk, options
     end
 
 
-    def self.request uri, options
+    def self.request uri, options={}
       kronk = Kronk.new options
       kronk.retrieve uri
       render kronk, options
@@ -485,37 +486,35 @@ Parse and run diffs against data from live and cached http responses.
     def self.render kronk, options
       if options[:irb]
         irb kronk.response
-        return false
-      end
 
-      if kronk.diff
-        render_diff kronk
+      elsif kronk.diff
+        render_diff kronk.diff
 
       elsif kronk.response
-        render_response kronk
+        render_response kronk.response, kronk.options
       end
     end
 
 
-    def self.render_diff kronk
-      puts kronk.diff.formatted unless Kronk.config[:brief]
+    def self.render_diff diff
+      puts diff.formatted unless Kronk.config[:brief]
 
       if Kronk.config[:verbose] || Kronk.config[:brief]
-        puts "Found #{kronk.diff.count} diff(s)."
+        puts "Found #{diff.count} diff(s)."
       end
 
-      kronk.diff.count == 0
+      diff.count == 0
     end
 
 
-    def self.render_response kronk
-      str = kronk.response.stringify kronk.options
+    def self.render_response response, options={}
+      str = response.stringify options
       str = Diff.insert_line_nums str if Kronk.config[:show_lines]
       puts str
 
-      verbose "\nResp. Time: #{kronk.response.time.to_f}"
+      verbose "\nResp. Time: #{response.time.to_f}"
 
-      kronk.response.success?
+      response.success?
     end
 
 

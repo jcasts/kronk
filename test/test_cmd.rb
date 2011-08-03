@@ -6,7 +6,7 @@ class TestCmd < Test::Unit::TestCase
     with_irb_mock do
       resp = Kronk::Response.new mock_resp("200_response.json")
 
-      Kronk::Cmd.irb resp
+      assert !Kronk::Cmd.irb(resp)
 
       assert_equal resp, $http_response
       assert_equal resp.parsed_body, $response
@@ -113,12 +113,176 @@ class TestCmd < Test::Unit::TestCase
   end
 
 
+  def test_query_password
+    $stderr.expects(:<<).with "Password: "
+    $stdin.expects(:gets).returns "mock_password\n"
+    $stderr.expects(:<<).with "\n"
+
+    Kronk::Cmd.query_password
+  end
+
+
+  def test_query_password_custom
+    $stderr.expects(:<<).with "SAY IT: "
+    $stdin.expects(:gets).returns "mock_password\n"
+    $stderr.expects(:<<).with "\n"
+
+    Kronk::Cmd.query_password "SAY IT:"
+  end
+
+
+  def test_compare
+    io1  = StringIO.new(mock_200_response)
+    io2  = StringIO.new(mock_200_response)
+
+    body = mock_200_response.split("\r\n\r\n")[1]
+    diff = Kronk::Diff.new(body, body)
+
+    $stdout.expects(:puts).with diff.formatted
+
+    assert Kronk::Cmd.compare(io1, io2), "Expected no diff to succeed"
+  end
+
+
+  def test_compare_failed
+    io1  = StringIO.new(mock_200_response)
+    io2  = StringIO.new(mock_302_response)
+
+    body1 = mock_200_response.split("\r\n\r\n")[1]
+    body2 = mock_302_response.split("\r\n\r\n")[1]
+    diff  = Kronk::Diff.new(body1, body2)
+
+    $stdout.expects(:puts).with diff.formatted
+
+    assert !Kronk::Cmd.compare(io1, io2), "Expected diffs to fail"
+  end
+
+
+  def test_request
+    io = StringIO.new(mock_200_response)
+    $stdout.expects(:puts).with(mock_200_response.split("\r\n\r\n")[1])
+
+    assert Kronk::Cmd.request(io), "Expected 200 response to succeed"
+  end
+
+
+  def test_request_failed
+    io = StringIO.new(mock_302_response)
+    $stdout.expects(:puts).with(mock_302_response.split("\r\n\r\n")[1])
+
+    assert !Kronk::Cmd.request(io), "Expected 302 response to fail"
+  end
+
+
+  def test_render_with_irb
+    kronk = Kronk.new
+    io1   = StringIO.new(mock_200_response)
+    io2   = StringIO.new(mock_200_response)
+
+    kronk.compare io1, io2
+    $stdout.expects(:puts).with(kronk.diff.formatted).never
+
+    with_irb_mock do
+      assert !Kronk::Cmd.render(kronk, :irb => true),
+        "Expected IRB rendering to return false"
+    end
+  end
+
+
+  def test_render_with_diff
+    kronk = Kronk.new
+    io1   = StringIO.new(mock_200_response)
+    io2   = StringIO.new(mock_200_response)
+
+    kronk.compare io1, io2
+    $stdout.expects(:puts).with(kronk.diff.formatted).times 2
+
+    assert_equal Kronk::Cmd.render_diff(kronk.diff),
+                 Kronk::Cmd.render(kronk, {})
+  end
+
+
+  def test_render_with_response
+    kronk = Kronk.new
+    io    = StringIO.new(mock_200_response)
+
+    kronk.retrieve io
+    $stdout.expects(:puts).with(kronk.response.stringify).times 2
+
+    assert_equal Kronk::Cmd.render_response(kronk.response),
+                 Kronk::Cmd.render(kronk, {})
+  end
+
+
+  def test_render_diff
+    kronk = Kronk.new
+    io1   = StringIO.new(mock_200_response)
+    io2   = StringIO.new(mock_200_response)
+
+    kronk.compare io1, io2
+
+    $stdout.expects(:puts).with kronk.diff.formatted
+    $stdout.expects(:puts).with("Found 0 diff(s).").never
+
+    assert Kronk::Cmd.render_diff(kronk.diff), "Expected no diff to succeed"
+  end
+
+
+  def test_render_diff_verbose_failed
+    kronk = Kronk.new
+    io1   = StringIO.new(mock_200_response)
+    io2   = StringIO.new(mock_302_response)
+
+    kronk.compare io1, io2
+
+    $stdout.expects(:puts).with kronk.diff.formatted
+    $stdout.expects(:puts).with "Found 1 diff(s)."
+
+    with_config :verbose => true do
+      assert !Kronk::Cmd.render_diff(kronk.diff), "Expected diffs to fail"
+    end
+  end
+
+
+  def test_render_diff_verbose
+    kronk = Kronk.new
+    io1   = StringIO.new(mock_200_response)
+    io2   = StringIO.new(mock_200_response)
+
+    kronk.compare io1, io2
+
+    $stdout.expects(:puts).with kronk.diff.formatted
+    $stdout.expects(:puts).with "Found 0 diff(s)."
+
+    with_config :verbose => true do
+      assert Kronk::Cmd.render_diff(kronk.diff), "Expected no diff to succeed"
+    end
+  end
+
+
+  def test_render_diff_brief
+    kronk = Kronk.new
+    io1   = StringIO.new(mock_200_response)
+    io2   = StringIO.new(mock_200_response)
+
+    kronk.compare io1, io2
+
+    $stdout.expects(:puts).with(kronk.diff.formatted).never
+    $stdout.expects(:puts).with "Found 0 diff(s)."
+
+    with_config :brief => true do
+      assert Kronk::Cmd.render_diff(kronk.diff), "Expected no diff to succeed"
+    end
+  end
+
+
   def test_render_response
     kronk = Kronk.new
     kronk.retrieve StringIO.new(mock_200_response)
 
     $stdout.expects(:puts).with kronk.response.stringify
-    assert Kronk::Cmd.render_response(kronk), "Expected render_response success"
+    assert Kronk::Cmd.render_response(kronk.response),
+      "Expected render_response success for 200"
   end
 
 
@@ -130,7 +294,7 @@ class TestCmd < Test::Unit::TestCase
       expected = Kronk::Diff.insert_line_nums kronk.response.stringify
       $stdout.expects(:puts).with expected
 
-      assert Kronk::Cmd.render_response(kronk),
+      assert Kronk::Cmd.render_response(kronk.response),
         "Expected render_response success"
     end
   end
@@ -148,7 +312,7 @@ class TestCmd < Test::Unit::TestCase
       $stdout.expects(:puts).with expected
       $stdout.expects(:<<).with "\nResp. Time: #{kronk.response.time.to_f}\n"
 
-      assert Kronk::Cmd.render_response(kronk),
+      assert Kronk::Cmd.render_response(kronk.response),
         "Expected render_response success"
     end
   end
@@ -159,7 +323,7 @@ class TestCmd < Test::Unit::TestCase
     kronk.retrieve StringIO.new(mock_302_response)
 
     $stdout.expects(:puts).with kronk.response.stringify
-    assert !Kronk::Cmd.render_response(kronk),
+    assert !Kronk::Cmd.render_response(kronk.response),
       "Expected render_response to fail on 302"
   end
 
