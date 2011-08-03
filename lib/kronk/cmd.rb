@@ -539,7 +539,8 @@ Parse and run diffs against data from live and cached http responses.
     # Returns true if kronk is running on ruby for windows.
 
     def self.windows?
-      !!(RUBY_PLATFORM.downcase =~ /mswin|mingw|cygwin/)
+      $RUBY_PLATFORM ||= RUBY_PLATFORM
+      !!($RUBY_PLATFORM.downcase =~ /mswin|mingw|cygwin/)
     end
   end
 end

@@ -63,6 +63,13 @@ def require str
 end
 
 
+def assert_require req, msg=nil
+  assert MOCK_REQUIRES.has_key?(req), msg || "Expected mock require '#{req}'"
+  assert_equal 0, MOCK_REQUIRES[req],
+    msg || "Expected require '#{req}' #{MOCK_REQUIRES[req]} more times"
+end
+
+
 IRB = Module.new
 def with_irb_mock
   mock_require "irb"
@@ -76,6 +83,14 @@ def with_irb_mock
   $http_response = nil
   $response = nil
   clear_mock_require 'irb'
+end
+
+
+def with_config config={}
+  old_conf = Kronk.config.dup
+  Kronk.config.merge! config
+  yield
+  Kronk.config.replace old_conf
 end
 
 
