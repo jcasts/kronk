@@ -6,7 +6,7 @@ class Kronk
   class Cmd
 
     ##
-    # Start an IRB console with the given http response object.
+    # Start an IRB console with the given Kronk::Response object.
 
     def self.irb resp
       require 'irb'

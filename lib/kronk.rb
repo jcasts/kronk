@@ -378,6 +378,6 @@ class Kronk
     @responses = resps
     @response  = resps.last
     cache_response
-    Cmd.irb resp if @options[:irb]
+    Cmd.irb @response if @options[:irb]
   end
 end
