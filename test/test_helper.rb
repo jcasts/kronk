@@ -41,11 +41,31 @@ def mock_data
   }
 end
 
+MOCK_REQUIRES = Hash.new 0
+
+def mock_require str
+  MOCK_REQUIRES[str] += 1
+end
+
+
+def clear_mock_require str
+  MOCK_REQUIRES.delete str
+end
+
+
+alias kernel_require require
+def require str
+  if MOCK_REQUIRES[str] > 0
+    MOCK_REQUIRES[str] = MOCK_REQUIRES[str] - 1
+    return
+  end
+  kernel_require str
+end
 
 
 IRB = Module.new
 def with_irb_mock
-  $:.unshift "test/mocks"
+  mock_require "irb"
 
   $stdout.expects(:puts).with "\nHTTP Response is in $http_response"
   $stdout.expects(:puts).with "Response data is in $response\n\n"
@@ -55,7 +75,7 @@ def with_irb_mock
 
   $http_response = nil
   $response = nil
-  $:.delete "test/mocks"
+  clear_mock_require 'irb'
 end
 
 
