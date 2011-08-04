@@ -328,6 +328,7 @@ class TestKronk < Test::Unit::TestCase
 
 
   def test_clear_cookies
+    Kronk.instance_variable_set "@cookie_jar", nil
     mock_cookie_jar = YAML.load_file("test/mocks/cookies.yml")
 
     File.expects(:file?).with(Kronk::DEFAULT_COOKIES_FILE).returns true

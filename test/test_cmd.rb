@@ -372,8 +372,91 @@ class TestCmd < Test::Unit::TestCase
     $stderr.expects(:puts).with "\nError: You must enter at least one URI"
     $stderr.expects(:puts).with "See 'kronk --help' for usage\n\n"
 
-    assert_exit 1 do
+    assert_exit 2 do
       opts = Kronk::Cmd.parse_args %w{}
+    end
+  end
+
+
+  def test_run_compare
+    Kronk.expects(:load_config)
+    expect_compare_output mock_200_response
+
+    file = File.join(File.dirname(__FILE__), "mocks/200_response.txt")
+    file = File.expand_path file
+
+    Kronk::Cmd.run [file, file]
+  end
+
+
+  def test_run_compare_diff
+    Kronk.expects(:load_config)
+    expect_compare_output mock_200_response, mock_302_response
+
+    file1 = File.join(File.dirname(__FILE__), "mocks/200_response.txt")
+    file2 = File.join(File.dirname(__FILE__), "mocks/302_response.txt")
+    file1 = File.expand_path file1
+    file2 = File.expand_path file2
+
+    assert_exit 1 do
+      Kronk::Cmd.run [file1, file2]
+    end
+  end
+
+
+  def test_run_request
+    Kronk.expects(:load_config)
+    expect_request_output mock_200_response
+
+    file = File.join(File.dirname(__FILE__), "mocks/200_response.txt")
+    file = File.expand_path file
+
+    Kronk::Cmd.run [file]
+  end
+
+
+  def test_run_request_not_200
+    Kronk.expects(:load_config)
+    expect_request_output mock_302_response
+
+    file = File.join(File.dirname(__FILE__), "mocks/302_response.txt")
+    file = File.expand_path file
+
+    assert_exit 1 do
+      Kronk::Cmd.run [file]
+    end
+  end
+
+
+  def test_run_caught_errors
+    errs = {
+      Kronk::Exception               => "Kronk::Exception",
+      Kronk::Response::MissingParser => "Kronk::Response::MissingParser",
+      Errno::ECONNRESET              => "Connection reset by peer"
+    }
+
+    errs.each do |err, msg|
+      Kronk.expects(:load_config)
+      expect_error_output msg
+      Kronk::Cmd.expects(:request).raises(err)
+
+      assert_exit 2 do
+        Kronk::Cmd.run ["foobar"]
+      end
+    end
+  end
+
+
+  def test_run_no_config_file
+    Kronk.expects(:load_config).raises Errno::ENOENT
+    Kronk::Cmd.expects(:make_config_file)
+
+    expect_error_output "No config file was found.\n" +
+              "Created default config in #{Kronk::DEFAULT_CONFIG_FILE}\n" +
+              "Edit file if necessary and try again.\n"
+
+    assert_exit 2 do
+      Kronk::Cmd.run ["foobar"]
     end
   end
 
@@ -382,10 +465,7 @@ class TestCmd < Test::Unit::TestCase
     io1  = StringIO.new(mock_200_response)
     io2  = StringIO.new(mock_200_response)
 
-    body = mock_200_response.split("\r\n\r\n")[1]
-    diff = Kronk::Diff.new(body, body)
-
-    $stdout.expects(:puts).with diff.formatted
+    expect_compare_output mock_200_response
 
     assert Kronk::Cmd.compare(io1, io2), "Expected no diff to succeed"
   end
@@ -394,12 +474,7 @@ class TestCmd < Test::Unit::TestCase
   def test_compare_failed
     io1  = StringIO.new(mock_200_response)
     io2  = StringIO.new(mock_302_response)
-
-    body1 = mock_200_response.split("\r\n\r\n")[1]
-    body2 = mock_302_response.split("\r\n\r\n")[1]
-    diff  = Kronk::Diff.new(body1, body2)
-
-    $stdout.expects(:puts).with diff.formatted
+    expect_compare_output mock_200_response, mock_302_response
 
     assert !Kronk::Cmd.compare(io1, io2), "Expected diffs to fail"
   end
@@ -407,7 +482,7 @@ class TestCmd < Test::Unit::TestCase
 
   def test_request
     io = StringIO.new(mock_200_response)
-    $stdout.expects(:puts).with(mock_200_response.split("\r\n\r\n")[1])
+    expect_request_output mock_200_response
 
     assert Kronk::Cmd.request(io), "Expected 200 response to succeed"
   end
@@ -415,7 +490,7 @@ class TestCmd < Test::Unit::TestCase
 
   def test_request_failed
     io = StringIO.new(mock_302_response)
-    $stdout.expects(:puts).with(mock_302_response.split("\r\n\r\n")[1])
+    expect_request_output mock_302_response
 
     assert !Kronk::Cmd.request(io), "Expected 302 response to fail"
   end
@@ -442,7 +517,7 @@ class TestCmd < Test::Unit::TestCase
     io2   = StringIO.new(mock_200_response)
 
     kronk.compare io1, io2
-    $stdout.expects(:puts).with(kronk.diff.formatted).times 2
+    expect_compare_output mock_200_response, :times => 2
 
     assert_equal Kronk::Cmd.render_diff(kronk.diff),
                  Kronk::Cmd.render(kronk, {})
@@ -454,7 +529,7 @@ class TestCmd < Test::Unit::TestCase
     io    = StringIO.new(mock_200_response)
 
     kronk.retrieve io
-    $stdout.expects(:puts).with(kronk.response.stringify).times 2
+    expect_request_output mock_200_response, :times => 2
 
     assert_equal Kronk::Cmd.render_response(kronk.response),
                  Kronk::Cmd.render(kronk, {})
@@ -572,6 +647,25 @@ class TestCmd < Test::Unit::TestCase
     $stdout.expects(:puts).with kronk.response.stringify
     assert !Kronk::Cmd.render_response(kronk.response),
       "Expected render_response to fail on 302"
+  end
+
+
+  def test_error
+    msg = "OH NOES!"
+    $stderr.expects(:puts).with("\nError: #{msg}").twice
+    Kronk::Cmd.error msg, "This is bad!"
+    Kronk::Cmd.error msg
+  end
+
+
+  def test_error_verbose
+    msg = "OH NOES!"
+    $stderr.expects(:puts).with "\nError: #{msg}"
+    $stderr.expects(:puts).with "This is bad!"
+
+    with_config :verbose => true do
+      Kronk::Cmd.error msg, "This is bad!"
+    end
   end
 
 

@@ -92,6 +92,30 @@ def assert_exit num=true
 end
 
 
+def expect_compare_output str1, str2=nil, opts={}
+  opts = str2 if opts.empty? && Hash === str2
+  str2 = str1 if !str2 || Hash === str2
+  tim  = opts.delete(:times) || 1
+
+  kronk = Kronk.new opts
+  kronk.compare StringIO.new(str1), StringIO.new(str2)
+
+  $stdout.expects(:puts).with(kronk.diff.formatted).times(tim)
+end
+
+
+def expect_request_output str, opts={}
+  res = Kronk::Response.new str
+  tim = opts.delete(:times) || 1
+  $stdout.expects(:puts).with(res.stringify opts).times(tim)
+end
+
+
+def expect_error_output str
+  $stderr.expects(:puts).with "\nError: #{str}"
+end
+
+
 IRB = Module.new
 def with_irb_mock
   mock_require "irb"

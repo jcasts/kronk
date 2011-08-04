@@ -377,10 +377,9 @@ Parse and run diffs against data from live and cached http responses.
       options
 
     rescue => e
-      $stderr.puts "\nError: #{e.message}"
-      $stderr.puts e.backtrace if Kronk.config[:verbose]
+      error e.message, e.backtrace
       $stderr.puts "See 'kronk --help' for usage\n\n"
-      exit 1
+      exit 2
     end
 
 
@@ -429,10 +428,9 @@ Parse and run diffs against data from live and cached http responses.
 
       rescue Errno::ENOENT
         make_config_file
-
-        $stderr << "\nNo config file was found.\n"
-        $stderr << "Created default config in #{DEFAULT_CONFIG_FILE}\n"
-        $stderr << "Edit file if necessary and try again.\n"
+        error "No config file was found.\n" +
+              "Created default config in #{DEFAULT_CONFIG_FILE}\n" +
+              "Edit file if necessary and try again.\n"
         exit 2
       end
 
@@ -467,8 +465,7 @@ Parse and run diffs against data from live and cached http responses.
       exit 1 unless success
 
     rescue Kronk::Exception, Response::MissingParser, Errno::ECONNRESET => e
-      $stderr << "\nError: #{e.message}\n"
-      $stderr << e.backtrace if Kronk.config[:verbose]
+      error e.message, e.backtrace
       exit 2
     end
 
@@ -511,6 +508,10 @@ Parse and run diffs against data from live and cached http responses.
     end
 
 
+    ##
+    # Output a Kronk::Response instance. Returns true if response code
+    # is in the 200 range.
+
     def self.render_response response, options={}
       str = response.stringify options
       str = Diff.insert_line_nums str if Kronk.config[:show_lines]
@@ -519,6 +520,15 @@ Parse and run diffs against data from live and cached http responses.
       verbose "\nResp. Time: #{response.time.to_f}"
 
       response.success?
+    end
+
+
+    ##
+    # Print and error string
+
+    def self.error str, more=nil
+      $stderr.puts "\nError: #{str}"
+      $stderr.puts more if Kronk.config[:verbose] && more
     end
 
 
