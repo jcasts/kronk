@@ -275,8 +275,8 @@ Parse and run diffs against data from live and cached http responses.
                'Header to pass to the server request') do |value|
           options[:headers] ||= {}
 
-          key, value = value.split ": ", 2
-          options[:headers][key] = value.strip
+          key, value = value.split /:\s*/, 2
+          options[:headers][key] = value.to_s.strip
         end
 
 
@@ -349,7 +349,7 @@ Parse and run diffs against data from live and cached http responses.
 
       opts.parse! argv
 
-      if options[:player]
+      unless options[:player].empty?
         options[:player] = Player.new options[:player]
       else
         options.delete :player
@@ -364,15 +364,15 @@ Parse and run diffs against data from live and cached http responses.
       options[:uris].concat argv
       options[:uris].slice!(2..-1)
 
-      if options[:uris].empty? && File.file?(Kronk.config[:cache_file])
+      if options[:uris].empty? && File.file?(Kronk.config[:cache_file]) &&
+       options[:player].nil?
         verbose "No URI specified - using kronk cache"
         options[:uris] << Kronk.config[:cache_file]
       end
 
       argv.clear
 
-      raise OptionParser::MissingArgument, "You must enter at least one URI" if
-        options[:uris].empty?
+      raise "You must enter at least one URI" if options[:uris].empty?
 
       options
 

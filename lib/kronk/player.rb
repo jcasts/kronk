@@ -1,7 +1,5 @@
 class Kronk
 
-  # TODO: Add support for full HTTP Request parsing
-
   class Player
 
     # Matcher to parse request from.

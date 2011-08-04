@@ -212,7 +212,169 @@ class TestCmd < Test::Unit::TestCase
 
 
   def test_parse_args_player_options
-    
+    opts = Kronk::Cmd.parse_args %w{uri -c 2 -n 100 -o}
+    assert_equal 2,   opts[:player].concurrency
+    assert_equal 100, opts[:player].number
+    assert_equal Kronk::Player::Stream, opts[:player].output.class
+
+    opts = Kronk::Cmd.parse_args %w{uri -o benchmark}
+    assert_equal Kronk::Player::Benchmark, opts[:player].output.class
+  end
+
+
+  def test_parse_args_player_stdin
+    $stdin.expects(:tty?).returns(false).times(6)
+
+    opts = Kronk::Cmd.parse_args %w{uri -p}
+    assert_equal $stdin, opts[:player].input.io
+    assert_equal %w{uri}, opts[:uris]
+
+    opts = Kronk::Cmd.parse_args %w{uri --benchmark}
+    assert_equal $stdin, opts[:player].input.io
+    assert_equal %w{uri}, opts[:uris]
+    assert_equal Kronk::Player::Benchmark, opts[:player].output.class
+
+    opts = Kronk::Cmd.parse_args %w{uri --stream}
+    assert_equal $stdin, opts[:player].input.io
+    assert_equal %w{uri}, opts[:uris]
+    assert_equal Kronk::Player::Stream, opts[:player].output.class
+  end
+
+
+  def test_parse_args_player_file
+    mock_file = StringIO.new "mock_file"
+    File.expects(:open).with("mock_file", "r").times(3).returns mock_file
+
+    opts = Kronk::Cmd.parse_args %w{uri -p mock_file}
+    assert_equal mock_file, opts[:player].input.io
+
+    opts = Kronk::Cmd.parse_args %w{uri --benchmark mock_file}
+    assert_equal mock_file, opts[:player].input.io
+    assert_equal Kronk::Player::Benchmark, opts[:player].output.class
+
+    opts = Kronk::Cmd.parse_args %w{uri --stream mock_file}
+    assert_equal mock_file, opts[:player].input.io
+    assert_equal Kronk::Player::Stream, opts[:player].output.class
+  end
+
+
+  def test_parse_args_clear_cookies
+    Kronk.cookie_jar.instance_variable_set "@domains", {"foo" => "bar"}
+
+    Kronk::Cmd.parse_args %w{uri --clear-cookies}
+    assert Kronk.cookie_jar.instance_variable_get("@domains").empty?
+
+    Kronk.instance_variable_set "@cookie_jar", nil
+  end
+
+
+  def test_parse_args_data
+    opts = Kronk::Cmd.parse_args %w{uri -d mock_data}
+    assert_equal "mock_data", opts[:data]
+    assert_equal "POST",      opts[:http_method]
+
+    opts = Kronk::Cmd.parse_args %w{uri -X PUT -d mock_data}
+    assert_equal "mock_data", opts[:data]
+    assert_equal "PUT",       opts[:http_method]
+  end
+
+
+  def test_parse_args_headers
+    opts = Kronk::Cmd.parse_args %w{uri -H NilHeader -H FOO:bar -H Test:\ foo}
+    expected = {
+      "NilHeader" => "",
+      "FOO"       => "bar",
+      "Test"      => "foo"
+    }
+
+    assert_equal expected, opts[:headers]
+  end
+
+
+  def test_parse_args_http_options
+    opts = Kronk::Cmd.parse_args %w{uri -A foo -L --no-cookies -? bar
+            --suff /tail -X PUT -x example.com:2000}
+
+    assert_equal "foo",   opts[:user_agent]
+    assert_equal true,    opts[:follow_redirects]
+    assert_equal true,    opts[:no_cookies]
+    assert_equal "bar",   opts[:query]
+    assert_equal "/tail", opts[:uri_suffix]
+    assert_equal "PUT",   opts[:http_method]
+    assert_equal({:address => "example.com", :port => "2000"}, opts[:proxy])
+
+    opts = Kronk::Cmd.parse_args %w{uri -L 3}
+    assert_equal 3, opts[:follow_redirects]
+  end
+
+
+  def test_parse_args_auth_http_options
+    Kronk::Cmd.expects(:query_password).with("Server password:").returns "svr"
+    Kronk::Cmd.expects(:query_password).with("Proxy password:").returns "prox"
+
+    opts = Kronk::Cmd.parse_args %w{uri -u svruser -U proxuser}
+    assert_equal({:username => "svruser", :password => "svr"}, opts[:auth])
+    assert_equal({:username => "proxuser", :password => "prox"}, opts[:proxy])
+
+    Kronk::Cmd.expects(:query_password).with("Server password:").never
+    Kronk::Cmd.expects(:query_password).with("Proxy password:").never
+
+    opts = Kronk::Cmd.parse_args %w{uri -u svruser:svr2 -U proxuser:prox2}
+    assert_equal({:username => "svruser", :password => "svr2"}, opts[:auth])
+    assert_equal({:username => "proxuser", :password => "prox2"}, opts[:proxy])
+  end
+
+
+  def test_parse_args_paths
+    opts = Kronk::Cmd.parse_args %w{uri -- path1 path2 -path3}
+    assert_equal %w{path3}, opts[:ignore_data]
+    assert_equal %w{path1 path2}, opts[:only_data]
+  end
+
+
+  def test_parse_args_uris
+    opts = Kronk::Cmd.parse_args %w{uri1 uri2 uri3 uri4}
+    assert_equal %w{uri1 uri2}, opts[:uris]
+  end
+
+
+  def test_parse_args_uris_with_io
+    $stdin.expects(:tty?).returns(false)
+    $stdin.expects(:read).returns("MOCK RESPONSE")
+
+    opts = Kronk::Cmd.parse_args %w{uri1 uri2}
+    assert_equal 2, opts[:uris].length
+    assert_equal "uri1", opts[:uris][1]
+    assert_equal StringIO, opts[:uris][0].class
+    assert_equal "MOCK RESPONSE", opts[:uris][0].read
+  end
+
+
+  def test_parse_args_uris_with_tty
+    $stdin.expects(:tty?).returns(true)
+    opts = Kronk::Cmd.parse_args %w{uri1}
+    assert_equal %w{uri1}, opts[:uris]
+  end
+
+
+  def test_parse_args_uris_from_cache
+    File.expects(:file?).with(Kronk.config[:cache_file]).returns true
+    Kronk::Cmd.expects(:verbose).with("No URI specified - using kronk cache")
+
+    opts = Kronk::Cmd.parse_args %w{}
+    assert_equal [Kronk.config[:cache_file]], opts[:uris]
+  end
+
+
+  def test_parse_args_uris_missing
+    File.expects(:file?).with(Kronk.config[:cache_file]).returns false
+
+    $stderr.expects(:puts).with "\nError: You must enter at least one URI"
+    $stderr.expects(:puts).with "See 'kronk --help' for usage\n\n"
+
+    assert_exit 1 do
+      opts = Kronk::Cmd.parse_args %w{}
+    end
   end
 
 
