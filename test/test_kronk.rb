@@ -49,6 +49,11 @@ class TestKronk < Test::Unit::TestCase
 
     Kronk.load_config
 
+    YAML.expects(:load_file).with("foobar").
+      returns mock_config
+
+    Kronk.load_config "foobar"
+
     expected = {
       :content_types => {
         'soap'  => "SOAPParser",
@@ -76,43 +81,10 @@ class TestKronk < Test::Unit::TestCase
   end
 
 
-  def test_make_config_file
-    file = mock 'file'
-    file.expects(:<<).with Kronk::DEFAULT_CONFIG.to_yaml
-    File.expects(:directory?).with(Kronk::CONFIG_DIR).returns false
-    Dir.expects(:mkdir).with Kronk::CONFIG_DIR
-    File.expects(:open).with(Kronk::DEFAULT_CONFIG_FILE, "w+").yields file
-
-    Kronk.make_config_file
-  end
-
-
   def test_parser_for
     assert_equal JSON, Kronk.parser_for('json')
     assert_equal Kronk::XMLParser, Kronk.parser_for('xml')
     assert_equal Kronk::PlistParser, Kronk.parser_for('plist')
-  end
-
-
-  def test_load_requires
-    old_requires = Kronk.config[:requires]
-    Kronk.config[:requires] = ["mock_lib1"]
-
-    assert_raises LoadError do
-      Kronk.load_requires
-    end
-
-    Kronk.config[:requires] = old_requires
-  end
-
-
-  def test_load_requires_nil
-    old_requires = Kronk.config[:requires]
-    Kronk.config[:requires] = nil
-
-    assert_nil Kronk.load_requires
-
-    Kronk.config[:requires] = old_requires
   end
 
 

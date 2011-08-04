@@ -57,27 +57,6 @@ class Kronk
 
 
   ##
-  # Load the config-based requires.
-
-  def self.load_requires more_requires=nil
-    return unless config[:requires] || more_requires
-    (config[:requires] | [*more_requires]).each{|lib| require lib }
-  end
-
-
-  ##
-  # Creates the default config file at the given path.
-
-  def self.make_config_file
-    Dir.mkdir CONFIG_DIR unless File.directory? CONFIG_DIR
-
-    File.open DEFAULT_CONFIG_FILE, "w+" do |file|
-      file << DEFAULT_CONFIG.to_yaml
-    end
-  end
-
-
-  ##
   # Find a fully qualified ruby namespace/constant.
 
   def self.find_const namespace
