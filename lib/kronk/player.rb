@@ -1,13 +1,14 @@
 class Kronk
 
+  ##
+  # The Player class is used for running multiple requests and comparisons and
+  # providing useful output through Player::Output classes.
+  # Kronk includes a Suite (test-like) output, a Stream (chunked) output,
+  # and a Benchmark output.
+
   class Player
 
-    # Matcher to parse request from.
-    # Assigns http method to $1 and path info to $2.
-    LOG_MATCHER = %r{([A-Za-z]+) (/[^\s"]+)[\s"]*}
-
     attr_accessor :number, :concurrency, :queue, :count, :input
-
     attr_reader :output
 
     ##
