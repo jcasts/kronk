@@ -449,9 +449,6 @@ Parse and run diffs against data from live and cached http responses.
         exit 2
       end
 
-      options[:cache_response] =
-        Kronk.config[:cache_file] if Kronk.config[:cache_file]
-
       uri1, uri2 = options.delete :uris
       runner     = options.delete(:player) || self
 
@@ -470,12 +467,18 @@ Parse and run diffs against data from live and cached http responses.
     end
 
 
+    ##
+    # Performs a Kronk compare and renders it to $stdout.
+
     def self.compare uri1, uri2, options={}
       kronk = Kronk.new options
       kronk.compare uri1, uri2
       render kronk, options
     end
 
+
+    ##
+    # Performs a single Kronk request and renders it to $stdout.
 
     def self.request uri, options={}
       kronk = Kronk.new options
@@ -484,7 +487,13 @@ Parse and run diffs against data from live and cached http responses.
     end
 
 
-    def self.render kronk, options
+    ##
+    # Renders the results of a Kronk compare or retrieve
+    # to $stdout.
+
+    def self.render kronk, options={}
+      cache_response kronk.response
+
       if options[:irb]
         irb kronk.response
 
@@ -496,6 +505,9 @@ Parse and run diffs against data from live and cached http responses.
       end
     end
 
+
+    ##
+    # Renders a Diff instance to $stdout
 
     def self.render_diff diff
       puts diff.formatted unless Kronk.config[:brief]
@@ -529,6 +541,23 @@ Parse and run diffs against data from live and cached http responses.
     def self.error str, more=nil
       $stderr.puts "\nError: #{str}"
       $stderr.puts more if Kronk.config[:verbose] && more
+    end
+
+
+    ##
+    # Saves the raw http response to a cache file.
+
+    def self.cache_response resp, filepath=nil
+      filepath ||= Kronk.config[:cache_file]
+      return unless filepath
+
+      begin
+        File.open(filepath, "wb+") do |file|
+          file.write resp.raw
+        end
+      rescue => e
+        error "#{e.class}: #{e.message}"
+      end
     end
 
 

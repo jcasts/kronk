@@ -192,7 +192,6 @@ class Kronk
   # :with_headers:: Boolean/String/Array - defines which headers to include
   # :parser:: Object/String - the parser to use for the body; default nil
   # :raw:: Boolean - run diff on raw strings
-  # :cache_response:: String - the filepath to save the raw response to
 
   def initialize opts={}
     @options   = opts
@@ -214,19 +213,19 @@ class Kronk
     res1 = res2 = nil
 
     t1 = Thread.new do
-          res1 = retrieve uri1, false
+          res1 = retrieve uri1
           str1 = res1.stringify @options
          end
 
     t2 = Thread.new do
-          res2 = retrieve uri2, false
+          res2 = retrieve uri2
           str2 = res2.stringify @options
          end
 
     t1.join
     t2.join
 
-    post_process_responses res1, res2
+    assign_responses res1, res2
     @diff = Diff.new str1, str2
   end
 
@@ -234,7 +233,7 @@ class Kronk
   ##
   # Returns a Response instance from a url, file, or IO as a String.
 
-  def retrieve uri, do_post_process=true
+  def retrieve uri
     options = Kronk.config[:no_uri_options] ? options_for_uri(uri) : @options
 
     if IO === uri || StringIO === uri
@@ -259,7 +258,7 @@ class Kronk
       max_rdir = max_rdir - 1 if Fixnum === max_rdir
     end
 
-    post_process_responses resp if do_post_process
+    assign_responses resp
     resp
 
   rescue SocketError, Errno::ENOENT, Errno::ECONNREFUSED
@@ -267,23 +266,6 @@ class Kronk
 
   rescue Timeout::Error
     raise TimeoutError, "#{uri} took too long to respond"
-  end
-
-
-  ##
-  # Saves the raw http response to a cache file.
-
-  def cache_response resp=@response
-    return unless @options[:cache_response]
-    filepath = @options[:cache_response]
-
-    begin
-      File.open(filepath, "wb+") do |file|
-        file.write resp.raw
-      end
-    rescue => e
-      $stderr << "#{e.class}: #{e.message}"
-    end
   end
 
 
@@ -353,9 +335,8 @@ class Kronk
   # Assign responses to instance variables, cache the last
   # response.
 
-  def post_process_responses *resps
+  def assign_responses *resps
     @responses = resps
     @response  = resps.last
-    cache_response
   end
 end

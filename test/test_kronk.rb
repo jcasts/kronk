@@ -88,6 +88,37 @@ class TestKronk < Test::Unit::TestCase
   end
 
 
+  def test_history
+    Kronk.instance_variable_set "@history", nil
+    File.expects(:file?).with(Kronk.config[:history_file]).returns true
+    File.expects(:read).with(Kronk.config[:history_file]).
+      returns "history1\nhistory2"
+
+    assert_equal %w{history1 history2}, Kronk.history
+  end
+
+
+  def test_history_no_file
+    Kronk.instance_variable_set "@history", nil
+    File.expects(:file?).with(Kronk.config[:history_file]).returns false
+    File.expects(:read).with(Kronk.config[:history_file]).never
+
+    assert_equal [], Kronk.history
+  end
+
+
+  def test_save_history
+    Kronk.instance_variable_set "@history", %w{hist1 hist2 hist1 hist3}
+    file = StringIO.new
+    File.expects(:open).with(Kronk.config[:history_file], "w").yields file
+
+    Kronk.save_history
+
+    file.rewind
+    assert_equal "hist1\nhist2\nhist3", file.read
+  end
+
+
   def test_find_const
     assert_equal Nokogiri::XML::Document,
                  Kronk.find_const("Nokogiri::XML::Document")
