@@ -254,7 +254,7 @@ class Kronk
     end
 
     max_rdir = options[:follow_redirects]
-    while resp.redirect? && (max_rdir == true || max_rdir.to_i > 0)
+    while resp.redirect? && (max_rdir == true || max_rdir.to_s.to_i > 0)
       Cmd.verbose "Following redirect..."
       resp     = resp.follow_redirect
       max_rdir = max_rdir - 1 if Fixnum === max_rdir
