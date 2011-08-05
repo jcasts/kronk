@@ -225,7 +225,9 @@ class Kronk
     t1.join
     t2.join
 
-    assign_responses res1, res2
+    @responses = [res1, res2]
+    @response  = res2
+
     @diff = Diff.new str1, str2
   end
 
@@ -258,7 +260,9 @@ class Kronk
       max_rdir = max_rdir - 1 if Fixnum === max_rdir
     end
 
-    assign_responses resp
+    @responses = [resp]
+    @response  = resp
+
     resp
 
   rescue SocketError, Errno::ENOENT, Errno::ECONNREFUSED
@@ -328,15 +332,5 @@ class Kronk
     end
 
     out_opts
-  end
-
-
-  ##
-  # Assign responses to instance variables, cache the last
-  # response.
-
-  def assign_responses *resps
-    @responses = resps
-    @response  = resps.last
   end
 end
