@@ -262,6 +262,7 @@ class Kronk
 
     @responses = [resp]
     @response  = resp
+    @diff      = nil
 
     resp
 

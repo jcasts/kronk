@@ -536,15 +536,6 @@ Parse and run diffs against data from live and cached http responses.
 
 
     ##
-    # Print and error string
-
-    def self.error str, more=nil
-      $stderr.puts "\nError: #{str}"
-      $stderr.puts more if Kronk.config[:verbose] && more
-    end
-
-
-    ##
     # Saves the raw http response to a cache file.
 
     def self.cache_response resp, filepath=nil
@@ -558,6 +549,15 @@ Parse and run diffs against data from live and cached http responses.
       rescue => e
         error "#{e.class}: #{e.message}"
       end
+    end
+
+
+    ##
+    # Print and error string
+
+    def self.error str, more=nil
+      $stderr.puts "\nError: #{str}"
+      $stderr.puts more if Kronk.config[:verbose] && more
     end
 
 

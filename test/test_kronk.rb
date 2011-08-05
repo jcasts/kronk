@@ -398,6 +398,36 @@ class TestKronk < Test::Unit::TestCase
   end
 
 
+  def test_compare_data_inst
+    kronk = Kronk.new :with_headers => true
+    diff  = kronk.compare "test/mocks/200_response.json",
+                          "test/mocks/200_response.xml"
+
+    json_resp = Kronk::Response.new(File.read("test/mocks/200_response.json"))
+    xml_resp  = Kronk::Response.new(File.read("test/mocks/200_response.xml"))
+
+    assert_equal xml_resp.raw,  kronk.response.raw
+    assert_equal xml_resp.raw,  kronk.responses.last.raw
+    assert_equal json_resp.raw, kronk.responses.first.raw
+    assert_equal 2,             kronk.responses.length
+    assert_equal diff,          kronk.diff
+
+    resp1 = kronk.retrieve "test/mocks/200_response.xml"
+    resp2 = kronk.retrieve "test/mocks/200_response.json"
+
+    assert_equal json_resp.raw, kronk.response.raw
+    assert_equal json_resp.raw, kronk.responses.last.raw
+    assert_equal 1,             kronk.responses.length
+    assert_equal nil,           kronk.diff
+
+    exp_diff = Kronk::Diff.new_from_data \
+                  resp2.selective_data(:with_headers => true),
+                  resp1.selective_data(:with_headers => true)
+
+    assert_equal exp_diff.formatted, diff.formatted
+  end
+
+
   def test_parse_data_path_args
     options = {}
     argv = %w{this is --argv -- one -two -- -three four}
