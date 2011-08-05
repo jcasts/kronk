@@ -331,50 +331,50 @@ class TestResponse < Test::Unit::TestCase
     str = Kronk::Response.read_file("test/mocks/200_response.json").stringify
     expected = <<-STR
 {
-"business" => {
- "address" => "3845 Rivertown Pkwy SW Ste 500",
- "city" => "Grandville",
- "description" => {
-  "additional_urls" => [
-   {
-    "destination" => "http://example.com",
-    "url_click" => "http://example.com"
+ "business" => {
+  "address" => "3845 Rivertown Pkwy SW Ste 500",
+  "city" => "Grandville",
+  "description" => {
+   "additional_urls" => [
+    {
+     "destination" => "http://example.com",
+     "url_click" => "http://example.com"
     }
    ],
-  "general_info" => "<p>A Paint Your Own Pottery Studios..</p>",
-  "op_hours" => "Fri 1pm-7pm, Sat 10am-6pm, Sun 1pm-4pm, Appointments Available",
-  "payment_text" => "DISCOVER, AMEX, VISA, MASTERCARD",
-  "slogan" => "<p>Pottery YOU dress up</p>"
+   "general_info" => "<p>A Paint Your Own Pottery Studios..</p>",
+   "op_hours" => "Fri 1pm-7pm, Sat 10am-6pm, Sun 1pm-4pm, Appointments Available",
+   "payment_text" => "DISCOVER, AMEX, VISA, MASTERCARD",
+   "slogan" => "<p>Pottery YOU dress up</p>"
   },
- "distance" => 0.0,
- "has_detail_page" => true,
- "headings" => [
-  "Pottery"
+  "distance" => 0.0,
+  "has_detail_page" => true,
+  "headings" => [
+   "Pottery"
   ],
- "id" => "1234",
- "impression_id" => "mock_iid",
- "improvable" => true,
- "latitude" => 42.882561,
- "listing_id" => "1234",
- "listing_type" => "free",
- "longitude" => -85.759586,
- "mappable" => true,
- "name" => "Naked Plates",
- "omit_address" => false,
- "omit_phone" => false,
- "phone" => "6168055326",
- "rateable" => true,
- "rating_count" => 0,
- "red_listing" => false,
- "state" => "MI",
- "website" => "http://example.com",
- "year_established" => "1996",
- "zip" => "49418"
+  "id" => "1234",
+  "impression_id" => "mock_iid",
+  "improvable" => true,
+  "latitude" => 42.882561,
+  "listing_id" => "1234",
+  "listing_type" => "free",
+  "longitude" => -85.759586,
+  "mappable" => true,
+  "name" => "Naked Plates",
+  "omit_address" => false,
+  "omit_phone" => false,
+  "phone" => "6168055326",
+  "rateable" => true,
+  "rating_count" => 0,
+  "red_listing" => false,
+  "state" => "MI",
+  "website" => "http://example.com",
+  "year_established" => "1996",
+  "zip" => "49418"
  },
-"original_request" => {
- "id" => "1234"
+ "original_request" => {
+  "id" => "1234"
  },
-"request_id" => "mock_rid"
+ "request_id" => "mock_rid"
 }
 STR
     assert_equal expected.strip, str

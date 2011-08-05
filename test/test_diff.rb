@@ -47,59 +47,59 @@ class TestDiff < Test::Unit::TestCase
   def test_ordered_data_string
     expected = <<STR
 {
-"acks" => [
- [
-  56,
-  78
+ "acks" => [
+  [
+   56,
+   78
   ],
- [
-  "12",
-  "34"
+  [
+   "12",
+   "34"
   ]
  ],
-"root" => [
- [
-  "B1",
-  "B2"
-  ],
- [
-  "A1",
-  "A2"
-  ],
- [
-  "C1",
-  "C2",
+ "root" => [
   [
-   "C3a",
-   "C3b"
+   "B1",
+   "B2"
+  ],
+  [
+   "A1",
+   "A2"
+  ],
+  [
+   "C1",
+   "C2",
+   [
+    "C3a",
+    "C3b"
    ]
   ],
- {
-  :tests => [
-   "D3a",
-   "D3b"
+  {
+   :tests => [
+    "D3a",
+    "D3b"
    ],
-  "test" => [
-   [
-    "D1a\\nContent goes here",
-    "D1b"
+   "test" => [
+    [
+     "D1a\\nContent goes here",
+     "D1b"
     ],
-   "D2"
+    "D2"
    ]
   }
  ],
-"subs" => [
- "a",
- "b"
+ "subs" => [
+  "a",
+  "b"
  ],
-"tests" => {
- :foo => :bar,
- "test" => [
-  [
-   1,
-   2
+ "tests" => {
+  :foo => :bar,
+  "test" => [
+   [
+    1,
+    2
    ],
-  2.123
+   2.123
   ]
  }
 }
@@ -112,59 +112,59 @@ STR
   def test_ordered_data_string_struct
     expected = <<STR
 {
-"acks" => [
- [
-  Fixnum,
-  Fixnum
-  ],
- [
-  String,
-  String
-  ]
- ],
-"root" => [
- [
-  String,
-  String
-  ],
- [
-  String,
-  String
-  ],
- [
-  String,
-  String,
-  [
-   String,
-   String
-   ]
-  ],
- {
-  :tests => [
-   String,
-   String
-   ],
-  "test" => [
-   [
-    String,
-    String
-    ],
-   String
-   ]
-  }
- ],
-"subs" => [
- String,
- String
- ],
-"tests" => {
- :foo => Symbol,
- "test" => [
+ "acks" => [
   [
    Fixnum,
    Fixnum
+  ],
+  [
+   String,
+   String
+  ]
+ ],
+ "root" => [
+  [
+   String,
+   String
+  ],
+  [
+   String,
+   String
+  ],
+  [
+   String,
+   String,
+   [
+    String,
+    String
+   ]
+  ],
+  {
+   :tests => [
+    String,
+    String
    ],
-  Float
+   "test" => [
+    [
+     String,
+     String
+    ],
+    String
+   ]
+  }
+ ],
+ "subs" => [
+  String,
+  String
+ ],
+ "tests" => {
+  :foo => Symbol,
+  "test" => [
+   [
+    Fixnum,
+    Fixnum
+   ],
+   Float
   ]
  }
 }

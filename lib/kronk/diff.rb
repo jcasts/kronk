@@ -19,10 +19,12 @@ class Kronk
     # Returns a data string that is diff-able, meaning sorted by
     # Hash keys when available.
 
-    def self.ordered_data_string data, struct_only=false, indent=0
+    def self.ordered_data_string data, struct_only=false, indent=1
       case data
 
       when Hash
+        return "{}" if data.empty?
+
         output = "{\n"
 
         sorted_keys = sort_any data.keys
@@ -36,9 +38,11 @@ class Kronk
           end
 
         output << data_values.join(",\n") << "\n" unless data_values.empty?
-        output << "#{" " * indent}}"
+        output << "#{" " * (indent-1)}}"
 
       when Array
+        return "[]" if data.empty?
+
         output = "[\n"
 
         data_values =
@@ -48,7 +52,7 @@ class Kronk
           end
 
         output << data_values.join(",\n") << "\n" unless data_values.empty?
-        output << "#{" " * indent}]"
+        output << "#{" " * (indent-1)}]"
 
       else
         return data.inspect unless struct_only
