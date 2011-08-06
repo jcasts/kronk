@@ -186,6 +186,7 @@ Avg. Slowest Paths (ms, #)
       @results = []
       @count   = 0
 
+      @div = nil
       @div = @player.number / 10 if @player.number
       @div = 100 if !@div || @div < 10
     end
