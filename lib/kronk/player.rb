@@ -68,15 +68,12 @@ class Kronk
     # Populate the queue by reading from the given IO instance and
     # parsing it into kronk options.
     #
-    # Parser can be a..
-    # * Regexp: $1 used as http_method, $2 used as path_info
-    # * Proc: return value should be a kronk options hash.
-    #   See Kronk#compare for supported options.
-    #
-    # Default parser is LOG_MATCHER.
+    # Default parser is RequestParser. See InputReader for parser requirements.
 
     def from_io io, parser=nil
-      @input = InputReader.new io, parser
+      @input.io     = io
+      @input.parser = parser if parser
+      @input
     end
 
 
@@ -106,6 +103,12 @@ class Kronk
 
     ##
     # Start processing the queue and reading from IO if available.
+    # Calls Output#start method and returns the value of Output#completed
+    # once processing is finished.
+    #
+    # Yields queue item and if it will be the only item or part of a
+    # suite, until queue and io (if available) are empty and the
+    # totaly number of requests to run is met (if number is set).
 
     def process_queue
       # First check if we're only processing a single case.
@@ -191,6 +194,7 @@ class Kronk
 
     ##
     # Process and output the results.
+    # Calls Output#completed method.
 
     def output_results
       @output.completed
@@ -198,7 +202,7 @@ class Kronk
 
 
     ##
-    # Run a single compare and return a result array.
+    # Run a single compare and call the Output#result or Output#error method.
 
     def process_compare uri1, uri2, opts={}
       kronk = Kronk.new opts
@@ -211,7 +215,7 @@ class Kronk
 
 
     ##
-    # Run a single request and return a result array.
+    # Run a single request and call the Output#result or Output#error method.
 
     def process_request uri, opts={}
       kronk = Kronk.new opts
