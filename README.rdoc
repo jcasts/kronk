@@ -29,7 +29,7 @@ Kronk was made possible by the sponsoring of AT&T Interactive.
 
 * Helper methods for test suites.
 
-* Auto-query reports with request randomization support.
+* Query and logfile playback with custom output.
 
 * Yes, it works on Windows.
 
