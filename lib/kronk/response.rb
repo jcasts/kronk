@@ -327,11 +327,10 @@ class Kronk
         end
       end
 
-      socket = resp.instance_variable_get "@socket"
-      read   = resp.instance_variable_get "@read"
-
-      resp.instance_variable_set "@socket", true unless socket
-      resp.instance_variable_set "@read",   true
+      resp.instance_eval do
+        @socket ||= true
+        @read   ||= true
+      end
 
       [resp, debug_io]
     end
