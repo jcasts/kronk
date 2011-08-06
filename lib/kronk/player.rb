@@ -26,7 +26,7 @@ class Kronk
       @concurrency = 1 if !@concurrency || @concurrency <= 0
       self.output  = opts[:output] || Suite
 
-      @count     = nil
+      @count     = 0
       @queue     = []
       @threads   = []
       @input     = InputReader.new opts[:io], opts[:parser]
@@ -176,7 +176,9 @@ class Kronk
 
 
     ##
-    # Get one line from the IO instance and parse it into a kronk_opts hash.
+    # Gets the next request to perform and always returns a Hash.
+    # Tries from input first, then from the last item in the queue.
+    # If both fail, returns an empty Hash.
 
     def next_request
       @input.get_next || @queue.last || Hash.new

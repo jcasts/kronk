@@ -145,7 +145,7 @@ end
 def expect_request req_method, url, options={}
   uri  = URI.parse url
 
-  resp = Kronk::Response.new mock_200_response #mock 'resp'
+  resp = Kronk::Response.new(options[:returns] || mock_200_response)
   resp.stubs(:code).returns(options[:status] || '200')
 
   http   = mock 'http'
