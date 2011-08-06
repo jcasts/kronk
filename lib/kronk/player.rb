@@ -9,7 +9,7 @@ class Kronk
   class Player
 
     attr_accessor :number, :concurrency, :queue, :count, :input
-    attr_reader :output
+    attr_reader :output, :mutex, :threads
 
     ##
     # Create a new Player for batch diff or response validation.
@@ -31,7 +31,7 @@ class Kronk
       @threads   = []
       @input     = InputReader.new opts[:io], opts[:parser]
 
-      @result_mutex = Mutex.new
+      @mutex = Mutex.new
     end
 
 
@@ -207,10 +207,10 @@ class Kronk
     def process_compare uri1, uri2, opts={}
       kronk = Kronk.new opts
       kronk.compare uri1, uri2
-      @output.result kronk, @result_mutex
+      @output.result kronk, @mutex
 
     rescue Kronk::Exception, Response::MissingParser, Errno::ECONNRESET => e
-      @output.error e, kronk, @result_mutex
+      @output.error e, kronk, @mutex
     end
 
 
@@ -220,10 +220,10 @@ class Kronk
     def process_request uri, opts={}
       kronk = Kronk.new opts
       kronk.retrieve uri
-      @output.result kronk, @result_mutex
+      @output.result kronk, @mutex
 
     rescue Kronk::Exception, Response::MissingParser, Errno::ECONNRESET => e
-      @output.error e, kronk, @result_mutex
+      @output.error e, kronk, @mutex
     end
   end
 end
