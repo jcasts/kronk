@@ -18,8 +18,8 @@ class Kronk
                     resp.body
                   end
 
-      puts "\nHTTP Response is in $http_response"
-      puts "Response data is in $response\n\n"
+      $stdout.puts "\nHTTP Response is in $http_response"
+      $stdout.puts "Response data is in $response\n\n"
 
       IRB.start
       false
@@ -104,7 +104,7 @@ Parse and run diffs against data from live and cached http responses.
           file = File.join(File.dirname(__FILE__),
                     "../../script/kronk_completion")
 
-          puts File.expand_path(file)
+          $stdout.puts File.expand_path(file)
           exit 2
         end
 
@@ -510,10 +510,10 @@ Parse and run diffs against data from live and cached http responses.
     # Renders a Diff instance to $stdout
 
     def self.render_diff diff
-      puts diff.formatted unless Kronk.config[:brief]
+      $stdout.puts diff.formatted unless Kronk.config[:brief]
 
       if Kronk.config[:verbose] || Kronk.config[:brief]
-        puts "Found #{diff.count} diff(s)."
+        $stdout.puts "Found #{diff.count} diff(s)."
       end
 
       diff.count == 0
@@ -527,7 +527,7 @@ Parse and run diffs against data from live and cached http responses.
     def self.render_response response, options={}
       str = response.stringify options
       str = Diff.insert_line_nums str if Kronk.config[:show_lines]
-      puts str
+      $stdout.puts str
 
       verbose "\nResp. Time: #{response.time.to_f}"
 
