@@ -50,7 +50,7 @@ class Kronk
       @encoding = "utf-8" unless @_res["Content-Type"]
       c_type = [*@headers["content-type"]].find{|ct| ct =~ ENCODING_MATCHER}
       @encoding = $2 if c_type
-      @encoding ||= "binary"
+      @encoding ||= "ASCII-8BIT"
       @encoding = Encoding.find(@encoding) if defined?(Encoding)
 
       raw_req, raw_resp, bytes = read_raw_from debug_io

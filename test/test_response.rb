@@ -10,6 +10,21 @@ class TestResponse < Test::Unit::TestCase
   end
 
 
+  def test_init
+    assert_equal "ISO-8859-1", @html_resp.encoding.to_s
+    assert_equal "UTF-8",      @json_resp.encoding.to_s.upcase
+    assert_equal "ASCII-8BIT",
+      Kronk::Response.read_file("test/mocks/200_response.png").encoding.to_s
+  end
+
+
+  def test_cookie
+    assert_nil @html_resp.cookie
+    @html_resp['Cookie'] = "blahblahblah"
+    assert_equal "blahblahblah", @html_resp.cookie
+  end
+
+
   def test_new_from_one_line_io
     io   = StringIO.new "just this one line!"
     resp = Kronk::Response.new io
