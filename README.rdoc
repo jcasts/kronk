@@ -261,10 +261,6 @@ single quotes around some of your paths.
 
 == REQUIREMENTS:
 
-* nokogiri gem
-
-* plist gem
-
 * json gem
 
 * cookiejar gem
