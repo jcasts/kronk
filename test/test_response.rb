@@ -10,11 +10,32 @@ class TestResponse < Test::Unit::TestCase
   end
 
 
-  def test_init
+  def test_init_encoding
     assert_equal "ISO-8859-1", @html_resp.encoding.to_s
+    assert_equal "ISO-8859-1", @html_resp.body.encoding.to_s if
+      "".respond_to? :encoding
     assert_equal "UTF-8",      @json_resp.encoding.to_s.upcase
-    assert_equal "ASCII-8BIT",
-      Kronk::Response.read_file("test/mocks/200_response.png").encoding.to_s
+
+    png = Kronk::Response.read_file "test/mocks/200_response.png"
+    assert_equal "ASCII-8BIT", png.encoding.to_s
+  end
+
+
+  def test_bytes
+    png = Kronk::Response.read_file "test/mocks/200_response.png"
+    assert_equal 8469, png.bytes
+    assert_equal png['Content-Length'].to_i, png.bytes
+
+    headless = Kronk::Response.new "foobar"
+    assert_equal "foobar".bytes.count, headless.bytes
+  end
+
+
+  def test_byterate
+    @html_resp.time = 10
+    assert_equal 869.7, @html_resp.byterate
+    @html_resp.time = 100
+    assert_equal 86.97, @html_resp.byterate
   end
 
 

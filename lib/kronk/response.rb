@@ -54,17 +54,18 @@ class Kronk
       @encoding = Encoding.find(@encoding) if defined?(Encoding)
 
       raw_req, raw_resp, bytes = read_raw_from debug_io
-      @bytes    = bytes.to_i
       @raw      = try_force_encoding raw_resp
 
       @request  = request ||
                   raw_req = try_force_encoding(raw_req) &&
                   Request.parse(raw_req)
 
-      @time     = 0
+      @time   = 0
 
-      @body     = try_force_encoding(@_res.body) if @_res.body
-      @body   ||= @raw.split("\r\n\r\n",2)[1]
+      @body   = try_force_encoding(@_res.body) if @_res.body
+      @body ||= @raw.split("\r\n\r\n",2)[1]
+
+      @bytes = (@_res['Content-Length'] || @body.bytes.count).to_i
 
       @code = @_res.code
 
@@ -284,7 +285,7 @@ class Kronk
 
     def time= new_time
       @time = new_time
-      @byterate = @raw.bytes.count / @time if @raw && @time > 0
+      @byterate = @bytes / @time.to_f if @raw && @time > 0
       @time
     end
 
