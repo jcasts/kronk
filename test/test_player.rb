@@ -52,4 +52,15 @@ class TestPlayer < Test::Unit::TestCase
     @player.queue_req :second_item
     assert_equal [:first_item, :second_item], @player.queue
   end
+
+
+  def test_from_io
+    @player.from_io "mock"
+    assert_equal "mock", @player.input.io
+    assert_equal Kronk::Player::RequestParser, @player.input.parser
+
+    @player.from_io "mock", "mock_parser"
+    assert_equal "mock", @player.input.io
+    assert_equal "mock_parser", @player.input.parser
+  end
 end
