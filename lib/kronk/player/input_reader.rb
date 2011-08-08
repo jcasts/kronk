@@ -32,8 +32,8 @@ class Kronk
         @buffer << (line = @io.gets)
       end
 
-      str = @io.eof? ? @buffer.join : @buffer.slice!(0..-2).join
-      @parser.parse str
+      end_index = @io.eof? ? -1 : -2
+      @parser.parse @buffer.slice!(0..end_index).join
     end
 
 

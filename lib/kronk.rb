@@ -3,6 +3,7 @@ require 'rubygems'
 require 'json'
 require 'cookiejar'
 
+require 'thread'
 require 'net/https'
 require 'optparse'
 require 'yaml'

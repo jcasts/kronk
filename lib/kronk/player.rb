@@ -82,6 +82,8 @@ class Kronk
     # If options are given, they are merged into every request.
 
     def compare uri1, uri2, opts={}
+      return Cmd.compare uri1, uri2, @queue.shift.merge(opts) if single_request?
+
       process_queue do |kronk_opts, suite|
         return Cmd.compare(uri1, uri2, kronk_opts.merge(opts)) unless suite
         process_compare uri1, uri2, kronk_opts.merge(opts)
@@ -94,10 +96,20 @@ class Kronk
     # If options are given, they are merged into every request.
 
     def request uri, opts={}
-      process_queue do |kronk_opts, suite|
-        return Cmd.request(uri, kronk_opts.merge(opts)) unless suite
+      return Cmd.request(uri, @queue.shift.merge(opts)) if single_request?
+
+      process_queue do |kronk_opts|
         process_request uri, kronk_opts.merge(opts)
       end
+    end
+
+
+    ##
+    # Check if we're only processing a single case.
+    # If so, yield a single item and return immediately.
+    def single_request?
+      @queue << next_request if @queue.empty? && (!@number || @number <= 1)
+      @queue.length == 1 && @input.eof?
     end
 
 
@@ -106,19 +118,10 @@ class Kronk
     # Calls Output#start method and returns the value of Output#completed
     # once processing is finished.
     #
-    # Yields queue item and if it will be the only item or part of a
-    # suite, until queue and io (if available) are empty and the
+    # Yields queue item until queue and io (if available) are empty and the
     # totaly number of requests to run is met (if number is set).
 
     def process_queue
-      # First check if we're only processing a single case.
-      # If so, yield a single item and return immediately.
-      @queue << next_request if @queue.empty? && (!@number || @number <= 1)
-      if @queue.length == 1 && @input.eof?
-        yield @queue.shift, false
-        return
-      end
-
       trap 'INT' do
         @threads.each{|t| t.kill}
         @threads.clear
@@ -139,7 +142,7 @@ class Kronk
         kronk_opts = @queue.shift
 
         @threads << Thread.new(kronk_opts) do |thread_opts|
-          yield thread_opts, true
+          yield thread_opts
         end
 
         @count += 1
@@ -181,7 +184,7 @@ class Kronk
     # If both fail, returns an empty Hash.
 
     def next_request
-      @input.get_next || @queue.last || Hash.new
+      @last_req = @input.get_next || @queue.last || @last_req || Hash.new
     end
 
 
