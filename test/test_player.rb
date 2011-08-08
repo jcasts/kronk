@@ -150,26 +150,29 @@ class TestPlayer < Test::Unit::TestCase
 
 
   def test_process_compare
-    headers =
-      {'User-Agent' => 'Kronk/1.5.0 (http://github.com/yaksnrainbows/kronk)'}
+    mock_thread = "mock_thread"
+    Thread.expects(:new).twice.yields.returns mock_thread
+    mock_thread.expects(:join).twice
 
-    resp1 = Kronk::HeadlessResponse.new mock_resp("200_response.json")
-    resp2 = Kronk::HeadlessResponse.new mock_resp("200_response.txt")
+    resp1 = Kronk::Response.new mock_resp("200_response.json")
+    resp1.parser = JSON
+    resp2 = Kronk::Response.new mock_resp("200_response.txt")
 
-    mock_req = "mock_request"
+    req1 = Kronk::Request.new "example.com"
+    req2 = Kronk::Request.new "beta-example.com"
 
-    Kronk::Request::VanillaRequest.expects(:new).twice.
-      with("GET", "/test", headers).returns(mock_req)
+    Kronk::Request.expects(:new).returns req2
+    Kronk::Request.expects(:new).returns req1
 
-    Net::HTTP.any_instance.expects(:request).with(mock_req, nil).returns resp2
-    Net::HTTP.any_instance.expects(:request).with(mock_req, nil).returns resp1
+    req1.expects(:retrieve).returns resp1
+    req2.expects(:retrieve).returns resp2
 
     @got_results = nil
 
     @player.output.expects(:result).with do |kronk, mutex|
       @got_results = true
       assert_equal @player.mutex, mutex
-      assert_equal Kronk::Diff.new(resp1.body, resp2.body).formatted,
+      assert_equal Kronk::Diff.new(resp1.stringify, resp2.stringify).formatted,
                     kronk.diff.formatted
     end
 
@@ -177,5 +180,36 @@ class TestPlayer < Test::Unit::TestCase
       :uri_suffix => "/test", :include_headers => true
 
     assert @got_results, "Expected output to get results but didn't"
+  end
+
+
+  def test_process_compare_error
+    @got_results = []
+
+    @player.output.expects(:error).times(3).with do |error, kronk, mutex|
+      @got_results << error.class
+      assert_equal @player.mutex, mutex
+      assert_equal Kronk,         kronk.class
+    end
+
+    errs = [Kronk::Exception, Kronk::Response::MissingParser, Errno::ECONNRESET]
+    errs.each do |eklass|
+      Kronk.any_instance.expects(:compare).raises eklass
+
+      @player.process_compare "example.com", "beta-example.com",
+        :uri_suffix => "/test", :include_headers => true
+    end
+
+    assert_equal errs, @got_results, "Expected output to get errors but didn't"
+  end
+
+
+  def test_process_compare_error_not_caught
+    Kronk.any_instance.expects(:compare).raises RuntimeError
+
+    assert_raises RuntimeError do
+      @player.process_compare "example.com", "beta-example.com",
+        :uri_suffix => "/test", :include_headers => true
+    end
   end
 end
