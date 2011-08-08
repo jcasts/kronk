@@ -3,7 +3,13 @@ require 'test/test_helper'
 class TestPlayer < Test::Unit::TestCase
 
   class MockOutput; end
-  class MockParser; end
+
+  class MockParser
+    def self.parse str
+      str
+    end
+  end
+
 
   def setup
     @out, @inn = IO.pipe
@@ -132,6 +138,32 @@ class TestPlayer < Test::Unit::TestCase
     @player.queue.clear
     @player.input.stubs(:eof?).returns true
     assert @player.finished?
+  end
+
+
+  def test_single_request_from_io
+    @player.input.io = StringIO.new "mock request"
+    @player.input.parser.expects(:start_new?).returns false
+    assert @player.single_request?, "Expected player to have one request"
+  end
+
+
+  def test_single_request_from_queue
+    @player.input.io = nil
+    assert @player.single_request?, "Expected player to have one request"
+  end
+
+
+  def test_not_single_request
+    @player.input.io = nil
+    @player.queue.concat Array.new(10, "mock request")
+    assert !@player.single_request?, "Expected player to have many requests"
+
+    @player.input.io = StringIO.new Array.new(5, "mock request").join("\n")
+    @player.queue.clear
+    @player.input.parser.expects(:start_new?).returns(true)
+
+    assert !@player.single_request?, "Expected player to have many requests"
   end
 
 
