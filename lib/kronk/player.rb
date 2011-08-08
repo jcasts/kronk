@@ -107,6 +107,7 @@ class Kronk
     ##
     # Check if we're only processing a single case.
     # If so, yield a single item and return immediately.
+
     def single_request?
       @queue << next_request if @queue.empty? && (!@number || @number <= 1)
       @queue.length == 1 && @input.eof?
@@ -122,27 +123,25 @@ class Kronk
     # totaly number of requests to run is met (if number is set).
 
     def process_queue
+      reader_thread = try_fill_queue
+
       trap 'INT' do
         @threads.each{|t| t.kill}
         @threads.clear
+        reader_thread.kill
         output_results
         exit 2
       end
 
       @output.start
-
-      reader_thread = try_fill_queue
-
       @count = 0
 
       until finished?
         @threads.delete_if{|t| !t.alive? }
         next if @threads.length >= @concurrency || @queue.empty?
 
-        kronk_opts = @queue.shift
-
-        @threads << Thread.new(kronk_opts) do |thread_opts|
-          yield thread_opts
+        @threads << Thread.new(@queue.shift) do |kronk_opts|
+          yield kronk_opts
         end
 
         @count += 1
