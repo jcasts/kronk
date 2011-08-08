@@ -212,4 +212,59 @@ class TestPlayer < Test::Unit::TestCase
         :uri_suffix => "/test", :include_headers => true
     end
   end
+
+
+  def test_process_request
+    resp = Kronk::Response.new mock_resp("200_response.json")
+    resp.parser = JSON
+
+    req = Kronk::Request.new "example.com"
+    req.expects(:retrieve).returns resp
+
+    Kronk::Request.expects(:new).returns req
+
+    @got_results = nil
+
+    @player.output.expects(:result).with do |kronk, mutex|
+      @got_results = true
+      assert_equal @player.mutex, mutex
+      assert_equal resp, kronk.response
+    end
+
+    @player.process_request "example.com",
+      :uri_suffix => "/test", :include_headers => true
+
+    assert @got_results, "Expected output to get results but didn't"
+  end
+
+
+  def test_process_request_error
+    @got_results = []
+
+    @player.output.expects(:error).times(3).with do |error, kronk, mutex|
+      @got_results << error.class
+      assert_equal @player.mutex, mutex
+      assert_equal Kronk,         kronk.class
+    end
+
+    errs = [Kronk::Exception, Kronk::Response::MissingParser, Errno::ECONNRESET]
+    errs.each do |eklass|
+      Kronk.any_instance.expects(:retrieve).raises eklass
+
+      @player.process_request "example.com",
+        :uri_suffix => "/test", :include_headers => true
+    end
+
+    assert_equal errs, @got_results, "Expected output to get errors but didn't"
+  end
+
+
+  def test_process_request_error_not_caught
+    Kronk.any_instance.expects(:retrieve).raises RuntimeError
+
+    assert_raises RuntimeError do
+      @player.process_request "example.com",
+        :uri_suffix => "/test", :include_headers => true
+    end
+  end
 end
