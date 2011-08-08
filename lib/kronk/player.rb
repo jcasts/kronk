@@ -84,7 +84,7 @@ class Kronk
     def compare uri1, uri2, opts={}
       return Cmd.compare uri1, uri2, @queue.shift.merge(opts) if single_request?
 
-      process_queue do |kronk_opts, suite|
+      process_queue do |kronk_opts|
         return Cmd.compare(uri1, uri2, kronk_opts.merge(opts)) unless suite
         process_compare uri1, uri2, kronk_opts.merge(opts)
       end
