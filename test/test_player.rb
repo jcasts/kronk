@@ -150,18 +150,32 @@ class TestPlayer < Test::Unit::TestCase
 
 
   def test_process_compare
-#    resp1 = mock_resp("200_response.json")
-#    resp2 = mock_resp("200_response.txt")
+    headers =
+      {'User-Agent' => 'Kronk/1.5.0 (http://github.com/yaksnrainbows/kronk)'}
 
-#    expect_request :get, "http://example.com/test", :returns => resp1
-#    expect_request :get, "http://beta-example.com/test", :returns => resp2
+    resp1 = Kronk::HeadlessResponse.new mock_resp("200_response.json")
+    resp2 = Kronk::HeadlessResponse.new mock_resp("200_response.txt")
 
-#    @player.output.expects(:result) do |kronk, mutex|
-#      assert_equal @player.mutex, mutex
-#      assert_equal Kronk::Diff.new(resp1, resp2).formatted, kronk.diff.formatted
-#    end
+    mock_req = "mock_request"
 
-#    @player.process_compare "example.com", "beta-example.com",
-#      :uri_suffix => "/test", :include_headers => true
+    Kronk::Request::VanillaRequest.expects(:new).twice.
+      with("GET", "/test", headers).returns(mock_req)
+
+    Net::HTTP.any_instance.expects(:request).with(mock_req, nil).returns resp2
+    Net::HTTP.any_instance.expects(:request).with(mock_req, nil).returns resp1
+
+    @got_results = nil
+
+    @player.output.expects(:result).with do |kronk, mutex|
+      @got_results = true
+      assert_equal @player.mutex, mutex
+      assert_equal Kronk::Diff.new(resp1.body, resp2.body).formatted,
+                    kronk.diff.formatted
+    end
+
+    @player.process_compare "example.com", "beta-example.com",
+      :uri_suffix => "/test", :include_headers => true
+
+    assert @got_results, "Expected output to get results but didn't"
   end
 end
