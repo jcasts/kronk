@@ -165,13 +165,12 @@ class Kronk
       Thread.new do
         loop do
           break if !@number && @input.eof?
-          next if @queue.length >= @concurrency * 2
+          next  if @queue.length >= @concurrency * 2
 
           max_new = @concurrency * 2 - @queue.length
 
           max_new.times do
-            req = next_request
-            @queue << req if req
+            @queue << next_request
           end
         end
       end

@@ -135,6 +135,68 @@ class TestPlayer < Test::Unit::TestCase
   end
 
 
+  def test_try_fill_queue_from_input
+    @player.input.stubs(:get_next).returns "mock_request"
+
+    @player.concurrency = 5
+    @player.number      = 20
+
+    thread = @player.try_fill_queue
+    assert_equal Thread, thread.class
+
+    sleep 0.2
+    assert_equal Array.new(10, "mock_request"), @player.queue
+
+    @player.queue.slice!(8)
+
+    sleep 0.2
+    assert_equal Array.new(10, "mock_request"), @player.queue
+
+  ensure
+    thread.kill
+  end
+
+
+  def test_try_fill_queue_from_last
+    @player.input.stubs(:get_next).returns nil
+    @player.input.stubs(:eof?).returns false
+
+    @player.concurrency = 5
+    @player.queue << "mock_request"
+
+    thread = @player.try_fill_queue
+    assert_equal Thread, thread.class
+
+    sleep 0.2
+    assert_equal Array.new(10, "mock_request"), @player.queue
+
+    @player.queue.slice!(8)
+
+    sleep 0.2
+    assert_equal Array.new(10, "mock_request"), @player.queue
+
+  ensure
+    thread.kill
+  end
+
+
+  def test_try_fill_queue_no_input
+    @player.input.stubs(:eof?).returns true
+
+    @player.concurrency = 5
+    @player.queue << "mock_request"
+
+    thread = @player.try_fill_queue
+    assert_equal Thread, thread.class
+
+    sleep 0.2
+    assert_equal ["mock_request"], @player.queue
+
+  ensure
+    thread.kill
+  end
+
+
   def test_next_request
     @player.input.expects(:get_next).returns "NEXT ITEM"
     assert_equal "NEXT ITEM", @player.next_request
@@ -145,6 +207,12 @@ class TestPlayer < Test::Unit::TestCase
 
     @player.input.expects(:get_next).returns nil
     @player.queue.clear
+    @player.instance_variable_set "@last_req", "LAST REQ"
+    assert_equal "LAST REQ", @player.next_request
+
+    @player.input.expects(:get_next).returns nil
+    @player.queue.clear
+    @player.instance_variable_set "@last_req", nil
     assert_equal Hash.new, @player.next_request
   end
 
