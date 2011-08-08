@@ -33,9 +33,14 @@ class TestResponse < Test::Unit::TestCase
 
   def test_byterate
     @html_resp.time = 10
-    assert_equal 869.7, @html_resp.byterate
+    assert_equal 930.3, @html_resp.byterate
     @html_resp.time = 100
-    assert_equal 86.97, @html_resp.byterate
+    assert_equal 93.03, @html_resp.byterate
+  end
+
+
+  def test_total_bytes
+    assert_equal @html_resp.raw.bytes.count, @html_resp.total_bytes
   end
 
 
@@ -43,6 +48,15 @@ class TestResponse < Test::Unit::TestCase
     assert_nil @html_resp.cookie
     @html_resp['Cookie'] = "blahblahblah"
     assert_equal "blahblahblah", @html_resp.cookie
+  end
+
+
+  def test_headless
+    assert Kronk::Response.new("blah blah blah").headless?,
+      "Expected a headless HTTP response"
+
+    assert !Kronk::Response.new("HTTP/1.1 200 OK\r\n\r\nHI").headless?,
+      "Expected full valid HTTP response"
   end
 
 

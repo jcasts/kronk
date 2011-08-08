@@ -1,6 +1,18 @@
 class Kronk
 
   ##
+  # Mock File IO to allow rewinding on Windows platforms.
+
+  class WinFileIO < StringIO
+    attr_accessor :path
+
+    def initialize path, str=""
+      @path = path
+      super str
+    end
+  end
+
+  ##
   # Wraps an http response.
 
   class Response
@@ -110,6 +122,15 @@ class Kronk
       try_force_encoding @body
       try_force_encoding @raw
       @encoding
+    end
+
+
+    ##
+    # If there was an error parsing the input as a standard http response,
+    # the input is assumed to be a body and HeadlessResponse is used.
+
+    def headless?
+      HeadlessResponse === @_res
     end
 
 
@@ -293,8 +314,16 @@ class Kronk
 
     def time= new_time
       @time = new_time
-      @byterate = @bytes / @time.to_f if @raw && @time > 0
+      @byterate = self.total_bytes / @time.to_f if @raw && @time > 0
       @time
+    end
+
+
+    ##
+    # Number of bytes of the response including the header.
+
+    def total_bytes
+      self.raw.bytes.count
     end
 
 
@@ -308,9 +337,7 @@ class Kronk
       # On windows, read the full file and insert contents into
       # a StringIO to avoid failures with IO#read_nonblock
       if Kronk::Cmd.windows? && File === resp_io
-        path = resp_io.path
-        resp_io = StringIO.new io.read
-        resp_io.instance_eval "def path; '#{path}'; end"
+        resp_io = WinFileIO.new resp_io.path, io.read
       end
 
       io = Net::BufferedIO === resp_io ? resp_io : Net::BufferedIO.new(resp_io)
@@ -321,8 +348,8 @@ class Kronk
         resp.reading_body io, true do;end
 
       rescue Net::HTTPBadResponse
-        ext = resp_io.respond_to?(:path) ?
-                File.extname(resp_io.path) : "text/html"
+        ext = "text/html"
+        ext = File.extname(resp_io.path) if WinFileIO === resp_io
 
         resp_io.rewind
         resp = HeadlessResponse.new resp_io.read, ext
@@ -331,7 +358,7 @@ class Kronk
         # If no response was read because it's too short
         unless resp
           resp_io.rewind
-          resp = HeadlessResponse.new resp_io.read, "text/html"
+          resp = HeadlessResponse.new resp_io.read, "html"
         end
       end
 
@@ -403,7 +430,7 @@ class Kronk
       encoding = body.respond_to?(:encoding) ? body.encoding : "UTF-8"
 
       @header = {
-        'Content-Type' => ["#{file_ext}; charset=#{encoding}"]
+        'Content-Type' => ["text/#{file_ext}; charset=#{encoding}"]
       }
     end
 

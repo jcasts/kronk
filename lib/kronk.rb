@@ -4,6 +4,8 @@ require 'json'
 require 'cookiejar'
 
 require 'thread'
+require 'stringio'
+
 require 'net/https'
 require 'optparse'
 require 'yaml'
