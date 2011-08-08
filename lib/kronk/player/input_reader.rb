@@ -41,7 +41,7 @@ class Kronk
     # Returns true if there is no more input to read from.
 
     def eof?
-      !@io || @io.eof? && @buffer.empty?
+      !@io || (@io.closed? || @io.eof?) && @buffer.empty?
     end
   end
 end

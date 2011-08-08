@@ -141,6 +141,94 @@ class TestPlayer < Test::Unit::TestCase
   end
 
 
+  def test_process_queue_interrupted
+    @player.concurrency = 0
+    @player.queue << "mock request"
+
+    @player.output.expects :start
+
+    thread = Thread.new do
+      @player.process_queue{|opts| sleep 10 }
+    end
+
+    assert_exit 2 do
+      @player.output.expects :completed
+      Process.kill 'INT', Process.pid
+    end
+
+  ensure
+    thread.kill
+  end
+
+
+  def test_process_queue
+    @player.concurrency = 10
+    requests = (1..20).map{|n| "request #{n}"}
+    @player.queue.concat requests.dup
+    @player.input.io.close
+
+    @player.output.expects :start
+    @player.output.expects :completed
+
+    start     = Time.now
+    processed = []
+
+    @player.process_queue do |req|
+      processed << req
+      sleep 0.5
+    end
+
+    time_spent = (Time.now - start).to_i
+    assert_equal 1, time_spent
+
+    assert_equal 20, @player.count
+
+    processed.sort!{|r1, r2| r1.split.last.to_i <=> r2.split.last.to_i}
+    assert_equal requests, processed
+  end
+
+
+  def test_process_queue_from_io
+    @player.concurrency = 10
+    @player.output.expects :start
+    @player.output.expects :completed
+
+    @player.input.parser.stubs(:start_new?).returns true
+    @player.input.parser.stubs(:start_new?).with("").returns false
+
+    @processed   = []
+    @start_time = 0
+    @time_spent = 0
+
+    thread = Thread.new do
+      @start_time = Time.now
+      @player.process_queue do |req|
+        @processed << req
+        sleep 0.5
+      end
+      @time_spent = (Time.now - @start_time).to_i
+    end
+
+    requests = (1..20).map{|n| "request #{n}\n"}
+    requests.each{|req| @inn << req }
+    @inn.close
+
+    thread.join
+
+    #assert_equal 1,  @time_spent
+    assert_equal 20, @player.count
+
+    @processed.sort! do |r1, r2|
+      r1.split.last.strip.to_i <=> r2.split.last.strip.to_i
+    end
+
+    assert_equal requests, @processed
+
+  ensure
+    thread.kill
+  end
+
+
   def test_single_request_from_io
     @player.input.io = StringIO.new "mock request"
     @player.input.parser.expects(:start_new?).returns false
