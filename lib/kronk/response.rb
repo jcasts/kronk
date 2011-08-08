@@ -114,6 +114,14 @@ class Kronk
 
 
     ##
+    # Ruby inspect.
+
+    def inspect
+      "#<#{self.class}:#{self.code} #{self['Content-Type']}>"
+    end
+
+
+    ##
     # Returns the body data parsed according to the content type.
     # If no parser is given will look for the default parser based on
     # the Content-Type, or will return the cached parsed body if available.

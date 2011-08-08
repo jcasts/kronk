@@ -364,6 +364,14 @@ class Kronk
 
 
     ##
+    # Ruby inspect.
+
+    def inspect
+      "#<#{self.class}:#{self.http_method} #{self.uri}>"
+    end
+
+
+    ##
     # Allow any http method to be sent
 
     class VanillaRequest
