@@ -30,6 +30,7 @@ class Kronk
       @queue     = []
       @threads   = []
       @input     = InputReader.new opts[:io], opts[:parser]
+      @last_req  = nil
 
       @mutex = Mutex.new
     end
@@ -141,7 +142,7 @@ class Kronk
         next if @threads.length >= @concurrency || @queue.empty?
 
         @threads << Thread.new(@queue.shift) do |kronk_opts|
-          yield kronk_opts
+          yield kronk_opts if block_given?
         end
 
         @count += 1

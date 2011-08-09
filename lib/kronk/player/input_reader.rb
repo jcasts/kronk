@@ -27,13 +27,20 @@ class Kronk
 
       @buffer << @io.gets if @buffer.empty?
 
-      line = ""
-      until @parser.start_new?(line) || @io.eof?
-        @buffer << (line = @io.gets)
+      until @io.eof?
+        line = @io.gets
+        next unless line
+
+        if @parser.start_new?(line) || @buffer.empty?
+          @buffer << line
+          break
+        else
+          @buffer.last << line
+        end
       end
 
-      end_index = @io.eof? ? -1 : -2
-      @parser.parse @buffer.slice!(0..end_index).join
+      return if @buffer.empty?
+      @parser.parse @buffer.slice!(0)
     end
 
 

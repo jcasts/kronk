@@ -2,7 +2,19 @@ require 'test/test_helper'
 
 class TestPlayer < Test::Unit::TestCase
 
-  class MockOutput; end
+  class MockPipe < StringIO
+    def puts str
+      super str
+      self.pos = self.pos - str.length - 1 if self.eof?
+    end
+
+    def << str
+      super str
+      self.pos = self.pos - str.length - 1 if self.eof?
+    end
+  end
+
+  class MockOutput < Kronk::Player::Output; end
 
   class MockParser
     def self.parse str
@@ -12,10 +24,10 @@ class TestPlayer < Test::Unit::TestCase
 
 
   def setup
-    @out, @inn = IO.pipe
+    @io        = MockPipe.new
     @parser    = MockParser
     @output    = MockOutput
-    @player    = Kronk::Player.new :io     => @out,
+    @player    = Kronk::Player.new :io     => @io,
                                    :parser => @parser,
                                    :output => @output
   end
@@ -37,7 +49,7 @@ class TestPlayer < Test::Unit::TestCase
   def test_init
     assert_equal Kronk::Player::InputReader,   @player.input.class
     assert_equal Mutex,                        @player.mutex.class
-    assert_equal @out,                         @player.input.io
+    assert_equal @io,                          @player.input.io
     assert_equal 1,                            @player.concurrency
     assert_nil                                 @player.number
     assert                                     @player.queue.empty?
@@ -143,16 +155,16 @@ class TestPlayer < Test::Unit::TestCase
 
   def test_process_queue_interrupted
     @player.concurrency = 0
-    @player.queue << "mock request"
 
     @player.output.expects :start
+    @player.output.expects :completed
 
     thread = Thread.new do
-      @player.process_queue{|opts| sleep 10 }
+      @player.process_queue
     end
 
+    sleep 0.1
     assert_exit 2 do
-      @player.output.expects :completed
       Process.kill 'INT', Process.pid
     end
 
@@ -196,42 +208,35 @@ class TestPlayer < Test::Unit::TestCase
     @player.input.parser.stubs(:start_new?).returns true
     @player.input.parser.stubs(:start_new?).with("").returns false
 
-    @processed   = []
-    @start_time = 0
-    @time_spent = 0
-
-    thread = Thread.new do
-      @start_time = Time.now
-      @player.process_queue do |req|
-        @processed << req
-        sleep 0.5
-      end
-      @time_spent = (Time.now - @start_time).to_i
-    end
+    processed  = []
+    start_time = 0
+    time_spent = 0
 
     requests = (1..20).map{|n| "request #{n}\n"}
-    requests.each{|req| @inn << req }
-    @inn.close
+    @player.from_io StringIO.new(requests.join)
 
-    thread.join
+    start_time = Time.now
+    @player.process_queue do |req|
+      processed << req
+      sleep 0.5
+    end
 
-    #assert_equal 1,  @time_spent
+    time_spent = (Time.now - start_time).to_i
+
+    assert_equal 1,  time_spent
     assert_equal 20, @player.count
 
-    @processed.sort! do |r1, r2|
+    processed.sort! do |r1, r2|
       r1.split.last.strip.to_i <=> r2.split.last.strip.to_i
     end
 
-    assert_equal requests, @processed
-
-  ensure
-    thread.kill
+    assert_equal requests, processed
   end
 
 
   def test_single_request_from_io
     @player.input.io = StringIO.new "mock request"
-    @player.input.parser.expects(:start_new?).returns false
+    @player.input.parser.stubs(:start_new?).returns true
     assert @player.single_request?, "Expected player to have one request"
   end
 
@@ -362,6 +367,7 @@ class TestPlayer < Test::Unit::TestCase
       assert_equal @player.mutex, mutex
       assert_equal Kronk::Diff.new(resp1.stringify, resp2.stringify).formatted,
                     kronk.diff.formatted
+      true
     end
 
     @player.process_compare "example.com", "beta-example.com",
@@ -378,6 +384,7 @@ class TestPlayer < Test::Unit::TestCase
       @got_results << error.class
       assert_equal @player.mutex, mutex
       assert_equal Kronk,         kronk.class
+      true
     end
 
     errs = [Kronk::Exception, Kronk::Response::MissingParser, Errno::ECONNRESET]
@@ -417,6 +424,7 @@ class TestPlayer < Test::Unit::TestCase
       @got_results = true
       assert_equal @player.mutex, mutex
       assert_equal resp, kronk.response
+      true
     end
 
     @player.process_request "example.com",
@@ -433,6 +441,7 @@ class TestPlayer < Test::Unit::TestCase
       @got_results << error.class
       assert_equal @player.mutex, mutex
       assert_equal Kronk,         kronk.class
+      true
     end
 
     errs = [Kronk::Exception, Kronk::Response::MissingParser, Errno::ECONNRESET]
