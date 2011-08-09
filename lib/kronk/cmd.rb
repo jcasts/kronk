@@ -236,7 +236,7 @@ Parse and run diffs against data from live and cached http responses.
                 'Replay the given file or STDIN against URIs') do |file|
           options[:player][:io]   = File.open(file, "r") if file
           options[:player][:io] ||= $stdin if !$stdin.tty?
-          options[:player][:number] ||= 1
+          options[:player][:output] ||= :suite
         end
 
 

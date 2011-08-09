@@ -9,7 +9,7 @@ class Kronk
     class ParseError < Kronk::Exception; end
 
     # Matches the first line of an http request string.
-    REQUEST_LINE_MATCHER = %r{([A-Za-z]+)?(^|[\s'"])(/[^\s'";]+)}
+    REQUEST_LINE_MATCHER = %r{([A-Za-z]+)?(^|[\s'"])(/[^\s'";]+)[\s"']*}
 
     ##
     # Creates a query string from data.

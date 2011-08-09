@@ -8,7 +8,7 @@ class Kronk
 
   class Player
 
-    attr_accessor :number, :concurrency, :queue, :count, :input
+    attr_accessor :number, :concurrency, :queue, :count, :input, :reader_thread
     attr_reader :output, :mutex, :threads
 
     ##
@@ -123,12 +123,12 @@ class Kronk
     # totaly number of requests to run is met (if number is set).
 
     def process_queue
-      reader_thread = try_fill_queue
+      @reader_thread = try_fill_queue
 
       trap 'INT' do
         @threads.each{|t| t.kill}
         @threads.clear
-        reader_thread.kill
+        @reader_thread.kill
         output_results
         exit 2
       end
@@ -150,7 +150,7 @@ class Kronk
       @threads.each{|t| t.join}
       @threads.clear
 
-      reader_thread.kill
+      @reader_thread.kill
 
       output_results
     end
@@ -169,8 +169,8 @@ class Kronk
           max_new = @concurrency * 2 - @queue.length
 
           max_new.times do
-            break if !@number && @input.eof?
             @queue << next_request
+            break if !@number && @input.eof?
           end
         end
       end
@@ -192,7 +192,7 @@ class Kronk
 
     def finished?
       (@number && @count >= @number) || @queue.empty? &&
-      @input.eof? && @count > 0
+      @input.eof? && @count > 0 && !@reader_thread.alive?
     end
 
 
