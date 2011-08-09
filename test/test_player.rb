@@ -179,15 +179,13 @@ class TestPlayer < Test::Unit::TestCase
 
     part1.each do |path|
       mock_requests "example.com", "beta-example.com",
-        :uri_suffix  => path,
-        :query       => "foo=bar"
+        :uri_suffix => path,
+        :query      => "foo=bar"
     end
 
     part2.each do |path|
       mock_requests "example.com", "beta-example.com",
         :uri_suffix  => path,
-        :headers     => {},
-        :http_method => nil,
         :query       => "foo=bar"
     end
 
@@ -225,10 +223,8 @@ class TestPlayer < Test::Unit::TestCase
 
     part2.each do |path|
       mock_requests "example.com",
-        :uri_suffix  => path,
-        :headers     => {},
-        :http_method => nil,
-        :query       => "foo=bar"
+        :uri_suffix => path,
+        :query      => "foo=bar"
     end
 
     @player.request "example.com", :query => "foo=bar"

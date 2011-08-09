@@ -14,10 +14,10 @@ class TestRequest < Test::Unit::TestCase
 
 
   def test_parse_to_hash
-    expected = {:headers => {}, :http_method => nil, :uri_suffix => "/foobar"}
+    expected = {:uri_suffix => "/foobar"}
     assert_equal expected, Kronk::Request.parse_to_hash("/foobar")
 
-    expected = {:headers => {}, :http_method => "GET", :uri_suffix => "/foobar"}
+    expected = {:http_method => "GET", :uri_suffix => "/foobar"}
     assert_equal expected, Kronk::Request.parse_to_hash("GET /foobar")
 
     expected.merge! :host => "example.com"

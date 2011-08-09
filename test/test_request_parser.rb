@@ -11,10 +11,10 @@ class TestRequestParser < Test::Unit::TestCase
 
 
   def test_parse
-    expected = {:headers => {}, :http_method => nil, :uri_suffix => "/foobar"}
+    expected = {:uri_suffix => "/foobar"}
     assert_equal expected, Kronk::Player::RequestParser.parse("/foobar")
 
-    expected = {:headers => {}, :http_method => "GET", :uri_suffix => "/foobar"}
+    expected = {:http_method => "GET", :uri_suffix => "/foobar"}
     assert_equal expected, Kronk::Player::RequestParser.parse("GET /foobar")
 
     expected.merge! :host => "example.com"

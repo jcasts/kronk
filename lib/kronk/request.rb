@@ -97,6 +97,10 @@ class Kronk
 
       opts[:data] = lines[body_start..-1].join("\n") if body_start
 
+      opts.delete(:headers)     if opts[:headers].empty?
+      opts.delete(:http_method) if !opts[:http_method]
+      opts.delete(:data)        if opts[:data] && opts[:data].strip.empty?
+
       opts
     end
 

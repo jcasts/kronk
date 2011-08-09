@@ -25,8 +25,6 @@ class TestInputReader < Test::Unit::TestCase
   def test_get_next
     (1..3).each do |num|
       expected = {
-        :headers     => {},
-        :http_method => nil,
         :uri_suffix  => "/path#{num}"
       }
       assert_equal expected, @input.get_next
@@ -47,7 +45,6 @@ class TestInputReader < Test::Unit::TestCase
       :http_method => "GET",
       :uri_suffix  => "/path",
       :host        => "example.com:80",
-      :data        => ""
     }
 
     File.open("test/mocks/get_request.txt") do |file|
@@ -70,7 +67,6 @@ class TestInputReader < Test::Unit::TestCase
       :http_method => "GET",
       :uri_suffix  => "/path",
       :host        => "example.com:80",
-      :data        => ""
     }
 
     req_str = File.read("test/mocks/get_request.txt") * 5
