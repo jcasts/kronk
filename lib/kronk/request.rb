@@ -231,6 +231,19 @@ class Kronk
 
 
     ##
+    # Returns the HTTP request object.
+
+    def http_request
+      req = VanillaRequest.new @http_method, @uri.request_uri, @headers
+
+      req.basic_auth @auth[:username], @auth[:password] if
+        @auth && @auth[:username]
+
+      req
+    end
+
+
+    ##
     # Assign the use of a proxy.
     # The proxy_opts arg can be a uri String or a Hash with the :address key
     # and optional :username and :password keys.
@@ -325,13 +338,8 @@ class Kronk
         socket = http.instance_variable_get "@socket"
         socket.debug_output = socket_io = StringIO.new
 
-        req = VanillaRequest.new @http_method, @uri.request_uri, @headers
-
-        req.basic_auth @auth[:username], @auth[:password] if
-          @auth && @auth[:username]
-
         start_time = Time.now
-        res = http.request req, @body
+        res = http.request self.http_request, @body
         elapsed_time = Time.now - start_time
 
         res
@@ -354,7 +362,7 @@ class Kronk
       out = "#{@http_method} #{@uri.request_uri} HTTP/1.1\r\n"
       out << "Host: #{@uri.host}:#{@uri.port}\r\n"
 
-      @headers.each do |name, value|
+      self.http_request.each do |name, value|
         out << "#{name}: #{value}\r\n" unless name =~ /host/i
       end
 
