@@ -40,7 +40,7 @@ class Kronk
       end
 
       return if @buffer.empty?
-      @parser.parse @buffer.slice!(0)
+      @parser.parse(@buffer.slice!(0)) || self.get_next
     end
 
 

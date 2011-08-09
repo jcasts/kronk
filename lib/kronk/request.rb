@@ -5,7 +5,11 @@ class Kronk
 
   class Request
 
-    REQUEST_LINE_MATCHER = %r{([A-Za-z]+)?(^|[\s'"])(/[^\s'"]+)[\s"']*}
+    # Raised by Request.parse when parsing invalid http request string.
+    class ParseError < Kronk::Exception; end
+
+    # Matches the first line of an http request string.
+    REQUEST_LINE_MATCHER = %r{([A-Za-z]+)?(^|[\s'"])(/[^\s'";]+)}
 
     ##
     # Creates a query string from data.
@@ -63,6 +67,8 @@ class Kronk
 
     def self.parse str, opts={}
       opts = parse_to_hash str, opts
+      raise ParseError unless opts
+
       new opts.delete(:host), opts
     end
 
@@ -91,16 +97,18 @@ class Kronk
 
         else
           name, value = line.split(": ", 2)
-          opts[:headers][name] = value.strip
+          opts[:headers][name] = value.strip if value
         end
       end
 
       opts[:data] = lines[body_start..-1].join("\n") if body_start
 
+      opts.delete(:uri_suffix)  if !opts[:uri_suffix]
       opts.delete(:headers)     if opts[:headers].empty?
       opts.delete(:http_method) if !opts[:http_method]
       opts.delete(:data)        if opts[:data] && opts[:data].strip.empty?
 
+      return if opts.empty?
       opts
     end
 
