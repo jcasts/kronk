@@ -164,7 +164,7 @@ class Kronk
     end
 
 
-    attr_accessor :auth, :body, :headers, :response, :timeout
+    attr_accessor :body, :headers, :response, :timeout
 
     attr_reader :http_method, :uri, :use_cookies
 
@@ -208,9 +208,25 @@ class Kronk
 
       if Hash === options[:proxy]
         self.use_proxy options[:proxy][:address], options[:proxy]
-      else
+      else@auth
         self.use_proxy options[:proxy]
       end
+    end
+
+
+    ##
+    # Returns the basic auth credentials if available.
+
+    def auth
+      @auth ||= Hash.new
+
+      if !@auth[:username] && @headers['Authorization']
+        str = Base64.decode64 @headers['Authorization'].split[1]
+        username, password = str.split(":", 2)
+        @auth = {:username => username, :password => password}.merge @auth
+      end
+
+      @auth
     end
 
 
@@ -360,7 +376,7 @@ class Kronk
 
     def to_s
       out = "#{@http_method} #{@uri.request_uri} HTTP/1.1\r\n"
-      out << "Host: #{@uri.host}:#{@uri.port}\r\n"
+      out << "host: #{@uri.host}:#{@uri.port}\r\n"
 
       self.http_request.each do |name, value|
         out << "#{name}: #{value}\r\n" unless name =~ /host/i

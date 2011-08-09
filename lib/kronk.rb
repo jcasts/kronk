@@ -5,6 +5,7 @@ require 'cookiejar'
 
 require 'thread'
 require 'stringio'
+require 'base64'
 
 require 'net/https'
 require 'optparse'

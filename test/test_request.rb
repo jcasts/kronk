@@ -224,6 +224,22 @@ class TestRequest < Test::Unit::TestCase
   end
 
 
+  def test_auth_from_headers
+    req = Kronk::Request.parse File.read("test/mocks/get_request.txt")
+    assert_equal "bob",    req.auth[:username]
+    assert_equal "foobar", req.auth[:password]
+  end
+
+
+  def test_auth_from_headers_and_options
+    req = Kronk::Request.new "http://example.com/path",
+            :headers => {"Authorization" => "Basic Ym9iOmZvb2Jhcg=="},
+            :auth    => {:password => "password"}
+    assert_equal "bob",      req.auth[:username]
+    assert_equal "password", req.auth[:password]
+  end
+
+
   def test_retrieve_basic_auth
     auth_opts = {:username => "user", :password => "pass"}
 
