@@ -2,6 +2,37 @@ require 'test/test_helper'
 
 class TestRequest < Test::Unit::TestCase
 
+  def test_parse
+    raw = "POST /foobar\r\nAccept: json\r\nHost: example.com\r\n\r\nfoo=bar"
+    req = Kronk::Request.parse(raw)
+
+    assert_equal Kronk::Request, req.class
+    assert_equal URI.parse("http://example.com/foobar"), req.uri
+    assert_equal "json", req.headers['Accept']
+    assert_equal "foo=bar", req.body
+  end
+
+
+  def test_parse_to_hash
+    expected = {:headers => {}, :http_method => nil, :uri_suffix => "/foobar"}
+    assert_equal expected, Kronk::Request.parse_to_hash("/foobar")
+
+    expected = {:headers => {}, :http_method => "GET", :uri_suffix => "/foobar"}
+    assert_equal expected, Kronk::Request.parse_to_hash("GET /foobar")
+
+    expected.merge! :host => "example.com"
+    raw = "GET /foobar\r\nHost: example.com"
+    assert_equal expected, Kronk::Request.parse_to_hash(raw)
+
+    expected.merge! :http_method => "POST",
+                    :data        => "foo=bar",
+                    :headers     => {'Accept' => 'json'}
+
+    raw = "POST /foobar\r\nAccept: json\r\nHost: example.com\r\n\r\nfoo=bar"
+    assert_equal expected, Kronk::Request.parse_to_hash(raw)
+  end
+
+
   def test_retrieve_post
     expect_request "POST", "http://example.com/request/path?foo=bar",
       :data => {'test' => 'thing'}, :headers => {'X-THING' => 'thing'}
