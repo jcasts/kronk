@@ -48,6 +48,7 @@ test/test_kronk.rb
 test/test_path.rb
 test/test_player.rb
 test/test_request.rb
+test/test_request_parser.rb
 test/test_response.rb
 test/test_transaction.rb
 test/test_xml_parser.rb
