@@ -118,6 +118,7 @@ class Kronk
           end
         end
 
+        perc_list.each{|i| @percentages[i] ||= self.slowest }
         @percentages[100] = self.slowest
         @percentages
       end
