@@ -205,6 +205,38 @@ class TestPlayer < Test::Unit::TestCase
   end
 
 
+  def test_request
+    @player.concurrency  = 3
+    @player.input.parser = Kronk::Player::RequestParser
+    @player.input.io << "/req3\n/req4\n/req5\n"
+    @player.input.io.rewind
+    @player.input.io.close_write
+
+    @player.queue.concat [{:uri_suffix => "/req1"}, {:uri_suffix => "/req2"}]
+
+    part1 = (1..2).map{|n| "/req#{n}"}
+    part2 = (3..5).map{|n| "/req#{n}"}
+
+    part1.each do |path|
+      mock_requests "example.com",
+        :uri_suffix  => path,
+        :query       => "foo=bar"
+    end
+
+    part2.each do |path|
+      mock_requests "example.com",
+        :uri_suffix  => path,
+        :headers     => {},
+        :http_method => nil,
+        :query       => "foo=bar"
+    end
+
+    @player.request "example.com", :query => "foo=bar"
+
+    assert_equal 5, @player.output.result_calls
+  end
+
+
   def test_process_queue_interrupted
     @player.concurrency = 0
 
@@ -522,10 +554,6 @@ class TestPlayer < Test::Unit::TestCase
   private
 
   def mock_requests *setup
-    #mock_thread = "mock_thread"
-    #Thread.expects(:new).twice.yields.returns mock_thread
-    #mock_thread.expects(:join).twice
-
     resp = []
     req  = []
 
