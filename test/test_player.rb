@@ -2,19 +2,22 @@ require 'test/test_helper'
 
 class TestPlayer < Test::Unit::TestCase
 
-  class MockPipe < StringIO
-    def puts str
-      super str
-      self.pos = self.pos - str.length - 1 if self.eof?
+  class MockPipe < StringIO; end
+
+  class MockOutput < Kronk::Player::Output
+    attr_accessor :result_calls
+
+    def initialize *args
+      @result_calls = 0
+      super
     end
 
-    def << str
-      super str
-      self.pos = self.pos - str.length - 1 if self.eof?
+    def result kronk, mutex
+      mutex.synchronize do
+        @result_calls += 1
+      end
     end
   end
-
-  class MockOutput < Kronk::Player::Output; end
 
   class MockParser
     def self.parse str
@@ -153,6 +156,55 @@ class TestPlayer < Test::Unit::TestCase
   end
 
 
+  def test_compare_single
+    io1  = StringIO.new(mock_200_response)
+    io2  = StringIO.new(mock_302_response)
+    expect_compare_output mock_200_response, mock_302_response
+
+    @player.compare io1, io2
+  end
+
+
+  def test_compare
+    @player.concurrency  = 3
+    @player.input.parser = Kronk::Player::RequestParser
+    @player.input.io << "/req3\n/req4\n/req5\n"
+    @player.input.io.rewind
+    @player.input.io.close_write
+
+    @player.queue.concat [{:uri_suffix => "/req1"}, {:uri_suffix => "/req2"}]
+
+    part1 = (1..2).map{|n| "/req#{n}"}
+    part2 = (3..5).map{|n| "/req#{n}"}
+
+    part1.each do |path|
+      mock_requests "example.com", "beta-example.com",
+        :uri_suffix  => path,
+        :query       => "foo=bar"
+    end
+
+    part2.each do |path|
+      mock_requests "example.com", "beta-example.com",
+        :uri_suffix  => path,
+        :headers     => {},
+        :http_method => nil,
+        :query       => "foo=bar"
+    end
+
+    @player.compare "example.com", "beta-example.com", :query => "foo=bar"
+
+    assert_equal 5, @player.output.result_calls
+  end
+
+
+  def test_request_single
+    io = StringIO.new(mock_200_response)
+    expect_request_output mock_200_response
+
+    @player.request io
+  end
+
+
   def test_process_queue_interrupted
     @player.concurrency = 0
 
@@ -192,8 +244,8 @@ class TestPlayer < Test::Unit::TestCase
 
     time_spent = (Time.now - start).to_i
     assert_equal 1, time_spent
-
     assert_equal 20, @player.count
+    assert @player.queue.empty?, "Expected queue to be empty"
 
     processed.sort!{|r1, r2| r1.split.last.to_i <=> r2.split.last.to_i}
     assert_equal requests, processed
@@ -225,6 +277,7 @@ class TestPlayer < Test::Unit::TestCase
 
     assert_equal 1,  time_spent
     assert_equal 20, @player.count
+    assert @player.queue.empty?, "Expected queue to be empty"
 
     processed.sort! do |r1, r2|
       r1.split.last.strip.to_i <=> r2.split.last.strip.to_i
@@ -462,6 +515,40 @@ class TestPlayer < Test::Unit::TestCase
     assert_raises RuntimeError do
       @player.process_request "example.com",
         :uri_suffix => "/test", :include_headers => true
+    end
+  end
+
+
+  private
+
+  def mock_requests *setup
+    #mock_thread = "mock_thread"
+    #Thread.expects(:new).twice.yields.returns mock_thread
+    #mock_thread.expects(:join).twice
+
+    resp = []
+    req  = []
+
+    opts = setup.length > 1 && Hash === setup.last ?
+            setup.delete_at(-1) : Hash.new
+
+    case setup.first
+    when Hash
+      hash = setup.first
+      req  = hash.keys
+      resp = req.map{|k| hash[k]}
+
+    when String
+      req = setup
+      resp = [mock_resp("200_response.txt")] * setup.length
+    end
+
+    req.each_with_index do |r, i|
+      mock_req = "mock request"
+      mock_res = Kronk::Response.new resp[i]
+      Kronk::Request.stubs(:new).with(req[i], opts).returns mock_req
+      mock_req.stubs(:retrieve).returns mock_res
+      mock_req.stubs(:uri).returns nil
     end
   end
 end

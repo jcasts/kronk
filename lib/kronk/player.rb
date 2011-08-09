@@ -86,7 +86,6 @@ class Kronk
       return Cmd.compare uri1, uri2, @queue.shift.merge(opts) if single_request?
 
       process_queue do |kronk_opts|
-        return Cmd.compare(uri1, uri2, kronk_opts.merge(opts)) unless suite
         process_compare uri1, uri2, kronk_opts.merge(opts)
       end
     end
@@ -170,6 +169,7 @@ class Kronk
           max_new = @concurrency * 2 - @queue.length
 
           max_new.times do
+            break if !@number && @input.eof?
             @queue << next_request
           end
         end

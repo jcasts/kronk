@@ -161,17 +161,18 @@ def expect_request req_method, url, options={}
   headers = options[:headers] || Hash.new
   headers['User-Agent'] ||= Kronk.config[:user_agents]['kronk']
 
+  req.expects(:start).yields(http).returns res
+
+  http.expects(:instance_variable_get).with("@socket").returns socket
+
   socket.expects(:debug_output=)
 
   Kronk::Request::VanillaRequest.expects(:new).
     with(req_method.to_s.upcase, uri.request_uri, headers).returns req
 
-  http.expects(:request).with(req, data).returns res
-
-  http.expects(:instance_variable_get).with("@socket").returns socket
-
   Net::HTTP.expects(:new).with(uri.host, uri.port).returns req
-  req.expects(:start).yields(http).returns res
+
+  http.expects(:request).with(req, data).returns res
 
   Kronk::Response.expects(:new).returns resp
 
