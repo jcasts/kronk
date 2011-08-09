@@ -208,7 +208,7 @@ class Kronk
 
       if Hash === options[:proxy]
         self.use_proxy options[:proxy][:address], options[:proxy]
-      else@auth
+      else
         self.use_proxy options[:proxy]
       end
     end
