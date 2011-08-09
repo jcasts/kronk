@@ -9,7 +9,7 @@ class Kronk
 
   class Player::InputReader
 
-    attr_accessor :io, :parser
+    attr_accessor :io, :parser, :buffer
 
     def initialize string_or_io, parser=nil
       @buffer = []
