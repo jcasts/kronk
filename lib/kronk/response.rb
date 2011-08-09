@@ -283,8 +283,7 @@ class Kronk
     # :only_data:: String/Array - extracts the data from given data paths
     # :ignore_data:: String/Array - defines which data points to exclude
     # :raw:: Boolean - Force using the unparsed raw response
-    # :keep_indicies:: Boolean - keep the original indicies of modified arrays,
-    #   and return them as hashes.
+    # :keep_indicies:: Boolean - indicies of modified arrays display as hashes.
     # :with_headers:: Boolean/String/Array - defines which headers to include
 
     def stringify options={}

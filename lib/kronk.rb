@@ -191,8 +191,7 @@ class Kronk
   # :proxy:: Hash/String - http proxy to use; defaults to nil
   # :only_data:: String/Array - extracts the data from given data paths
   # :ignore_data:: String/Array - defines which data points to exclude
-  # :keep_indicies:: Boolean - keep the original indicies of modified arrays,
-  #   and return them as hashes.
+  # :keep_indicies:: Boolean - indicies of modified arrays display as hashes.
   # :with_headers:: Boolean/String/Array - defines which headers to include
   # :parser:: Object/String - the parser to use for the body; default nil
   # :raw:: Boolean - run diff on raw strings

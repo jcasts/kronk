@@ -7,7 +7,6 @@ bin/kronk
 lib/kronk.rb
 lib/kronk/constants.rb
 lib/kronk/cmd.rb
-lib/kronk/data_set.rb
 lib/kronk/diff.rb
 lib/kronk/diff/ascii_format.rb
 lib/kronk/diff/color_format.rb
@@ -41,7 +40,6 @@ test/test_assertions.rb
 test/test_core_ext.rb
 test/test_cmd.rb
 test/test_helper_methods.rb
-test/test_data_set.rb
 test/test_diff.rb
 test/test_helper.rb
 test/test_input_reader.rb
