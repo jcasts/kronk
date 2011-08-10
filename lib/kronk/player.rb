@@ -8,8 +8,8 @@ class Kronk
 
   class Player
 
-    attr_accessor :number, :concurrency, :queue, :count, :input, :reader_thread
-    attr_reader :output, :mutex, :threads
+    attr_accessor :number, :concurrency, :queue, :count, :input,
+                  :output, :mutex, :threads, :reader_thread
 
     ##
     # Create a new Player for batch diff or response validation.
@@ -24,7 +24,7 @@ class Kronk
       @number      = opts[:number]
       @concurrency = opts[:concurrency]
       @concurrency = 1 if !@concurrency || @concurrency <= 0
-      self.output  = opts[:output] || Suite
+      self.output_from opts[:output] || Suite
 
       @count     = 0
       @queue     = []
@@ -40,7 +40,7 @@ class Kronk
     # The kind of output to use. Typically Player::Suite or Player::Stream.
     # Takes an output class or a string that represents a class constant.
 
-    def output= new_output
+    def output_from new_output
       return @output = new_output.new(self) if Class === new_output
 
       klass =

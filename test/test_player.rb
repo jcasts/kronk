@@ -73,16 +73,16 @@ class TestPlayer < Test::Unit::TestCase
 
 
   def test_output
-    @player.output = :benchmark
+    @player.output_from :benchmark
     assert_equal Kronk::Player::Benchmark, @player.output.class
 
-    @player.output = :stream
+    @player.output_from :stream
     assert_equal Kronk::Player::Stream, @player.output.class
 
-    @player.output = :suite
+    @player.output_from :suite
     assert_equal Kronk::Player::Suite, @player.output.class
 
-    @player.output = Kronk::Player::Benchmark
+    @player.output_from Kronk::Player::Benchmark
     assert_equal Kronk::Player::Benchmark, @player.output.class
   end
 
