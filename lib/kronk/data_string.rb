@@ -71,7 +71,7 @@ class Kronk
             value   = data[key]
             pad     = " " * indent
             subdata = ordered_data_string value, struct_only, indent + 1
-            "#{pad}#{key.to_json}: #{subdata}"
+            "#{pad}#{key.to_s.to_json}: #{subdata}"
           end
 
         output << data_values.join(",\n") << "\n" unless data_values.empty?
