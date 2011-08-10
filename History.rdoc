@@ -1,10 +1,18 @@
-=== 1.5.0 / 2011-
+=== 1.5.0 / 2011-08-12
 
-* Enhancements:
+* Major Enhancements:
 
   * Support for replay functionality from log files.
 
-  * Refactored a great deal of Request and Response classes.
+  * Support for Suite, Stream, and Benchmark outputs.
+
+  * A great deal of Kronk, Cmd, Request and Response class refactoring.
+
+  * Plist and Nokogiri dependencies optional, based on usage.
+
+* Bugfixes:
+
+  * Custom config files would never load.
 
 === 1.4.0 / 2011-07-04
 
