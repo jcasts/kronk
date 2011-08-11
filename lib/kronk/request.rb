@@ -78,10 +78,12 @@ class Kronk
     # Also parses most single access log entries.
 
     def self.parse_to_hash str, opts={}
-      opts[:headers] ||= {}
       lines = str.split("\n")
+      return if lines.empty?
 
       body_start = nil
+
+      opts[:headers] ||= {}
 
       lines.shift.strip =~ REQUEST_LINE_MATCHER
       opts[:http_method], opts[:uri_suffix] = $1, $3

@@ -13,6 +13,16 @@ class TestRequest < Test::Unit::TestCase
   end
 
 
+  def test_parse_invalid
+    assert_raises Kronk::Request::ParseError do
+      Kronk::Request.parse "thing\nfoo\n"
+    end
+    assert_raises Kronk::Request::ParseError do
+      Kronk::Request.parse ""
+    end
+  end
+
+
   def test_parse_to_hash
     expected = {:uri_suffix => "/foobar"}
     assert_equal expected, Kronk::Request.parse_to_hash("/foobar")
@@ -30,6 +40,12 @@ class TestRequest < Test::Unit::TestCase
 
     raw = "POST /foobar\r\nAccept: json\r\nHost: example.com\r\n\r\nfoo=bar"
     assert_equal expected, Kronk::Request.parse_to_hash(raw)
+  end
+
+
+  def test_parse_to_hash_invalid
+    assert_nil Kronk::Request.parse_to_hash("thing\nfoo\n")
+    assert_nil Kronk::Request.parse_to_hash("")
   end
 
 
