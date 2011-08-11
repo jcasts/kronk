@@ -163,11 +163,11 @@ The previous example will narrow down the parsed data returned to
 something like:
 
   {
-    "data" => {
-      "path1" => "value1",
-      "path2" => [
+    "data": {
+      "path1": "value1",
+      "path2": [
         {
-          "child" => "child value"
+          "child": "child value"
         }
       ]
     }
@@ -179,10 +179,10 @@ flag it to remove data:
   $ kronk http://host.com -- -data/path2
 
   {
-    "data" => {
-      "path1" => "value1",
-      "path3" => "value3",
-      "path4" => "value4"
+    "data": {
+      "path1": "value1",
+      "path3": "value3",
+      "path4": "value4"
     }
   }
 
@@ -192,12 +192,12 @@ attribute, you can do so by appending "/.." to the path.
   $ kronk http://host.com -- data/path2/1/child/..
 
   {
-    "data" => {
-      "path2" => [
+    "data": {
+      "path2": [
         {
-          "first_child" => "first value",
-          "child" => "child value",
-          "last_child" => "last value"
+          "first_child": "first value",
+          "child": "child value",
+          "last_child": "last value"
         },
       ]
     }
@@ -210,16 +210,16 @@ end of the path in the following fashion:
   $ kronk host.com -- data/path2/1//i
 
   {
-    "data" => {
-      "PATH2" => [
+    "data": {
+      "PATH2": [
         "item at index 1"
       ],
         
-      "path2" => [
+      "path2": [
         {
-          "first_child" => "first value",
-          "child" => "child value",
-          "last_child" => "last value"
+          "first_child": "first value",
+          "child": "child value",
+          "last_child": "last value"
         }
       ]
     }
@@ -229,8 +229,8 @@ end of the path in the following fashion:
   $ kronk host.com -- data/**=*foobar*//im
 
   {
-    "data" => {
-      "subdata" => "test for\nFOOBAR\nmultiline"
+    "data": {
+      "subdata": "test for\nFOOBAR\nmultiline"
     }
   }
 
