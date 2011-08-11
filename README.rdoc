@@ -141,6 +141,10 @@ Assign a default host to use when none is specified:
 
   :default_host: http://localhost:3000
 
+Set the number of spaces for indentation:
+
+  :indentation: 2
+
 === Bash Completion:
 
 Bash completion is available by sourcing the file returned by:
