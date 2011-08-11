@@ -168,11 +168,12 @@ class TestCmd < Test::Unit::TestCase
 
   def test_parse_args_kronk_configs
     with_config Hash.new do
-      Kronk::Cmd.parse_args %w{uri -q -l --no-opts -V -t 1234}
+      Kronk::Cmd.parse_args %w{uri -q -l --no-opts -V -t 1234 --ruby}
       assert Kronk.config[:brief]
       assert Kronk.config[:show_lines]
       assert Kronk.config[:no_uri_options]
       assert Kronk.config[:verbose]
+      assert_equal 'ruby', Kronk.config[:render_lang]
       assert_equal 1234, Kronk.config[:timeout]
     end
   end

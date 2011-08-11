@@ -19,103 +19,11 @@ class Kronk
     # Returns a data string that is diff-able, meaning sorted by
     # Hash keys when available.
 
-    def self.ordered_data_string data, struct_only=false, indent=1
-      case data
-
-      when Hash
-        return "{}" if data.empty?
-
-        output = "{\n"
-
-        sorted_keys = sort_any data.keys
-
-        data_values =
-          sorted_keys.map do |key|
-            value   = data[key]
-            pad     = " " * indent
-            subdata = ordered_data_string value, struct_only, indent + 1
-            "#{pad}#{key.inspect} => #{subdata}"
-          end
-
-        output << data_values.join(",\n") << "\n" unless data_values.empty?
-        output << "#{" " * (indent-1)}}"
-
-      when Array
-        return "[]" if data.empty?
-
-        output = "[\n"
-
-        data_values =
-          data.map do |value|
-            pad = " " * indent
-            "#{pad}#{ordered_data_string value, struct_only, indent + 1}"
-          end
-
-        output << data_values.join(",\n") << "\n" unless data_values.empty?
-        output << "#{" " * (indent-1)}]"
-
+    def self.ordered_data_string data, struct_only=false
+      case Kronk.config[:render_lang].to_s
+      when 'ruby' then DataRenderer.ruby(data, struct_only)
       else
-        return data.inspect unless struct_only
-        return "Boolean" if data == true || data == false
-        data.class
-      end
-    end
-
-
-    ##
-    # Sorts an array of any combination of string, integer, or symbols.
-
-    def self.sort_any arr
-      i = 1
-      until i >= arr.length
-        j        = i-1
-        val      = arr[i]
-        prev_val = arr[j]
-
-        loop do
-          if smaller?(val, arr[j])
-            arr[j+1] = arr[j]
-            j = j - 1
-            break if j < 0
-
-          else
-            break
-          end
-        end
-
-        arr[j+1] = val
-
-        i = i.next
-      end
-
-      arr
-    end
-
-
-    ##
-    # Compares Numerics, Strings, and Symbols and returns true if the left
-    # side is 'smaller' than the right side.
-
-    def self.smaller? left, right
-      case left
-      when Numeric
-        case right
-        when Numeric then right > left
-        else              true
-        end
-
-      when Symbol
-        case right
-        when Numeric then false
-        when Symbol  then right.to_s > left.to_s
-        else              true
-        end
-
-      when String
-        case right
-        when String  then right > left
-        else              false
-        end
+        DataRenderer.json(data, struct_only)
       end
     end
 

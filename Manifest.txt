@@ -7,6 +7,7 @@ bin/kronk
 lib/kronk.rb
 lib/kronk/constants.rb
 lib/kronk/cmd.rb
+lib/kronk/data_renderer.rb
 lib/kronk/diff.rb
 lib/kronk/diff/ascii_format.rb
 lib/kronk/diff/color_format.rb

@@ -44,8 +44,140 @@ class TestDiff < Test::Unit::TestCase
   end
 
 
-  def test_ordered_data_string
+  def test_ordered_data_string_json
     expected = <<STR
+{
+ "acks": [
+  [
+   56,
+   78
+  ],
+  [
+   "12",
+   "34"
+  ]
+ ],
+ "root": [
+  [
+   "B1",
+   "B2"
+  ],
+  [
+   "A1",
+   "A2"
+  ],
+  [
+   "C1",
+   "C2",
+   [
+    "C3a",
+    "C3b"
+   ]
+  ],
+  {
+   ":tests": [
+    "D3a",
+    "D3b"
+   ],
+   "test": [
+    [
+     "D1a\\nContent goes here",
+     "D1b"
+    ],
+    "D2"
+   ]
+  }
+ ],
+ "subs": [
+  "a",
+  "b"
+ ],
+ "tests": {
+  ":foo": ":bar",
+  "test": [
+   [
+    1,
+    2
+   ],
+   2.123
+  ]
+ }
+}
+STR
+
+    assert_equal expected.strip, Kronk::Diff.ordered_data_string(mock_data)
+  end
+
+
+  def test_ordered_data_string_struct_json
+    expected = <<STR
+{
+ "acks": [
+  [
+   "Fixnum",
+   "Fixnum"
+  ],
+  [
+   "String",
+   "String"
+  ]
+ ],
+ "root": [
+  [
+   "String",
+   "String"
+  ],
+  [
+   "String",
+   "String"
+  ],
+  [
+   "String",
+   "String",
+   [
+    "String",
+    "String"
+   ]
+  ],
+  {
+   ":tests": [
+    "String",
+    "String"
+   ],
+   "test": [
+    [
+     "String",
+     "String"
+    ],
+    "String"
+   ]
+  }
+ ],
+ "subs": [
+  "String",
+  "String"
+ ],
+ "tests": {
+  ":foo": "Symbol",
+  "test": [
+   [
+    "Fixnum",
+    "Fixnum"
+   ],
+   "Float"
+  ]
+ }
+}
+STR
+
+    assert_equal expected.strip,
+                  Kronk::Diff.ordered_data_string(mock_data, true)
+  end
+
+
+  def test_ordered_data_string_ruby
+    with_config :render_lang => 'ruby' do
+      expected = <<STR
 {
  "acks" => [
   [
@@ -105,12 +237,14 @@ class TestDiff < Test::Unit::TestCase
 }
 STR
 
-    assert_equal expected.strip, Kronk::Diff.ordered_data_string(mock_data)
+      assert_equal expected.strip, Kronk::Diff.ordered_data_string(mock_data)
+    end
   end
 
 
-  def test_ordered_data_string_struct
-    expected = <<STR
+  def test_ordered_data_string_struct_ruby
+    with_config :render_lang => 'ruby' do
+      expected = <<STR
 {
  "acks" => [
   [
@@ -170,8 +304,9 @@ STR
 }
 STR
 
-    assert_equal expected.strip,
-                  Kronk::Diff.ordered_data_string(mock_data, true)
+      assert_equal expected.strip,
+                    Kronk::Diff.ordered_data_string(mock_data, true)
+    end
   end
 
 

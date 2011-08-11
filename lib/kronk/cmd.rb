@@ -199,6 +199,11 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
+        opt.on('--ruby', 'Use legacy Ruby renderer') do
+          Kronk.config[:render_lang] = 'ruby'
+        end
+
+
         opt.on('--struct', 'Run diff on the data structure') do
           options[:struct] = true
         end

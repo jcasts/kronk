@@ -27,6 +27,7 @@ class Kronk
   require 'kronk/cmd'
   require 'kronk/path'
   require 'kronk/path/transaction'
+  require 'kronk/data_renderer'
   require 'kronk/diff/ascii_format'
   require 'kronk/diff/color_format'
   require 'kronk/diff'
