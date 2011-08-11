@@ -12,6 +12,10 @@
 
   * Plist and Nokogiri dependencies optional, based on usage.
 
+* Enhancements:
+
+  * Configurable output indentation.
+
 * Bugfixes:
 
   * Custom config files would never load.

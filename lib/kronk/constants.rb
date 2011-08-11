@@ -80,6 +80,7 @@ class Kronk
     :default_host   => "http://localhost:3000",
     :diff_format    => :ascii_diff,
     :history_file   => DEFAULT_HISTORY_FILE,
+    :indentiation   => 1,
     :requires       => [],
     :show_lines     => false,
     :uri_options    => {},
