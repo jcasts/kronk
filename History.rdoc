@@ -2,6 +2,8 @@
 
 * Major Enhancements:
 
+  * JSON is the primary output format (instead of Ruby).
+
   * Support for replay functionality from log files.
 
   * Support for Suite, Stream, and Benchmark outputs.
