@@ -50,8 +50,8 @@ class Kronk
         uri2, options = nil, uri2.merge(options) if Hash === uri2
 
         if uri2
-          @responses = [Request.retrieve(uri1, options),
-                        Request.retrieve(uri2, options)]
+          @responses = [Kronk.retrieve(uri1, options),
+                        Kronk.retrieve(uri2, options)]
           @response  = @responses.last
 
           @datas     = @responses.map do |r|
@@ -67,7 +67,7 @@ class Kronk
           @diff      = Diff.new_from_data(*@datas)
 
         else
-          @response  = Request.retrieve uri1, options
+          @response  = Kronk.retrieve uri1, options
           @responses = [@response]
 
           @data      = begin
