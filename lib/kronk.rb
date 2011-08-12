@@ -14,7 +14,7 @@ require 'yaml'
 class Kronk
 
   # This gem's version.
-  VERSION = '1.5.0'
+  VERSION = '1.5.1'
 
   require 'kronk/constants'
   require 'kronk/player'

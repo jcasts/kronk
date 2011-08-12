@@ -1,3 +1,9 @@
+=== 1.5.1 / 2011-08-12
+
+* Bugfixes:
+
+  * Fix for helper methods calling Request instead of Kronk.
+
 === 1.5.0 / 2011-08-11
 
 * Major Enhancements:
