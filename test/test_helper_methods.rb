@@ -11,12 +11,12 @@ class TestHelperMethods < Test::Unit::TestCase
     @mock_resp2 = Kronk::Response.new \
                     StringIO.new mock_resp("200_response.json")
 
-    Kronk::Request.stubs(:retrieve).returns @mock_resp
+    Kronk.stubs(:retrieve).returns @mock_resp
   end
 
 
   def test_get
-    Kronk::Request.expects(:retrieve).
+    Kronk.expects(:retrieve).
       with("host.com", :foo => "bar", :http_method => :get).
       returns @mock_resp
 
@@ -25,7 +25,7 @@ class TestHelperMethods < Test::Unit::TestCase
 
 
   def test_get_two
-    Kronk::Request.expects(:retrieve).times(2).
+    Kronk.expects(:retrieve).times(2).
       with("host.com", :foo => "bar", :http_method => :get).
       returns @mock_resp
 
@@ -34,7 +34,7 @@ class TestHelperMethods < Test::Unit::TestCase
 
 
   def test_post
-    Kronk::Request.expects(:retrieve).
+    Kronk.expects(:retrieve).
       with("host.com", :foo => "bar", :http_method => :post).
       returns @mock_resp
 
@@ -43,7 +43,7 @@ class TestHelperMethods < Test::Unit::TestCase
 
 
   def test_post_two
-    Kronk::Request.expects(:retrieve).times(2).
+    Kronk.expects(:retrieve).times(2).
       with("host.com", :foo => "bar", :http_method => :post).
       returns @mock_resp
 
@@ -52,7 +52,7 @@ class TestHelperMethods < Test::Unit::TestCase
 
 
   def test_put
-    Kronk::Request.expects(:retrieve).
+    Kronk.expects(:retrieve).
       with("host.com", :foo => "bar", :http_method => :put).
       returns @mock_resp
 
@@ -61,7 +61,7 @@ class TestHelperMethods < Test::Unit::TestCase
 
 
   def test_put_two
-    Kronk::Request.expects(:retrieve).times(2).
+    Kronk.expects(:retrieve).times(2).
       with("host.com", :foo => "bar", :http_method => :put).
       returns @mock_resp
 
@@ -71,7 +71,7 @@ class TestHelperMethods < Test::Unit::TestCase
 
 
   def test_delete
-    Kronk::Request.expects(:retrieve).
+    Kronk.expects(:retrieve).
       with("host.com", :foo => "bar", :http_method => :delete).
       returns @mock_resp
 
@@ -80,7 +80,7 @@ class TestHelperMethods < Test::Unit::TestCase
 
 
   def test_delete_two
-    Kronk::Request.expects(:retrieve).times(2).
+    Kronk.expects(:retrieve).times(2).
       with("host.com", :foo => "bar", :http_method => :delete).
       returns @mock_resp
 
@@ -89,7 +89,7 @@ class TestHelperMethods < Test::Unit::TestCase
 
 
   def test_retrieve_one
-    Kronk::Request.expects(:retrieve).
+    Kronk.expects(:retrieve).
       with("host.com", :foo => "bar", :test => "thing").returns @mock_resp
 
     @mock_resp.expects(:selective_data).with(:foo => "bar", :test => "thing").
@@ -108,10 +108,10 @@ class TestHelperMethods < Test::Unit::TestCase
 
 
   def test_retrieve_two
-    Kronk::Request.expects(:retrieve).
+    Kronk.expects(:retrieve).
       with("host1.com", :foo => "bar").returns @mock_resp
 
-    Kronk::Request.expects(:retrieve).
+    Kronk.expects(:retrieve).
       with("host2.com", :foo => "bar").returns @mock_resp2
 
     @mock_resp.expects(:selective_data).with(:foo => "bar").returns @json
@@ -136,7 +136,7 @@ class TestHelperMethods < Test::Unit::TestCase
   def test_retrieve_unparsable
     mock_resp = Kronk::Response.new StringIO.new(mock_200_response)
 
-    Kronk::Request.expects(:retrieve).
+    Kronk.expects(:retrieve).
       with("host.com", :foo => "bar").returns mock_resp
 
     retrieve "host.com", :foo => "bar"
@@ -154,10 +154,10 @@ class TestHelperMethods < Test::Unit::TestCase
   def test_retrieve_two_unparsable
     mock_resp = Kronk::Response.new StringIO.new(mock_200_response)
 
-    Kronk::Request.expects(:retrieve).
+    Kronk.expects(:retrieve).
       with("host1.com", :foo => "bar").returns mock_resp
 
-    Kronk::Request.expects(:retrieve).
+    Kronk.expects(:retrieve).
       with("host2.com", :foo => "bar").returns mock_resp
 
 
