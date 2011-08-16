@@ -1,5 +1,5 @@
 require 'test/test_helper'
-require 'lib/kronk/test/core_ext'
+require 'lib/kronk/core_ext'
 
 class TestCoreExt < Test::Unit::TestCase
 

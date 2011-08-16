@@ -1,3 +1,9 @@
+=== 1.5.2 / 2011-08
+
+* Enhancements:
+
+  * Moved kronk/test/core_ext to kronk/core_ext
+
 === 1.5.1 / 2011-08-12
 
 * Bugfixes:
