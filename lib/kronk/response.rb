@@ -18,6 +18,8 @@ class Kronk
   class Response
 
     class MissingParser < Exception; end
+    class InvalidParser < Exception; end
+
 
     ENCODING_MATCHER = /(^|;\s?)charset=(.*?)\s*(;|$)/
 
@@ -152,9 +154,11 @@ class Kronk
 
       return @parsed_body if @parsed_body && !parser
 
-      if String === parser
+      begin
         parser = Kronk.parser_for(parser) || Kronk.find_const(parser)
-      end
+      rescue NameError
+        raise InvalidParser, "No such parser: #{parser}"
+      end if String === parser
 
       parser ||= @parser
 
