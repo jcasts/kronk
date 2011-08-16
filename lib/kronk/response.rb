@@ -12,8 +12,9 @@ class Kronk
     end
   end
 
+
   ##
-  # Wraps an http response.
+  # Standard Kronk response object.
 
   class Response
 

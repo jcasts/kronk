@@ -149,6 +149,13 @@ class TestResponse < Test::Unit::TestCase
   end
 
 
+  def test_parsed_body_invalid_parser
+    assert_raises Kronk::Response::InvalidParser do
+      @html_resp.parsed_body "FooBar"
+    end
+  end
+
+
   def test_parsed_body_bad_parser
     assert_raises JSON::ParserError do
       @html_resp.parsed_body JSON

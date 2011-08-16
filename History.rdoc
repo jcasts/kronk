@@ -2,7 +2,11 @@
 
 * Enhancements:
 
-  * Moved kronk/test/core_ext to kronk/core_ext
+  * Moved kronk/test/core_ext to kronk/core_ext.
+
+* Bugfixes:
+
+  * Handling of invalid parser errors.
 
 === 1.5.1 / 2011-08-12
 
