@@ -64,8 +64,18 @@ class Kronk
   ##
   # Find a fully qualified ruby namespace/constant.
 
-  def self.find_const namespace
-    consts = namespace.to_s.split "::"
+  def self.find_const name_or_file
+    if File.file? name_or_file
+      namespace = name_or_file.split("/").last.split(".",2).first
+      namespace.gsub!(/(^|[\-_]+)([a-z0-9])/i){|m| m[-1,1].upcase}
+
+      require File.expand_path(name_or_file)
+
+    else
+      namespace = name_or_file.to_s
+    end
+
+    consts = namespace.split "::"
     curr = self
 
     until consts.empty? do
