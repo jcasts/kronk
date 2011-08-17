@@ -104,7 +104,7 @@ class Kronk
 
       until consts.empty? do
         const = consts.shift
-        next if const.empty?
+        next if const.to_s.empty?
 
         if case_insensitive
           const.gsub!(/(^|[\-_.]+)([a-z0-9])/i){|m| m[-1,1].upcase}
