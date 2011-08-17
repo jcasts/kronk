@@ -91,7 +91,7 @@ class Kronk
 
         if case_insensitive
           const.gsub!(/(^|[\-_.]+)([a-z0-9])/i){|m| m[-1,1].upcase}
-          const = curr.constants.find do |c|
+          const = (curr.constants | Object.constants).find do |c|
             c.to_s.downcase == const.to_s.downcase
           end
         end

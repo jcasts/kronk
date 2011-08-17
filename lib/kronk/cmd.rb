@@ -48,6 +48,24 @@ class Kronk
 
 
     ##
+    # Parses a Constant:file/path pair.
+
+    def self.parse_const str
+      return unless str
+
+      if str =~ /[^:]:([^:]+)$/
+        req_file = $1
+        i        = $1.length + 2
+        str    = str[0..-i]
+
+        require File.expand_path(req_file)
+      end
+
+      str
+    end
+
+
+    ##
     # Parse ARGV
 
     def self.parse_args argv
@@ -122,7 +140,7 @@ Parse and run diffs against data from live and cached http responses.
 
         opt.on('--format STR', String,
                'Use a custom diff formatter') do |value|
-          Kronk.config[:diff_format] = value
+          Kronk.config[:diff_format] = parse_const value
         end
 
 
@@ -178,7 +196,7 @@ Parse and run diffs against data from live and cached http responses.
 
         opt.on('-P', '--parser STR', String,
                'Override default response body parser') do |value|
-          options[:parser] = value
+          options[:parser] = parse_const value
         end
 
 
@@ -233,7 +251,7 @@ Parse and run diffs against data from live and cached http responses.
 
         opt.on('-o', '--replay-out [FORMAT]',
                'Output format used by --replay; default: stream') do |output|
-          options[:player][:output] = output || :stream
+          options[:player][:output] = parse_const(output) || :stream
         end
 
 
