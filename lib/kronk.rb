@@ -81,6 +81,14 @@ class Kronk
 
       raise NameError, "no constant match for #{name_or_file}"
 
+    elsif name_or_file =~ /[^:]:([^:]+)$/
+      req_file = $1
+      i        = $1.length + 2
+      const    = name_or_file[0..-i]
+
+      require File.expand_path(req_file)
+      find_const const
+
     else
       consts = name_or_file.to_s.split "::"
       curr = self
