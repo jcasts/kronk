@@ -157,7 +157,7 @@ class TestResponse < Test::Unit::TestCase
 
 
   def test_parsed_body_bad_parser
-    assert_raises JSON::ParserError do
+    assert_raises Kronk::ParserError do
       @html_resp.parsed_body JSON
     end
   end
