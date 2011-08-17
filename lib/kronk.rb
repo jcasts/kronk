@@ -64,25 +64,47 @@ class Kronk
   ##
   # Find a fully qualified ruby namespace/constant.
 
-  def self.find_const name_or_file
+  def self.find_const name_or_file, case_insensitive=false
     if File.file? name_or_file
-      namespace = name_or_file.split("/").last.split(".",2).first
-      namespace.gsub!(/(^|[\-_]+)([a-z0-9])/i){|m| m[-1,1].upcase}
-
       require File.expand_path(name_or_file)
 
+      namespace = File.basename name_or_file, ".rb"
+      consts    = File.dirname(name_or_file).split(File::SEPARATOR)
+      consts   << namespace
+
+      consts.each do |const|
+        const
+      end
+
+      name = ""
+      until consts.empty?
+        name  = "::" << consts.pop.to_s << name
+        const = find_const name, true rescue nil
+        return const if const
+      end
+
+      raise NameError, "no constant match for #{name_or_file}"
+
     else
-      namespace = name_or_file.to_s
+      consts = name_or_file.to_s.split "::"
+      curr = self
+
+      until consts.empty? do
+        const = consts.shift
+        next if const.empty?
+
+        if case_insensitive
+          const.gsub!(/(^|[\-_.]+)([a-z0-9])/i){|m| m[-1,1].upcase}
+          const = curr.constants.find do |c|
+            c.to_s.downcase == const.to_s.downcase
+          end
+        end
+
+        curr = curr.const_get const.to_s
+      end
+
+      curr
     end
-
-    consts = namespace.split "::"
-    curr = self
-
-    until consts.empty? do
-      curr = curr.const_get consts.shift
-    end
-
-    curr
   end
 
 
