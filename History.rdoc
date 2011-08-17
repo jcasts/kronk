@@ -10,6 +10,8 @@
 
   * Handling of invalid parser errors.
 
+  * More explicit parser errors for unparsable strings.
+
 === 1.5.1 / 2011-08-12
 
 * Bugfixes:
