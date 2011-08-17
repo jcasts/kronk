@@ -168,7 +168,7 @@ class Kronk
         "No parser for Content-Type: #{@_res['Content-Type']}" unless parser
 
       begin
-        @parsed_body = parser.parse self.body
+        @parsed_body = parser.parse(self.body) or raise RuntimeError
 
       rescue RuntimeError, ::Exception => e
         msg = ParserError === e ? e.message : "#{parser} failed parsing body"
