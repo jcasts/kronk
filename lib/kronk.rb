@@ -72,10 +72,6 @@ class Kronk
       consts    = File.dirname(name_or_file).split(File::SEPARATOR)
       consts   << namespace
 
-      consts.each do |const|
-        const
-      end
-
       name = ""
       until consts.empty?
         name  = "::" << consts.pop.to_s << name
