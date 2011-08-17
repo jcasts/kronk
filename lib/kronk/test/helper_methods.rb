@@ -4,7 +4,8 @@ class Kronk
 
     ##
     # Kronk test helper methods to easily make and mock requests.
-    # Sets @responses, @response, @datas, @data, and @diff instance variables.
+    # Sets @kronk, @responses, @response, @datas, @data, and @diff
+    # instance variables.
 
     module HelperMethods
 
