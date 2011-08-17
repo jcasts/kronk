@@ -87,6 +87,7 @@ class Kronk
       @parser = Kronk.parser_for @_res['Content-Type']
 
       @uri = @request.uri if @request && @request.uri
+      @uri = URI.parse io.path if File === io
 
       @byterate = 0
     end
@@ -167,6 +168,10 @@ class Kronk
         "No parser for Content-Type: #{@_res['Content-Type']}" unless parser
 
       @parsed_body = parser.parse self.body
+
+    rescue ParserError => e
+      raise unless @uri
+      raise ParserError, (e.message << " returned by #{@uri}")
     end
 
 

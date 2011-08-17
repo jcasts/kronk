@@ -106,7 +106,7 @@ class TestResponse < Test::Unit::TestCase
     assert_equal expected, @json_resp.parsed_body
     assert_equal @xml_resp.parsed_body, @json_resp.parsed_body
 
-    assert_raises RuntimeError do
+    assert_raises Kronk::ParserError do
       @json_resp.parsed_body Kronk::PlistParser
     end
   end
@@ -118,7 +118,7 @@ class TestResponse < Test::Unit::TestCase
 
     assert_equal expected, @json_resp.parsed_body
 
-    assert_raises RuntimeError do
+    assert_raises Kronk::ParserError do
       @json_resp.parsed_body 'PlistParser'
     end
   end
@@ -251,7 +251,7 @@ class TestResponse < Test::Unit::TestCase
 
 
   def test_selective_data_parser
-    assert_raises RuntimeError do
+    assert_raises Kronk::ParserError do
       @json_resp.selective_data :parser => Kronk::PlistParser
     end
 

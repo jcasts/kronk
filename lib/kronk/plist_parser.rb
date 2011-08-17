@@ -10,7 +10,10 @@ class Kronk
 
     def self.parse plist
       require 'plist'
-      Plist.parse_xml plist
+      Plist.parse_xml(plist) || raise(ParserError, "invalid Plist")
+
+    rescue RuntimeError
+      raise(ParserError, "unparsable Plist")
 
     rescue LoadError => e
       raise unless e.message =~ /-- plist/

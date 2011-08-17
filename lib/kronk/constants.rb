@@ -3,6 +3,9 @@ class Kronk
   # Generic Request exception.
   class Exception < ::Exception; end
 
+  # Raised when parsing fails.
+  class ParserError < Exception; end
+
   # Raised when the URI was not resolvable.
   class NotFoundError < Exception; end
 

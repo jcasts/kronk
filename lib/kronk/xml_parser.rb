@@ -47,7 +47,7 @@ class Kronk
       end
 
       hash = node_value root_node.children
-      hash.values.first
+      hash.values.first || raise(ParserError, "invalid XML")
     end
 
 
