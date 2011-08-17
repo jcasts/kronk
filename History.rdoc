@@ -4,6 +4,8 @@
 
   * Moved kronk/test/core_ext to kronk/core_ext.
 
+  * Options that take a constant name now support passing only a file name. 
+
 * Bugfixes:
 
   * Handling of invalid parser errors.
