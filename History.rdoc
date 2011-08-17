@@ -4,9 +4,12 @@
 
   * Moved kronk/test/core_ext to kronk/core_ext.
 
-  * Options that take a constant name now support passing only a file name. 
+  * Options that take a constant name now support passing a file path only,
+    or a Constant:file/path pair.
 
 * Bugfixes:
+
+  * Fixed unsupported struct options in helper_methods.
 
   * Handling of invalid parser errors.
 

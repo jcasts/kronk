@@ -49,37 +49,24 @@ class Kronk
       def retrieve uri1, uri2=nil, options={}
         uri2, options = nil, uri2.merge(options) if Hash === uri2
 
-        if uri2
-          @responses = [Kronk.retrieve(uri1, options),
-                        Kronk.retrieve(uri2, options)]
-          @response  = @responses.last
+        @kronk = Kronk.new options
 
-          @datas     = @responses.map do |r|
-                         begin
-                           r.selective_data options
-                         rescue Kronk::Response::MissingParser
-                           r.body
-                         end
-                       end
+        uri2 ? @kronk.compare(uri1, uri2) : @kronk.retrieve(uri1)
 
-          @data      = @datas.last
-
-          @diff      = Diff.new_from_data(*@datas)
-
-        else
-          @response  = Kronk.retrieve uri1, options
-          @responses = [@response]
-
-          @data      = begin
-                         @response.selective_data options
+        @responses = @kronk.responses
+        @response  = @kronk.response
+        @datas     = @responses.map do |r|
+                       begin
+                         r.selective_data options
                        rescue Kronk::Response::MissingParser
-                         @response.body
+                         r.body
                        end
+                     end
 
-          @datas     = [@data]
+        @data = @datas.last
+        @diff = @kronk.diff
 
-          @diff      = nil
-        end
+        @kronk
       end
     end
   end
