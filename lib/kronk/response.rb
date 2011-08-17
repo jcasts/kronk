@@ -171,7 +171,7 @@ class Kronk
         @parsed_body = parser.parse self.body
 
       rescue RuntimeError, ::Exception => e
-        msg = ParserError === e ? e.message : "invalid #{parser}"
+        msg = ParserError === e ? e.message : "#{parser} failed parsing body"
         msg << " returned by #{@uri}" if @uri
         raise ParserError, msg
       end

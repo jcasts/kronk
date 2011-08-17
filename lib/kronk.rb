@@ -65,8 +65,25 @@ class Kronk
   # Find a fully qualified ruby namespace/constant.
 
   def self.find_const name_or_file, case_insensitive=false
-    if File.file? name_or_file
-      require File.expand_path(name_or_file)
+    if name_or_file =~ /[^:]:([^:]+)$/
+      req_file = $1
+      i        = $1.length + 2
+      const    = name_or_file[0..-i]
+
+      begin
+        require req_file
+      rescue LoadError
+        require File.expand_path(req_file)
+      end
+
+      find_const const
+
+    elsif name_or_file.include? File::SEPARATOR
+      begin
+        require name_or_file
+      rescue LoadError
+        require File.expand_path(name_or_file)
+      end
 
       namespace = File.basename name_or_file, ".rb"
       consts    = File.dirname(name_or_file).split(File::SEPARATOR)
@@ -80,14 +97,6 @@ class Kronk
       end
 
       raise NameError, "no constant match for #{name_or_file}"
-
-    elsif name_or_file =~ /[^:]:([^:]+)$/
-      req_file = $1
-      i        = $1.length + 2
-      const    = name_or_file[0..-i]
-
-      require File.expand_path(req_file)
-      find_const const
 
     else
       consts = name_or_file.to_s.split "::"

@@ -132,6 +132,56 @@ class TestKronk < Test::Unit::TestCase
   end
 
 
+  def test_find_const_file
+    $".delete File.expand_path("lib/kronk/diff/ascii_format.rb")
+    Kronk::Diff.send(:remove_const, :AsciiFormat)
+    assert_raises(NameError){ Kronk::Diff::AsciiFormat }
+
+    Kronk.find_const 'kronk/diff/ascii_format'
+    assert Kronk::Diff::AsciiFormat
+  end
+
+
+  def test_find_const_file_rb
+    $".delete File.expand_path("lib/kronk/diff/ascii_format.rb")
+    Kronk::Diff.send(:remove_const, :AsciiFormat)
+    assert_raises(NameError){ Kronk::Diff::AsciiFormat }
+
+    Kronk.find_const 'kronk/diff/ascii_format.rb'
+    assert Kronk::Diff::AsciiFormat
+  end
+
+
+  def test_find_const_file_pair
+    $".delete File.expand_path("lib/kronk/diff/ascii_format.rb")
+    Kronk::Diff.send(:remove_const, :AsciiFormat)
+    assert_raises(NameError){ Kronk::Diff::AsciiFormat }
+
+    Kronk.find_const 'Kronk::Diff::AsciiFormat:kronk/diff/ascii_format'
+    assert Kronk::Diff::AsciiFormat
+  end
+
+
+  def test_find_const_file_pair_rb
+    $".delete File.expand_path("lib/kronk/diff/ascii_format.rb")
+    Kronk::Diff.send(:remove_const, :AsciiFormat)
+    assert_raises(NameError){ Kronk::Diff::AsciiFormat }
+
+    Kronk.find_const 'Kronk::Diff::AsciiFormat:kronk/diff/ascii_format.rb'
+    assert Kronk::Diff::AsciiFormat
+  end
+
+
+  def test_find_const_file_pair_rb_expanded
+    $".delete File.expand_path("lib/kronk/diff/ascii_format.rb")
+    Kronk::Diff.send(:remove_const, :AsciiFormat)
+    assert_raises(NameError){ Kronk::Diff::AsciiFormat }
+
+    Kronk.find_const 'Kronk::Diff::AsciiFormat:lib/kronk/diff/ascii_format.rb'
+    assert Kronk::Diff::AsciiFormat
+  end
+
+
   def test_options_for_uri
     with_uri_options do
       assert_equal mock_uri_options['example'],
