@@ -168,6 +168,40 @@ class Kronk::Path::Transaction
   end
 
 
+  def temp_convert_ary
+    #TODO: convert array to hash and add to @make_array
+  end
+
+
+  def force_assign_paths data, path_val_hash # :nodoc:
+    path_val_hash.each do |path, value|
+      curr_data = data
+      prev_data = nil
+
+      path.each_with_index do |key, i|
+        prev_key = path[i-1] if i > 0
+        last     = i == path.length - 1
+
+        curr_data[key] = value and break if last
+
+        if Array === curr_data && !(Integer === key)
+          curr_data = ary_to_hash curr_data
+          prev_data[prev_key] = curr_data if prev_data
+          @make_array.delete path[0..i]
+        end
+
+        unless Array === curr_data[key] || Hash === curr_data[key]
+          curr_data[key] = Hash.new
+          @make_array << path[0..i] if Integer === key
+        end
+
+        prev_data = curr_data
+        curr_data = curr_data[key]
+      end
+    end
+  end
+
+
   def ary_to_hash ary # :nodoc:
     hash = {}
     ary.each_with_index{|val, i| hash[i] = val}
