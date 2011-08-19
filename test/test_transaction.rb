@@ -285,6 +285,22 @@ class TestTransaction < Test::Unit::TestCase
   end
 
 
+  def test_force_assign_paths
+    data = {'foo' => 'bar'}
+
+    new_data = @trans.force_assign_paths data,
+                 %w{sub thing one}   => 'val1',
+                 %w{sub thing two}   => 'val2',
+                 ['sub', 'other', 3] => 'val3',
+                 ['sub', 'other', 1] => 'val4',
+                 ['sub', 'other', 5, 6] => 'val5'
+
+    new_data = @trans.remake_arrays new_data
+
+    p new_data
+  end
+
+
   def test_ary_to_hash
     expected = {1 => :a, 0 => :foo, 2 => :b}
     assert_equal expected, @trans.ary_to_hash([:foo, :a, :b])

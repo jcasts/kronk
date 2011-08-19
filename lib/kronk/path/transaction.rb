@@ -73,14 +73,18 @@ class Kronk::Path::Transaction
 
 
   def remake_arrays new_data, except_modified=false # :nodoc:
-    @make_array.each do |path_arr, v|
+    remake_paths = @make_array.keys.sort{|p1, p2| p2.length <=> p1.length}
+
+    remake_paths.each do |path_arr|
       key  = path_arr.last
       obj = Kronk::Path.data_at_path path_arr[0..-2], new_data
 
       next unless Hash === obj[key]
-      next if except_modified &&
-        obj[key].length !=
-          Kronk::Path.data_at_path(path_arr, @data).length
+
+      if except_modified
+        data_at_path = Kronk::Path.data_at_path(path_arr, @data)
+        next if !data_at_path || obj[key].length != data_at_path.length
+      end
 
       obj[key] = hash_to_ary obj[key]
     end
@@ -169,45 +173,52 @@ class Kronk::Path::Transaction
 
 
   def force_assign_paths data, path_val_hash # :nodoc:
-    new_data = data.dup
+    new_data = data.dup rescue []
 
     path_val_hash.each do |path, value|
       curr_data     = data
       new_curr_data = new_data
       prev_data     = nil
       prev_key      = nil
+      prev_path     = []
 
       path.each_with_index do |key, i|
-        last      = i == path.length - 1
-        curr_path = []
-        curr_path = path[0..(i-1)] if i > 0
-        next_path = path[0..i]
-
-        new_curr_data[key] = value and break if last
-
-        new_curr_data[key] = curr_data[key].dup rescue nil
-
         if Array === new_curr_data
           new_curr_data          = ary_to_hash new_curr_data
           prev_data[prev_key]    = new_curr_data if prev_data
-          @make_array[curr_path] = true
+          @make_array[prev_path] = true
         end
 
-        # curr_data is a hash from here on
-        @make_array.delete curr_path unless Integer === key
+        last      = i == path.length - 1
+        prev_path = path[0..(i-1)] if i > 0
+        curr_path = path[0..i]
+        next_path = path[0..(i+1)]
+        next_key  = next_path.last
+
+        # new_curr_data is a hash from here on
+
+        @make_array.delete prev_path unless Integer === key
+
+        new_curr_data[key] = value and break if last
+
+        if curr_data && curr_data.respond_to?(:[]) && curr_data[key]
+          new_curr_data[key] = curr_data[key].respond_to?(:dup) ?
+                                curr_data[key].dup : curr_data[key]
+        end
 
         unless Array === new_curr_data[key] || Hash === new_curr_data[key]
-          new_curr_data[key]     = Hash.new
-          @make_array[next_path] = true if Integer === key
+          new_curr_data[key] ||= Integer === next_key ? [] : {}
         end
+
+        @make_array[curr_path] = true if Array === new_curr_data[key]
 
         prev_key      = key
         prev_data     = new_curr_data
         new_curr_data = new_curr_data[key]
-        curr_data     = curr_data[key]
+        curr_data     = curr_data.respond_to?(:[]) ? curr_data[key] : nil
       end
     end
-
+#p @make_array
     new_data
   end
 
