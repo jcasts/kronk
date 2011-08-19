@@ -169,10 +169,13 @@ class Kronk::Path::Transaction
 
 
   def force_assign_paths data, path_val_hash # :nodoc:
+    new_data = data.dup
+
     path_val_hash.each do |path, value|
-      curr_data = data
-      prev_data = nil
-      prev_key  = nil
+      curr_data     = data
+      new_curr_data = new_data
+      prev_data     = nil
+      prev_key      = nil
 
       path.each_with_index do |key, i|
         last      = i == path.length - 1
@@ -180,27 +183,32 @@ class Kronk::Path::Transaction
         curr_path = path[0..(i-1)] if i > 0
         next_path = path[0..i]
 
-        curr_data[key] = value and break if last
+        new_curr_data[key] = value and break if last
 
-        if Array === curr_data
-          curr_data = ary_to_hash curr_data
-          prev_data[prev_key] = curr_data if prev_data
+        new_curr_data[key] = curr_data[key].dup rescue nil
+
+        if Array === new_curr_data
+          new_curr_data          = ary_to_hash new_curr_data
+          prev_data[prev_key]    = new_curr_data if prev_data
           @make_array[curr_path] = true
         end
 
         # curr_data is a hash from here on
         @make_array.delete curr_path unless Integer === key
 
-        unless Array === curr_data[key] || Hash === curr_data[key]
-          curr_data[key] = Hash.new
+        unless Array === new_curr_data[key] || Hash === new_curr_data[key]
+          new_curr_data[key]     = Hash.new
           @make_array[next_path] = true if Integer === key
         end
 
-        prev_key  = key
-        prev_data = curr_data
-        curr_data = curr_data[key]
+        prev_key      = key
+        prev_data     = new_curr_data
+        new_curr_data = new_curr_data[key]
+        curr_data     = curr_data[key]
       end
     end
+
+    new_data
   end
 
 
