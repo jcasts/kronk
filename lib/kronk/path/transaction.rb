@@ -44,7 +44,7 @@ class Kronk::Path::Transaction
     @data    = data
     @actions = Hash.new{|h,k| h[k] = []}
 
-    @make_array = []
+    @make_array = {}
   end
 
 
@@ -73,7 +73,7 @@ class Kronk::Path::Transaction
 
 
   def remake_arrays new_data, except_modified=false # :nodoc:
-    @make_array.each do |path_arr|
+    @make_array.each do |path_arr, v|
       key  = path_arr.last
       obj = Kronk::Path.data_at_path path_arr[0..-2], new_data
 
@@ -115,7 +115,7 @@ class Kronk::Path::Transaction
             # Tag data item for conversion to Array.
             # Hashes are used to conserve position of Array elements.
             if Array === curr_data[key]
-              @make_array << path[0..i]
+              @make_array[path[0..i]] = true
             end
 
             new_curr_data = new_curr_data[key]
@@ -154,7 +154,7 @@ class Kronk::Path::Transaction
 
             if Array === new_curr_data[key]
               new_curr_data[key] = ary_to_hash new_curr_data[key]
-              @make_array << path[0..i]
+              @make_array[path[0..i]] = true
             end
 
             new_curr_data = new_curr_data[key]
@@ -168,33 +168,35 @@ class Kronk::Path::Transaction
   end
 
 
-  def temp_convert_ary
-    #TODO: convert array to hash and add to @make_array
-  end
-
-
   def force_assign_paths data, path_val_hash # :nodoc:
     path_val_hash.each do |path, value|
       curr_data = data
       prev_data = nil
+      prev_key  = nil
 
       path.each_with_index do |key, i|
-        prev_key = path[i-1] if i > 0
-        last     = i == path.length - 1
+        last      = i == path.length - 1
+        curr_path = []
+        curr_path = path[0..(i-1)] if i > 0
+        next_path = path[0..i]
 
         curr_data[key] = value and break if last
 
-        if Array === curr_data && !(Integer === key)
+        if Array === curr_data
           curr_data = ary_to_hash curr_data
           prev_data[prev_key] = curr_data if prev_data
-          @make_array.delete path[0..i]
+          @make_array[curr_path] = true
         end
+
+        # curr_data is a hash from here on
+        @make_array.delete curr_path unless Integer === key
 
         unless Array === curr_data[key] || Hash === curr_data[key]
           curr_data[key] = Hash.new
-          @make_array << path[0..i] if Integer === key
+          @make_array[next_path] = true if Integer === key
         end
 
+        prev_key  = key
         prev_data = curr_data
         curr_data = curr_data[key]
       end
@@ -236,5 +238,24 @@ class Kronk::Path::Transaction
 
   def delete *paths
     @actions[:delete].concat paths
+  end
+
+
+  ##
+  # Queues path moving for transaction. Moving a path will attempt to
+  # keep the original data structure and only affect the given paths.
+  # Empty hashes or arrays after a move are deleted.
+  #   t.move "my/path/1..4/key" => "new_path/%d/key",
+  #          "other/path/*"     => "moved/%d"
+
+  def move path_maps
+  end
+
+
+  ##
+  # Queues path mapping for transaction. Mapping a path will only keep the
+  # mapped values, completely replacing the original data structure.
+
+  def map path_maps
   end
 end

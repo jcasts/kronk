@@ -298,7 +298,7 @@ class TestTransaction < Test::Unit::TestCase
 
   def test_clear
     @trans.instance_variable_get(:@actions)[:foo] = :bar
-    @trans.instance_variable_get(:@make_array) << :foobar
+    @trans.instance_variable_get(:@make_array)[:foobar] = true
 
     @trans.clear
 
