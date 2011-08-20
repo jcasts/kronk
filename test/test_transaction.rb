@@ -295,9 +295,45 @@ class TestTransaction < Test::Unit::TestCase
                  ['sub', 'other', 1] => 'val4',
                  ['sub', 'other', 5, 6] => 'val5'
 
-    new_data = @trans.remake_arrays new_data
+    assert_equal({'foo' => 'bar'}, data)
 
-    p new_data
+    expected = {
+      'foo' => 'bar',
+      'sub' => {
+        'thing' => {'one' => 'val1', 'two' => 'val2'},
+        'other' => {3 => 'val3', 1 => 'val4', 5 => {6 => 'val5'}}
+      }
+    }
+    assert_equal expected, new_data
+
+    expected['sub']['other'] = ['val4', 'val3', ['val5']]
+    new_data = @trans.remake_arrays new_data
+    assert_equal expected, new_data
+  end
+
+
+  def test_force_assign_paths_root_array
+    data = ['foo', 'bar']
+
+    new_data = @trans.force_assign_paths data,
+                 [1, 'thing', 'one'] => 'val1',
+                 [1, 'thing', 'two'] => 'val2',
+                 [3, 'other', 3]     => 'val3',
+                 [3, 'other', 1]     => 'val4',
+                 [3, 'other', 5, 6]  => 'val5'
+
+    assert_equal(['foo', 'bar'], data)
+
+    expected = {
+      0 => 'foo',
+      1 => {'thing' => {'one' => 'val1', 'two' => 'val2'}},
+      3 => {'other' => {3 => 'val3', 1 => 'val4', 5 => {6 => 'val5'}}}
+    }
+    assert_equal expected, new_data
+
+    expected[3]['other'] = ['val4', 'val3', ['val5']]
+    new_data = @trans.remake_arrays new_data
+    assert_equal expected, new_data
   end
 
 

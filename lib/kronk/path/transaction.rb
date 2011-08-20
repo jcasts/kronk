@@ -186,14 +186,14 @@ class Kronk::Path::Transaction
         if Array === new_curr_data
           new_curr_data          = ary_to_hash new_curr_data
           prev_data[prev_key]    = new_curr_data if prev_data
+          new_data               = new_curr_data if i == 0
           @make_array[prev_path] = true
         end
 
         last      = i == path.length - 1
         prev_path = path[0..(i-1)] if i > 0
         curr_path = path[0..i]
-        next_path = path[0..(i+1)]
-        next_key  = next_path.last
+        next_key  = path[i+1]
 
         # new_curr_data is a hash from here on
 
@@ -201,13 +201,12 @@ class Kronk::Path::Transaction
 
         new_curr_data[key] = value and break if last
 
-        if curr_data && curr_data.respond_to?(:[]) && curr_data[key]
-          new_curr_data[key] = curr_data[key].respond_to?(:dup) ?
-                                curr_data[key].dup : curr_data[key]
-        end
+        if ary_or_hash?(curr_data) && ary_or_hash?(curr_data[key])
+          new_curr_data[key] ||= curr_data[key].respond_to?(:dup) ?
+                                  curr_data[key].dup : curr_data[key]
 
-        unless Array === new_curr_data[key] || Hash === new_curr_data[key]
-          new_curr_data[key] ||= Integer === next_key ? [] : {}
+        elsif !ary_or_hash?(new_curr_data[key])
+          new_curr_data[key] = Integer === next_key ? [] : {}
         end
 
         @make_array[curr_path] = true if Array === new_curr_data[key]
@@ -218,8 +217,13 @@ class Kronk::Path::Transaction
         curr_data     = curr_data.respond_to?(:[]) ? curr_data[key] : nil
       end
     end
-#p @make_array
+
     new_data
+  end
+
+
+  def ary_or_hash? obj # :nodoc:
+    Array === obj || Hash === obj
   end
 
 
@@ -274,6 +278,8 @@ class Kronk::Path::Transaction
   ##
   # Queues path mapping for transaction. Mapping a path will only keep the
   # mapped values, completely replacing the original data structure.
+  #   t.move "my/path/1..4/key" => "new_path/%d/key",
+  #          "other/path/*"     => "moved/%d"
 
   def map path_maps
   end
