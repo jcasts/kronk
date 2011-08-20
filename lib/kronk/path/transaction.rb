@@ -213,7 +213,7 @@ class Kronk::Path::Transaction
         prev_key      = key
         prev_data     = new_curr_data
         new_curr_data = new_curr_data[key]
-        curr_data     = curr_data.respond_to?(:[]) ? curr_data[key] : nil
+        curr_data     = ary_or_hash?(curr_data) ? curr_data[key] : nil
       end
     end
 
