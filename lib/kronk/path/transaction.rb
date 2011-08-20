@@ -202,8 +202,7 @@ class Kronk::Path::Transaction
         new_curr_data[key] = value and break if last
 
         if ary_or_hash?(curr_data) && ary_or_hash?(curr_data[key])
-          new_curr_data[key] ||= curr_data[key].respond_to?(:dup) ?
-                                  curr_data[key].dup : curr_data[key]
+          new_curr_data[key] ||= curr_data[key]
 
         elsif !ary_or_hash?(new_curr_data[key])
           new_curr_data[key] = Integer === next_key ? [] : {}
