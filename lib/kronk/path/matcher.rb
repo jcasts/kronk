@@ -142,9 +142,9 @@ class Kronk::Path::Matcher
         # Remove escaping from special path characters
         str.gsub! %r{#{RECH}([#{PATH_CHARS}])}, '\1'
         str.gsub! %r{#{RECH}([#{RESC_CHARS}])}, '\1'
-        str.gsub! %r{(^|[^#{RECH}])([#{SUFF_CHARS}])}, '\1.\2'
+        str.gsub! %r{(^|[^#{RECH}])([#{SUFF_CHARS}])}, '\1(.\2)'
 
-        Regexp.new "\\A(#{str})\\Z", @regex_opts
+        Regexp.new "\\A#{str}\\Z", @regex_opts
 
       else
         str.gsub %r{#{RECH}([^#{RECH}]|$)}, '\1'
