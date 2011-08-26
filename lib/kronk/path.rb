@@ -62,6 +62,9 @@ class Kronk
     # The path item delimiter character "/"
     DCH = "/"
 
+    # The replacement character "%" for path mapping
+    RCH = "%"
+
     # The path character to assign value "="
     VCH = "="
 
@@ -97,9 +100,9 @@ class Kronk
     # Instantiate a Path object with a String data path.
     #   Path.new "/path/**/to/*=bar/../../**/last"
 
-    def initialize path_str, regex_opts=nil
+    def initialize path_str, regex_opts=nil, &block
       path_str = path_str.dup
-      @path = self.class.parse_path_str path_str, regex_opts
+      @path = self.class.parse_path_str path_str, regex_opts, &block
     end
 
 

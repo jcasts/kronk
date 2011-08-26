@@ -1,5 +1,3 @@
-require 'kronk/path/path_match'
-
 class Kronk::Path::Matcher
 
   # Shortcut characters that require modification before being turned into
@@ -22,7 +20,7 @@ class Kronk::Path::Matcher
   ANYVAL_MATCHER = /^(\?*\*+\?*)*$/
 
   # Matcher to assert if any unescaped special chars are in a path item.
-  PATH_CHAR_MATCHER = /(^|[^#{RECH}])([#{PATH_CHARS}])/
+  PATH_CHAR_MATCHER = /(^|[^#{Kronk::Path::RECH}])([#{PATH_CHARS}])/
 
 
   def initialize opts={}
@@ -99,7 +97,7 @@ class Kronk::Path::Matcher
     elsif Regexp === node
       match = node.match value.to_s
       return false unless match
-      match = match.size > 1 ? match[1..-1] | match.to_a
+      match = match.size > 1 ? match[1..-1] : match.to_a
       [true, match]
 
     elsif Range === node
