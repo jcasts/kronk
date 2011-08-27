@@ -15,6 +15,11 @@ class Kronk::Path::PathMatch < Array
   end
 
 
+  def match_for str # :nodoc:
+    @matches[str.to_i-1].to_s
+  end
+
+
   ##
   # Builds a path array by replacing %n values with matches.
 
@@ -38,24 +43,23 @@ class Kronk::Path::PathMatch < Array
       end and next unless escape
 
       if replace
-        if chr.to_i.to_s != chr
-          path.last << @matches[rindex.to_i+1].to_s unless rindex.empty?
+        if new_item && !rindex.empty? || chr.to_i.to_s != chr || escape
+          path.last << match_for(rindex) unless rindex.empty?
           rindex  = ""
           replace = false
         else
           rindex << chr
-          next
         end
       end
 
-      path      << "" if new_item
-      path.last << chr
+      path      << ""  if new_item
+      path.last << chr unless replace
 
       new_item = false
       escape   = false
     end
 
-    path.last << @matches[rindex.to_i+1].to_s unless rindex.empty?
+    path.last << match_for(rindex) unless rindex.empty?
 
     path
   end
