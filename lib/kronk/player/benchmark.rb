@@ -118,7 +118,7 @@ class Kronk
           end
         end
 
-        perc_list.each{|i| @percentages[i] ||= self.slowest }
+        perc_list.each{|l| @percentages[l] ||= self.slowest }
         @percentages[100] = self.slowest
         @percentages
       end
@@ -252,6 +252,7 @@ end
 
 if Float.instance_method(:round).arity == 0
 class Float
+  undef round
   def round ndigits=0
     num, dec = self.to_s.split(".")
     num = "#{num}.#{dec[0,ndigits]}".sub(/\.$/, "")

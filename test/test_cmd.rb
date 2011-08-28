@@ -179,7 +179,7 @@ class TestCmd < Test::Unit::TestCase
   end
 
 
-  def test_parse_args_headers
+  def test_parse_args_http_headers
     opts = Kronk::Cmd.parse_args %w{uri -i FOO -i BAR -iTWO,PART}
     assert_equal %w{FOO BAR TWO PART}, opts[:with_headers]
     assert_equal false, opts[:no_body]

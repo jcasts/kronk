@@ -280,7 +280,7 @@ Parse and run diffs against data from live and cached http responses.
                'Header to pass to the server request') do |value|
           options[:headers] ||= {}
 
-          key, value = value.split /:\s*/, 2
+          key, value = value.split(/:\s*/, 2)
           options[:headers][key] = value.to_s.strip
         end
 
