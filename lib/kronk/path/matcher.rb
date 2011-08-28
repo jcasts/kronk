@@ -1,3 +1,7 @@
+##
+# Path::Matcher is representation of a single node of a relative path used
+# to find values in a data set.
+
 class Kronk::Path::Matcher
 
   # Shortcut characters that require modification before being turned into

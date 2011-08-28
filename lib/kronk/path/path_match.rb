@@ -1,3 +1,6 @@
+##
+# Represents a single match of a relative path against a data set.
+
 class Kronk::Path::PathMatch < Array
 
   attr_accessor :matches

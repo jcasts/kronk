@@ -36,4 +36,10 @@ class TestPathMatch < Test::Unit::TestCase
     path = @pmatch.make_path "/%\\31/2/path/%4_%1"
     assert_equal %w{31 2 path foo_this}, path
   end
+
+
+  def test_make_path_bad_token_num
+    path = @pmatch.make_path "/%31/2/path/%4_%1"
+    assert_equal ["", "2", "path", "foo_this"], path
+  end
 end
