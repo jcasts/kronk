@@ -28,59 +28,61 @@ class TestKronk < Test::Unit::TestCase
 
 
   def test_load_config
-    mock_config = {
-      :content_types => {
-        'soap' => "SOAPParser",
-        'js'   => "JsEngine"
-      },
-      :ignore_headers => ["Content-Type"],
-      :cache_file  => Kronk::DEFAULT_CACHE_FILE,
-      :cookies_file => Kronk::DEFAULT_COOKIES_FILE,
-      :history_file => Kronk::DEFAULT_HISTORY_FILE,
-      :indentation => 1,
-      :show_lines  => false,
-      :use_cookies => true,
-      :requires    => [],
-      :uri_options => {'example.com' => {:parser => 'JSON'}},
-      :user_agents => {:win_ie6 => 'piece of crap browser'},
-      :foo => :bar
-    }
+    with_config do
+      mock_config = {
+        :content_types => {
+          'soap' => "SOAPParser",
+          'js'   => "JsEngine"
+        },
+        :ignore_headers => ["Content-Type"],
+        :cache_file  => Kronk::DEFAULT_CACHE_FILE,
+        :cookies_file => Kronk::DEFAULT_COOKIES_FILE,
+        :history_file => Kronk::DEFAULT_HISTORY_FILE,
+        :indentation => 1,
+        :show_lines  => false,
+        :use_cookies => true,
+        :requires    => [],
+        :uri_options => {'example.com' => {:parser => 'JSON'}},
+        :user_agents => {:win_ie6 => 'piece of crap browser'},
+        :foo => :bar
+      }
 
-    YAML.expects(:load_file).with(Kronk::DEFAULT_CONFIG_FILE).
-      returns mock_config
+      YAML.expects(:load_file).with(Kronk::DEFAULT_CONFIG_FILE).
+        returns mock_config
 
-    Kronk.load_config
+      Kronk.load_config
 
-    YAML.expects(:load_file).with("foobar").
-      returns mock_config
+      YAML.expects(:load_file).with("foobar").
+        returns mock_config
 
-    Kronk.load_config "foobar"
+      Kronk.load_config "foobar"
 
-    expected = {
-      :content_types => {
-        'soap'  => "SOAPParser",
-        'js'    => "JsEngine",
-        'json'  => "JSON",
-        'plist' => "PlistParser",
-        'xml'   => "XMLParser"
-      },
-      :default_host => "http://localhost:3000",
-      :diff_format => :ascii_diff,
-      :cache_file  => Kronk::DEFAULT_CACHE_FILE,
-      :cookies_file => Kronk::DEFAULT_COOKIES_FILE,
-      :history_file => Kronk::DEFAULT_HISTORY_FILE,
-      :indentation => 1,
-      :requires    => [],
-      :show_lines  => false,
-      :use_cookies => true,
-      :ignore_headers => ["Content-Type"],
-      :uri_options => {'example.com' => {:parser => 'JSON'}},
-      :user_agents =>
-        Kronk::USER_AGENTS.merge(:win_ie6 => 'piece of crap browser'),
-      :foo => :bar
-    }
+      expected = {
+        :content_types => {
+          'soap'  => "SOAPParser",
+          'js'    => "JsEngine",
+          'json'  => "JSON",
+          'plist' => "PlistParser",
+          'xml'   => "XMLParser"
+        },
+        :default_host => "http://localhost:3000",
+        :diff_format => :ascii_diff,
+        :cache_file  => Kronk::DEFAULT_CACHE_FILE,
+        :cookies_file => Kronk::DEFAULT_COOKIES_FILE,
+        :history_file => Kronk::DEFAULT_HISTORY_FILE,
+        :indentation => 1,
+        :requires    => [],
+        :show_lines  => false,
+        :use_cookies => true,
+        :ignore_headers => ["Content-Type"],
+        :uri_options => {'example.com' => {:parser => 'JSON'}},
+        :user_agents =>
+          Kronk::USER_AGENTS.merge(:win_ie6 => 'piece of crap browser'),
+        :foo => :bar
+      }
 
-    assert_equal expected, Kronk.config
+      assert_equal expected, Kronk.config
+    end
   end
 
 

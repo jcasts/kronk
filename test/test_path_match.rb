@@ -8,6 +8,21 @@ class TestPathMatch < Test::Unit::TestCase
   end
 
 
+  def test_new
+    assert_equal %w{this is 4 foo}, @pmatch.matches
+    assert_equal %w{path to resource},    @pmatch
+  end
+
+
+  def test_dup
+    new_match = @pmatch.dup
+    assert_equal new_match, @pmatch
+    assert_not_equal @pmatch.matches.object_id, new_match.matches.object_id
+    assert_equal %w{this is 4 foo}, @pmatch.matches
+    assert_equal %w{this is 4 foo}, new_match.matches
+  end
+
+
   def test_make_path
     path = @pmatch.make_path "/%3/2/path/%4_%1"
     assert_equal %w{4 2 path foo_this}, path

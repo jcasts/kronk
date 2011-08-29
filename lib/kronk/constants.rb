@@ -47,30 +47,31 @@ class Kronk
       Hash === v1 && Hash === v2 ? v1.merge(v2,&DEEP_MERGE) : v2
     end
 
+  # The default Kronk user agent.
+  DEFAULT_USER_AGENT =
+    "Kronk/#{VERSION} (http://github.com/yaksnrainbows/kronk)"
 
   # Aliases for various user-agents. Thanks Mechanize! :)
   USER_AGENTS = {
-    'kronk'         =>
-    "Kronk/#{VERSION} (http://github.com/yaksnrainbows/kronk)",
-    'iphone'        =>
+    'iphone'          =>
     "Mozilla/5.0 (iPhone; U; CPU like Mac OS X; en) AppleWebKit/420+ (KHTML, like Gecko) Version/3.0 Mobile/1C28 Safari/419.3",
-    'linux_firefox' =>
+    'linux_firefox'   =>
     "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.2.1) Gecko/20100122 firefox/3.6.1",
-    'linux_mozilla' =>
+    'linux_mozilla'   =>
     "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.4) Gecko/20030624",
-    'mac_mozilla'   =>
+    'mac_mozilla'     =>
     "Mozilla/5.0 (Macintosh; U; PPC Mac OS X Mach-O; en-US; rv:1.4a) Gecko/20030401",
     'linux_konqueror' =>
     "Mozilla/5.0 (compatible; Konqueror/3; Linux)",
-    'mac_firefox'   =>
+    'mac_firefox'     =>
     "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2) Gecko/20100115 Firefox/3.6",
-    'mac_safari'    =>
+    'mac_safari'      =>
     "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_2; de-at) AppleWebKit/531.21.8 (KHTML, like Gecko) Version/4.0.4 Safari/531.21.10",
-    'win_ie6'       =>
+    'win_ie6'         =>
     "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)",
-    'win_ie7'       =>
+    'win_ie7'         =>
     "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)",
-    'win_mozilla'   =>
+    'win_mozilla'     =>
     "Mozilla/5.0 (Windows; U; Windows NT 5.0; en-US; rv:1.4b) Gecko/20030516 Mozilla Firebird/0.6"
   }
 
