@@ -95,4 +95,62 @@ class TestPathMatcher < Test::Unit::TestCase
     assert_equal ['key1b'], keys
     assert_equal [@data[:key1]], data_points
   end
+
+
+  def test_parse_node_range
+    assert_equal 1..4,   @matcher.parse_node("1..4")
+    assert_equal 1...4,  @matcher.parse_node("1...4")
+    assert_equal "1..4", @matcher.parse_node("\\1..4")
+    assert_equal "1..4", @matcher.parse_node("1\\..4")
+    assert_equal "1..4", @matcher.parse_node("1.\\.4")
+    assert_equal "1..4", @matcher.parse_node("1..\\4")
+    assert_equal "1..4", @matcher.parse_node("1..4\\")
+  end
+
+
+  def test_parse_node_index_length
+    assert_equal 2...6, @matcher.parse_node("2,4")
+    assert_equal "2,4", @matcher.parse_node("\\2,4")
+    assert_equal "2,4", @matcher.parse_node("2\\,4")
+    assert_equal "2,4", @matcher.parse_node("2,\\4")
+    assert_equal "2,4", @matcher.parse_node("2,4\\")
+  end
+
+
+  def test_parse_node_anyval
+    assert_equal Kronk::Path::ANY_VALUE, @matcher.parse_node("*")
+    assert_equal Kronk::Path::ANY_VALUE, @matcher.parse_node("")
+    assert_equal Kronk::Path::ANY_VALUE, @matcher.parse_node("**?*?*?")
+    assert_equal Kronk::Path::ANY_VALUE, @matcher.parse_node(nil)
+  end
+
+
+  def test_parse_node_regex
+    assert_equal(/\Atest(.*)\Z/,       @matcher.parse_node("test*"))
+    assert_equal(/\A(.?)test(.*)\Z/,   @matcher.parse_node("?test*"))
+    assert_equal(/\A\?test(.*)\Z/,     @matcher.parse_node("\\?test*"))
+    assert_equal(/\A(.?)test\*(.*)\Z/, @matcher.parse_node("?test\\**"))
+    assert_equal(/\A(.?)test(.*)\Z/,   @matcher.parse_node("?test*?**??"))
+    assert_equal(/\Aa|b\Z/,            @matcher.parse_node("a|b"))
+    assert_equal(/\Aa|b(c|d)\Z/,       @matcher.parse_node("a|b(c|d)"))
+
+    @matcher.regex_opts = Regexp::IGNORECASE
+    assert_equal(/\Aa|b(c|d)\Z/i, @matcher.parse_node("a|b(c|d)"))
+  end
+
+
+  def test_parse_node_string
+    assert_equal "a|b", @matcher.parse_node("a\\|b")
+    assert_equal "a(b", @matcher.parse_node("a\\(b")
+    assert_equal "a?b", @matcher.parse_node("a\\?b")
+    assert_equal "a*b", @matcher.parse_node("a\\*b")
+  end
+
+
+  def test_parse_node_passthru
+    assert_equal Kronk::Path::PARENT,
+      @matcher.parse_node(Kronk::Path::PARENT)
+
+    assert_equal :thing, @matcher.parse_node(:thing)
+  end
 end
