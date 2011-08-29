@@ -34,6 +34,60 @@ class TestPathMatcher < Test::Unit::TestCase
   end
 
 
+
+  def test_each_data_item_hash
+    hash = {
+      :a => 1,
+      :b => 2,
+      :c => 3
+    }
+
+    keys = []
+    values = []
+
+    @matcher.each_data_item hash do |key, val|
+      keys << key
+      values << val
+    end
+
+    assert_equal keys, (keys | hash.keys)
+    assert_equal values, (values | hash.values)
+  end
+
+
+  def test_each_data_item_array
+    ary = [:a, :b, :c]
+
+    keys = []
+    values = []
+
+    @matcher.each_data_item ary do |key, val|
+      keys << key
+      values << val
+    end
+
+    assert_equal [2,1,0], keys
+    assert_equal ary.reverse, values
+  end
+
+
+  def test_match_data_item
+    assert @matcher.match_node(:key, "key")
+    assert @matcher.match_node("key", :key)
+
+    assert @matcher.match_node(/key/, "foo_key")
+    assert !@matcher.match_node("foo_key", /key/)
+    assert @matcher.match_node(/key/, /key/)
+
+    assert @matcher.match_node(Kronk::Path::ANY_VALUE, "foo_key")
+    assert !@matcher.match_node("foo_key", Kronk::Path::ANY_VALUE)
+
+    assert @matcher.match_node(1..3, 1)
+    assert !@matcher.match_node(1, 1..3)
+    assert @matcher.match_node(1..3, 1..3)
+  end
+
+
   def test_find_in
     keys = []
 
