@@ -65,7 +65,7 @@ class Kronk::Path::Matcher
     return [] unless Array === data || Hash === data
 
     paths  = []
-    path ||= PathMatch.new
+    path ||= Kronk::Path::PathMatch.new
 
     each_data_item data do |key, value|
       c_path = path.dup << key
@@ -95,7 +95,8 @@ class Kronk::Path::Matcher
   # and the matches found.
 
   def match_node node, value
-    return if ANY_VALUE != node && (Array === value || Hash === value)
+    return if Kronk::Path::ANY_VALUE != node &&
+              (Array === value || Hash === value)
 
     if node.class == value.class
       node == value
@@ -111,7 +112,7 @@ class Kronk::Path::Matcher
       match = [value.to_i] if stat
       [stat, match]
 
-    elsif ANY_VALUE == node
+    elsif Kronk::Path::ANY_VALUE == node
       [true, [node]]
 
     else
@@ -126,7 +127,7 @@ class Kronk::Path::Matcher
   def parse_node str
     case str
     when nil, ANYVAL_MATCHER
-      ANY_VALUE
+      Kronk::Path::ANY_VALUE
 
     when RANGE_MATCHER
       Range.new $1.to_i, $3.to_i, ($2 == "...")
@@ -151,7 +152,7 @@ class Kronk::Path::Matcher
         Regexp.new "\\A#{str}\\Z", @regex_opts
 
       else
-        str.gsub %r{#{Kronk::Path::RECH}([^#{RECH}]|$)}, '\1'
+        str.gsub %r{#{Kronk::Path::RECH}([^#{Kronk::Path::RECH}]|$)}, '\1'
       end
 
     else
