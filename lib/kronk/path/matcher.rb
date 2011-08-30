@@ -27,7 +27,7 @@ class Kronk::Path::Matcher
   PATH_CHAR_MATCHER = /(^|[^#{Kronk::Path::RECH}])([#{PATH_CHARS}])/
 
 
-  attr_accessor :key, :value, :regex_opts
+  attr_reader :key, :value, :regex_opts
 
   def initialize opts={}
     @regex_opts = opts[:regex_opts]

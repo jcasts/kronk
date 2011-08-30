@@ -269,8 +269,8 @@ class TestPathMatcher < Test::Unit::TestCase
     assert_equal(/\Aa|b\Z/,            @matcher.parse_node("a|b"))
     assert_equal(/\Aa|b(c|d)\Z/,       @matcher.parse_node("a|b(c|d)"))
 
-    @matcher.regex_opts = Regexp::IGNORECASE
-    assert_equal(/\Aa|b(c|d)\Z/i, @matcher.parse_node("a|b(c|d)"))
+    matcher = Kronk::Path::Matcher.new :regex_opts => Regexp::IGNORECASE
+    assert_equal(/\Aa|b(c|d)\Z/i, matcher.parse_node("a|b(c|d)"))
   end
 
 
