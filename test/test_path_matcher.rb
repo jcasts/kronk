@@ -192,6 +192,23 @@ class TestPathMatcher < Test::Unit::TestCase
   end
 
 
+  def test_find_in_match_any
+    matcher = Kronk::Path::Matcher.new :key => "*"
+    paths = matcher.find_in @data
+
+    expected_paths = [
+      ["findme"],
+      [:key1],
+      [:key2],
+      [:key3]
+    ]
+
+    assert_equal expected_paths, (expected_paths | paths)
+    assert_equal Kronk::Path::PathMatch, paths.first.class
+    assert_equal expected_paths, (expected_paths | paths.map{|p| p.matches})
+  end
+
+
   def test_parse_node_range
     assert_equal 1..4,   @matcher.parse_node("1..4")
     assert_equal 1...4,  @matcher.parse_node("1...4")
