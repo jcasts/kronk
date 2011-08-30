@@ -71,7 +71,7 @@ class TestPathMatcher < Test::Unit::TestCase
   end
 
 
-  def test_match_data_item
+  def test_match_node
     assert @matcher.match_node(:key, "key")
     assert @matcher.match_node("key", :key)
 
