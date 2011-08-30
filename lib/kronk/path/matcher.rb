@@ -30,10 +30,10 @@ class Kronk::Path::Matcher
   attr_accessor :key, :value, :regex_opts
 
   def initialize opts={}
+    @regex_opts = opts[:regex_opts]
     @key        = parse_node opts[:key]   if opts.has_key? :key
     @value      = parse_node opts[:value] if opts.has_key? :value
     @recursive  = !!opts[:recursive]
-    @regex_opts = opts[:regex_opts]
   end
 
 
