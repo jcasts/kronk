@@ -30,8 +30,8 @@ class Kronk::Path::Matcher
   attr_accessor :key, :value, :regex_opts
 
   def initialize opts={}
-    @key        = parse_node opts[:key]
-    @value      = parse_node(opts[:value]) if opts.has_key? :value
+    @key        = parse_node opts[:key]   if opts.has_key? :key
+    @value      = parse_node opts[:value] if opts.has_key? :value
     @recursive  = !!opts[:recursive]
     @regex_opts = opts[:regex_opts]
   end
@@ -70,8 +70,8 @@ class Kronk::Path::Matcher
     each_data_item data do |key, value|
       c_path = path.dup << key
 
-      found, kmatch = match_node(@key, key)
-      found, vmatch = match_node(@value, value) if @value && found
+      found, kmatch = match_node(@key, key)     if @key
+      found, vmatch = match_node(@value, value) if @value && (!@key || found)
 
       if found
         c_path.matches.concat kmatch.to_a

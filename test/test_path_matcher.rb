@@ -209,6 +209,29 @@ class TestPathMatcher < Test::Unit::TestCase
   end
 
 
+  def test_find_in_match_value_only
+    matcher = Kronk::Path::Matcher.new :value     => "th*g",
+                                       :recursive => true
+
+    paths = matcher.find_in @data
+
+    assert_equal [[:key1, :key1a, 3, :findme]], paths
+    assert_equal ["in"], paths.first.matches
+  end
+
+
+  def test_find_in_match_value_and_nil_key
+    matcher = Kronk::Path::Matcher.new :key       => nil,
+                                       :value     => "th*g",
+                                       :recursive => true
+
+    paths = matcher.find_in @data
+
+    assert_equal [[:key1, :key1a, 3, :findme]], paths
+    assert_equal [:findme, "in"], paths.first.matches
+  end
+
+
   def test_parse_node_range
     assert_equal 1..4,   @matcher.parse_node("1..4")
     assert_equal 1...4,  @matcher.parse_node("1...4")
