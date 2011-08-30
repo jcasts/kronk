@@ -31,7 +31,7 @@ class Kronk::Path::Matcher
 
   def initialize opts={}
     @key        = parse_node opts[:key]
-    @value      = parse_node opts[:value]
+    @value      = parse_node(opts[:value]) if opts.has_key? :value
     @recursive  = !!opts[:recursive]
     @regex_opts = opts[:regex_opts]
   end
@@ -71,7 +71,7 @@ class Kronk::Path::Matcher
       c_path = path.dup << key
 
       found, kmatch = match_node(@key, key)
-      found, vmatch = match_node(@value, value) if found
+      found, vmatch = match_node(@value, value) if @value && found
 
       if found
         c_path.matches.concat kmatch.to_a
@@ -113,7 +113,7 @@ class Kronk::Path::Matcher
       [stat, match]
 
     elsif Kronk::Path::ANY_VALUE == node
-      [true, [node]]
+      [true, [value]]
 
     else
       value.to_s == node.to_s
