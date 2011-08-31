@@ -1,0 +1,10 @@
+= TODO
+
+* Allow for showing diffed sections of a diff only.
+  Do it by sorted paths? Example:
+    - "/path/foo": "value1"
+    + "/path/bar": "value1"
+
+* Should these Path case be handled as looking for a blank node or any node?
+    "/path/foo="
+    "/path/=foo"
