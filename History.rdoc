@@ -1,3 +1,11 @@
+=== 1.5.3 / 2011-08-31
+
+* Bugfixes:
+
+  * Fix for multiple path transaction delete bug.
+
+  * Fix for non applied uri options from config.
+
 === 1.5.2 / 2011-08-15
 
 * Enhancements:
