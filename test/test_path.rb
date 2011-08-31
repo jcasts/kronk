@@ -26,113 +26,6 @@ class TestPath < Test::Unit::TestCase
   end
 
 
-  def test_each_data_item_hash
-    hash = {
-      :a => 1,
-      :b => 2,
-      :c => 3
-    }
-
-    keys = []
-    values = []
-
-    Kronk::Path.each_data_item hash do |key, val|
-      keys << key
-      values << val
-    end
-
-    assert_equal keys, (keys | hash.keys)
-    assert_equal values, (values | hash.values)
-  end
-
-
-  def test_each_data_item_array
-    ary = [:a, :b, :c]
-
-    keys = []
-    values = []
-
-    Kronk::Path.each_data_item ary do |key, val|
-      keys << key
-      values << val
-    end
-
-    assert_equal [2,1,0], keys
-    assert_equal ary.reverse, values
-  end
-
-
-  def test_match_data_item
-    assert Kronk::Path.match_data_item(:key, "key")
-    assert Kronk::Path.match_data_item("key", :key)
-
-    assert Kronk::Path.match_data_item(/key/, "foo_key")
-    assert !Kronk::Path.match_data_item("foo_key", /key/)
-    assert Kronk::Path.match_data_item(/key/, /key/)
-
-    assert Kronk::Path.match_data_item(Kronk::Path::ANY_VALUE, "foo_key")
-    assert !Kronk::Path.match_data_item("foo_key", Kronk::Path::ANY_VALUE)
-
-    assert Kronk::Path.match_data_item(1..3, 1)
-    assert !Kronk::Path.match_data_item(1, 1..3)
-    assert Kronk::Path.match_data_item(1..3, 1..3)
-  end
-
-
-  def test_find_match
-    keys = []
-
-    Kronk::Path.find_match @data, /key/ do |data, key|
-      keys << key.to_s
-      assert_equal @data, data
-    end
-
-    assert_equal ['key1', 'key2', 'key3'], keys.sort
-  end
-
-
-  def test_find_match_recursive
-    keys = []
-    data_points = []
-
-    Kronk::Path.find_match @data, :findme, ANY_VALUE, true do |data, key|
-      keys << key.to_s
-      data_points << data
-    end
-
-    assert_equal 3, keys.length
-    assert_equal 1, keys.uniq.length
-    assert_equal "findme", keys.first
-
-    assert_equal 3, data_points.length
-    assert data_points.include?(@data)
-    assert data_points.include?({:findme => "thing"})
-    assert data_points.include?({:findme => 123456})
-  end
-
-
-  def test_find_match_value
-    keys = []
-    data_points = []
-
-    Kronk::Path.find_match @data, ANY_VALUE, "findme" do |data, key|
-      keys << key.to_s
-      data_points << data
-    end
-
-    assert keys.empty?
-    assert data_points.empty?
-
-    Kronk::Path.find_match @data, ANY_VALUE, "findme", true do |data, key|
-      keys << key.to_s
-      data_points << data
-    end
-
-    assert_equal ['key1b'], keys
-    assert_equal [@data[:key1]], data_points
-  end
-
-
   def test_find_wildcard
     keys = []
     data_points = []
@@ -206,64 +99,6 @@ class TestPath < Test::Unit::TestCase
   end
 
 
-  def test_parse_path_item_range
-    assert_equal 1..4,   Kronk::Path.parse_path_item("1..4")
-    assert_equal 1...4,  Kronk::Path.parse_path_item("1...4")
-    assert_equal "1..4", Kronk::Path.parse_path_item("\\1..4")
-    assert_equal "1..4", Kronk::Path.parse_path_item("1\\..4")
-    assert_equal "1..4", Kronk::Path.parse_path_item("1.\\.4")
-    assert_equal "1..4", Kronk::Path.parse_path_item("1..\\4")
-    assert_equal "1..4", Kronk::Path.parse_path_item("1..4\\")
-  end
-
-
-  def test_parse_path_item_index_length
-    assert_equal 2...6, Kronk::Path.parse_path_item("2,4")
-    assert_equal "2,4", Kronk::Path.parse_path_item("\\2,4")
-    assert_equal "2,4", Kronk::Path.parse_path_item("2\\,4")
-    assert_equal "2,4", Kronk::Path.parse_path_item("2,\\4")
-    assert_equal "2,4", Kronk::Path.parse_path_item("2,4\\")
-  end
-
-
-  def test_parse_path_item_anyval
-    assert_equal Kronk::Path::ANY_VALUE, Kronk::Path.parse_path_item("*")
-    assert_equal Kronk::Path::ANY_VALUE, Kronk::Path.parse_path_item("")
-    assert_equal Kronk::Path::ANY_VALUE, Kronk::Path.parse_path_item("**?*?*?")
-    assert_equal Kronk::Path::ANY_VALUE, Kronk::Path.parse_path_item(nil)
-  end
-
-
-  def test_parse_path_item_regex
-    assert_equal(/\A(test.*)\Z/,     Kronk::Path.parse_path_item("test*"))
-    assert_equal(/\A(.?test.*)\Z/,   Kronk::Path.parse_path_item("?test*"))
-    assert_equal(/\A(\?test.*)\Z/,   Kronk::Path.parse_path_item("\\?test*"))
-    assert_equal(/\A(.?test\*.*)\Z/, Kronk::Path.parse_path_item("?test\\**"))
-    assert_equal(/\A(.?test.*)\Z/,   Kronk::Path.parse_path_item("?test*?**??"))
-    assert_equal(/\A(a|b)\Z/,        Kronk::Path.parse_path_item("a|b"))
-    assert_equal(/\A(a|b(c|d))\Z/,   Kronk::Path.parse_path_item("a|b(c|d)"))
-
-    assert_equal(/\A(a|b(c|d))\Z/i,
-      Kronk::Path.parse_path_item("a|b(c|d)", Regexp::IGNORECASE))
-  end
-
-
-  def test_parse_path_item_string
-    assert_equal "a|b", Kronk::Path.parse_path_item("a\\|b")
-    assert_equal "a(b", Kronk::Path.parse_path_item("a\\(b")
-    assert_equal "a?b", Kronk::Path.parse_path_item("a\\?b")
-    assert_equal "a*b", Kronk::Path.parse_path_item("a\\*b")
-  end
-
-
-  def test_parse_path_item_passthru
-    assert_equal Kronk::Path::PARENT,
-      Kronk::Path.parse_path_item(Kronk::Path::PARENT)
-
-    assert_equal :thing, Kronk::Path.parse_path_item(:thing)
-  end
-
-
   def test_parse_path_str_yield
     all_args = []
 
@@ -272,9 +107,10 @@ class TestPath < Test::Unit::TestCase
     end
 
     expected = [
-      ["path", ANY_VALUE, false, false],
-      ["to", "foo", true, false],
-      ["item", ANY_VALUE, false, true],
+      [Kronk::Path::Matcher.new(:key => "path"), false],
+      [Kronk::Path::Matcher.new(:key => "to", :value => "foo",
+        :recursive => true), false],
+      [Kronk::Path::Matcher.new(:key => "item"), true],
     ]
 
     assert_equal expected, all_args
@@ -289,22 +125,22 @@ class TestPath < Test::Unit::TestCase
 
     assert_path %w{path/to item/ i}, "path\\/to/item\\//i"
 
-    assert_path [/\A(path\/\.to)\Z/i, /\A(item)\Z/i],
+    assert_path [/\Apath\/\.to\Z/i, /\Aitem\Z/i],
        "path\\/.to/item", Regexp::IGNORECASE
 
-    assert_path ['path', /\A(to|for)\Z/, 'item'], "path/to|for/item"
+    assert_path ['path', /\Ato|for\Z/, 'item'], "path/to|for/item"
   end
 
 
   def test_parse_path_str_value
     assert_path ['path', ['to', 'foo'], 'item'], "path/to=foo/item"
-    assert_path ['path', [nil, 'foo'], 'item'],  "path/*=foo/item"
+    assert_path ['path', ["*", 'foo'], 'item'],  "path/*=foo/item"
     assert_path ['path', [nil, 'foo'], 'item'],  "path/=foo/item"
 
-    assert_path ['path', ['to', /\A(foo|bar)\Z/], 'item'],
+    assert_path ['path', ['to', /\Afoo|bar\Z/], 'item'],
       "path/to=foo|bar/item"
 
-    assert_path [/\A(path)\Z/i, [/\A(to)\Z/i, /\A(foo)\Z/i], /\A(item)\Z/i],
+    assert_path [/\Apath\Z/i, [/\Ato\Z/i, /\Afoo\Z/i], /\Aitem\Z/i],
       "path/to=foo/item", Regexp::IGNORECASE
   end
 
@@ -312,15 +148,15 @@ class TestPath < Test::Unit::TestCase
   def test_parse_path_str_recur
     assert_path ['path', ['to', 'foo', true], 'item'],    "path/**/to=foo/item"
     assert_path [['path', nil, true], 'to', 'item'],      "**/**/path/to/item"
-    assert_path ['path', 'to', 'item', [nil, nil, true]], "path/to/item/**/**"
-    assert_path ['path', [nil, 'foo', true], 'item'],     "path/**=foo/item"
+    assert_path ['path', 'to', 'item', ["*", nil, true]], "path/to/item/**/**"
+    assert_path ['path', ["*", 'foo', true], 'item'],     "path/**=foo/item"
   end
 
 
   def test_parse_path_str_parent
     assert_path ['path', PARENT, 'item'],              "path/../item"
     assert_path ['path', [PARENT, 'foo'], 'item'],     "path/..=foo/item"
-    assert_path ['path', [nil, 'foo', true], 'item'],  "path/**/..=foo/item"
+    assert_path ['path', ["*", 'foo', true], 'item'],  "path/**/..=foo/item"
     assert_path ['path', [nil, 'foo', true], 'item'],  "path/**/=foo/item"
     assert_path ['path', ['item', nil, true]],         "path/**/../item"
     assert_path ['path', PARENT, ['item', nil, true]], "path/../**/item"
@@ -354,15 +190,13 @@ class TestPath < Test::Unit::TestCase
   private
 
   PARENT    = Kronk::Path::PARENT
-  ANY_VALUE = Kronk::Path::ANY_VALUE
+  ANY_VALUE = Kronk::Path::Matcher::ANY_VALUE
 
   def assert_path match, path, regexp_opt=nil
     match.map! do |i|
       i = [i] unless Array === i
-      i[0] ||= ANY_VALUE
-      i[1] ||= ANY_VALUE
-      i[2] ||= false
-      i
+      Kronk::Path::Matcher.new :key => i[0], :value => i[1],
+        :recursive => i[2], :regex_opts => regexp_opt
     end
 
     assert_equal match, Kronk::Path.parse_path_str(path, regexp_opt)

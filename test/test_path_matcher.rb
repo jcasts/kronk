@@ -79,8 +79,8 @@ class TestPathMatcher < Test::Unit::TestCase
     assert !@matcher.match_node("foo_key", /key/)
     assert @matcher.match_node(/key/, /key/)
 
-    assert @matcher.match_node(Kronk::Path::ANY_VALUE, "foo_key")
-    assert !@matcher.match_node("foo_key", Kronk::Path::ANY_VALUE)
+    assert @matcher.match_node(Kronk::Path::Matcher::ANY_VALUE, "foo_key")
+    assert !@matcher.match_node("foo_key", Kronk::Path::Matcher::ANY_VALUE)
 
     assert @matcher.match_node(1..3, 1)
     assert !@matcher.match_node(1, 1..3)
@@ -290,10 +290,10 @@ class TestPathMatcher < Test::Unit::TestCase
 
 
   def test_parse_node_anyval
-    assert_equal Kronk::Path::ANY_VALUE, @matcher.parse_node("*")
-    assert_equal Kronk::Path::ANY_VALUE, @matcher.parse_node("")
-    assert_equal Kronk::Path::ANY_VALUE, @matcher.parse_node("**?*?*?")
-    assert_equal Kronk::Path::ANY_VALUE, @matcher.parse_node(nil)
+    assert_equal Kronk::Path::Matcher::ANY_VALUE, @matcher.parse_node("*")
+    assert_equal Kronk::Path::Matcher::ANY_VALUE, @matcher.parse_node("")
+    assert_equal Kronk::Path::Matcher::ANY_VALUE, @matcher.parse_node("**?*?*?")
+    assert_equal Kronk::Path::Matcher::ANY_VALUE, @matcher.parse_node(nil)
   end
 
 

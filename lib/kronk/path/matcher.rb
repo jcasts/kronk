@@ -4,6 +4,9 @@
 
 class Kronk::Path::Matcher
 
+  # Used as path item value to match any key or value.
+  module ANY_VALUE; end
+
   # Shortcut characters that require modification before being turned into
   # a matcher.
   SUFF_CHARS = Regexp.escape "*?"
@@ -41,6 +44,14 @@ class Kronk::Path::Matcher
   end
 
 
+  def == other # :nodoc:
+    self.class  == other.class      &&
+    @key        == other.key        &&
+    @value      == other.value      &&
+    @regex_opts == other.regex_opts
+  end
+
+
   ##
   # Universal iterator for Hash and Array like objects.
   # The data argument must either respond to both :each_with_index
@@ -70,6 +81,7 @@ class Kronk::Path::Matcher
 
     paths  = []
     path ||= Kronk::Path::PathMatch.new
+    path   = Kronk::Path::PathMatch.new path if path.class == Array
 
     each_data_item data do |key, value|
       c_path = path.dup << key
@@ -99,7 +111,7 @@ class Kronk::Path::Matcher
   # and the matches found.
 
   def match_node node, value
-    return if Kronk::Path::ANY_VALUE != node &&
+    return if ANY_VALUE != node &&
               (Array === value || Hash === value)
 
     if node.class == value.class
@@ -116,7 +128,7 @@ class Kronk::Path::Matcher
       match = [value.to_i] if stat
       [stat, match]
 
-    elsif Kronk::Path::ANY_VALUE == node
+    elsif ANY_VALUE == node
       [true, [value]]
 
     else
@@ -131,7 +143,7 @@ class Kronk::Path::Matcher
   def parse_node str
     case str
     when nil, ANYVAL_MATCHER
-      Kronk::Path::ANY_VALUE
+      ANY_VALUE
 
     when RANGE_MATCHER
       Range.new $1.to_i, $3.to_i, ($2 == "...")

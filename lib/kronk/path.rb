@@ -38,9 +38,6 @@ class Kronk
     # Used as path instruction to go up one path level.
     module PARENT; end
 
-    # Used as path item value to match any key or value.
-    module ANY_VALUE; end
-
     # Mapping of letters to Regexp options.
     REGEX_OPTS = {
       "i" => Regexp::IGNORECASE,
@@ -48,16 +45,6 @@ class Kronk
       "u" => (Regexp::FIXEDENCODING if defined?(Regexp::FIXEDENCODING)),
       "x" => Regexp::EXTENDED
     }
-
-    # Shortcut characters that require modification before being turned into
-    # a matcher.
-    SUFF_CHARS = Regexp.escape "*?"
-
-    # All special path characters.
-    PATH_CHARS = Regexp.escape("()|") << SUFF_CHARS
-
-    # Path chars that get regexp escaped.
-    RESC_CHARS = "*?()|/"
 
     # The path item delimiter character "/"
     DCH = "/"
@@ -82,18 +69,6 @@ class Kronk
 
     # The key string that indicates recursive lookup.
     RECUR_KEY = "**"
-
-    # Matcher for Range path item.
-    RANGE_MATCHER  = %r{^(\-?\d+)(\.{2,3})(\-?\d+)$}
-
-    # Matcher for index,length path item.
-    ILEN_MATCHER   = %r{^(\-?\d+),(\-?\d+)$}
-
-    # Matcher allowing any value to be matched.
-    ANYVAL_MATCHER = /^(\?*\*+\?*)*$/
-
-    # Matcher to assert if any unescaped special chars are in a path item.
-    PATH_CHAR_MATCHER = /(^|[^#{RECH}])([#{PATH_CHARS}])/
 
 
     ##
@@ -132,11 +107,10 @@ class Kronk
     def find_in data
       matches = {[] => data}
 
-      @path.each_with_index do |(mkey, mvalue, recur), i|
-        args      = [matches, data, mkey, mvalue, recur]
+      @path.each_with_index do |matcher, i|
         last_item = i == @path.length - 1
 
-        self.class.assign_find(*args) do |sdata, key, spath|
+        self.class.assign_find(matches, data, matcher) do |sdata, key, spath|
           yield sdata, key, spath if last_item && block_given?
         end
       end
@@ -154,8 +128,8 @@ class Kronk
     def self.find path_str, data, regex_opts=nil, &block
       matches = {[] => data}
 
-      parse_path_str path_str, regex_opts do |mkey, mvalue, recur, last_item|
-        assign_find matches, data, mkey, mvalue, recur do |sdata, key, spath|
+      parse_path_str path_str, regex_opts do |matcher, last_item|
+        assign_find matches, data, matcher do |sdata, key, spath|
           yield sdata, key, spath if last_item && block_given?
         end
       end
@@ -167,11 +141,11 @@ class Kronk
     ##
     # Common find functionality that assigns to the matches hash.
 
-    def self.assign_find matches, data, mkey, mvalue, recur
+    def self.assign_find matches, data, matcher
       matches.keys.each do |path|
         pdata = matches.delete path
 
-        if mkey == PARENT
+        if matcher.key == PARENT
           path    = path[0..-2]
           subdata = data_at_path path[0..-2], data
 
@@ -183,7 +157,7 @@ class Kronk
           next
         end
 
-        find_match pdata, mkey, mvalue, recur, path do |sdata, key, spath|
+        matcher.find_in pdata, path do |sdata, key, spath|
           yield sdata, key, spath if block_given?
           matches[spath] = sdata[key]
         end
@@ -206,118 +180,6 @@ class Kronk
 
     rescue NoMethodError, TypeError
        nil
-    end
-
-
-    ##
-    # Universal iterator for Hash and Array like objects.
-    # The data argument must either respond to both :each_with_index
-    # and :length, or respond to :each yielding a key/value pair.
-
-    def self.each_data_item data, &block
-      if data.respond_to?(:has_key?) && data.respond_to?(:each)
-        data.each(&block)
-
-      elsif data.respond_to?(:each_with_index) && data.respond_to?(:length)
-        # We need to iterate through the array this way
-        # in case items in it get deleted.
-        (data.length - 1).downto(0) do |i|
-          block.call i, data[i]
-        end
-      end
-    end
-
-
-    ##
-    # Finds data with the given key and value matcher, optionally recursive.
-    # Yields data, key and path Array when block is given.
-    # Returns an Array of path arrays.
-
-    def self.find_match data, mkey, mvalue=ANY_VALUE,
-                        recur=false, path=nil, &block
-
-      return [] unless Array === data || Hash === data
-
-      paths  = []
-      path ||= []
-
-      each_data_item data do |key, value|
-        c_path = path.dup << key
-
-        if match_data_item(mkey, key) && match_data_item(mvalue, value)
-          yield data, key, c_path if block_given?
-          paths << c_path
-        end
-
-        paths.concat \
-          find_match(data[key], mkey, mvalue, true, c_path, &block) if recur
-      end
-
-      paths
-    end
-
-
-    ##
-    # Check if data key or value is a match for nested data searches.
-
-    def self.match_data_item item1, item2
-      return if ANY_VALUE != item1 && (Array === item2 || Hash === item2)
-
-      if item1.class == item2.class
-        item1 == item2
-
-      elsif Regexp === item1
-        item2.to_s =~ item1
-
-      elsif Range === item1
-        item1.include? item2.to_i
-
-      elsif ANY_VALUE == item1
-        true
-
-      else
-        item2.to_s.downcase == item1.to_s.downcase
-      end
-    end
-
-
-    ##
-    # Decide whether to make path item matcher a regex, range, array, or string.
-
-    def self.parse_path_item str, regex_opts=nil
-      case str
-      when nil, ANYVAL_MATCHER
-        ANY_VALUE
-
-      when RANGE_MATCHER
-        Range.new $1.to_i, $3.to_i, ($2 == "...")
-
-      when ILEN_MATCHER
-        Range.new $1.to_i, ($1.to_i + $2.to_i), true
-
-      else
-        if String === str && (regex_opts || str =~ PATH_CHAR_MATCHER)
-
-          # Remove extra suffix characters
-          str.gsub! %r{(^|[^#{RECH}])(\*+\?+|\?+\*+)}, '\1*'
-          str.gsub! %r{(^|[^#{RECH}])\*+}, '\1*'
-
-          str = Regexp.escape str
-
-          # Remove escaping from special path characters
-          str.gsub! %r{#{RECH}([#{PATH_CHARS}])}, '\1'
-          str.gsub! %r{#{RECH}([#{RESC_CHARS}])}, '\1'
-          str.gsub! %r{(^|[^#{RECH}])([#{SUFF_CHARS}])}, '\1.\2'
-
-          Regexp.new "\\A(#{str})\\Z", regex_opts
-
-        elsif String === str
-          str.gsub %r{#{RECH}([^#{RECH}]|$)}, '\1'
-
-        else
-          str
-        end
-      end
     end
 
 
@@ -391,13 +253,13 @@ class Kronk
           end
 
           unless key =~ /^\.?$/ && !value
-            parsed << [ parse_path_item(key, regex_opts),
-                        parse_path_item(value, regex_opts),
-                        recur ]
+            matcher = Matcher.new :key        => key,
+                                  :value      => value,
+                                  :recursive  => recur,
+                                  :regex_opts => regex_opts
 
-            yield_args = (parsed.last.dup << path.empty?)
-
-            yield(*yield_args) if block_given?
+            parsed << matcher
+            yield matcher, path.empty? if block_given?
           end
 
           key   = ""
