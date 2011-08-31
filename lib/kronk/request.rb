@@ -323,7 +323,7 @@ class Kronk
     def user_agent= new_ua
       @headers['User-Agent'] =
         new_ua && Kronk.config[:user_agents][new_ua.to_s] ||
-        new_ua || Kronk.config[:user_agents]['kronk']
+        new_ua || Kronk::DEFAULT_USER_AGENT
     end
 
 

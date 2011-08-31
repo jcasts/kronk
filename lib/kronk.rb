@@ -285,7 +285,7 @@ class Kronk
   # Returns a Response instance from a url, file, or IO as a String.
 
   def retrieve uri
-    options = Kronk.config[:no_uri_options] ? options_for_uri(uri) : @options
+    options = Kronk.config[:no_uri_options] ? @options : options_for_uri(uri)
 
     if IO === uri || StringIO === uri
       Cmd.verbose "Reading IO #{uri}"
@@ -339,7 +339,6 @@ class Kronk
           out_opts[key] = val
           next
         end
-
 
         case key
 

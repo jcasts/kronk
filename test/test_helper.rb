@@ -133,7 +133,11 @@ end
 
 
 def with_config config={}
-  old_conf = Kronk.config
+  old_conf = Kronk.config.dup
+  old_conf.each do |k,v|
+    old_conf[k] = v.dup if Array === old_conf[k] || Hash === old_conf[k]
+  end
+
   Kronk.instance_variable_set "@config", Kronk.config.merge(config)
   yield
 
@@ -159,7 +163,7 @@ def expect_request req_method, url, options={}
   data &&= Hash === data ? Kronk::Request.build_query(data) : data.to_s
 
   headers = options[:headers] || Hash.new
-  headers['User-Agent'] ||= Kronk.config[:user_agents]['kronk']
+  headers['User-Agent'] ||= Kronk::DEFAULT_USER_AGENT
 
   req.expects(:start).yields(http).returns res
 
