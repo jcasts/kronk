@@ -140,13 +140,14 @@ class TestPathMatcher < Test::Unit::TestCase
                                        :value     => "findme",
                                        :recursive => true
 
-    matcher.find_in @data do |data, key|
+    paths = matcher.find_in @data do |data, key|
       keys << key.to_s
       data_points << data
     end
 
     assert_equal ['key1b'], keys
     assert_equal [@data[:key1]], data_points
+    assert_equal ['key1b'], paths.first.matches
   end
 
 
@@ -228,7 +229,43 @@ class TestPathMatcher < Test::Unit::TestCase
     paths = matcher.find_in @data
 
     assert_equal [[:key1, :key1a, 3, :findme]], paths
-    assert_equal [:findme, "in"], paths.first.matches
+    assert_equal ["in"], paths.first.matches
+  end
+
+
+  def test_find_in_match_value_and_empty_key
+    matcher = Kronk::Path::Matcher.new :key       => "",
+                                       :value     => "th*g",
+                                       :recursive => true
+
+    paths = matcher.find_in @data
+
+    assert_equal [[:key1, :key1a, 3, :findme]], paths
+    assert_equal ["in"], paths.first.matches
+  end
+
+
+  def test_find_in_match_value_and_nil_value
+    matcher = Kronk::Path::Matcher.new :key       => "*3a",
+                                       :value     => nil,
+                                       :recursive => true
+
+    paths = matcher.find_in @data
+
+    assert_equal [[:key3, :key3a]], paths
+    assert_equal ["key"], paths.first.matches
+  end
+
+
+  def test_find_in_match_value_and_empty_value
+    matcher = Kronk::Path::Matcher.new :key       => "*3a",
+                                       :value     => "",
+                                       :recursive => true
+
+    paths = matcher.find_in @data
+
+    assert_equal [[:key3, :key3a]], paths
+    assert_equal ["key"], paths.first.matches
   end
 
 

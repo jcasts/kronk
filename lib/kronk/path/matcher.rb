@@ -31,9 +31,13 @@ class Kronk::Path::Matcher
 
   def initialize opts={}
     @regex_opts = opts[:regex_opts]
-    @key        = parse_node opts[:key]   if opts.has_key? :key
-    @value      = parse_node opts[:value] if opts.has_key? :value
     @recursive  = !!opts[:recursive]
+
+    @key = parse_node opts[:key] if
+      opts[:key] && !opts[:key].to_s.empty?
+
+    @value = parse_node opts[:value] if
+      opts[:value] && !opts[:value].to_s.empty?
   end
 
 
