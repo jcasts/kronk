@@ -280,6 +280,17 @@ class TestTransaction < Test::Unit::TestCase
   end
 
 
+  def test_transaction_delete_many_from_embedded_data
+    result = @trans.transaction_delete @data, "key1/key1a/1", "key1/key1a/0"
+    expected = {
+      :key1a => {2 => "foobar", 3 => {:findme => "thing"}},
+      'key1b' => "findme"
+      }
+
+    assert_equal expected, result[:key1]
+  end
+
+
   def test_transaction_delete_empty
     assert_equal @data, @trans.transaction_delete(@data)
   end

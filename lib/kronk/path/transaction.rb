@@ -150,7 +150,8 @@ class Kronk::Path::Transaction
             new_curr_data.delete key
 
           else
-            new_curr_data[key] = curr_data[key].dup
+            new_curr_data[key] = new_curr_data[key].dup if
+              new_curr_data[key] == curr_data[key]
 
             if Array === new_curr_data[key]
               new_curr_data[key] = ary_to_hash new_curr_data[key]
