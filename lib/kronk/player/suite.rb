@@ -25,6 +25,14 @@ class Kronk
           [status, time, text]
 
         elsif kronk.response
+          begin
+            # Make sure response is parsable
+            kronk.response.stringify kronk.options
+          rescue => e
+            error e, kronk, mutex
+            return
+          end if kronk.response.success?
+
           status = "F"             if !kronk.response.success?
           text   = resp_text kronk if status == "F"
           [status, kronk.response.time, text]
