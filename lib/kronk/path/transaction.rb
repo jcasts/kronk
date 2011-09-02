@@ -111,6 +111,20 @@ class Kronk::Path::Transaction
   end
 
 
+  def transaction_move data, match_target_hash
+    path_val_hash = {}
+
+    match_target_hash.each do |data_path, path_map|
+      data = transaction data, [data_path] do |new_curr_data, curr_data, key, path|
+        mapped_path = path.make_path path_map
+        path_val_hash[mapped_path] = new_curr_data.delete key
+      end
+    end
+
+    force_assign_paths data, path_val_hash
+  end
+
+
   def transaction data, data_paths, create_empty=false # :nodoc:
     data_paths = data_paths.compact
     return data if data_paths.empty?
@@ -128,7 +142,7 @@ class Kronk::Path::Transaction
 
         path.each_with_index do |key, i|
           if i == path.length - 1
-            yield new_curr_data, curr_data, key if block_given?
+            yield new_curr_data, curr_data, key, path if block_given?
 
           else
             if create_empty
