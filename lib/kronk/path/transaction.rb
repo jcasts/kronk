@@ -98,46 +98,24 @@ class Kronk::Path::Transaction
 
 
   def transaction_select data, *data_paths # :nodoc:
-    data_paths = data_paths.compact
-    return data if data_paths.empty?
-
-    new_data = Hash.new
-
-    data_paths.each do |data_path|
-      Kronk::Path.find data_path, data do |obj, k, path|
-
-        curr_data     = data
-        new_curr_data = new_data
-
-        path.each_with_index do |key, i|
-          if i == path.length - 1
-            new_curr_data[key] = curr_data[key]
-
-          else
-            new_curr_data[key] ||= Hash.new
-
-            # Tag data item for conversion to Array.
-            # Hashes are used to conserve position of Array elements.
-            if Array === curr_data[key]
-              @make_array[path[0..i]] = true
-            end
-
-            new_curr_data = new_curr_data[key]
-            curr_data     = curr_data[key]
-          end
-        end
-      end
+    transaction data, data_paths, true do |new_curr_data, curr_data, key|
+      new_curr_data[key] = curr_data[key]
     end
-
-    new_data
   end
 
 
   def transaction_delete data, *data_paths # :nodoc:
+    transaction data, data_paths do |new_curr_data, curr_data, key|
+      new_curr_data.delete key
+    end
+  end
+
+
+  def transaction data, data_paths, create_empty=false # :nodoc:
     data_paths = data_paths.compact
     return data if data_paths.empty?
 
-    new_data = data.dup
+    new_data = create_empty ? Hash.new : data.dup
 
     if Array === new_data
       new_data = ary_to_hash new_data
@@ -145,22 +123,24 @@ class Kronk::Path::Transaction
 
     data_paths.each do |data_path|
       Kronk::Path.find data_path, data do |obj, k, path|
-
         curr_data     = data
         new_curr_data = new_data
 
         path.each_with_index do |key, i|
           if i == path.length - 1
-            new_curr_data.delete key
+            yield new_curr_data, curr_data, key if block_given?
 
           else
-            new_curr_data[key] = new_curr_data[key].dup if
-              new_curr_data[key] == curr_data[key]
+            if create_empty
+              new_curr_data[key] ||= Hash.new
 
-            if Array === new_curr_data[key]
-              new_curr_data[key] = ary_to_hash new_curr_data[key]
-              @make_array[path[0..i]] = true
+            elsif new_curr_data[key] == curr_data[key]
+              new_curr_data[key] = Array === new_curr_data[key] ?
+                                    ary_to_hash(curr_data[key]) :
+                                    curr_data[key].dup
             end
+
+            @make_array[path[0..i]] = true if Array === curr_data[key]
 
             new_curr_data = new_curr_data[key]
             curr_data     = curr_data[key]
