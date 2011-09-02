@@ -77,7 +77,7 @@ class Kronk::Path::Transaction
       key  = path_arr.last
       obj = Kronk::Path.data_at_path path_arr[0..-2], new_data
 
-      next unless Hash === obj[key]
+      next unless obj && Hash === obj[key]
       next if except_modified &&
         obj[key].length !=
           Kronk::Path.data_at_path(path_arr, @data).length
