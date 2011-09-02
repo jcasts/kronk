@@ -1,5 +1,7 @@
 = TODO
 
+* Support data diffing for arrays (including data struct).
+
 * Allow for showing diffed sections of a diff only.
   Do it by sorted paths? Example:
     - "/path/foo": "value1"
