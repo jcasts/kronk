@@ -41,8 +41,6 @@ class Kronk::Path::Matcher
 
     @value = parse_node opts[:value] if
       opts[:value] && !opts[:value].to_s.empty?
-
-    p @key if opts[:key] && opts[:key].to_s =~ /\?\?$/
   end
 
 

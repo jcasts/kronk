@@ -9,8 +9,8 @@ class TestPathMatch < Test::Unit::TestCase
 
 
   def test_new
-    assert_equal %w{this is 4 foo}, @pmatch.matches
-    assert_equal %w{path to resource},    @pmatch
+    assert_equal %w{this is 4 foo},    @pmatch.matches
+    assert_equal %w{path to resource}, @pmatch
   end
 
 
