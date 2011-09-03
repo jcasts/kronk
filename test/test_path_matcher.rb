@@ -303,6 +303,7 @@ class TestPathMatcher < Test::Unit::TestCase
     assert_equal(/\A\?test(.*)\Z/,     @matcher.parse_node("\\?test*"))
     assert_equal(/\A(.?)test\*(.*)\Z/, @matcher.parse_node("?test\\**"))
     assert_equal(/\A(.?)test(.*)\Z/,   @matcher.parse_node("?test*?**??"))
+    assert_equal(/\A(.?)test(.?)(.?)(.*)\Z/, @matcher.parse_node("?test??**??"))
     assert_equal(/\Aa|b\Z/,            @matcher.parse_node("a|b"))
     assert_equal(/\Aa|b(c|d)\Z/,       @matcher.parse_node("a|b(c|d)"))
 

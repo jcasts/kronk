@@ -41,6 +41,8 @@ class Kronk::Path::Matcher
 
     @value = parse_node opts[:value] if
       opts[:value] && !opts[:value].to_s.empty?
+
+    p @key if opts[:key] && opts[:key].to_s =~ /\?\?$/
   end
 
 
@@ -155,7 +157,7 @@ class Kronk::Path::Matcher
       if @regex_opts || str =~ PATH_CHAR_MATCHER
 
         # Remove extra suffix characters
-        str.gsub! %r{(^|[^#{Kronk::Path::RECH}])(\*+\?+|\?+\*+)}, '\1*'
+        str.gsub! %r{(^|[^#{Kronk::Path::RECH}])(\*+\?*)}, '\1*'
         str.gsub! %r{(^|[^#{Kronk::Path::RECH}])\*+}, '\1*'
 
         str = Regexp.escape str
@@ -163,7 +165,8 @@ class Kronk::Path::Matcher
         # Remove escaping from special path characters
         str.gsub! %r{#{Kronk::Path::RECH}([#{PATH_CHARS}])}, '\1'
         str.gsub! %r{#{Kronk::Path::RECH}([#{RESC_CHARS}])}, '\1'
-        str.gsub! %r{(^|[^#{Kronk::Path::RECH}])([#{SUFF_CHARS}])}, '\1(.\2)'
+        str.gsub! %r{(^|[^#{Kronk::Path::RECH}])([#{SUFF_CHARS}])},   '\1(.\2)'
+        str.gsub! %r{(^|[^\.#{Kronk::Path::RECH}])([#{SUFF_CHARS}])}, '\1(.\2)'
 
         Regexp.new "\\A#{str}\\Z", @regex_opts
 
