@@ -115,7 +115,7 @@ class Kronk::Path::Transaction
     path_val_hash = {}
 
     match_target_hash.each do |data_path, path_map|
-      data = transaction data, [data_path] do |new_curr_data, curr_data, key, path|
+      data = transaction data, [data_path] do |new_curr_data, cdata, key, path|
         mapped_path = path.make_path path_map
         path_val_hash[mapped_path] = new_curr_data.delete key
       end

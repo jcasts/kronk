@@ -296,6 +296,39 @@ class TestTransaction < Test::Unit::TestCase
   end
 
 
+  def test_transaction_move
+    expected = {:key1=>{}, :key2=>"foobar",
+      "mapped"=>{
+        "1-a"=>["foo", "bar", "foobar", {:findme=>"thing"}],
+        "1-b"=>"findme", "3-a"=>["val1", "val2", "val3"]},
+      :key3=>{}, "findme"=>[123, 456, {:findme=>123456}]}
+
+    data = @trans.transaction_move @data, "key*/key??" => "mapped/%1-%3"
+    assert_equal expected, data
+    assert_not_equal @data, data
+  end
+
+
+  def test_transaction_move_array_conflicting
+    expected = {:key1=>{:key1a=>[], "key1b"=>"findme"},:key2=>"foobar",
+      :key3=>{:key3a=>[]}, "findme"=>[123, 456, {:findme=>123456}]}
+
+    data = @trans.transaction_move @data, "key*/key??/*" => "mapped/%4"
+    data = @trans.remake_arrays data
+
+    mapped = data.delete "mapped"
+
+    assert_equal expected, data
+    assert_not_equal @data, data
+
+    assert_equal({:findme=>"thing"}, mapped.last)
+
+    # Due to unordered hashes, this could be
+    # %w{val1 val2 val3} OR %w{foo bar foobar}
+    assert_equal [String], mapped[0..2].map{|v| v.class}.uniq
+  end
+
+
   def test_force_assign_paths
     data = {'foo' => 'bar'}
 
