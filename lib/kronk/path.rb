@@ -123,11 +123,17 @@ class Kronk
     # Returns a path-keyed data hash. Be careful of mixed key types in hashes
     # as Symbols and Strings both use #to_s.
 
-    def self.pathed data
+    def self.pathed data, escape=true
+      path_esc = "*?()|/."
       new_data = {}
       find "**", data do |subdata, key, path|
         next if Array === subdata[key] || Hash === subdata[key]
-        new_data[path.join(DCH)] = subdata[key]
+        path.map! do |k|
+          k.to_s.gsub(/([#{path_esc}])/){|m| "\\#{m}"}
+        end if escape
+
+        path_str = path.join(DCH)
+        new_data[path_str] = subdata[key]
       end
 
       new_data
