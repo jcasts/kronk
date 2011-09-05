@@ -120,6 +120,21 @@ class Kronk
 
 
     ##
+    # Returns a path-keyed data hash. Be careful of mixed key types in hashes
+    # as Symbols and Strings both use #to_s.
+
+    def self.pathed data
+      new_data = {}
+      find "**", data do |subdata, key, path|
+        next if Array === subdata[key] || Hash === subdata[key]
+        new_data[path.join(DCH)] = subdata[key]
+      end
+
+      new_data
+    end
+
+
+    ##
     # Fully streamed version of:
     #   Path.new(str_path).find_in data
     #

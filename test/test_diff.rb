@@ -174,12 +174,10 @@ STR
                   Kronk::Diff.ordered_data_string(mock_data, true)
   end
 
-
-  def test_ordered_data_string_ruby
-    with_config :render_lang => 'ruby' do
-      expected = <<STR
+  def test_ordered_data_string_json
+    expected = <<STR
 {
- "acks" => [
+ "acks": [
   [
    56,
    78
@@ -189,7 +187,7 @@ STR
    "34"
   ]
  ],
- "root" => [
+ "root": [
   [
    "B1",
    "B2"
@@ -207,11 +205,11 @@ STR
    ]
   ],
   {
-   :tests => [
+   ":tests": [
     "D3a",
     "D3b"
    ],
-   "test" => [
+   "test": [
     [
      "D1a\\nContent goes here",
      "D1b"
@@ -220,13 +218,13 @@ STR
    ]
   }
  ],
- "subs" => [
+ "subs": [
   "a",
   "b"
  ],
- "tests" => {
-  :foo => :bar,
-  "test" => [
+ "tests": {
+  ":foo": ":bar",
+  "test": [
    [
     1,
     2
@@ -234,6 +232,40 @@ STR
    2.123
   ]
  }
+}
+STR
+
+    assert_equal expected.strip, Kronk::Diff.ordered_data_string(mock_data)
+  end
+
+
+  def test_ordered_data_string_ruby_paths
+    with_config :render_lang => 'ruby', :render_paths => true do
+      expected = <<STR
+{
+ "acks/0/0" => 56,
+ "acks/0/1" => 78,
+ "acks/1/0" => "12",
+ "acks/1/1" => "34",
+ "root/0/0" => "B1",
+ "root/0/1" => "B2",
+ "root/1/0" => "A1",
+ "root/1/1" => "A2",
+ "root/2/0" => "C1",
+ "root/2/1" => "C2",
+ "root/2/2/0" => "C3a",
+ "root/2/2/1" => "C3b",
+ "root/3/test/0/0" => "D1a\\nContent goes here",
+ "root/3/test/0/1" => "D1b",
+ "root/3/test/1" => "D2",
+ "root/3/tests/0" => "D3a",
+ "root/3/tests/1" => "D3b",
+ "subs/0" => "a",
+ "subs/1" => "b",
+ "tests/foo" => :bar,
+ "tests/test/0/0" => 1,
+ "tests/test/0/1" => 2,
+ "tests/test/1" => 2.123
 }
 STR
 

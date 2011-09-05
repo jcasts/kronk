@@ -21,6 +21,7 @@ class Kronk
       end
     end
 
+
     ##
     # Returns a json data string that is diff-able, meaning sorted by
     # Hash keys when available.
@@ -39,6 +40,9 @@ class Kronk
       end
     end
 
+
+    ##
+    # Turns a data set into an ordered string output for diff-ing.
 
     def self.ordered_data_string data, struct_only=false, indent=nil, &block
       i_width  = Kronk.config[:indentation] || 1

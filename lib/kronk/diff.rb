@@ -20,6 +20,8 @@ class Kronk
     # Hash keys when available.
 
     def self.ordered_data_string data, struct_only=false
+      data = Kronk::Path.pathed(data) if Kronk.config[:render_paths]
+
       case Kronk.config[:render_lang].to_s
       when 'ruby' then DataRenderer.ruby(data, struct_only)
       else

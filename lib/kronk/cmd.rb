@@ -161,7 +161,7 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
-        opt.on('--irb', 'Start an IRB console') do
+        opt.on('--irb', 'Start an IRB console with the response') do
           options[:irb] = true
         end
 
@@ -179,6 +179,11 @@ Parse and run diffs against data from live and cached http responses.
         opt.on('-P', '--parser STR', String,
                'Override default response body parser') do |value|
           options[:parser] = value
+        end
+
+
+        opt.on('--paths', 'Render data as path value pairs') do
+          Kronk.config[:render_paths] = true
         end
 
 
