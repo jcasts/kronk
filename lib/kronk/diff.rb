@@ -249,7 +249,8 @@ class Kronk
 
         if !context || ary[i,context].to_a.find{|da| Array === da}
           record ||= [output.length, line1+1, line2+1, 0, 0]
-        elsif context
+
+        elsif context && !ary[i,context].to_a.find{|da| Array === da}
           scheck = output.length - (context+1)
           unless output[scheck..-1].find{|da| Array === da} && i != ary.length
             start  = record[0]
