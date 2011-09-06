@@ -541,9 +541,10 @@ STR
     resp2 = Kronk::Response.read_file "test/mocks/200_response.json"
     @diff = Kronk::Diff.new resp1.stringify, resp2.stringify
 
-    puts @diff.formatted(:formatter => Kronk::Diff::ColorFormat,
-                         :context   => 3,
-                         :labels    => [resp1.uri, resp2.uri])
+    assert_equal diff_json_color,
+                 @diff.formatted(:formatter => Kronk::Diff::ColorFormat,
+                                 :context   => 3,
+                                 :labels    => [resp1.uri, resp2.uri])
   end
 
 
@@ -571,6 +572,55 @@ STR
   end
 
   private
+
+  def diff_json_color
+    (<<-STR
+\e[33m--- test/mocks/200_response_diff.json
++++ test/mocks/200_response.json\e[0m
+\e[35m@@ -6,7 +6,7 @@\e[0m business/description
+     "additional_urls": [
+      {
+       "destination": "http://example.com",
+\e[31m-      "url_click": "http://google.com"\e[0m
+\e[32m+      "url_click": "http://example.com"\e[0m
+      }
+     ],
+     "general_info": "<p>A Paint Your Own Pottery Studios..</p>",
+\e[35m@@ -15,11 +15,12 @@\e[0m business/description
+     "slogan": "<p>Pottery YOU dress up</p>"
+    },
+    "distance": 0.0,
+\e[31m-   "has_detail_page": false,\e[0m
+\e[32m+   "has_detail_page": true,\e[0m
+    "headings": [
+     "Pottery"
+    ],
+\e[31m-   "id": 1234,\e[0m
+\e[32m+   "id": "1234",\e[0m
+\e[32m+   "impression_id": "mock_iid",\e[0m
+    "improvable": true,
+    "latitude": 42.882561,
+    "listing_id": "1234",
+\e[35m@@ -34,12 +35,12 @@\e[0m business
+    "rating_count": 0,
+    "red_listing": false,
+    "state": "MI",
+\e[31m-   "website": "http://google.com",\e[0m
+\e[32m+   "website": "http://example.com",\e[0m
+    "year_established": "1996",
+    "zip": "49418"
+   },
+\e[31m-  "original": {\e[0m
+\e[32m+  "original_request": {\e[0m
+    "id": "1234"
+   },
+\e[31m-  "request_id": "foobar"\e[0m
+\e[32m+  "request_id": "mock_rid"\e[0m
+  }
+    STR
+    ).strip
+  end
+
 
   def diff_302_301
     [[["HTTP/1.1 302 Found", "Location: http://igoogle.com/"],

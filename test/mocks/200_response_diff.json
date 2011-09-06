@@ -22,7 +22,7 @@ Cache-Control: private, max-age=0, must-revalidate
 "listing_id":"1234","phone":"6168055326",
 "address":"3845 Rivertown Pkwy SW Ste 500",
 "mappable":true,"rating_count":0,"rateable":true,
-"impression_id":"mock_iid","zip":"49418","red_listing":false,"omit_phone":false,
+"zip":"49418","red_listing":false,"omit_phone":false,
 "state":"MI","distance":0.0,"year_established":"1996","city":"Grandville",
 "name":"Naked Plates","latitude":42.882561,"omit_address":false,"id":1234,
 "has_detail_page":false}}
