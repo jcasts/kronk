@@ -276,7 +276,9 @@ class Kronk
       end
 
       if options[:with_headers]
-        data = [parsed_header(options[:with_headers]), data].compact
+        header_data = parsed_header(options[:with_headers])
+        data &&= [header_data, data]
+        data ||= header_data
       end
 
       Path::Transaction.run data, options do |t|

@@ -284,10 +284,10 @@ class TestResponse < Test::Unit::TestCase
 
   def test_selective_data_no_body
     body = JSON.parse @json_resp.body
-    expected =
-      [{'content-type' => 'application/json; charset=utf-8',
+    expected = {
+        'content-type' => 'application/json; charset=utf-8',
         'date'         => "Fri, 03 Dec 2010 21:49:00 GMT"
-      }]
+      }
 
     assert_equal expected,
                  @json_resp.selective_data(:no_body => true,
