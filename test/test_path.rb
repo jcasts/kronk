@@ -101,18 +101,18 @@ class TestPath < Test::Unit::TestCase
 
   def test_pathed
     expected = {
-      "findme/0"            => 123,
-      "findme/1"            => 456,
-      "findme/2/findme"     => 123456,
-      "key1/key1a/0"        => "foo",
-      "key1/key1a/1"        => "bar",
-      "key1/key1a/2"        => "foobar",
-      "key1/key1a/3/findme" => "thing",
-      "key1/key1b"          => "findme",
-      "key2"                => "foobar",
-      "key3/key3a/0"        => "val1",
-      "key3/key3a/1"        => "val2",
-      "key3/key3a/2"        => "val3"
+      "/findme/0"            => 123,
+      "/findme/1"            => 456,
+      "/findme/2/findme"     => 123456,
+      "/key1/key1a/0"        => "foo",
+      "/key1/key1a/1"        => "bar",
+      "/key1/key1a/2"        => "foobar",
+      "/key1/key1a/3/findme" => "thing",
+      "/key1/key1b"          => "findme",
+      "/key2"                => "foobar",
+      "/key3/key3a/0"        => "val1",
+      "/key3/key3a/1"        => "val2",
+      "/key3/key3a/2"        => "val3"
     }
     assert_equal expected, Kronk::Path.pathed(@data)
   end
@@ -127,24 +127,24 @@ class TestPath < Test::Unit::TestCase
     }
 
     expected = {
-      "findme/0"            => 123,
-      "findme/1"            => 456,
-      "findme/2/findme"     => 123456,
+      "/findme/0"            => 123,
+      "/findme/1"            => 456,
+      "/findme/2/findme"     => 123456,
 
-      "findme/2/\\*thing\\?/\\.\\."         => "parent",
-      "findme/2/\\*thing\\?/\\*\\*"         => "recurse",
-      "findme/2/\\*thing\\?/\\(hi\\|hey\\)" => "paren",
-      "findme/2/\\*thing\\?/more\\/here"    => "path",
+      "/findme/2/\\*thing\\?/\\.\\."         => "parent",
+      "/findme/2/\\*thing\\?/\\*\\*"         => "recurse",
+      "/findme/2/\\*thing\\?/\\(hi\\|hey\\)" => "paren",
+      "/findme/2/\\*thing\\?/more\\/here"    => "path",
 
-      "key1/key1a/0"        => "foo",
-      "key1/key1a/1"        => "bar",
-      "key1/key1a/2"        => "foobar",
-      "key1/key1a/3/findme" => "thing",
-      "key1/key1b"          => "findme",
-      "key2"                => "foobar",
-      "key3/key3a/0"        => "val1",
-      "key3/key3a/1"        => "val2",
-      "key3/key3a/2"        => "val3"
+      "/key1/key1a/0"        => "foo",
+      "/key1/key1a/1"        => "bar",
+      "/key1/key1a/2"        => "foobar",
+      "/key1/key1a/3/findme" => "thing",
+      "/key1/key1b"          => "findme",
+      "/key2"                => "foobar",
+      "/key3/key3a/0"        => "val1",
+      "/key3/key3a/1"        => "val2",
+      "/key3/key3a/2"        => "val3"
     }
     assert_equal expected, Kronk::Path.pathed(@data)
   end
@@ -159,24 +159,24 @@ class TestPath < Test::Unit::TestCase
     }
 
     expected = {
-      "findme/0"            => 123,
-      "findme/1"            => 456,
-      "findme/2/findme"     => 123456,
+      "/findme/0"            => 123,
+      "/findme/1"            => 456,
+      "/findme/2/findme"     => 123456,
 
-      "findme/2/*thing?/.."        => "parent",
-      "findme/2/*thing?/**"        => "recurse",
-      "findme/2/*thing?/(hi|hey)"  => "paren",
-      "findme/2/*thing?/more/here" => "path",
+      "/findme/2/*thing?/.."        => "parent",
+      "/findme/2/*thing?/**"        => "recurse",
+      "/findme/2/*thing?/(hi|hey)"  => "paren",
+      "/findme/2/*thing?/more/here" => "path",
 
-      "key1/key1a/0"        => "foo",
-      "key1/key1a/1"        => "bar",
-      "key1/key1a/2"        => "foobar",
-      "key1/key1a/3/findme" => "thing",
-      "key1/key1b"          => "findme",
-      "key2"                => "foobar",
-      "key3/key3a/0"        => "val1",
-      "key3/key3a/1"        => "val2",
-      "key3/key3a/2"        => "val3"
+      "/key1/key1a/0"        => "foo",
+      "/key1/key1a/1"        => "bar",
+      "/key1/key1a/2"        => "foobar",
+      "/key1/key1a/3/findme" => "thing",
+      "/key1/key1b"          => "findme",
+      "/key2"                => "foobar",
+      "/key3/key3a/0"        => "val1",
+      "/key3/key3a/1"        => "val2",
+      "/key3/key3a/2"        => "val3"
     }
     assert_equal expected, Kronk::Path.pathed(@data, false)
   end

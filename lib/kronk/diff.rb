@@ -9,9 +9,9 @@ class Kronk
     ##
     # Creates a new diff from two data objects.
 
-    def self.new_from_data data1, data2, options={}
-      new ordered_data_string(data1, options[:struct]),
-          ordered_data_string(data2, options[:struct])
+    def self.new_from_data data1, data2, opts={}
+      new ordered_data_string(data1, opts[:struct]),
+          ordered_data_string(data2, opts[:struct])
     end
 
 
@@ -57,13 +57,16 @@ class Kronk
     end
 
 
-    attr_accessor :str1, :str2, :char, :formatter, :show_lines
+    attr_accessor :str1, :str2, :char, :context,
+                  :formatter, :show_lines, :labels
 
     def initialize str1, str2, char=/\r?\n/
       @str1       = str1
       @str2       = str2
       @char       = char
+      @context    = nil
       @diff_ary   = nil
+      @labels     = nil
       @show_lines = Kronk.config[:show_lines]
       @formatter  =
         self.class.formatter(Kronk.config[:diff_format]) || AsciiFormat
@@ -210,18 +213,23 @@ class Kronk
     ##
     # Returns a formatted output as a string.
     # Supported options are:
-    # :join_char:: String - The string used to join lines; default "\n"
-    # :show_lines:: Boolean - Insert line numbers or not; default @show_lines
+    # :context:: Integer - The number of lines of context to use; default 3
     # :formatter:: Object - The formatter to use; default @formatter
+    # :join_char:: String - The string used to join lines; default "\n"
+    # :labels:: Array - Labels for the left and right sides of the diff
+    # :show_lines:: Boolean - Insert line numbers or not; default @show_lines
 
-    def formatted options={}
-      options = {
+    def formatted opts={}
+      opts = {
+        :context    => @context,
+        :formatter  => @formatter,
         :join_char  => "\n",
-        :show_lines => @show_lines,
-        :formatter  => @formatter
-      }.merge options
+        :labels     => @labels,
+        :show_lines => @show_lines
+      }.merge opts
 
-      format = options[:formatter]
+      format  = opts[:formatter]
+      context = opts[:context]
 
       line1 = line2 = 0
 
@@ -230,33 +238,66 @@ class Kronk
 
       width = (lines1 > lines2 ? lines1 : lines2).to_s.length
 
-      diff_array.map do |item|
+      output = []
+      output << format.head(*Array(opts[:labels])) if opts[:labels]
+
+      record = false
+      ary    = diff_array
+
+      0.upto(ary.length) do |i|
+        item = ary[i]
+
+        if !context || ary[i,context].to_a.find{|da| Array === da}
+          record ||= [output.length, line1+1, line2+1, 0, 0]
+        elsif context
+          scheck = output.length - (context+1)
+          unless output[scheck..-1].find{|da| Array === da} && i != ary.length
+            start  = record[0]
+            cleft  = "#{record[1]},#{record[3]}"
+            cright = "#{record[2]},#{record[4]}"
+            info   = output[start] if output[start].respond_to?(:meta)
+            output[start,0] = format.context cleft, cright, info
+            record = false
+          end
+        end
+
+        next unless record
+
         case item
         when String
           line1 = line1.next
           line2 = line2.next
 
-          lines = format.lines [line1, line2], width if options[:show_lines]
-          "#{lines}#{format.common item}"
+          if record
+            lines = format.lines [line1, line2], width if opts[:show_lines]
+            output << "#{lines}#{format.common item}"
+            record[3] += 1
+            record[4] += 1
+          end
+
 
         when Array
           item = item.dup
 
           item[0] = item[0].map do |str|
             line1 = line1.next
-            lines = format.lines [line1, nil], width if options[:show_lines]
+            lines = format.lines [line1, nil], width if opts[:show_lines]
+            record[3] += 1
             "#{lines}#{format.deleted str}"
           end
 
           item[1] = item[1].map do |str|
             line2 = line2.next
-            lines = format.lines [nil, line2], width if options[:show_lines]
+            lines = format.lines [nil, line2], width if opts[:show_lines]
+            record[4] += 1
             "#{lines}#{format.added str}"
           end
 
-          item
+          output << item
         end
-      end.flatten.join options[:join_char]
+      end
+
+      output.flatten.join opts[:join_char]
     end
 
 

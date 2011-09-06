@@ -17,6 +17,18 @@ class Kronk
       end
 
 
+      def self.head left, right
+        ensure_color
+        "\033[7;36m--- #{left}\n+++ #{right}\033[0m"
+      end
+
+
+      def self.context left, right, info=nil
+        ensure_color
+        "\033[7;35m@@ -#{left} +#{right} @@\033[0m #{info}"
+      end
+
+
       def self.lines line_nums, col_width
         ensure_color
 
@@ -25,7 +37,7 @@ class Kronk
             lnum.to_s.rjust col_width
           end.join "\033[32m"
 
-        "\033[7;31m#{out}\033[0m "
+        "\033[7;31m#{out}\033[0m"
       end
 
 

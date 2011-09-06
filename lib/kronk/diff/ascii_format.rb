@@ -7,6 +7,17 @@ class Kronk
 
     class AsciiFormat
 
+
+      def self.head left, right
+        "--- #{left}\n+++ #{right}"
+      end
+
+
+      def self.context left, right, info=nil
+        "@@ -#{left} +#{right} @@ #{info}"
+      end
+
+
       def self.lines line_nums, col_width
         out =
           [*line_nums].map do |lnum|

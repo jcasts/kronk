@@ -1,6 +1,70 @@
 class Kronk
 
   ##
+  # A String with per-line metadata.
+
+  class DataString < String
+
+    attr_accessor :meta
+
+    def initialize str="", metadata=nil
+      @meta = [metadata].compact * str.length
+      super str
+    end
+
+
+    ##
+    # Add a line with metadata to the string.
+
+    def append str, metadata=nil
+      dstr = self.class.new str
+      dstr.meta = [metadata] * str.length
+      self << dstr
+    end
+
+
+    def << str
+      if str.class == self.class
+        @meta.concat str.meta
+      else
+        @meta.concat([@meta.last] * str.length)
+      end
+      super str
+    end
+
+
+    def [] arg
+      dstr = self.class.new super
+      dstr.meta = @meta[arg]
+      dstr
+    end
+
+
+    def split pattern=$;, *more
+      arr      = super
+      i        = 0
+      interval = (self.length - arr.join.length) / (arr.length - 1)
+
+      arr.map do |str|
+        ds = self.class.new str
+        ds.meta = @meta[i,str.length]
+        i += str.length + interval
+        ds
+      end
+    end
+
+
+    def meta_by_line
+      output = ""
+      split.each do |line|
+        output << line.meta.first.to_s << "   " << line << "\n"
+      end
+      output
+    end
+  end
+
+
+  ##
   # Creates ordered data strings for rendering to the output.
 
   module DataRenderer
@@ -44,50 +108,62 @@ class Kronk
     ##
     # Turns a data set into an ordered string output for diff-ing.
 
-    def self.ordered_data_string data, struct_only=false, indent=nil, &block
+    def self.ordered_data_string data, struct_only=false, path=[], &block
       i_width  = Kronk.config[:indentation] || 1
-      indent ||= 0
-      indent += i_width
+      indent   = (path.length + 1) * i_width
+      pad      = " " * indent
+      path_str = Path.join path
 
       case data
 
       when Hash
-        return "{}" if data.empty?
-
-        output = "{\n"
+        return DataString.new("{}", path_str) if data.empty?
+        output = DataString.new "{\n", path_str
 
         sorted_keys = sort_any data.keys
 
         data_values =
           sorted_keys.map do |key|
-            value   = data[key]
-            pad     = " " * indent
-            subdata = ordered_data_string value, struct_only, indent, &block
-            "#{pad}#{ yield(:key, key) }#{ yield(:key_assign) } #{subdata}"
+            value    = data[key]
+            new_path = path.dup << key
+            subdata  = ordered_data_string value, struct_only, new_path, &block
+            line     = "#{pad}#{ yield(:key, key) }#{ yield(:key_assign) } "
+            line     = DataString.new line, path_str
+            line << subdata
           end
 
-        output << data_values.join(",\n") << "\n"
-        output << "#{" " * (indent - i_width)}}"
+        data_values.each_with_index do |val, i|
+          val << "," unless i == data_values.length - 1
+          output << val << "\n"
+        end
+
+        output.append(("#{" " * (indent - i_width)}}"), path_str)
 
       when Array
-        return "[]" if data.empty?
-
-        output = "[\n"
+        return DataString.new("[]", path_str) if data.empty?
+        output = DataString.new "[\n", path_str
 
         data_values =
-          data.map do |value|
-            pad = " " * indent
-            "#{pad}#{ordered_data_string value, struct_only, indent, &block}"
+          (0...data.length).map do |key|
+            value    = data[key]
+            new_path = path.dup << key
+            subdata  = ordered_data_string value, struct_only, new_path, &block
+            line     = DataString.new pad, path_str
+            line << subdata
           end
 
-        output << data_values.join(",\n") << "\n"
-        output << "#{" " * (indent - i_width)}]"
+        data_values.each_with_index do |val, i|
+          val << "," unless i == data_values.length - 1
+          output << val << "\n"
+        end
+
+        output.append(("#{" " * (indent - i_width)}]"), path_str)
 
       else
-        struct_only ? yield(:struct, data) : yield(:value, data)
+        output = struct_only ? yield(:struct, data) : yield(:value, data)
+        DataString.new(output.to_s, path_str)
       end
     end
-
 
 
     ##

@@ -124,19 +124,28 @@ class Kronk
     # as Symbols and Strings both use #to_s.
 
     def self.pathed data, escape=true
-      path_esc = "*?()|/."
       new_data = {}
+
       find "**", data do |subdata, key, path|
         next if Array === subdata[key] || Hash === subdata[key]
-        path.map! do |k|
-          k.to_s.gsub(/([#{path_esc}])/){|m| "\\#{m}"}
-        end if escape
-
-        path_str = path.join(DCH)
+        path_str = "#{DCH}#{join(path, escape)}"
         new_data[path_str] = subdata[key]
       end
 
       new_data
+    end
+
+
+    ##
+    # Joins an Array into a path String.
+
+    def self.join path_arr, escape=true
+      path_esc = "*?()|/."
+      path_arr.map! do |k|
+        k.to_s.gsub(/([#{path_esc}])/){|m| "\\#{m}"}
+      end if escape
+
+      path_arr.join(DCH)
     end
 
 
