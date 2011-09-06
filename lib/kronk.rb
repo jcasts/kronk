@@ -280,7 +280,7 @@ class Kronk
     @responses = [res1, res2]
     @response  = res2
 
-    @diff = Diff.new str1, str2
+    @diff = Diff.new str1, str2, @options
   end
 
 

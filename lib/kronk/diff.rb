@@ -34,7 +34,7 @@ class Kronk
     # Adds line numbers to each lines of a String.
 
     def self.insert_line_nums str, formatter=nil
-      format = Diff.formatter formatter || Kronk.config[:diff_format]
+      format = Diff::Output.formatter formatter || Kronk.config[:diff_format]
 
       out   = ""
       width = str.lines.count.to_s.length
@@ -47,29 +47,14 @@ class Kronk
     end
 
 
-    ##
-    # Returns a formatter from a symbol or string. Returns nil if not found.
+    attr_accessor :str1, :str2, :char, :output
 
-    def self.formatter name
-      return AsciiFormat if name == :ascii_diff
-      return ColorFormat if name == :color_diff
-      Kronk.find_const name rescue name
-    end
-
-
-    attr_accessor :str1, :str2, :char, :context,
-                  :formatter, :show_lines, :labels
-
-    def initialize str1, str2, char=/\r?\n/
+    def initialize str1, str2, opts={}
       @str1       = str1
       @str2       = str2
-      @char       = char
-      @context    = nil
       @diff_ary   = nil
-      @labels     = nil
-      @show_lines = Kronk.config[:show_lines]
-      @formatter  =
-        self.class.formatter(Kronk.config[:diff_format]) || AsciiFormat
+      @char       = opts[:char] || /\r?\n/
+      @output     = Output.new self, opts
     end
 
 
@@ -212,23 +197,9 @@ class Kronk
 
     ##
     # Returns a formatted output as a string.
-    # Supported options are:
-    # :context:: Integer - The number of lines of context to use; default 3
-    # :formatter:: Object - The formatter to use; default @formatter
-    # :join_char:: String - The string used to join lines; default "\n"
-    # :labels:: Array - Labels for the left and right sides of the diff
-    # :show_lines:: Boolean - Insert line numbers or not; default @show_lines
 
     def formatted opts={}
-      opts = {
-        :context    => @context,
-        :formatter  => @formatter,
-        :join_char  => "\n",
-        :labels     => @labels,
-        :show_lines => @show_lines
-      }.merge opts
-
-      Output.new(self, opts).render
+      @output.render
     end
 
 

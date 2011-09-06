@@ -513,26 +513,26 @@ STR
 
 
   def test_formatted_lines
-    output = @diff.formatted :show_lines => true
+    @diff.output.show_lines = true
+    output = @diff.formatted
     assert_equal diff_302_301_str_lines, output
   end
 
 
   def test_formatted_color
-    assert_equal diff_302_301_color,
-      @diff.formatted(:formatter => Kronk::Diff::ColorFormat)
+    @diff.output.format = Kronk::Diff::ColorFormat
 
-    @diff.formatter = Kronk::Diff::ColorFormat
-    assert_equal diff_302_301_color, @diff.formatted
+    assert_equal diff_302_301_color,
+      @diff.formatted
   end
 
 
   def test_formatted_join_char
     expected = diff_302_301_str.gsub(/\n/, "\r\n")
-    assert_equal expected,
-      @diff.formatted(
-        :formatter => Kronk::Diff::AsciiFormat,
-        :join_char => "\r\n")
+    @diff.output.format  = Kronk::Diff::AsciiFormat
+    @diff.output.join_ch = "\r\n"
+
+    assert_equal expected, @diff.formatted
   end
 
 
@@ -541,10 +541,11 @@ STR
     resp2 = Kronk::Response.read_file "test/mocks/200_response.json"
     @diff = Kronk::Diff.new resp1.stringify, resp2.stringify
 
-    assert_equal diff_json_color,
-                 @diff.formatted(:formatter => Kronk::Diff::ColorFormat,
-                                 :context   => 3,
-                                 :labels    => [resp1.uri, resp2.uri])
+    @diff.output.format  = Kronk::Diff::ColorFormat
+    @diff.output.context = 3
+    @diff.output.labels  = [resp1.uri, resp2.uri]
+
+    assert_equal diff_json_color, @diff.formatted
   end
 
 
@@ -563,7 +564,8 @@ STR
   end
 
   def test_formatted_custom
-    str_diff = @diff.formatted :formatter => CustomFormat
+    @diff.output.format = CustomFormat
+    str_diff = @diff.formatted
     expected = diff_302_301_str.gsub(/^\+ /, ">>>301>>> ")
     expected = expected.gsub(/^\- /, "<<<302<<< ")
     expected = expected.gsub(/^\s\s/, "")

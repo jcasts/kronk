@@ -2,14 +2,44 @@ class Kronk::Diff
 
   class Output
 
+    ##
+    # Returns a formatter from a symbol or string. Returns nil if not found.
+
+    def self.formatter name
+      return unless name
+
+      return name        if Class === name
+      return AsciiFormat if name == :ascii_diff
+      return ColorFormat if name == :color_diff
+      Kronk.find_const name rescue name
+    end
+
+
+    def self.attr_rm_cache *attrs # :nodoc:
+      self.send :attr_reader, *attrs
+
+      attrs.each do |attr|
+        define_method "#{attr}=" do |value|
+          if send(attr) != value
+            instance_variable_set("@#{attr}", value)
+            instance_variable_set("@cached", nil)
+          end
+        end
+      end
+    end
+
+
+    attr_rm_cache :labels, :show_lines, :join_ch, :context, :format, :diff_ary
+
+
     def initialize diff, opts={}
       @output     = []
       @cached     = nil
-      @diff_ary   = diff.diff_array
-      @format     = opts[:formatter]     || diff.formatter || AsciiFormat
-      @context    = opts[:context]       && opts[:context] + 1
-      @join_ch    = opts[:join_char]     || "\n"
-      @labels     = Array(opts[:labels]  || ["left", "right"])
+      @diff       = diff
+      @format     = self.class.formatter(opts[:format]) || AsciiFormat
+      @context    = opts[:context]
+      @join_ch    = opts[:join_char]    || "\n"
+      @labels     = Array(opts[:labels] || ["left", "right"])
       @show_lines = opts[:show_lines]
       @record     = false
 
@@ -20,13 +50,16 @@ class Kronk::Diff
 
 
     def record? i, line1, line2
-      next_diff = @diff_ary[i,@context].to_a.find{|da| Array === da} if @context
+      if @context
+        clen = @context + 1
+        next_diff = @diff_ary[i,clen].to_a.find{|da| Array === da}
+      end
 
       if !@context || next_diff
         @record || [@output.length, line1+1, line2+1, 0, 0]
 
-      elsif @record && @context && !next_diff
-        scheck = @output.length - (@context - 1)
+      elsif @record && clen && !next_diff
+        scheck = @output.length - (clen - 1)
         subary = @output[scheck..-1].to_a
 
         if i == @diff_ary.length || !subary.find{|da| Array === da}
@@ -49,6 +82,8 @@ class Kronk::Diff
 
 
     def render force=false
+      self.diff_ary = @diff.diff_array
+
       return @cached if !force && @cached
       @output << @format.head(*@labels)
 
