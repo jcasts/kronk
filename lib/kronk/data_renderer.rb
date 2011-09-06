@@ -14,7 +14,7 @@ class Kronk
 
 
     ##
-    # Add a line with metadata to the string.
+    # Add a string with metadata to the data string.
 
     def append str, metadata=nil
       dstr = self.class.new str
@@ -51,15 +51,6 @@ class Kronk
         i += str.length + interval
         ds
       end
-    end
-
-
-    def meta_by_line
-      output = ""
-      split.each do |line|
-        output << line.meta.first.to_s << "   " << line << "\n"
-      end
-      output
     end
   end
 
