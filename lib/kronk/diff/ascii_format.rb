@@ -9,7 +9,7 @@ class Kronk
 
 
       def self.head left, right
-        "--- #{left}\n+++ #{right}"
+        ["--- #{left}", "+++ #{right}"]
       end
 
 

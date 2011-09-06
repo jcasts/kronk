@@ -547,7 +547,7 @@ STR
   end
 
 
-  class CustomFormat
+  class CustomFormat < Kronk::Diff::AsciiFormat
     def self.added str
       ">>>301>>> #{str}"
     end
@@ -563,8 +563,8 @@ STR
 
   def test_formatted_custom
     str_diff = @diff.formatted :formatter => CustomFormat
-    expected = diff_302_301_str.gsub(/^\+/, ">>>301>>>")
-    expected = expected.gsub(/^\-/, "<<<302<<<")
+    expected = diff_302_301_str.gsub(/^\+ /, ">>>301>>> ")
+    expected = expected.gsub(/^\- /, "<<<302<<< ")
     expected = expected.gsub(/^\s\s/, "")
 
     assert_equal expected, str_diff
@@ -613,6 +613,8 @@ STR
 
   def diff_302_301_str
     str = <<STR
+--- left
++++ right
 - HTTP/1.1 302 Found
 - Location: http://igoogle.com/
 + HTTP/1.1 301 Moved Permanently
@@ -642,6 +644,8 @@ STR
 
   def diff_302_301_str_lines
     str = <<STR
+--- left
++++ right
  1|   - HTTP/1.1 302 Found
  2|   - Location: http://igoogle.com/
   | 1 + HTTP/1.1 301 Moved Permanently
@@ -672,6 +676,8 @@ STR
 
   def diff_302_301_color
     str = <<STR
+\e[33m--- left
++++ right\033[0m
 \033[31m- HTTP/1.1 302 Found\033[0m
 \033[31m- Location: http://igoogle.com/\033[0m
 \033[32m+ HTTP/1.1 301 Moved Permanently\033[0m

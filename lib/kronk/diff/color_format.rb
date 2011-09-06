@@ -19,7 +19,7 @@ class Kronk
 
       def self.head left, right
         ensure_color
-        "\033[33m--- #{left}\n+++ #{right}\033[0m"
+        ["\033[33m--- #{left}", "+++ #{right}\033[0m"]
       end
 
 

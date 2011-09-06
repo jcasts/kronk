@@ -32,6 +32,7 @@ class Kronk
   require 'kronk/data_renderer'
   require 'kronk/diff/ascii_format'
   require 'kronk/diff/color_format'
+  require 'kronk/diff/output'
   require 'kronk/diff'
   require 'kronk/response'
   require 'kronk/request'
