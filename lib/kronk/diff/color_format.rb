@@ -19,13 +19,13 @@ class Kronk
 
       def self.head left, right
         ensure_color
-        ["\033[33m--- #{left}", "+++ #{right}\033[0m"]
+        ["\033[1;33m--- #{left}", "+++ #{right}\033[0m"]
       end
 
 
       def self.context left, right, info=nil
         ensure_color
-        "\033[35m@@ -#{left} +#{right} @@\033[0m #{info}"
+        "\033[1;35m@@ -#{left} +#{right} @@\033[0m #{info}"
       end
 
 
@@ -37,19 +37,19 @@ class Kronk
             lnum.to_s.rjust col_width
           end.join "\033[32m"
 
-        "\033[7;31m#{out}\033[0m"
+        "\033[7;31m#{out}\033[0m "
       end
 
 
       def self.deleted str
         ensure_color
-        "\033[31m- #{str}\033[0m"
+        "\033[1;31m- #{str}\033[0m"
       end
 
 
       def self.added str
         ensure_color
-        "\033[32m+ #{str}\033[0m"
+        "\033[1;32m+ #{str}\033[0m"
       end
 
 

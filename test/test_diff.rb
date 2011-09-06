@@ -577,47 +577,47 @@ STR
 
   def diff_json_color
     (<<-STR
-\e[33m--- test/mocks/200_response_diff.json
+\e[1;33m--- test/mocks/200_response_diff.json
 +++ test/mocks/200_response.json\e[0m
-\e[35m@@ -6,7 +6,7 @@\e[0m business/description
+\e[1;35m@@ -6,7 +6,7 @@\e[0m business/description
      "additional_urls": [
       {
        "destination": "http://example.com",
-\e[31m-      "url_click": "http://google.com"\e[0m
-\e[32m+      "url_click": "http://example.com"\e[0m
+\e[1;31m-      "url_click": "http://google.com"\e[0m
+\e[1;32m+      "url_click": "http://example.com"\e[0m
       }
      ],
      "general_info": "<p>A Paint Your Own Pottery Studios..</p>",
-\e[35m@@ -15,11 +15,12 @@\e[0m business/description
+\e[1;35m@@ -15,11 +15,12 @@\e[0m business/description
      "slogan": "<p>Pottery YOU dress up</p>"
     },
     "distance": 0.0,
-\e[31m-   "has_detail_page": false,\e[0m
-\e[32m+   "has_detail_page": true,\e[0m
+\e[1;31m-   "has_detail_page": false,\e[0m
+\e[1;32m+   "has_detail_page": true,\e[0m
     "headings": [
      "Pottery"
     ],
-\e[31m-   "id": 1234,\e[0m
-\e[32m+   "id": "1234",\e[0m
-\e[32m+   "impression_id": "mock_iid",\e[0m
+\e[1;31m-   "id": 1234,\e[0m
+\e[1;32m+   "id": "1234",\e[0m
+\e[1;32m+   "impression_id": "mock_iid",\e[0m
     "improvable": true,
     "latitude": 42.882561,
     "listing_id": "1234",
-\e[35m@@ -34,12 +35,12 @@\e[0m business
+\e[1;35m@@ -34,12 +35,12 @@\e[0m business
     "rating_count": 0,
     "red_listing": false,
     "state": "MI",
-\e[31m-   "website": "http://google.com",\e[0m
-\e[32m+   "website": "http://example.com",\e[0m
+\e[1;31m-   "website": "http://google.com",\e[0m
+\e[1;32m+   "website": "http://example.com",\e[0m
     "year_established": "1996",
     "zip": "49418"
    },
-\e[31m-  "original": {\e[0m
-\e[32m+  "original_request": {\e[0m
+\e[1;31m-  "original": {\e[0m
+\e[1;32m+  "original_request": {\e[0m
     "id": "1234"
    },
-\e[31m-  "request_id": "foobar"\e[0m
-\e[32m+  "request_id": "mock_rid"\e[0m
+\e[1;31m-  "request_id": "foobar"\e[0m
+\e[1;32m+  "request_id": "mock_rid"\e[0m
   }
     STR
     ).strip
@@ -728,29 +728,29 @@ STR
 
   def diff_302_301_color
     str = <<STR
-\e[33m--- left
+\e[1;33m--- left
 +++ right\033[0m
-\033[31m- HTTP/1.1 302 Found\033[0m
-\033[31m- Location: http://igoogle.com/\033[0m
-\033[32m+ HTTP/1.1 301 Moved Permanently\033[0m
-\033[32m+ Location: http://www.google.com/\033[0m
+\033[1;31m- HTTP/1.1 302 Found\033[0m
+\033[1;31m- Location: http://igoogle.com/\033[0m
+\033[1;32m+ HTTP/1.1 301 Moved Permanently\033[0m
+\033[1;32m+ Location: http://www.google.com/\033[0m
   Content-Type: text/html; charset=UTF-8
   Date: Fri, 26 Nov 2010 16:14:45 GMT
   Expires: Sun, 26 Dec 2010 16:14:45 GMT
   Cache-Control: public, max-age=2592000
   Server: gws
-\033[31m- Content-Length: 260\033[0m
-\033[32m+ Content-Length: 219\033[0m
+\033[1;31m- Content-Length: 260\033[0m
+\033[1;32m+ Content-Length: 219\033[0m
   X-XSS-Protection: 1; mode=block
   
   <HTML><HEAD><meta http-equiv="content-type" content="text/html;charset=utf-8">
-\033[31m- <TITLE>302 Found</TITLE></HEAD><BODY>\033[0m
-\033[31m- <H1>302 Found</H1>\033[0m
-\033[32m+ <TITLE>301 Moved</TITLE></HEAD><BODY>\033[0m
-\033[32m+ <H1>301 Moved</H1>\033[0m
+\033[1;31m- <TITLE>302 Found</TITLE></HEAD><BODY>\033[0m
+\033[1;31m- <H1>302 Found</H1>\033[0m
+\033[1;32m+ <TITLE>301 Moved</TITLE></HEAD><BODY>\033[0m
+\033[1;32m+ <H1>301 Moved</H1>\033[0m
   The document has moved
   <A HREF="http://www.google.com/">here</A>.
-\033[31m- <A HREF="http://igoogle.com/">here</A>.\033[0m
+\033[1;31m- <A HREF="http://igoogle.com/">here</A>.\033[0m
   </BODY></HTML>
 STR
     str.strip

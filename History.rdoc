@@ -1,3 +1,15 @@
+=== 1.6.0 / 2011-09-
+
+* Major Enhancements:
+
+  * Diff output limited context with a default of 3 lines.
+
+* Enhancements:
+
+  * Parsed headers output is a Hash of Strings instead of Arrays.
+
+  * Support for moving and mapping data with path transactions.
+
 === 1.5.4 / 2011-09-02
 
 * Bugfixes:
