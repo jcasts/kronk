@@ -28,8 +28,6 @@ class Kronk
     # Read http response from a file and return a HTTPResponse instance.
 
     def self.read_file path
-      Kronk::Cmd.verbose "Reading file:  #{path}\n"
-
       file     = File.open(path, "rb")
       resp     = new file
       resp.uri = path
