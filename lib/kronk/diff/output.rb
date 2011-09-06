@@ -36,17 +36,21 @@ class Kronk::Diff
       @output     = []
       @cached     = nil
       @diff       = diff
-      @format     =
+
+      @format =
         self.class.formatter(opts[:format] || Kronk.config[:diff_format]) ||
         AsciiFormat
-      @context    = opts[:context]      || Kronk.config[:context]
-      @join_ch    = opts[:join_char]    || "\n"
+
+      @context = Kronk.config[:context]
+      @context = opts[:context] if opts[:context] || opts[:context] == false
+
+      @join_ch = opts[:join_char] || "\n"
 
       @labels      = Array(opts[:labels])
       @labels[0] ||= "left"
       @labels[1] ||= "right"
 
-      @show_lines = opts[:show_lines]   || Kronk.config[:show_lines]
+      @show_lines = opts[:show_lines] || Kronk.config[:show_lines]
       @record     = false
 
       lines1 = diff.str1.lines.count
@@ -61,7 +65,7 @@ class Kronk::Diff
         next_diff = @diff_ary[i,clen].to_a.find{|da| Array === da}
       end
 
-      if !@context || next_diff
+      if !clen || next_diff
         @record || [@output.length, line1+1, line2+1, 0, 0]
 
       elsif @record && clen && !next_diff
@@ -72,7 +76,10 @@ class Kronk::Diff
           start  = @record[0]
           cleft  = "#{@record[1]},#{@record[3]}"
           cright = "#{@record[2]},#{@record[4]}"
-          info   = @output[start].meta[0] if @output[start].respond_to?(:meta)
+
+          str    = @output[start]
+          str    = str[0][0]   if Array === str
+          info   = str.meta[0] if str.respond_to?(:meta)
 
           @output[start,0] = @format.context cleft, cright, info
           false

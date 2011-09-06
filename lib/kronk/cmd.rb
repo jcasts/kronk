@@ -115,6 +115,12 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
+        opt.on('--context [NUM]', Integer,
+               'Show NUM context lines for diff') do |value|
+          options[:context] = value || Kronk.config[:context] || 3
+        end
+
+
         opt.on('-q', '--brief', 'Output only whether URI responses differ') do
           Kronk.config[:brief] = true
         end
@@ -123,6 +129,11 @@ Parse and run diffs against data from live and cached http responses.
         opt.on('--format STR', String,
                'Use a custom diff formatter') do |value|
           Kronk.config[:diff_format] = value
+        end
+
+
+        opt.on('--full', 'Show the full diff') do
+          options[:context] = false
         end
 
 

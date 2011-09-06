@@ -145,6 +145,25 @@ class TestCmd < Test::Unit::TestCase
   end
 
 
+  def test_parse_args_context
+    with_config do
+      opts = Kronk::Cmd.parse_args %w{uri --context}
+      assert_equal 3, opts[:context]
+      assert_equal nil, Kronk.config[:context]
+
+      Kronk.config[:context] = 4
+      opts = Kronk::Cmd.parse_args %w{uri --context}
+      assert_equal 4, opts[:context]
+
+      opts = Kronk::Cmd.parse_args %w{uri --context 5}
+      assert_equal 5, opts[:context]
+
+      opts = Kronk::Cmd.parse_args %w{uri --full}
+      assert_equal false, opts[:context]
+    end
+  end
+
+
   def test_parse_args_completion
     with_config Hash.new do
       file = File.join(File.dirname(__FILE__), "../script/kronk_completion")
