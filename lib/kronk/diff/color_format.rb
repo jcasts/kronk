@@ -19,13 +19,13 @@ class Kronk
 
       def self.head left, right
         ensure_color
-        "\033[7;36m--- #{left}\n+++ #{right}\033[0m"
+        "\033[33m--- #{left}\n+++ #{right}\033[0m"
       end
 
 
       def self.context left, right, info=nil
         ensure_color
-        "\033[7;35m@@ -#{left} +#{right} @@\033[0m #{info}"
+        "\033[35m@@ -#{left} +#{right} @@\033[0m #{info}"
       end
 
 

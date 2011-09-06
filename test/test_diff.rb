@@ -536,6 +536,17 @@ STR
   end
 
 
+  def test_formatted_context
+    resp1 = Kronk::Response.read_file "test/mocks/200_response_diff.json"
+    resp2 = Kronk::Response.read_file "test/mocks/200_response.json"
+    @diff = Kronk::Diff.new resp1.stringify, resp2.stringify
+
+    puts @diff.formatted(:formatter => Kronk::Diff::ColorFormat,
+                         :context   => 3,
+                         :labels    => [resp1.uri, resp2.uri])
+  end
+
+
   class CustomFormat
     def self.added str
       ">>>301>>> #{str}"

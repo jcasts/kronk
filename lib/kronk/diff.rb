@@ -247,16 +247,16 @@ class Kronk
       0.upto(ary.length) do |i|
         item = ary[i]
 
-        if !context || ary[i,context].to_a.find{|da| Array === da}
+        if !context || ary[i,context+1].to_a.find{|da| Array === da}
           record ||= [output.length, line1+1, line2+1, 0, 0]
 
-        elsif context && !ary[i,context].to_a.find{|da| Array === da}
+        elsif record && context && !ary[i,context].to_a.find{|da| Array === da}
           scheck = output.length - (context+1)
-          unless output[scheck..-1].find{|da| Array === da} && i != ary.length
+          unless output[scheck..-1].to_a.find{|da| Array === da} && i != ary.length
             start  = record[0]
             cleft  = "#{record[1]},#{record[3]}"
             cright = "#{record[2]},#{record[4]}"
-            info   = output[start] if output[start].respond_to?(:meta)
+            info   = output[start].meta[0] if output[start].respond_to?(:meta)
             output[start,0] = format.context cleft, cright, info
             record = false
           end
@@ -271,7 +271,9 @@ class Kronk
 
           if record
             lines = format.lines [line1, line2], width if opts[:show_lines]
-            output << "#{lines}#{format.common item}"
+            str   = "#{lines}#{format.common item}"
+            str   = DataString.new(str, item.meta[0]) if item.respond_to? :meta
+            output << str
             record[3] += 1
             record[4] += 1
           end
@@ -284,14 +286,20 @@ class Kronk
             line1 = line1.next
             lines = format.lines [line1, nil], width if opts[:show_lines]
             record[3] += 1
-            "#{lines}#{format.deleted str}"
+
+            str = "#{lines}#{format.deleted str}"
+            str = DataString.new(str, item.meta[0]) if item.respond_to? :meta
+            str
           end
 
           item[1] = item[1].map do |str|
             line2 = line2.next
             lines = format.lines [nil, line2], width if opts[:show_lines]
             record[4] += 1
-            "#{lines}#{format.added str}"
+
+            str = "#{lines}#{format.added str}"
+            str = DataString.new(str, item.meta[0]) if item.respond_to? :meta
+            str
           end
 
           output << item
