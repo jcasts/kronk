@@ -58,7 +58,8 @@ class Kronk
         @_res, debug_io = request_from_io(io)
       end
 
-      @headers  = @_res.to_hash
+      @headers  = @_res.to_hash.dup
+      @headers.keys.each{|h| @headers[h] = @headers[h].join(", ")}
 
       @encoding = "utf-8" unless @_res["Content-Type"]
       c_type = [*@headers["content-type"]].find{|ct| ct =~ ENCODING_MATCHER}
@@ -180,7 +181,7 @@ class Kronk
     # Returns the parsed header hash.
 
     def parsed_header include_headers=true
-      headers = @_res.to_hash.dup
+      headers = @headers.dup
 
       case include_headers
       when nil, false
@@ -298,7 +299,7 @@ class Kronk
     # :with_headers:: Boolean/String/Array - defines which headers to include
 
     def stringify options={}
-      if !options[:raw] && (options[:parser] || @parser)
+      if !options[:raw] && (options[:parser] || @parser || options[:no_body])
         data = selective_data options
         Diff.ordered_data_string data, options[:struct]
       else

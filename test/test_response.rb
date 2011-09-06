@@ -166,11 +166,11 @@ class TestResponse < Test::Unit::TestCase
   def test_parsed_header
     assert_equal @json_resp.to_hash, @json_resp.parsed_header
 
-    assert_equal({'content-type' => ["application/json; charset=utf-8"]},
+    assert_equal({'content-type' => "application/json; charset=utf-8"},
                 @json_resp.parsed_header('Content-Type'))
 
-    assert_equal({'date'         => ["Fri, 03 Dec 2010 21:49:00 GMT"],
-                  'content-type' => ["application/json; charset=utf-8"]},
+    assert_equal({'date'         => "Fri, 03 Dec 2010 21:49:00 GMT",
+                  'content-type' => "application/json; charset=utf-8"},
                 @json_resp.parsed_header(['Content-Type', 'Date']))
 
     assert_nil @json_resp.parsed_header(false)
@@ -262,7 +262,7 @@ class TestResponse < Test::Unit::TestCase
   def test_selective_data_single_header
     body = JSON.parse @json_resp.body
     expected =
-      [{'content-type' => ['application/json; charset=utf-8']}, body]
+      [{'content-type' => 'application/json; charset=utf-8'}, body]
 
     assert_equal expected,
                  @json_resp.selective_data(:with_headers => "Content-Type")
@@ -272,8 +272,8 @@ class TestResponse < Test::Unit::TestCase
   def test_selective_data_multiple_headers
     body = JSON.parse @json_resp.body
     expected =
-      [{'content-type' => ['application/json; charset=utf-8'],
-        'date'         => ["Fri, 03 Dec 2010 21:49:00 GMT"]
+      [{'content-type' => 'application/json; charset=utf-8',
+        'date'         => "Fri, 03 Dec 2010 21:49:00 GMT"
       }, body]
 
     assert_equal expected,
@@ -285,8 +285,8 @@ class TestResponse < Test::Unit::TestCase
   def test_selective_data_no_body
     body = JSON.parse @json_resp.body
     expected =
-      [{'content-type' => ['application/json; charset=utf-8'],
-        'date'         => ["Fri, 03 Dec 2010 21:49:00 GMT"]
+      [{'content-type' => 'application/json; charset=utf-8',
+        'date'         => "Fri, 03 Dec 2010 21:49:00 GMT"
       }]
 
     assert_equal expected,
