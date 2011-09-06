@@ -10,6 +10,7 @@ class TestKronk < Test::Unit::TestCase
         'plist'   => 'PlistParser',
         'xml'     => 'XMLParser'
       },
+      :context      => nil,
       :cache_file   => Kronk::DEFAULT_CACHE_FILE,
       :cookies_file => Kronk::DEFAULT_COOKIES_FILE,
       :history_file => Kronk::DEFAULT_HISTORY_FILE,
@@ -34,6 +35,7 @@ class TestKronk < Test::Unit::TestCase
           'soap' => "SOAPParser",
           'js'   => "JsEngine"
         },
+        :context     => 3,
         :ignore_headers => ["Content-Type"],
         :cache_file  => Kronk::DEFAULT_CACHE_FILE,
         :cookies_file => Kronk::DEFAULT_COOKIES_FILE,
@@ -65,6 +67,7 @@ class TestKronk < Test::Unit::TestCase
           'plist' => "PlistParser",
           'xml'   => "XMLParser"
         },
+        :context     => 3,
         :default_host => "http://localhost:3000",
         :diff_format => :ascii_diff,
         :cache_file  => Kronk::DEFAULT_CACHE_FILE,
@@ -371,7 +374,11 @@ class TestKronk < Test::Unit::TestCase
                              :raw => true
 
     exp_diff = Kronk::Diff.new resp1.selective_string(:with_headers => true),
-                               resp2.selective_string(:with_headers => true)
+                               resp2.selective_string(:with_headers => true),
+                               :labels => [
+                                 "test/mocks/200_response.json",
+                                 "test/mocks/200_response.xml"
+                                ]
 
     assert_equal exp_diff.formatted, diff.formatted
   end
@@ -447,7 +454,11 @@ class TestKronk < Test::Unit::TestCase
 
     exp_diff = Kronk::Diff.new_from_data \
                   resp1.selective_data(:with_headers => true),
-                  resp2.selective_data(:with_headers => true)
+                  resp2.selective_data(:with_headers => true),
+                  :labels => [
+                    "test/mocks/200_response.json",
+                    "test/mocks/200_response.xml"
+                   ]
 
     assert_equal exp_diff.formatted, diff.formatted
   end
@@ -535,7 +546,12 @@ class TestKronk < Test::Unit::TestCase
 
     exp_diff = Kronk::Diff.new_from_data \
                   resp2.selective_data(:with_headers => true),
-                  resp1.selective_data(:with_headers => true)
+                  resp1.selective_data(:with_headers => true),
+                  :labels => [
+                    "test/mocks/200_response.json",
+                    "test/mocks/200_response.xml"
+                   ]
+
 
     assert_equal exp_diff.formatted, diff.formatted
   end

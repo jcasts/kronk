@@ -280,7 +280,8 @@ class Kronk
     @responses = [res1, res2]
     @response  = res2
 
-    @diff = Diff.new str1, str2, @options
+    opts = {:labels => [res1.uri, res2.uri]}.merge @options
+    @diff = Diff.new str1, str2, opts
   end
 
 

@@ -80,6 +80,7 @@ class Kronk
   DEFAULT_CONFIG = {
     :content_types  => DEFAULT_CONTENT_TYPES.dup,
     :cache_file     => DEFAULT_CACHE_FILE,
+    :context        => 3,
     :cookies_file   => DEFAULT_COOKIES_FILE,
     :default_host   => "http://localhost:3000",
     :diff_format    => :ascii_diff,

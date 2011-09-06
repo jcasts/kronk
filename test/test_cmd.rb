@@ -381,24 +381,25 @@ class TestCmd < Test::Unit::TestCase
 
 
   def test_run_compare
-    Kronk.expects(:load_config)
-    expect_compare_output mock_200_response
-
     file = File.join(File.dirname(__FILE__), "mocks/200_response.txt")
     file = File.expand_path file
+
+    Kronk.expects(:load_config)
+    expect_compare_output mock_200_response, :labels => [file, file]
 
     Kronk::Cmd.run [file, file]
   end
 
 
   def test_run_compare_diff
-    Kronk.expects(:load_config)
-    expect_compare_output mock_200_response, mock_302_response
-
     file1 = File.join(File.dirname(__FILE__), "mocks/200_response.txt")
     file2 = File.join(File.dirname(__FILE__), "mocks/302_response.txt")
     file1 = File.expand_path file1
     file2 = File.expand_path file2
+
+    Kronk.expects(:load_config)
+    expect_compare_output mock_200_response, mock_302_response,
+      :labels => [file1, file2]
 
     assert_exit 1 do
       Kronk::Cmd.run [file1, file2]

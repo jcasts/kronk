@@ -11,7 +11,7 @@ class Kronk
 
     def self.new_from_data data1, data2, opts={}
       new ordered_data_string(data1, opts[:struct]),
-          ordered_data_string(data2, opts[:struct])
+          ordered_data_string(data2, opts[:struct]), opts
     end
 
 

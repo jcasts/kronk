@@ -2,6 +2,8 @@ require "test/unit"
 require "kronk"
 require "mocha"
 
+Kronk.config[:context] = nil
+
 
 def mock_resp name
   File.read File.join("test/mocks", name)

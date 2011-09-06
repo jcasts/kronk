@@ -36,11 +36,17 @@ class Kronk::Diff
       @output     = []
       @cached     = nil
       @diff       = diff
-      @format     = self.class.formatter(opts[:format]) || AsciiFormat
-      @context    = opts[:context]
+      @format     =
+        self.class.formatter(opts[:format] || Kronk.config[:diff_format]) ||
+        AsciiFormat
+      @context    = opts[:context]      || Kronk.config[:context]
       @join_ch    = opts[:join_char]    || "\n"
-      @labels     = Array(opts[:labels] || ["left", "right"])
-      @show_lines = opts[:show_lines]
+
+      @labels      = Array(opts[:labels])
+      @labels[0] ||= "left"
+      @labels[1] ||= "right"
+
+      @show_lines = opts[:show_lines]   || Kronk.config[:show_lines]
       @record     = false
 
       lines1 = diff.str1.lines.count
