@@ -42,7 +42,12 @@ class Kronk::Path::Transaction
 
   def initialize data
     @data    = data
-    @actions = Hash.new{|h,k| h[k] = []}
+    @actions = {
+      :select => [],
+      :delete => [],
+      :move   => {},
+      :map    => {}
+    }
 
     @make_array = {}
   end
@@ -283,6 +288,7 @@ class Kronk::Path::Transaction
   #          "other/path/*"     => "moved/%d"
 
   def move path_maps
+    @actions[:move].merge! path_maps
   end
 
 
@@ -293,5 +299,6 @@ class Kronk::Path::Transaction
   #          "other/path/*"     => "moved/%d"
 
   def map path_maps
+    @actions[:map].merge! path_maps
   end
 end
