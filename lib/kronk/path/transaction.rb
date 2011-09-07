@@ -156,6 +156,8 @@ class Kronk::Path::Transaction
         new_curr_data = new_data
 
         path.each_with_index do |key, i|
+          break unless new_curr_data
+
           if i == path.length - 1
             yield new_curr_data, curr_data, key, path if block_given?
 
