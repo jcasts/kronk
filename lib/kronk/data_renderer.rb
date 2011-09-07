@@ -43,7 +43,9 @@ class Kronk
     def split pattern=$;, *more
       arr      = super
       i        = 0
-      interval = (self.length - arr.join.length) / (arr.length - 1)
+      interval = 0
+      interval = (self.length - arr.join.length) / (arr.length - 1) if
+        arr.length > 1
 
       arr.map do |str|
         ds = self.class.new str
