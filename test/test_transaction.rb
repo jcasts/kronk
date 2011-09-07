@@ -393,12 +393,13 @@ class TestTransaction < Test::Unit::TestCase
 
 
   def test_clear
-    @trans.instance_variable_get(:@actions)[:foo] = :bar
-    @trans.instance_variable_get(:@make_array)[:foobar] = true
+    @trans.delete "foo"
+    @trans.select "bar"
 
     @trans.clear
 
-    assert @trans.instance_variable_get(:@actions).empty?
+    assert @trans.instance_variable_get(:@actions)[:delete].empty?
+    assert @trans.instance_variable_get(:@actions)[:select].empty?
     assert @trans.instance_variable_get(:@make_array).empty?
   end
 

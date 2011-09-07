@@ -259,7 +259,7 @@ class Kronk::Path::Transaction
   # Clears the queued actions and cache.
 
   def clear
-    @actions.clear
+    @actions.each{|k,v| v.clear}
     @make_array.clear
   end
 
