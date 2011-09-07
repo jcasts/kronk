@@ -10,6 +10,10 @@
 
   * Support for moving and mapping data with path transactions.
 
+* Bugfixes:
+
+  * Path transaction fixes for accessing and yielding already removed data.
+
 === 1.5.4 / 2011-09-02
 
 * Bugfixes:
