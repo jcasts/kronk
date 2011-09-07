@@ -199,7 +199,15 @@ class Kronk
     # Returns a formatted output as a string.
 
     def formatted opts={}
-      @output.render
+      @output.render if any?
+    end
+
+
+    ##
+    # Returns true if any diff is found.
+
+    def any?
+      !!diff_array.find{|i| Array === i }
     end
 
 
