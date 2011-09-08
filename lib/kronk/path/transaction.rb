@@ -126,6 +126,10 @@ class Kronk::Path::Transaction
       transaction data, [data_path] do |new_curr_data, cdata, key, path|
         mapped_path = path.make_path path_map
         path_val_hash[mapped_path] = new_curr_data.delete key
+        if @make_array[path]
+          @make_array.delete path
+          @make_array[mapped_path] = true
+        end
       end
     end
 
@@ -140,6 +144,10 @@ class Kronk::Path::Transaction
       Kronk::Path.find data_path, data do |sdata, key, spath|
         mapped_path = spath.make_path path_map
         path_val_hash[mapped_path] = sdata[key]
+        if @make_array[spath]
+          @make_array.delete spath
+          @make_array[mapped_path] = true
+        end
       end
     end
 
@@ -193,7 +201,7 @@ class Kronk::Path::Transaction
 
   def force_assign_paths data, path_val_hash # :nodoc:
     return data if path_val_hash.empty?
-    @new_data ||= data.dup rescue []
+    @new_data ||= (data.dup rescue [])
 
     path_val_hash.each do |path, value|
       curr_data     = data

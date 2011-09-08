@@ -299,10 +299,10 @@ class TestTransaction < Test::Unit::TestCase
   def test_transaction_move
     expected = {:key1=>{}, :key2=>"foobar",
       "mapped"=>{
-        "1-a"=>["foo", "bar", "foobar", {:findme=>"thing"}],
+        "1-a"=>["foo", "bar", "foobar", {}],
         "1-b"=>"findme", "3-a"=>["val1", "val2", "val3"]},
       :key3=>{}, "findme"=>[123, 456, {}],
-      "more"=>{"two-findme"=>123456}}
+      "more"=>{"one-findme"=>"thing", "two-findme"=>123456}}
 
     data = @trans.transaction_move @data, "key*/key??" => "mapped/%1-%3",
                                           "mapped"     => "remapped",
@@ -326,6 +326,7 @@ class TestTransaction < Test::Unit::TestCase
     data = @trans.transaction_map @data, "key*/key??" => "mapped/%1-%3",
                                          "mapped"     => "remapped",
                                          "**=thing"   => "more/%1"
+
     assert_equal expected, data
     assert_not_equal @data, data
   end
