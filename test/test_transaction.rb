@@ -301,10 +301,15 @@ class TestTransaction < Test::Unit::TestCase
       "mapped"=>{
         "1-a"=>["foo", "bar", "foobar", {:findme=>"thing"}],
         "1-b"=>"findme", "3-a"=>["val1", "val2", "val3"]},
-      :key3=>{}, "findme"=>[123, 456, {:findme=>123456}]}
+      :key3=>{}, "findme"=>[123, 456, {}],
+      "more"=>{"two-findme"=>123456}}
 
     data = @trans.transaction_move @data, "key*/key??" => "mapped/%1-%3",
-                                          "mapped"     => "remapped"
+                                          "mapped"     => "remapped",
+                                          "**=thing"   => "more/one-%1",
+                                          "**=123456"  => "more/two-%1"
+    data = @trans.remake_arrays data
+
     assert_equal expected, data
     assert_not_equal @data, data
   end
@@ -314,11 +319,13 @@ class TestTransaction < Test::Unit::TestCase
     expected = {
       "mapped"=>{
         "1-a"=>["foo", "bar", "foobar", {:findme=>"thing"}],
-        "1-b"=>"findme", "3-a"=>["val1", "val2", "val3"]}
+        "1-b"=>"findme", "3-a"=>["val1", "val2", "val3"]},
+      "more"=>{:findme=>"thing"}
     }
 
     data = @trans.transaction_map @data, "key*/key??" => "mapped/%1-%3",
-                                         "mapped"     => "remapped"
+                                         "mapped"     => "remapped",
+                                         "**=thing"   => "more/%1"
     assert_equal expected, data
     assert_not_equal @data, data
   end
