@@ -75,8 +75,7 @@ class Kronk::Path::Transaction
     new_data = transaction_map    @data,  @actions[:map]
     new_data = transaction_move   @data,  @actions[:move]
     new_data = transaction_delete @data, *@actions[:delete]
-    new_data = remake_arrays new_data, opts[:keep_indicies]
-    new_data
+    remake_arrays new_data, opts[:keep_indicies]
   end
 
 
@@ -120,6 +119,7 @@ class Kronk::Path::Transaction
 
 
   def transaction_move data, match_target_hash # :nodoc:
+    return data if match_target_hash.empty?
     path_val_hash = {}
 
     match_target_hash.each do |data_path, path_map|
@@ -138,6 +138,7 @@ class Kronk::Path::Transaction
 
 
   def transaction_map data, match_target_hash # :nodoc:
+    return data if match_target_hash.empty?
     path_val_hash = {}
 
     match_target_hash.each do |data_path, path_map|

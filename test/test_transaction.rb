@@ -28,6 +28,26 @@ class TestTransaction < Test::Unit::TestCase
   end
 
 
+  def test_many_transactions
+    data = @trans.run do |t|
+      t.map "key?"     => "thing%1",
+            "key3/*/0" => "key_value"
+      t.select "findme/0..1"
+      t.delete "findme/0"
+      t.move "findme/2" => "last_thing"
+    end
+
+    expected = {
+      "last_thing"=>{}, "key_value"=>"val1",
+      "thing1"=>{:key1a=>["foo", "bar", "foobar", {:findme=>"thing"}],
+        "key1b"=>"findme"},
+      "thing2"=>"foobar",
+      "thing3"=>{:key3a=>["val1", "val2", "val3"]}, "findme"=>[456]}
+
+    assert_equal expected, data
+  end
+
+
   def test_class_run
     block = lambda do |t|
       t.delete "key3/key*/2", "**=thing"
