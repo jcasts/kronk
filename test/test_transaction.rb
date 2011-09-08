@@ -119,7 +119,7 @@ class TestTransaction < Test::Unit::TestCase
 
 
   def test_remake_arrays_select
-    result = @trans.transaction_select @data, "**=foo", "key3/key*/2"
+    result = @trans.transaction_select "**=foo", "key3/key*/2"
     result = @trans.remake_arrays result
 
     expected = {:key1=>{:key1a=>["foo"]}, :key3=>{:key3a=>["val3"]}}
@@ -129,7 +129,7 @@ class TestTransaction < Test::Unit::TestCase
 
 
   def test_remake_arrays_select_except_modified
-    result = @trans.transaction_select @data, "**=foo", "key3/key*/2"
+    result = @trans.transaction_select "**=foo", "key3/key*/2"
     result = @trans.remake_arrays result, true
 
     expected = {:key1=>{:key1a=>{0=>"foo"}}, :key3=>{:key3a=>{2=>"val3"}}}
@@ -142,7 +142,7 @@ class TestTransaction < Test::Unit::TestCase
     data_arr = @data.keys.sort{|x,y| x.to_s <=> y.to_s}.map{|k| @data[k]}
 
     @trans = Kronk::Path::Transaction.new data_arr
-    result = @trans.transaction_select data_arr, "**=foo", "3/key*/2"
+    result = @trans.transaction_select "**=foo", "3/key*/2"
     result = @trans.remake_arrays result
 
     expected = [{:key1a=>["foo"]}, {:key3a=>["val3"]}]
@@ -155,7 +155,7 @@ class TestTransaction < Test::Unit::TestCase
     data_arr = @data.keys.sort{|x,y| x.to_s <=> y.to_s}.map{|k| @data[k]}
 
     @trans = Kronk::Path::Transaction.new data_arr
-    result = @trans.transaction_select data_arr, "**=foo", "3/key*"
+    result = @trans.transaction_select "**=foo", "3/key*"
     result = @trans.remake_arrays result, true
 
     expected = {1=>{:key1a=>{0=>"foo"}}, 3=>{:key3a=>["val1", "val2", "val3"]}}
@@ -165,7 +165,7 @@ class TestTransaction < Test::Unit::TestCase
 
 
   def test_remake_arrays_delete
-    result = @trans.transaction_delete @data, "**=foo", "key3/key*/2"
+    result = @trans.transaction_delete "**=foo", "key3/key*/2"
     result = @trans.remake_arrays result
 
     expected = {
@@ -185,7 +185,7 @@ class TestTransaction < Test::Unit::TestCase
 
 
   def test_remake_arrays_delete_except_modified
-    result = @trans.transaction_delete @data, "**=foo", "key3/key*/2"
+    result = @trans.transaction_delete "**=foo", "key3/key*/2"
     result = @trans.remake_arrays result, true
 
     expected = {
@@ -208,7 +208,7 @@ class TestTransaction < Test::Unit::TestCase
     data_arr = @data.keys.sort{|x,y| x.to_s <=> y.to_s}.map{|k| @data[k]}
 
     @trans = Kronk::Path::Transaction.new data_arr
-    result = @trans.transaction_delete data_arr, "**=foo", "3/key*/2"
+    result = @trans.transaction_delete "**=foo", "3/key*/2"
     result = @trans.remake_arrays result
 
     expected = [
@@ -226,7 +226,7 @@ class TestTransaction < Test::Unit::TestCase
     data_arr = @data.keys.sort{|x,y| x.to_s <=> y.to_s}.map{|k| @data[k]}
 
     @trans = Kronk::Path::Transaction.new data_arr
-    result = @trans.transaction_delete data_arr, "**=foo", "3/key*/2"
+    result = @trans.transaction_delete "**=foo", "3/key*/2"
     result = @trans.remake_arrays result, true
 
     expected = [
@@ -242,7 +242,7 @@ class TestTransaction < Test::Unit::TestCase
 
 
   def test_transaction_select
-    result = @trans.transaction_select @data, "**=foo", "key3/key*/2"
+    result = @trans.transaction_select "**=foo", "key3/key*/2"
     expected = {:key1=>{:key1a=>{0=>"foo"}}, :key3=>{:key3a=>{2=>"val3"}}}
 
     assert_equal expected, result
@@ -252,7 +252,8 @@ class TestTransaction < Test::Unit::TestCase
   def test_transaction_select_array
     data_arr = @data.keys.sort{|x,y| x.to_s <=> y.to_s}.map{|k| @data[k]}
 
-    result = @trans.transaction_select data_arr, "**=foo", "3/key*/2"
+    @trans = Kronk::Path::Transaction.new data_arr
+    result = @trans.transaction_select "**=foo", "3/key*/2"
     expected = {1=>{:key1a=>{0=>"foo"}}, 3=>{:key3a=>{2=>"val3"}}}
 
     assert_equal expected, result
@@ -260,12 +261,12 @@ class TestTransaction < Test::Unit::TestCase
 
 
   def test_transaction_select_empty
-    assert_equal @data, @trans.transaction_select(@data)
+    assert_equal @data, @trans.transaction_select
   end
 
 
   def test_transaction_delete
-    result = @trans.transaction_delete @data, "**=foo", "key3/key*/2"
+    result = @trans.transaction_delete "**=foo", "key3/key*/2"
     expected = {
       :key1 => {
         :key1a => {1 => "bar", 2 => "foobar", 3 => {:findme => "thing"}},
@@ -285,7 +286,8 @@ class TestTransaction < Test::Unit::TestCase
   def test_transaction_delete_array
     data_arr = @data.keys.sort{|x,y| x.to_s <=> y.to_s}.map{|k| @data[k]}
 
-    result = @trans.transaction_delete data_arr, "**=foo", "3/key*/2"
+    @trans = Kronk::Path::Transaction.new data_arr
+    result = @trans.transaction_delete "**=foo", "3/key*/2"
     expected = {
       0 => [123, 456, {:findme => 123456}],
       1 => {
@@ -301,7 +303,7 @@ class TestTransaction < Test::Unit::TestCase
 
 
   def test_transaction_delete_many_from_embedded_data
-    result = @trans.transaction_delete @data, "key1/key1a/1", "key1/key1a/0"
+    result = @trans.transaction_delete "key1/key1a/1", "key1/key1a/0"
     expected = {
       :key1a => {2 => "foobar", 3 => {:findme => "thing"}},
       'key1b' => "findme"
@@ -312,7 +314,7 @@ class TestTransaction < Test::Unit::TestCase
 
 
   def test_transaction_delete_empty
-    assert_equal @data, @trans.transaction_delete(@data)
+    assert_equal @data, @trans.transaction_delete
   end
 
 
@@ -324,10 +326,10 @@ class TestTransaction < Test::Unit::TestCase
       :key3=>{}, "findme"=>[123, 456, {}],
       "more"=>{"one-findme"=>"thing", "two-findme"=>123456}}
 
-    data = @trans.transaction_move @data, "key*/key??" => "mapped/%1-%3",
-                                          "mapped"     => "remapped",
-                                          "**=thing"   => "more/one-%1",
-                                          "**=123456"  => "more/two-%1"
+    data = @trans.transaction_move "key*/key??" => "mapped/%1-%3",
+                                   "mapped"     => "remapped",
+                                   "**=thing"   => "more/one-%1",
+                                   "**=123456"  => "more/two-%1"
     data = @trans.remake_arrays data
 
     assert_equal expected, data
@@ -343,9 +345,9 @@ class TestTransaction < Test::Unit::TestCase
       "more"=>{:findme=>"thing"}
     }
 
-    data = @trans.transaction_map @data, "key*/key??" => "mapped/%1-%3",
-                                         "mapped"     => "remapped",
-                                         "**=thing"   => "more/%1"
+    data = @trans.transaction_map "key*/key??" => "mapped/%1-%3",
+                                  "mapped"     => "remapped",
+                                  "**=thing"   => "more/%1"
 
     assert_equal expected, data
     assert_not_equal @data, data
@@ -356,7 +358,7 @@ class TestTransaction < Test::Unit::TestCase
     expected = {:key1=>{:key1a=>[], "key1b"=>"findme"},:key2=>"foobar",
       :key3=>{:key3a=>[]}, "findme"=>[123, 456, {:findme=>123456}]}
 
-    data = @trans.transaction_move @data, "key*/key??/*" => "mapped/%4"
+    data = @trans.transaction_move "key*/key??/*" => "mapped/%4"
     data = @trans.remake_arrays data
 
     mapped = data.delete "mapped"
