@@ -41,8 +41,9 @@ class Kronk::Path::Transaction
   # operations on.
 
   def initialize data
-    @data    = data
-    @actions = {
+    @data     = data
+    @new_data = nil
+    @actions  = {
       :select => [],
       :delete => [],
       :move   => {},
@@ -71,7 +72,9 @@ class Kronk::Path::Transaction
 
   def results opts={}
     new_data = transaction_select @data, *@actions[:select]
-    new_data = transaction_delete new_data, *@actions[:delete]
+    new_data = transaction_map    @data,  @actions[:map]
+    new_data = transaction_move   @data,  @actions[:move]
+    new_data = transaction_delete @data, *@actions[:delete]
     new_data = remake_arrays new_data, opts[:keep_indicies]
     new_data
   end
@@ -120,13 +123,13 @@ class Kronk::Path::Transaction
     path_val_hash = {}
 
     match_target_hash.each do |data_path, path_map|
-      data = transaction data, [data_path] do |new_curr_data, cdata, key, path|
+      transaction data, [data_path] do |new_curr_data, cdata, key, path|
         mapped_path = path.make_path path_map
         path_val_hash[mapped_path] = new_curr_data.delete key
       end
     end
 
-    force_assign_paths data, path_val_hash
+    force_assign_paths @new_data, path_val_hash
   end
 
 
@@ -134,31 +137,30 @@ class Kronk::Path::Transaction
     path_val_hash = {}
 
     match_target_hash.each do |data_path, path_map|
-      data =
-        transaction data, [data_path], true do |new_curr_data, cdata, key, path|
-          mapped_path = path.make_path path_map
-          path_val_hash[mapped_path] = new_curr_data.delete key
-        end
+      Kronk::Path.find data_path, data do |sdata, key, spath|
+        mapped_path = spath.make_path path_map
+        path_val_hash[mapped_path] = sdata[key]
+      end
     end
 
-    force_assign_paths data, path_val_hash
+    force_assign_paths @new_data, path_val_hash
   end
 
 
   def transaction data, data_paths, create_empty=false # :nodoc:
     data_paths = data_paths.compact
-    return data if data_paths.empty?
+    return @new_data || data if data_paths.empty?
 
-    new_data = create_empty ? Hash.new : data.dup
+    @new_data ||= create_empty ? Hash.new : data.dup
 
-    if Array === new_data
-      new_data = ary_to_hash new_data
+    if Array === @new_data
+      @new_data = ary_to_hash @new_data
     end
 
     data_paths.each do |data_path|
       Kronk::Path.find data_path, data do |obj, k, path|
         curr_data     = data
-        new_curr_data = new_data
+        new_curr_data = @new_data
 
         path.each_with_index do |key, i|
           break unless new_curr_data
@@ -185,16 +187,17 @@ class Kronk::Path::Transaction
       end
     end
 
-    new_data
+    @new_data
   end
 
 
   def force_assign_paths data, path_val_hash # :nodoc:
-    new_data = data.dup rescue []
+    return data if path_val_hash.empty?
+    @new_data ||= data.dup rescue []
 
     path_val_hash.each do |path, value|
       curr_data     = data
-      new_curr_data = new_data
+      new_curr_data = @new_data
       prev_data     = nil
       prev_key      = nil
       prev_path     = []
@@ -203,7 +206,7 @@ class Kronk::Path::Transaction
         if Array === new_curr_data
           new_curr_data          = ary_to_hash new_curr_data
           prev_data[prev_key]    = new_curr_data if prev_data
-          new_data               = new_curr_data if i == 0
+          @new_data              = new_curr_data if i == 0
           @make_array[prev_path] = true
         end
 
@@ -234,7 +237,7 @@ class Kronk::Path::Transaction
       end
     end
 
-    new_data
+    @new_data
   end
 
 
@@ -259,6 +262,7 @@ class Kronk::Path::Transaction
   # Clears the queued actions and cache.
 
   def clear
+    @new_data = nil
     @actions.each{|k,v| v.clear}
     @make_array.clear
   end
