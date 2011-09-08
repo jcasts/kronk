@@ -71,10 +71,10 @@ class Kronk::Path::Transaction
   # pass the :keep_indicies => true option.
 
   def results opts={}
-    new_data = transaction_select *@actions[:select]
-    new_data = transaction_map     @actions[:map]
-    new_data = transaction_move    @actions[:move]
-    new_data = transaction_delete *@actions[:delete]
+    new_data = transaction_select @data, *@actions[:select]
+    new_data = transaction_map    @data,  @actions[:map]
+    new_data = transaction_move   @data,  @actions[:move]
+    new_data = transaction_delete @data, *@actions[:delete]
     remake_arrays new_data, opts[:keep_indicies]
   end
 
@@ -104,26 +104,26 @@ class Kronk::Path::Transaction
   end
 
 
-  def transaction_select *data_paths # :nodoc:
-    transaction data_paths, true do |new_curr_data, curr_data, key|
+  def transaction_select data, *data_paths # :nodoc:
+    transaction data, data_paths, true do |new_curr_data, curr_data, key|
       new_curr_data[key] = curr_data[key]
     end
   end
 
 
-  def transaction_delete *data_paths # :nodoc:
-    transaction data_paths do |new_curr_data, curr_data, key|
+  def transaction_delete data, *data_paths # :nodoc:
+    transaction data, data_paths do |new_curr_data, curr_data, key|
       new_curr_data.delete key
     end
   end
 
 
-  def transaction_move match_target_hash # :nodoc:
-    return @data if match_target_hash.empty?
+  def transaction_move data, match_target_hash # :nodoc:
+    return data if match_target_hash.empty?
     path_val_hash = {}
 
     match_target_hash.each do |data_path, path_map|
-      transaction [data_path] do |new_curr_data, cdata, key, path|
+      transaction data, [data_path] do |new_curr_data, cdata, key, path|
         mapped_path = path.make_path path_map
         path_val_hash[mapped_path] = new_curr_data.delete key
         if @make_array[path]
@@ -137,12 +137,12 @@ class Kronk::Path::Transaction
   end
 
 
-  def transaction_map match_target_hash # :nodoc:
-    return @data if match_target_hash.empty?
+  def transaction_map data, match_target_hash # :nodoc:
+    return data if match_target_hash.empty?
     path_val_hash = {}
 
     match_target_hash.each do |data_path, path_map|
-      Kronk::Path.find data_path, @data do |sdata, key, spath|
+      Kronk::Path.find data_path, data do |sdata, key, spath|
         mapped_path = spath.make_path path_map
         path_val_hash[mapped_path] = sdata[key]
         if @make_array[spath]
@@ -156,19 +156,19 @@ class Kronk::Path::Transaction
   end
 
 
-  def transaction data_paths, create_empty=false # :nodoc:
+  def transaction data, data_paths, create_empty=false # :nodoc:
     data_paths = data_paths.compact
-    return @new_data || @data if data_paths.empty?
+    return @new_data || data if data_paths.empty?
 
-    @new_data ||= create_empty ? Hash.new : @data.dup
+    @new_data ||= create_empty ? Hash.new : data.dup
 
     if Array === @new_data
       @new_data = ary_to_hash @new_data
     end
 
     data_paths.each do |data_path|
-      Kronk::Path.find data_path, @data do |obj, k, path|
-        curr_data     = @data
+      Kronk::Path.find data_path, data do |obj, k, path|
+        curr_data     = data
         new_curr_data = @new_data
 
         path.each_with_index do |key, i|
