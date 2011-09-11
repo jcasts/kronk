@@ -1,4 +1,4 @@
-=== 1.6.0 / 2011-09-
+=== 1.6.0 / 2011-09-11
 
 * Major Enhancements:
 
@@ -7,8 +7,6 @@
 * Enhancements:
 
   * Parsed headers output is a Hash of Strings instead of Arrays.
-
-  * Support for moving and mapping data with path transactions.
 
 * Bugfixes:
 
