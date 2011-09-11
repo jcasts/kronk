@@ -12,6 +12,7 @@ lib/kronk/data_renderer.rb
 lib/kronk/diff.rb
 lib/kronk/diff/ascii_format.rb
 lib/kronk/diff/color_format.rb
+lib/kronk/diff/output.rb
 lib/kronk/path.rb
 lib/kronk/path/matcher.rb
 lib/kronk/path/path_match.rb
@@ -40,11 +41,12 @@ test/mocks/302_response.txt
 test/mocks/cookies.yml
 test/mocks/get_request.txt
 test/test_assertions.rb
-test/test_core_ext.rb
 test/test_cmd.rb
-test/test_helper_methods.rb
+test/test_core_ext.rb
+test/test_data_string.rb
 test/test_diff.rb
 test/test_helper.rb
+test/test_helper_methods.rb
 test/test_input_reader.rb
 test/test_kronk.rb
 test/test_path.rb
