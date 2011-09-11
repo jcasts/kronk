@@ -71,6 +71,7 @@ class Kronk
 
     def create_diff
       diff_ary = []
+      return diff_ary if @str1.empty? && @str2.empty?
 
       arr1 = @str1.split @char
       arr2 = @str2.split @char
