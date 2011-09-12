@@ -81,6 +81,12 @@ class Kronk::Diff
           str    = str[0][0]   if Array === str
           info   = str.meta[0] if str.respond_to?(:meta)
 
+          if Array === info && !info.empty?
+            cleft  << " " << info[0]
+            cright << " " << info[1]
+            info = nil
+          end
+
           @output[start,0] = @format.context cleft, cright, info
           false
 

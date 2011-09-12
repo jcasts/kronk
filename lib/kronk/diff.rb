@@ -93,6 +93,13 @@ class Kronk
         diff_ary << [left, right] unless left.empty? && right.empty?
 
         # add common
+        arr1[c[1], c[0]].each_with_index do |str1, i|
+          str2 = arr2[c[2]+i]
+          next unless str1.respond_to?(:meta) && str2.respond_to?(:meta) &&
+                      str1.meta.first != str2.meta.first
+
+          str1.meta[0] = [str1.meta[0], str2.meta[0]]
+        end
         diff_ary.concat arr1[c[1], c[0]]
 
         last_i1 = c[1] + c[0]
