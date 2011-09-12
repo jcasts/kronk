@@ -268,12 +268,12 @@ class Kronk
 
     t1 = Thread.new do
           res1 = retrieve uri1
-          str1 = res1.stringify @options
+          str1 = res1.stringify
          end
 
     t2 = Thread.new do
           res2 = retrieve uri2
-          str2 = res2.stringify @options
+          str2 = res2.stringify
          end
 
     t1.join
@@ -308,7 +308,8 @@ class Kronk
       Kronk.history << uri
     end
 
-    resp.parser = options[:parser] if options[:parser]
+    resp.parser         = options[:parser] if options[:parser]
+    resp.stringify_opts = options
 
     max_rdir = options[:follow_redirects]
     while resp.redirect? && (max_rdir == true || max_rdir.to_s.to_i > 0)
@@ -378,8 +379,10 @@ class Kronk
 
         # Response headers - Boolean, String, or Array
         when :show_headers
-          next if out_opts[key] == true || out_opts[key] && val == true
-          out_opts[key] = [*out_opts[key]] | [*val]
+          next if out_opts.has_key?(key) &&
+                  (out_opts[key].class != Array || val == true || val == false)
+          out_opts[key] = (val == true || val == false) ? val :
+                                      [*out_opts[key]] | [*val]
 
         # String or Array
         when :only_data, :ignore_data

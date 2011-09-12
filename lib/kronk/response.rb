@@ -38,7 +38,7 @@ class Kronk
 
 
     attr_accessor :body, :bytes, :byterate, :code, :headers,
-                  :raw, :request, :uri
+                  :raw, :stringify_opts, :request, :uri
 
     attr_reader :encoding, :parser, :time
 
@@ -89,6 +89,8 @@ class Kronk
       @uri = URI.parse io.path if File === io
 
       @byterate = 0
+
+      @stringify_opts = {}
     end
 
 
@@ -311,6 +313,8 @@ class Kronk
     # :show_headers:: Boolean/String/Array - defines which headers to include
 
     def stringify options={}
+      options = options.empty? ? @stringify_opts : merge_stringify_opts(options)
+
       if !options[:raw] && (options[:parser] || @parser || options[:no_body])
         data = selective_data options
         Diff.ordered_data_string data, options[:struct]
@@ -321,6 +325,30 @@ class Kronk
     rescue MissingParser
       Cmd.verbose "Warning: No parser for #{@_res['Content-Type']} [#{@uri}]"
         selective_string options
+    end
+
+
+    def merge_stringify_opts options # :nodoc:
+      options = options.dup
+      @stringify_opts.each do |key, val|
+        case key
+        # Response headers - Boolean, String, or Array
+        when :show_headers
+          next if options.has_key?(key) &&
+                  (options[key].class != Array || val == true || val == false)
+
+          options[key] = (val == true || val == false) ? val :
+                                      [*options[key]] | [*val]
+
+        # String or Array
+        when :only_data, :ignore_data
+          options[key] = [*options[key]] | [*val]
+
+        else
+          options[key] = val if options[key].nil?
+        end
+      end
+      options
     end
 
 
