@@ -27,7 +27,7 @@ class Kronk
         elsif kronk.response
           begin
             # Make sure response is parsable
-            kronk.response.stringify kronk.options
+            kronk.response.stringify
           rescue => e
             error e, kronk, mutex
             return

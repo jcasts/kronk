@@ -29,8 +29,10 @@ class Kronk
           kronk.diff.formatted
 
         elsif kronk.response
-          kronk.response.stringify kronk.options
+          kronk.response.stringify
         end
+
+      return unless output
 
       output = "#{output.length}\r\n#{output}\r\n"
 

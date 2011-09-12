@@ -83,8 +83,8 @@ class Kronk
       # Supports all options of Kronk.compare.
 
       def assert_equal_responses uri1, uri2, options={}
-        resp1 = Kronk.retrieve(uri1, options).stringify options
-        resp2 = Kronk.retrieve(uri2, options).stringify options
+        resp1 = Kronk.retrieve(uri1, options).stringify
+        resp2 = Kronk.retrieve(uri2, options).stringify
 
         assert_equal resp1, resp2
       end
