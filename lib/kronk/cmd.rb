@@ -57,7 +57,7 @@ class Kronk
         :player       => {},
         :proxy        => {},
         :uris         => [],
-        :with_headers => false
+        :show_headers => false
       }
 
       options = parse_data_path_args options, argv
@@ -139,13 +139,13 @@ Parse and run diffs against data from live and cached http responses.
 
         opt.on('-i', '--include [HEADER1,HEADER2]', Array,
                'Include all or given headers in response') do |value|
-          options[:with_headers] ||= []
+          options[:show_headers] ||= []
 
           if value
-            options[:with_headers].concat value if
-              Array === options[:with_headers]
+            options[:show_headers].concat value if
+              Array === options[:show_headers]
           else
-            options[:with_headers] = true
+            options[:show_headers] = true
           end
 
           options[:no_body] = false
@@ -154,13 +154,13 @@ Parse and run diffs against data from live and cached http responses.
 
         opt.on('-I', '--head [HEADER1,HEADER2]', Array,
                'Use all or given headers only in the response') do |value|
-          options[:with_headers] ||= []
+          options[:show_headers] ||= []
 
           if value
-            options[:with_headers].concat value if
-              Array === options[:with_headers]
+            options[:show_headers].concat value if
+              Array === options[:show_headers]
           else
-            options[:with_headers] = true
+            options[:show_headers] = true
           end
 
           options[:no_body] = true

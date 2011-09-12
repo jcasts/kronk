@@ -208,7 +208,7 @@ class TestResponse < Test::Unit::TestCase
 
     assert_equal "#{@json_resp.raw.split("\r\n\r\n")[0]}\r\n",
                  @json_resp.selective_string(:no_body => true,
-                  :with_headers => true)
+                  :show_headers => true)
   end
 
 
@@ -217,7 +217,7 @@ class TestResponse < Test::Unit::TestCase
 
     expected = "Content-Type: application/json; charset=utf-8\r\n\r\n#{body}"
     assert_equal expected,
-                 @json_resp.selective_string(:with_headers => "Content-Type")
+                 @json_resp.selective_string(:show_headers => "Content-Type")
   end
 
 
@@ -227,12 +227,12 @@ class TestResponse < Test::Unit::TestCase
     expected = "Date: Fri, 03 Dec 2010 21:49:00 GMT\r\nContent-Type: application/json; charset=utf-8\r\n\r\n#{body}"
     assert_equal expected,
                  @json_resp.selective_string(
-                    :with_headers => ["Content-Type", "Date"])
+                    :show_headers => ["Content-Type", "Date"])
 
     expected = "Date: Fri, 03 Dec 2010 21:49:00 GMT\r\nContent-Type: application/json; charset=utf-8\r\n"
     assert_equal expected,
                  @json_resp.selective_string(:no_body => true,
-                    :with_headers => ["Content-Type", "Date"])
+                    :show_headers => ["Content-Type", "Date"])
   end
 
 
@@ -246,7 +246,7 @@ class TestResponse < Test::Unit::TestCase
 
     assert_equal "#{@json_resp.raw.split("\r\n\r\n")[0]}\r\n",
                  @json_resp.selective_string(:no_body => true,
-                  :with_headers => true)
+                  :show_headers => true)
   end
 
 
@@ -265,7 +265,7 @@ class TestResponse < Test::Unit::TestCase
       [{'content-type' => 'application/json; charset=utf-8'}, body]
 
     assert_equal expected,
-                 @json_resp.selective_data(:with_headers => "Content-Type")
+                 @json_resp.selective_data(:show_headers => "Content-Type")
   end
 
 
@@ -278,7 +278,7 @@ class TestResponse < Test::Unit::TestCase
 
     assert_equal expected,
                  @json_resp.selective_data(
-                    :with_headers => ["Content-Type", "Date"])
+                    :show_headers => ["Content-Type", "Date"])
   end
 
 
@@ -291,7 +291,7 @@ class TestResponse < Test::Unit::TestCase
 
     assert_equal expected,
                  @json_resp.selective_data(:no_body => true,
-                    :with_headers => ["Content-Type", "Date"])
+                    :show_headers => ["Content-Type", "Date"])
   end
 
 

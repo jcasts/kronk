@@ -313,31 +313,31 @@ class TestKronk < Test::Unit::TestCase
   end
 
 
-  def test_options_for_uri_with_headers
+  def test_options_for_uri_show_headers
     with_uri_options do
       %w{withhdrs withstrhdrs withtruehdrs}.each do |type|
-        opts = Kronk.new(:with_headers => true).
+        opts = Kronk.new(:show_headers => true).
                 options_for_uri "http://#{type}.com"
 
-        assert_equal true, opts[:with_headers]
+        assert_equal true, opts[:show_headers]
       end
     end
   end
 
 
-  def test_options_for_uri_with_headers_arr
+  def test_options_for_uri_show_headers_arr
     with_uri_options do
       %w{withhdrs withstrhdrs}.each do |type|
-        opts = Kronk.new(:with_headers => %w{hdr2 hdr3}).
+        opts = Kronk.new(:show_headers => %w{hdr2 hdr3}).
                 options_for_uri "http://#{type}.com"
 
-        assert_equal %w{hdr1 hdr2 hdr3}.sort, opts[:with_headers].sort
+        assert_equal %w{hdr1 hdr2 hdr3}.sort, opts[:show_headers].sort
       end
 
-      opts = Kronk.new(:with_headers => %w{hdr2 hdr3}).
+      opts = Kronk.new(:show_headers => %w{hdr2 hdr3}).
               options_for_uri "http://withtruehdrs.com"
 
-      assert_equal %w{hdr2 hdr3}, opts[:with_headers]
+      assert_equal %w{hdr2 hdr3}, opts[:show_headers]
     end
   end
 
@@ -362,19 +362,19 @@ class TestKronk < Test::Unit::TestCase
   def test_compare_raw
     diff = Kronk.compare "test/mocks/200_response.json",
                          "test/mocks/200_response.xml",
-                         :with_headers => true,
+                         :show_headers => true,
                          :raw => true
 
     resp1 = Kronk.retrieve "test/mocks/200_response.json",
-                             :with_headers => true,
+                             :show_headers => true,
                              :raw => true
 
     resp2 = Kronk.retrieve "test/mocks/200_response.xml",
-                             :with_headers => true,
+                             :show_headers => true,
                              :raw => true
 
-    exp_diff = Kronk::Diff.new resp1.selective_string(:with_headers => true),
-                               resp2.selective_string(:with_headers => true),
+    exp_diff = Kronk::Diff.new resp1.selective_string(:show_headers => true),
+                               resp2.selective_string(:show_headers => true),
                                :labels => [
                                  "test/mocks/200_response.json",
                                  "test/mocks/200_response.xml"
@@ -444,17 +444,17 @@ class TestKronk < Test::Unit::TestCase
   def test_compare_data
     diff = Kronk.compare "test/mocks/200_response.json",
                          "test/mocks/200_response.xml",
-                         :with_headers => true
+                         :show_headers => true
 
     resp1 = Kronk.retrieve "test/mocks/200_response.json",
-                             :with_headers => true
+                             :show_headers => true
 
     resp2 = Kronk.retrieve "test/mocks/200_response.xml",
-                             :with_headers => true
+                             :show_headers => true
 
     exp_diff = Kronk::Diff.new_from_data \
-                  resp1.selective_data(:with_headers => true),
-                  resp2.selective_data(:with_headers => true),
+                  resp1.selective_data(:show_headers => true),
+                  resp2.selective_data(:show_headers => true),
                   :labels => [
                     "test/mocks/200_response.json",
                     "test/mocks/200_response.xml"
@@ -523,7 +523,7 @@ class TestKronk < Test::Unit::TestCase
 
 
   def test_compare_data_inst
-    kronk = Kronk.new :with_headers => true
+    kronk = Kronk.new :show_headers => true
     diff  = kronk.compare "test/mocks/200_response.json",
                           "test/mocks/200_response.xml"
 
@@ -545,8 +545,8 @@ class TestKronk < Test::Unit::TestCase
     assert_equal nil,           kronk.diff
 
     exp_diff = Kronk::Diff.new_from_data \
-                  resp2.selective_data(:with_headers => true),
-                  resp1.selective_data(:with_headers => true),
+                  resp2.selective_data(:show_headers => true),
+                  resp1.selective_data(:show_headers => true),
                   :labels => [
                     "test/mocks/200_response.json",
                     "test/mocks/200_response.xml"
@@ -618,13 +618,13 @@ class TestKronk < Test::Unit::TestCase
         :proxy => "someproxy.com"
       },
       'withhdrs'    => {
-        :with_headers => %w{hdr1 hdr2 hdr3}
+        :show_headers => %w{hdr1 hdr2 hdr3}
       },
       'withstrhdrs' => {
-        :with_headers => "hdr1"
+        :show_headers => "hdr1"
       },
       'withtruehdrs' => {
-        :with_headers => true
+        :show_headers => true
       },
       'focus_data'   => {
         :only_data      => %w{path1 path2},

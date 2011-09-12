@@ -37,10 +37,10 @@ class Kronk
     end
 
 
-    attr_accessor :body, :bytes, :byterate, :code, :headers, :parser,
+    attr_accessor :body, :bytes, :byterate, :code, :headers,
                   :raw, :request, :uri
 
-    attr_reader :encoding, :time
+    attr_reader :encoding, :parser, :time
 
     alias to_hash headers
     alias to_s raw
@@ -155,13 +155,13 @@ class Kronk
 
       return @parsed_body if @parsed_body && !parser
 
+      parser ||= @parser
+
       begin
         parser = Kronk.parser_for(parser) || Kronk.find_const(parser)
       rescue NameError
         raise InvalidParser, "No such parser: #{parser}"
       end if String === parser
-
-      parser ||= @parser
 
       raise MissingParser,
         "No parser for Content-Type: #{@_res['Content-Type']}" unless parser
@@ -200,6 +200,16 @@ class Kronk
       when true
         headers
       end
+    end
+
+
+    ##
+    # Assign the parser.
+
+    def parser= parser
+      @parser = Kronk.parser_for(parser) || Kronk.find_const(parser)
+    rescue NameError
+      raise InvalidParser, "No such parser: #{parser}"
     end
 
 
@@ -245,13 +255,13 @@ class Kronk
     # Returns the raw response with selective headers and/or the body of
     # the response. Supports the following options:
     # :no_body:: Bool - Don't return the body; default nil
-    # :with_headers:: Bool/String/Array - Return headers; default nil
+    # :show_headers:: Bool/String/Array - Return headers; default nil
 
     def selective_string options={}
       str = @body unless options[:no_body]
 
-      if options[:with_headers]
-        header = raw_header(options[:with_headers])
+      if options[:show_headers]
+        header = raw_header(options[:show_headers])
         str = [header, str].compact.join "\r\n"
       end
 
@@ -263,7 +273,7 @@ class Kronk
     # Returns the parsed response with selective headers and/or the body of
     # the response. Supports the following options:
     # :no_body:: Bool - Don't return the body; default nil
-    # :with_headers:: Bool/String/Array - Return headers; default nil
+    # :show_headers:: Bool/String/Array - Return headers; default nil
     # :parser:: Object - The parser to use for the body; default nil
     # :ignore_data:: String/Array - Removes the data from given data paths
     # :only_data:: String/Array - Extracts the data from given data paths
@@ -275,8 +285,8 @@ class Kronk
         data = parsed_body options[:parser]
       end
 
-      if options[:with_headers]
-        header_data = parsed_header(options[:with_headers])
+      if options[:show_headers]
+        header_data = parsed_header(options[:show_headers])
         data &&= [header_data, data]
         data ||= header_data
       end
@@ -298,7 +308,7 @@ class Kronk
     # :ignore_data:: String/Array - defines which data points to exclude
     # :raw:: Boolean - Force using the unparsed raw response
     # :keep_indicies:: Boolean - indicies of modified arrays display as hashes.
-    # :with_headers:: Boolean/String/Array - defines which headers to include
+    # :show_headers:: Boolean/String/Array - defines which headers to include
 
     def stringify options={}
       if !options[:raw] && (options[:parser] || @parser || options[:no_body])

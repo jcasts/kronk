@@ -68,6 +68,8 @@ class Kronk
   # Find a fully qualified ruby namespace/constant.
 
   def self.find_const name_or_file, case_insensitive=false
+    return name_or_file unless String === name_or_file
+
     if name_or_file =~ /[^:]:([^:]+)$/
       req_file = $1
       i        = $1.length + 2
@@ -240,8 +242,8 @@ class Kronk
   # :proxy:: Hash/String - http proxy to use; defaults to nil
   # :only_data:: String/Array - extracts the data from given data paths
   # :ignore_data:: String/Array - defines which data points to exclude
-  # :keep_indicies:: Boolean - indicies of modified arrays display as hashes.
-  # :with_headers:: Boolean/String/Array - defines which headers to include
+  # :keep_indicies:: Boolean - indicies of modified arrays display as hashes
+  # :show_headers:: Boolean/String/Array - which headers to show in output
   # :parser:: Object/String - the parser to use for the body; default nil
   # :raw:: Boolean - run diff on raw strings
 
@@ -305,6 +307,8 @@ class Kronk
       resp = req.retrieve
       Kronk.history << uri
     end
+
+    resp.parser = options[:parser] if options[:parser]
 
     max_rdir = options[:follow_redirects]
     while resp.redirect? && (max_rdir == true || max_rdir.to_s.to_i > 0)
@@ -373,7 +377,7 @@ class Kronk
           end
 
         # Response headers - Boolean, String, or Array
-        when :with_headers
+        when :show_headers
           next if out_opts[key] == true || out_opts[key] && val == true
           out_opts[key] = [*out_opts[key]] | [*val]
 
