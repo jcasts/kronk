@@ -1,3 +1,9 @@
+=== 1.6.1 / 2011-09-12
+
+* Enhancements:
+
+  * Support for diff paths on both sides when they are different.
+
 === 1.6.0 / 2011-09-11
 
 * Major Enhancements:
