@@ -1,5 +1,18 @@
 = TODO
 
+== Path
+
+* Support move and map for path transactions.
+
+== Player
+
+* Read full URIs for player input but strip off the protocol and host.
+
+* When using player and no host is given, support reading a full URI for
+  player input.
+
+== Done
+
 * Support data diffing for arrays (including data struct).
 
 * Allow for showing diffed sections of a diff only.
