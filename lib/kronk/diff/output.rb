@@ -66,7 +66,7 @@ class Kronk::Diff
       end
 
       if !clen || next_diff
-        @record || [@output.length, line1+1, line2+1, 0, 0]
+        @record || [@output.length, line1+1, line2+1, 0, 0, []]
 
       elsif @record && clen && !next_diff
         scheck = @output.length - (clen - 1)
@@ -76,15 +76,14 @@ class Kronk::Diff
           start  = @record[0]
           cleft  = "#{@record[1]},#{@record[3]}"
           cright = "#{@record[2]},#{@record[4]}"
+          info   = @record[5]
 
-          str    = @output[start]
-          str    = str[0][0]   if Array === str
-          info   = str.meta[0] if str.respond_to?(:meta)
-
-          if Array === info && !info.empty?
+          if info[0] != info[1] && info[0] && info[1]
             cleft  << " " << info[0]
             cright << " " << info[1]
             info = nil
+          else
+            info = info[0] || info[1]
           end
 
           @output[start,0] = @format.context cleft, cright, info
@@ -142,17 +141,20 @@ class Kronk::Diff
 
 
     def make_line item, line1, line2
-      action = if line1 && !line2
-                 :deleted
-               elsif !line1 && line2
-                 :added
-               else
-                 :common
-               end
+      if line1 && !line2
+        @record[5][0] ||= item.meta.first if Kronk::DataString === item
+        action = :deleted
+      elsif !line1 && line2
+        @record[5][1] ||= item.meta.first if Kronk::DataString === item
+        action = :added
+      else
+        @record[5][0] ||= @record[5][1] ||= item.meta.first if
+          Kronk::DataString === item
+        action = :common
+      end
 
       lines = @format.lines [line1, line2], @cwidth if @show_lines
       line  = "#{lines}#{@format.send action, item}"
-      line  = Kronk::DataString.new line, item.meta[0] if item.respond_to? :meta
       @record[3] += 1 if line1
       @record[4] += 1 if line2
       line

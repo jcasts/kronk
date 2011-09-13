@@ -29,7 +29,7 @@ class Kronk
   require 'kronk/path/path_match'
   require 'kronk/path/matcher'
   require 'kronk/path/transaction'
-  require 'kronk/data_renderer'
+  require 'kronk/data_string'
   require 'kronk/diff/ascii_format'
   require 'kronk/diff/color_format'
   require 'kronk/diff/output'

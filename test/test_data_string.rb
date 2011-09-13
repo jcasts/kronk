@@ -3,7 +3,8 @@ require 'test/test_helper'
 class TestDataString < Test::Unit::TestCase
 
   def setup
-    @dstr = Kronk::DataString.new "foobar", "data0"
+    @dstr = Kronk::DataString.new
+    @dstr.append "foobar", "data0"
   end
 
 

@@ -23,9 +23,9 @@ class Kronk
       data = Kronk::Path.pathed(data) if Kronk.config[:render_paths]
 
       case Kronk.config[:render_lang].to_s
-      when 'ruby' then DataRenderer.ruby(data, struct_only)
+      when 'ruby' then DataString.ruby(data, :struct => struct_only)
       else
-        DataRenderer.json(data, struct_only)
+        DataString.json(data, :struct => struct_only)
       end
     end
 

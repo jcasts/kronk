@@ -579,7 +579,7 @@ STR
     (<<-STR
 \e[1;33m--- test/mocks/200_response_diff.json
 +++ test/mocks/200_response.json\e[0m
-\e[1;35m@@ -6,7 +6,7 @@\e[0m business/description
+\e[1;35m@@ -6,7 +6,7 @@\e[0m /business/description
      "additional_urls": [
       {
        "destination": "http://example.com",
@@ -588,7 +588,7 @@ STR
       }
      ],
      "general_info": "<p>A Paint Your Own Pottery Studios..</p>",
-\e[1;35m@@ -15,11 +15,12 @@\e[0m business/description
+\e[1;35m@@ -15,11 +15,12 @@\e[0m /business/description
      "slogan": "<p>Pottery YOU dress up</p>"
     },
     "distance": 0.0,
@@ -603,7 +603,7 @@ STR
     "improvable": true,
     "latitude": 42.882561,
     "listing_id": "1234",
-\e[1;35m@@ -34,12 +35,12 @@\e[0m business
+\e[1;35m@@ -34,12 +35,12 @@\e[0m /business
     "rating_count": 0,
     "red_listing": false,
     "state": "MI",
