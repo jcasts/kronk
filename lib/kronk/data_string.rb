@@ -50,7 +50,8 @@ class Kronk
 
 
     ##
-    # Create a new DataString
+    # Create a new DataString that is diff-able, meaning sorted by
+    # Hash keys when available.
 
     def initialize data=nil, opts={}, &block
       @struct_only = opts[:struct]
@@ -60,10 +61,12 @@ class Kronk
       if String === data
         super data
         @data = nil
+
       else
         super ""
-        @data = data
-        block = TO_RUBY unless block_given?
+        data    = Kronk::Path.pathed(data) if Kronk.config[:render_paths]
+        @data   = data
+        block ||= Kronk.config[:render_lang].to_s == 'ruby' ? TO_RUBY : TO_JSON
       end
 
       render data, &block if data && block

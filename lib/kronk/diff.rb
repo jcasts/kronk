@@ -10,8 +10,8 @@ class Kronk
     # Creates a new diff from two data objects.
 
     def self.new_from_data data1, data2, opts={}
-      new ordered_data_string(data1, opts[:struct]),
-          ordered_data_string(data2, opts[:struct]), opts
+      new DataString.new(data1, opts),
+          DataString.new(data2, opts), opts
     end
 
 
@@ -20,13 +20,7 @@ class Kronk
     # Hash keys when available.
 
     def self.ordered_data_string data, struct_only=false
-      data = Kronk::Path.pathed(data) if Kronk.config[:render_paths]
-
-      case Kronk.config[:render_lang].to_s
-      when 'ruby' then DataString.ruby(data, :struct => struct_only)
-      else
-        DataString.json(data, :struct => struct_only)
-      end
+      DataString.new data, :struct => struct_only
     end
 
 
