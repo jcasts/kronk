@@ -13,7 +13,7 @@ class Kronk::Diff
       attr_accessor :context, :format, :lindex, :rindex, :llen, :rlen,
                     :lmeta, :rmeta
 
-      def initialize format, line_num_width, lindex, rindex
+      def initialize format, line_num_width=nil, lindex=0, rindex=0
         @format  = format
         @cwidth  = line_num_width
         @lindex  = lindex
@@ -147,22 +147,20 @@ class Kronk::Diff
     end
 
 
-    def section? i, line1, line2
-      if @context
-        clen = @context + 1
-        next_diff = @diff_ary[i,clen].to_a.find{|da| Array === da}
-      end
+    def continue_section? i
+       !@context || !!@diff_ary[i,@context+1].to_a.find{|da| Array === da}
+    end
 
-      if !@context || next_diff
-        @section || Section.new(@format, (@show_lines && @cwidth), line1, line2)
 
-      elsif @section && @context && !next_diff && @section.context >= @context
-        @output.concat @section.render
-        false
+    def start_section? i
+      !@section && continue_section?(i)
+    end
 
-      else
-        @section
-      end
+
+    def end_section? i
+      @section &&
+        (i >= @diff_ary.length ||
+         !continue_section?(i) && @context && @section.context >= @context)
     end
 
 
@@ -173,24 +171,21 @@ class Kronk::Diff
       @output << @format.head(*@labels)
 
       line1 = line2 = 0
+      lwidth = @show_lines && @cwidth
 
       @diff_ary.each_with_index do |item, i|
-        @section = section? i, line1, line2
-
+        @section = Section.new @format, lwidth, line1, line2 if start_section? i
         @section << item if @section
 
-        case item
-        when String
-          line1 = line1.next
-          line2 = line2.next
+        line1 += Array === item ? item[0].length : 1
+        line2 += Array === item ? item[1].length : 1
 
-        when Array
-          line1 = line1 + item[0].length
-          line2 = line2 + item[1].length
+        if end_section?(i+1)
+          @output.concat @section.render
+          @section = false
         end
       end
 
-      @output.concat @section.render if @section
       @cached = @output.join(@join_ch)
     end
 
