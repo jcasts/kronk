@@ -147,16 +147,16 @@ class Kronk::Diff
     end
 
 
-    def record? i, line1, line2
+    def section? i, line1, line2
       if @context
         clen = @context + 1
         next_diff = @diff_ary[i,clen].to_a.find{|da| Array === da}
       end
 
-      if !clen || next_diff
+      if !@context || next_diff
         @section || Section.new(@format, (@show_lines && @cwidth), line1, line2)
 
-      elsif @section && clen && !next_diff && @section.context >= @context
+      elsif @section && @context && !next_diff && @section.context >= @context
         @output.concat @section.render
         false
 
@@ -175,19 +175,18 @@ class Kronk::Diff
       line1 = line2 = 0
 
       @diff_ary.each_with_index do |item, i|
-        @section = record? i, line1, line2
+        @section = section? i, line1, line2
+
+        @section << item if @section
 
         case item
         when String
           line1 = line1.next
           line2 = line2.next
-          @section << item if @section
 
         when Array
           line1 = line1 + item[0].length
           line2 = line2 + item[1].length
-
-          @section << item if @section
         end
       end
 
