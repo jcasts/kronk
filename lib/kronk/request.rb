@@ -9,7 +9,8 @@ class Kronk
     class ParseError < Kronk::Exception; end
 
     # Matches the first line of an http request string.
-    REQUEST_LINE_MATCHER = %r{([A-Za-z]+)?(^|[\s'"])(/[^\s'";]+)[\s"']*}
+    REQUEST_LINE_MATCHER =
+      %r{([A-Za-z]+)?(?:^|[\s'"])(https?://[^/]+)?(/[^\s'";]+)[\s"']*}
 
     ##
     # Creates a query string from data.
@@ -45,7 +46,7 @@ class Kronk
     # path and options.
 
     def self.build_uri uri, options={}
-      uri  ||= Kronk.config[:default_host]
+      uri  ||= options[:host] || Kronk.config[:default_host]
       suffix = options[:uri_suffix]
 
       uri = "http://#{uri}"   unless uri.to_s =~ %r{^(\w+://|/)}
@@ -86,7 +87,9 @@ class Kronk
       opts[:headers] ||= {}
 
       lines.shift.strip =~ REQUEST_LINE_MATCHER
-      opts[:http_method], opts[:uri_suffix] = $1, $3
+      opts.merge! :http_method => $1,
+                  :host        => $2,
+                  :uri_suffix  => $3
 
       lines.each_with_index do |line, i|
         case line
@@ -105,6 +108,7 @@ class Kronk
 
       opts[:data] = lines[body_start..-1].join("\n") if body_start
 
+      opts.delete(:host)        if !opts[:host]
       opts.delete(:uri_suffix)  if !opts[:uri_suffix]
       opts.delete(:headers)     if opts[:headers].empty?
       opts.delete(:http_method) if !opts[:http_method]
