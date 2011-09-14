@@ -454,7 +454,7 @@ STR
     expected = JSON.parse \
       File.read("test/mocks/200_response.json").split("\r\n\r\n")[1]
 
-    expected = Kronk::Diff.ordered_data_string expected, true
+    expected = Kronk::DataString.new expected, :struct => true
 
     assert_equal expected, str
   end
