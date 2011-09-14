@@ -317,7 +317,7 @@ class Kronk
 
       if !options[:raw] && (options[:parser] || @parser || options[:no_body])
         data = selective_data options
-        Diff.ordered_data_string data, options[:struct]
+        DataString.new data, options
       else
         selective_string options
       end

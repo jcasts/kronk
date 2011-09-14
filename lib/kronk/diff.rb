@@ -16,15 +16,6 @@ class Kronk
 
 
     ##
-    # Returns a data string that is diff-able, meaning sorted by
-    # Hash keys when available.
-
-    def self.ordered_data_string data, struct_only=false
-      DataString.new data, :struct => struct_only
-    end
-
-
-    ##
     # Adds line numbers to each lines of a String.
 
     def self.insert_line_nums str, formatter=nil
