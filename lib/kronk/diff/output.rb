@@ -1,6 +1,95 @@
 class Kronk::Diff
 
+  ##
+  # Renders diff outputs.
+
   class Output
+
+    ##
+    # Represents one diff section to render
+    # (starts with @@-line,len +line,len@@)
+
+    class Section
+      attr_accessor :context, :format, :lindex, :rindex, :llen, :rlen,
+                    :lmeta, :rmeta
+
+      def initialize format, line_num_width, lindex, rindex
+        @format  = format
+        @cwidth  = line_num_width
+        @lindex  = lindex
+        @rindex  = rindex
+        @llen    = 0
+        @rlen    = 0
+        @lmeta   = nil
+        @rmeta   = nil
+        @lines   = []
+        @context = 0
+      end
+
+
+      def << obj
+        if String === obj
+          add_common obj
+
+        elsif Array === obj
+          left, right = obj
+          left.each{|o| add_left o }
+          right.each{|o| add_right o }
+        end
+      end
+
+
+      def add_common obj
+        @llen    += 1
+        @rlen    += 1
+        @context += 1
+
+        @lmeta ||= @rmeta ||= obj.meta.first if obj.respond_to? :meta
+
+        line_nums =
+          @format.lines [@llen+@lindex, @rlen+@rindex], @cwidth if @cwidth
+
+        @lines << "#{line_nums}#{@format.common obj}"
+      end
+
+
+      def add_left obj
+        @llen   += 1
+        @context = 0
+
+        @lmeta ||= obj.meta.first if obj.respond_to? :meta
+
+        line_nums = @format.lines [@llen+@lindex, nil], @cwidth if @cwidth
+        @lines << "#{line_nums}#{@format.deleted obj}"
+      end
+
+
+      def add_right obj
+        @rlen   += 1
+        @context = 0
+
+        @rmeta ||= obj.meta.first if obj.respond_to? :meta
+
+        line_nums = @format.lines [nil, @rlen+@rindex], @cwidth if @cwidth
+        @lines << "#{line_nums}#{@format.added obj}"
+      end
+
+
+      def render
+        cleft  = "#{@lindex+1},#{@llen}"
+        cright = "#{@rindex+1},#{@rlen}"
+
+        if @lmeta != @rmeta && @lmeta && @rmeta
+          cleft  << " " << @lmeta
+          cright << " " << @rmeta
+        else
+          info = @lmeta || @rmeta
+        end
+
+        [@format.context(cleft, cright, info), *@lines]
+      end
+    end
+
 
     ##
     # Returns a formatter from a symbol or string. Returns nil if not found.
@@ -31,7 +120,6 @@ class Kronk::Diff
 
     attr_rm_cache :labels, :show_lines, :join_ch, :context, :format, :diff_ary
 
-
     def initialize diff, opts={}
       @output     = []
       @cached     = nil
@@ -51,7 +139,7 @@ class Kronk::Diff
       @labels[1] ||= "right"
 
       @show_lines = opts[:show_lines] || Kronk.config[:show_lines]
-      @record     = false
+      @section    = false
 
       lines1 = diff.str1.lines.count
       lines2 = diff.str2.lines.count
@@ -66,35 +154,14 @@ class Kronk::Diff
       end
 
       if !clen || next_diff
-        @record || [@output.length, line1+1, line2+1, 0, 0, []]
+        @section || Section.new(@format, (@show_lines && @cwidth), line1, line2)
 
-      elsif @record && clen && !next_diff
-        scheck = @output.length - (clen - 1)
-        subary = @output[scheck..-1].to_a
-
-        if i == @diff_ary.length || !subary.find{|da| Array === da}
-          start  = @record[0]
-          cleft  = "#{@record[1]},#{@record[3]}"
-          cright = "#{@record[2]},#{@record[4]}"
-          info   = @record[5]
-
-          if info[0] != info[1] && info[0] && info[1]
-            cleft  << " " << info[0]
-            cright << " " << info[1]
-            info = nil
-          else
-            info = info[0] || info[1]
-          end
-
-          @output[start,0] = @format.context cleft, cright, info
-          false
-
-        else
-          @record
-        end
+      elsif @section && clen && !next_diff && @section.context >= @context
+        @output.concat @section.render
+        false
 
       else
-        @record
+        @section
       end
     end
 
@@ -107,57 +174,27 @@ class Kronk::Diff
 
       line1 = line2 = 0
 
-      0.upto(@diff_ary.length) do |i|
-        item = @diff_ary[i]
-        @record = record? i, line1, line2
+      @diff_ary.each_with_index do |item, i|
+        @section = record? i, line1, line2
 
         case item
         when String
           line1 = line1.next
           line2 = line2.next
-          @output << make_line(item, line1, line2) if @record
+          @section << item if @section
 
         when Array
-          sides = [[],[]]
+          line1 = line1 + item[0].length
+          line2 = line2 + item[1].length
 
-          item[0].each do |ditem|
-            line1 = line1.next
-            sides[0] << make_line(ditem, line1, nil) if @record
-          end
-
-          item[1].each do |ditem|
-            line2 = line2.next
-            sides[0] << make_line(ditem, nil, line2) if @record
-          end
-
-          @output << sides if @record
+          @section << item if @section
         end
       end
 
-      @cached = @output.flatten.join(@join_ch)
+      @output.concat @section.render if @section
+      @cached = @output.join(@join_ch)
     end
 
     alias to_s render
-
-
-    def make_line item, line1, line2
-      if line1 && !line2
-        @record[5][0] ||= item.meta.first if Kronk::DataString === item
-        action = :deleted
-      elsif !line1 && line2
-        @record[5][1] ||= item.meta.first if Kronk::DataString === item
-        action = :added
-      else
-        @record[5][0] ||= @record[5][1] ||= item.meta.first if
-          Kronk::DataString === item
-        action = :common
-      end
-
-      lines = @format.lines [line1, line2], @cwidth if @show_lines
-      line  = "#{lines}#{@format.send action, item}"
-      @record[3] += 1 if line1
-      @record[4] += 1 if line2
-      line
-    end
   end
 end

@@ -369,6 +369,7 @@ class TestDiff < Test::Unit::TestCase
     str = <<STR
 --- left
 +++ right
+@@ -1,17 +1,16 @@ 
 - HTTP/1.1 302 Found
 - Location: http://igoogle.com/
 + HTTP/1.1 301 Moved Permanently
@@ -400,6 +401,7 @@ STR
     str = <<STR
 --- left
 +++ right
+@@ -1,17 +1,16 @@ 
  1|   - HTTP/1.1 302 Found
  2|   - Location: http://igoogle.com/
   | 1 + HTTP/1.1 301 Moved Permanently
@@ -432,6 +434,7 @@ STR
     str = <<STR
 \e[1;33m--- left
 +++ right\033[0m
+\e[1;35m@@ -1,17 +1,16 @@\e[0m 
 \033[1;31m- HTTP/1.1 302 Found\033[0m
 \033[1;31m- Location: http://igoogle.com/\033[0m
 \033[1;32m+ HTTP/1.1 301 Moved Permanently\033[0m
