@@ -104,26 +104,10 @@ class Kronk::Diff
     end
 
 
-    def self.attr_rm_cache *attrs # :nodoc:
-      self.send :attr_reader, *attrs
-
-      attrs.each do |attr|
-        define_method "#{attr}=" do |value|
-          if send(attr) != value
-            instance_variable_set("@#{attr}", value)
-            instance_variable_set("@cached", nil)
-          end
-        end
-      end
-    end
-
-
-    attr_rm_cache :labels, :show_lines, :join_ch, :context, :format, :diff_ary
+    attr_accessor :labels, :show_lines, :join_ch, :context, :format
 
     def initialize diff, opts={}
-      @output     = []
-      @cached     = nil
-      @diff       = diff
+      @diff = diff
 
       @format =
         self.class.formatter(opts[:format] || Kronk.config[:diff_format]) ||
@@ -148,7 +132,8 @@ class Kronk::Diff
 
 
     def continue_section? i
-       !@context || !!@diff_ary[i,@context+1].to_a.find{|da| Array === da}
+       !@context ||
+        !!@diff.diff_array[i,@context+1].to_a.find{|da| Array === da}
     end
 
 
@@ -159,21 +144,19 @@ class Kronk::Diff
 
     def end_section? i
       @section &&
-        (i >= @diff_ary.length ||
+        (i >= @diff.diff_array.length ||
          !continue_section?(i) && @context && @section.context >= @context)
     end
 
 
     def render force=false
-      self.diff_ary = @diff.diff_array
-
-      return @cached if !force && @cached
-      @output << @format.head(*@labels)
+      output = []
+      output << @format.head(*@labels)
 
       line1 = line2 = 0
       lwidth = @show_lines && @cwidth
 
-      @diff_ary.each_with_index do |item, i|
+      @diff.diff_array.each_with_index do |item, i|
         @section = Section.new @format, lwidth, line1, line2 if start_section? i
         @section << item if @section
 
@@ -181,12 +164,12 @@ class Kronk::Diff
         line2 += Array === item ? item[1].length : 1
 
         if end_section?(i+1)
-          @output.concat @section.render
+          output.concat @section.render
           @section = false
         end
       end
 
-      @cached = @output.join(@join_ch)
+      output.join(@join_ch)
     end
 
     alias to_s render
