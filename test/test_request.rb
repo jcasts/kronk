@@ -13,6 +13,24 @@ class TestRequest < Test::Unit::TestCase
   end
 
 
+  def test_parse_url
+    raw = "https://example.com/foobar?foo=bar"
+    req = Kronk::Request.parse(raw)
+
+    assert_equal Kronk::Request, req.class
+    assert_equal URI.parse("https://example.com/foobar?foo=bar"), req.uri
+  end
+
+
+  def test_parse_url_path
+    raw = "/foobar?foo=bar"
+    req = Kronk::Request.parse(raw)
+
+    assert_equal Kronk::Request, req.class
+    assert_equal URI.parse("http://localhost:3000/foobar?foo=bar"), req.uri
+  end
+
+
   def test_parse_invalid
     assert_raises Kronk::Request::ParseError do
       Kronk::Request.parse "thing\nfoo\n"
@@ -40,6 +58,13 @@ class TestRequest < Test::Unit::TestCase
 
     raw = "POST /foobar\r\nAccept: json\r\nHost: example.com\r\n\r\nfoo=bar"
     assert_equal expected, Kronk::Request.parse_to_hash(raw)
+  end
+
+
+  def test_parse_to_hash_url
+    expected = {:host => "http://example.com", :uri_suffix => "/foobar?foo=bar"}
+    assert_equal expected,
+      Kronk::Request.parse_to_hash("http://example.com/foobar?foo=bar")
   end
 
 

@@ -5,7 +5,11 @@ class TestRequestParser < Test::Unit::TestCase
   def test_start_new
     assert Kronk::Player::RequestParser.start_new?("/foobar\r\n")
     assert Kronk::Player::RequestParser.start_new?("GET /foobar\r\n")
-    assert !Kronk::Player::RequestParser.start_new?("http://example.com\r\n")
+    assert Kronk::Player::RequestParser.start_new?("http://example.com\r\n")
+    assert Kronk::Player::RequestParser.start_new?("https://example.com\r\n")
+    assert Kronk::Player::RequestParser.start_new?("https://foo.com/\r\n")
+    assert Kronk::Player::RequestParser.start_new?("/\r\n")
+    assert Kronk::Player::RequestParser.start_new?("https://foo.com/bar\r\n")
     assert !Kronk::Player::RequestParser.start_new?("foobar\r\n")
   end
 

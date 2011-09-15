@@ -10,7 +10,7 @@ class Kronk
 
     # Matches the first line of an http request string.
     REQUEST_LINE_MATCHER =
-      %r{([A-Za-z]+)?(?:^|[\s'"])(https?://[^/]+)?(/[^\s'";]+)[\s"']*}
+      %r{([a-z]+)?(?:^|[\s'"])(https?://[^/]+)?(/[^\s'";]*)?[\s"']*}i
 
     ##
     # Creates a query string from data.

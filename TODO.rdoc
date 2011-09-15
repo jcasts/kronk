@@ -4,14 +4,12 @@
 
 * Support move and map for path transactions.
 
-== Player
+== Done
 
 * Read full URIs for player input but strip off the protocol and host.
 
 * When using player and no host is given, support reading a full URI for
   player input.
-
-== Done
 
 * Support data diffing for arrays (including data struct).
 

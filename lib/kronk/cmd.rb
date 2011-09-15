@@ -393,7 +393,8 @@ Parse and run diffs against data from live and cached http responses.
 
       argv.clear
 
-      raise "You must enter at least one URI" if options[:uris].empty?
+      raise "You must enter at least one URI" if options[:uris].empty? &&
+                                                  options[:player].nil?
 
       options
 
