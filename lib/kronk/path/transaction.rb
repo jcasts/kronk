@@ -92,7 +92,7 @@ class Kronk::Path::Transaction
       prev_data = new_data
     end
 
-p @make_array
+#p @make_array
     remake_arrays new_data, opts[:keep_indicies]
   end
 
@@ -119,6 +119,15 @@ p @make_array
       (!except_modified || @data.length == new_data.length)
 
     new_data
+  end
+
+
+  def remap_make_arrays new_path, old_path
+    @make_array.keys.each do |path|
+      if path[0...old_path.length] == old_path
+        path[0...old_path.length] = new_path
+      end
+    end
   end
 
 
@@ -157,7 +166,8 @@ p @make_array
     new_data =
       transaction data, path_pairs do |sdata, cdata, key, path, tpath|
         path_val_hash[tpath] = sdata.delete key
-        @make_array[tpath] = true if @make_array[path]
+        remap_make_arrays(tpath, path)
+        #@make_array[tpath] = true if @make_array[path]
       end
 
     force_assign_paths new_data, path_val_hash
@@ -172,7 +182,8 @@ p @make_array
       Kronk::Path.find data_path, data do |sdata, key, spath|
         mapped_path = spath.make_path path_map
         path_val_hash[mapped_path] = sdata[key]
-        @make_array[mapped_path] = true if @make_array[spath]
+        remap_make_arrays(mapped_path, spath)
+        #@make_array[mapped_path] = true if @make_array[spath]
       end
     end
 

@@ -315,7 +315,6 @@ class TestTransaction < Test::Unit::TestCase
 
 
   def test_transaction_move
-return
     expected = {:key1=>{}, :key2=>"foobar",
       "mapped"=>{
         "1-a"=>["foo", "bar", "foobar", {}],
