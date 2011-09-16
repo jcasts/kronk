@@ -1,6 +1,20 @@
+=== 1.7.0 / 2011-09
+
+* Enhancements:
+
+  * Full URL support for player input.
+
+  * Move and map path transaction support.
+
+* Bugfixes:
+
+  * More accurate data diff metadata output.
+
+  * Lots of Diff::Output and DataString cleanup.
+
 === 1.6.2 / 2011-09-12
 
-* Bugfixes
+* Bugfixes:
 
   * Handling of stream output with Diff#formatted is nil.
 
