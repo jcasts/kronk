@@ -32,13 +32,14 @@ class Kronk
     end
 
 
-    attr_accessor :str1, :str2, :char, :output
+    attr_accessor :str1, :str2, :char, :output, :meta
 
     def initialize str1, str2, opts={}
       @str1       = str1
       @str2       = str2
       @diff_ary   = nil
       @char       = opts[:char] || /\r?\n/
+      @meta       = []
       @output     = Output.new self, opts
     end
 
@@ -75,15 +76,20 @@ class Kronk
         right = arr2[last_i2...c[2]]
 
         # add diffs
-        diff_ary << [left, right] unless left.empty? && right.empty?
+        unless left.empty? && right.empty?
+          @meta << []
+          @meta.last[0] = left[0].meta[0]  if left[0].respond_to?(:meta)
+          @meta.last[1] = right[0].meta[0] if right[0].respond_to?(:meta)
+
+          diff_ary << [left, right]
+        end
 
         # add common
         arr1[c[1], c[0]].each_with_index do |str1, i|
           str2 = arr2[c[2]+i]
-          next unless str1.respond_to?(:meta) && str2.respond_to?(:meta) &&
-                      str1.meta.first != str2.meta.first
-
-          str1.meta[0] = [str1.meta[0], str2.meta[0]]
+          @meta << []
+          @meta.last[0] = str1.meta[0] if str1.respond_to?(:meta)
+          @meta.last[1] = str2.meta[0] if str2.respond_to?(:meta)
         end
         diff_ary.concat arr1[c[1], c[0]]
 

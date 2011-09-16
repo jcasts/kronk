@@ -27,7 +27,9 @@ class Kronk::Diff
       end
 
 
-      def << obj
+      def add obj, meta=nil
+        @lmeta, @rmeta = meta if meta && !@lmeta && !@rmeta
+
         if String === obj
           add_common obj
 
@@ -44,8 +46,6 @@ class Kronk::Diff
         @rlen    += 1
         @context += 1
 
-        @lmeta ||= @rmeta ||= obj.meta.first if obj.respond_to? :meta
-
         line_nums =
           @format.lines [@llen+@lindex, @rlen+@rindex], @cwidth if @cwidth
 
@@ -57,8 +57,6 @@ class Kronk::Diff
         @llen   += 1
         @context = 0
 
-        @lmeta ||= obj.meta.first if obj.respond_to? :meta
-
         line_nums = @format.lines [@llen+@lindex, nil], @cwidth if @cwidth
         @lines << "#{line_nums}#{@format.deleted obj}"
       end
@@ -67,8 +65,6 @@ class Kronk::Diff
       def add_right obj
         @rlen   += 1
         @context = 0
-
-        @rmeta ||= obj.meta.first if obj.respond_to? :meta
 
         line_nums = @format.lines [nil, @rlen+@rindex], @cwidth if @cwidth
         @lines << "#{line_nums}#{@format.added obj}"
@@ -158,7 +154,7 @@ class Kronk::Diff
 
       @diff.diff_array.each_with_index do |item, i|
         @section = Section.new @format, lwidth, line1, line2 if start_section? i
-        @section << item if @section
+        @section.add item, @diff.meta[i] if @section
 
         line1 += Array === item ? item[0].length : 1
         line2 += Array === item ? item[1].length : 1
