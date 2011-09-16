@@ -30,19 +30,17 @@ class TestTransaction < Test::Unit::TestCase
 
   def test_many_transactions
     data = @trans.run do |t|
-      t.map "key?"     => "thing%1",
-            "key3/*/0" => "key_value"
-      t.select "findme/0..1"
+      t.select "findme/0..1", "key(1|3)"
+      t.move [["key3/*/0", "key_value"], ["key?", "thing%1"]]
       t.delete "findme/0"
-      t.move "findme/2" => "last_thing"
+      t.move "findme/1" => "last_thing"
     end
 
     expected = {
-      "last_thing"=>{}, "key_value"=>"val1",
+      "last_thing"=>456 , "key_value"=>"val1", "findme" => [],
       "thing1"=>{:key1a=>["foo", "bar", "foobar", {:findme=>"thing"}],
         "key1b"=>"findme"},
-      "thing2"=>"foobar",
-      "thing3"=>{:key3a=>["val1", "val2", "val3"]}, "findme"=>[456]}
+      "thing3"=>{:key3a=>["val2", "val3"]}}
 
     assert_equal expected, data
   end
@@ -64,7 +62,7 @@ class TestTransaction < Test::Unit::TestCase
 
   def test_run
     expected = {
-      :key1=>{:key1a=>["foo", "foobar", {}]},
+      :key1=>{:key1a=>["foo", "foobar"]},
       :key2=>"foobar",
       "findme"=>[123, 456, {:findme=>123456}]
     }
@@ -93,7 +91,7 @@ class TestTransaction < Test::Unit::TestCase
     result = @trans.results
 
     expected = {
-      :key1=>{:key1a=>["foo", "foobar", {}]},
+      :key1=>{:key1a=>["foo", "foobar"]},
       :key2=>"foobar",
       "findme"=>[123, 456, {:findme=>123456}]
     }
@@ -109,7 +107,7 @@ class TestTransaction < Test::Unit::TestCase
     result = @trans.results :keep_indicies => true
 
     expected = {
-      :key1=>{:key1a=>{2=>"foobar", 0=>"foo", 3=>{}}},
+      :key1=>{:key1a=>{2=>"foobar", 0=>"foo"}},
       :key2=>"foobar",
       "findme"=>[123, 456, {:findme=>123456}]
     }
@@ -325,10 +323,11 @@ return
       :key3=>{}, "findme"=>[123, 456, {}],
       "more"=>{"one-findme"=>"thing", "two-findme"=>123456}}
 
-    data = @trans.transaction_move @data, "key*/key??" => "mapped/%1-%3",
-                                          "mapped"     => "remapped",
-                                          "**=thing"   => "more/one-%1",
-                                          "**=123456"  => "more/two-%1"
+    data = @trans.transaction_move @data,
+              ["**=thing",   "more/one-%1"],
+              ["key*/key??", "mapped/%1-%3"],
+              ["mapped",     "remapped"],
+              ["**=123456",  "more/two-%1"]
     data = @trans.remake_arrays data
 
     assert_equal expected, data
@@ -344,9 +343,10 @@ return
       "more"=>{:findme=>"thing"}
     }
 
-    data = @trans.transaction_map @data, "key*/key??" => "mapped/%1-%3",
-                                         "mapped"     => "remapped",
-                                         "**=thing"   => "more/%1"
+    data = @trans.transaction_map @data,
+              ["key*/key??", "mapped/%1-%3"],
+              ["mapped",     "remapped"],
+              ["**=thing",   "more/%1"]
 
     assert_equal expected, data
     assert_not_equal @data, data
@@ -357,7 +357,7 @@ return
     expected = {:key1=>{:key1a=>[], "key1b"=>"findme"},:key2=>"foobar",
       :key3=>{:key3a=>[]}, "findme"=>[123, 456, {:findme=>123456}]}
 
-    data = @trans.transaction_move @data, "key*/key??/*" => "mapped/%4"
+    data = @trans.transaction_move @data, ["key*/key??/*", "mapped/%4"]
     data = @trans.remake_arrays data
 
     mapped = data.delete "mapped"
@@ -442,30 +442,30 @@ return
 
     @trans.clear
 
-    assert @trans.instance_variable_get(:@actions)[:delete].empty?
-    assert @trans.instance_variable_get(:@actions)[:select].empty?
+    assert @trans.instance_variable_get(:@actions).empty?
     assert @trans.instance_variable_get(:@make_array).empty?
   end
 
 
   def test_select
     @trans.select "path1", "path2", "path3"
-    assert_equal ["path1", "path2", "path3"],
-                 @trans.instance_variable_get(:@actions)[:select]
+    assert_equal [[:select, ["path1", "path2", "path3"]]],
+                 @trans.instance_variable_get(:@actions)
 
     @trans.select "path4", "path5"
-    assert_equal ["path1", "path2", "path3", "path4", "path5"],
-                 @trans.instance_variable_get(:@actions)[:select]
+    assert_equal [[:select, ["path1", "path2", "path3", "path4", "path5"]]],
+                 @trans.instance_variable_get(:@actions)
   end
 
 
   def test_delete
     @trans.delete "path1", "path2", "path3"
-    assert_equal ["path1", "path2", "path3"],
-                 @trans.instance_variable_get(:@actions)[:delete]
+    assert_equal [[:delete, ["path1", "path2", "path3"]]],
+                 @trans.instance_variable_get(:@actions)
 
     @trans.delete "path4", "path5"
-    assert_equal ["path1", "path2", "path3", "path4", "path5"],
-                 @trans.instance_variable_get(:@actions)[:delete]
+    assert_equal [[:delete, ["path1", "path2", "path3"]],
+                  [:delete, ["path4", "path5"]]],
+                 @trans.instance_variable_get(:@actions)
   end
 end

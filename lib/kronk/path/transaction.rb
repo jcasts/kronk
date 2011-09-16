@@ -43,12 +43,7 @@ class Kronk::Path::Transaction
   def initialize data
     @data     = data
     @new_data = nil
-    @actions  = {
-      :select => [],
-      :delete => [],
-      :move   => {},
-      :map    => {}
-    }
+    @actions  = []
 
     @make_array = {}
   end
@@ -71,10 +66,33 @@ class Kronk::Path::Transaction
   # pass the :keep_indicies => true option.
 
   def results opts={}
-    new_data = transaction_select @data, *@actions[:select]
-    new_data = transaction_map    @data,  @actions[:map]
-    new_data = transaction_move   @data,  @actions[:move]
-    new_data = transaction_delete @data, *@actions[:delete]
+    #new_data = transaction_select @data, *@actions[:select]
+    #new_data = transaction_map    @data,  @actions[:map]
+    #new_data = transaction_move   @data,  @actions[:move]
+    #new_data = transaction_delete @data, *@actions[:delete]
+
+
+# - :select and :map must operate both on the same parent data and
+# write to the same child data. Make them the same action!
+# - :delete can run on the child data of :select/:map
+# - :move ??? Move seems to be the culprit making looping necessary.
+# Do we care about moving things that haven't been selected? Probably not.
+    new_data  = @data
+    prev_type = nil
+    prev_data = nil
+
+    @actions.each do |type, paths|
+      new_data = prev_data if [:select, :map].include?(prev_type) &&
+                              [:select, :map].include?(type)
+
+      new_data = send("transaction_#{type}", new_data, *paths)
+#p type
+#p new_data
+      prev_type = type
+      prev_data = new_data
+    end
+
+p @make_array
     remake_arrays new_data, opts[:keep_indicies]
   end
 
@@ -105,9 +123,23 @@ class Kronk::Path::Transaction
 
 
   def transaction_select data, *data_paths # :nodoc:
-    transaction data, data_paths, true do |new_curr_data, curr_data, key|
-      new_curr_data[key] = curr_data[key]
-    end
+    return data if data_paths.empty?
+    map_hash = {}
+
+    new_data =
+      transaction data, data_paths, true do |sdata, cdata, key, path, tpath|
+        if tpath
+          map_hash[tpath] = cdata[key]
+
+        else
+          sdata[key] = cdata[key]
+          @make_array[tpath] = true if @make_array[path]
+        end
+      end
+
+    new_data = force_assign_paths new_data, map_hash unless map_hash.empty?
+
+    new_data
   end
 
 
@@ -118,26 +150,21 @@ class Kronk::Path::Transaction
   end
 
 
-  def transaction_move data, match_target_hash # :nodoc:
-    return data if match_target_hash.empty?
+  def transaction_move data, *path_pairs # :nodoc:
+    return data if path_pairs.empty?
     path_val_hash = {}
 
-    match_target_hash.each do |data_path, path_map|
-      transaction data, [data_path] do |new_curr_data, cdata, key, path|
-        mapped_path = path.make_path path_map
-        path_val_hash[mapped_path] = new_curr_data.delete key
-        if @make_array[path]
-          @make_array.delete path
-          @make_array[mapped_path] = true
-        end
+    new_data =
+      transaction data, path_pairs do |sdata, cdata, key, path, tpath|
+        path_val_hash[tpath] = sdata.delete key
+        @make_array[tpath] = true if @make_array[path]
       end
-    end
 
-    force_assign_paths @new_data, path_val_hash
+    force_assign_paths new_data, path_val_hash
   end
 
 
-  def transaction_map data, match_target_hash # :nodoc:
+  def transaction_map data, *match_target_hash # :nodoc:
     return data if match_target_hash.empty?
     path_val_hash = {}
 
@@ -145,10 +172,7 @@ class Kronk::Path::Transaction
       Kronk::Path.find data_path, data do |sdata, key, spath|
         mapped_path = spath.make_path path_map
         path_val_hash[mapped_path] = sdata[key]
-        if @make_array[spath]
-          @make_array.delete spath
-          @make_array[mapped_path] = true
-        end
+        @make_array[mapped_path] = true if @make_array[spath]
       end
     end
 
@@ -160,13 +184,17 @@ class Kronk::Path::Transaction
     data_paths = data_paths.compact
     return @new_data || data if data_paths.empty?
 
-    @new_data ||= create_empty ? Hash.new : data.dup
+    @new_data = create_empty ? Hash.new : data.dup
 
     if Array === @new_data
       @new_data = ary_to_hash @new_data
     end
 
     data_paths.each do |data_path|
+      # If data_path is an array, the second element is the path where the value
+      # should be mapped to.
+      data_path, target_path = data_path
+
       Kronk::Path.find data_path, data do |obj, k, path|
         curr_data     = data
         new_curr_data = @new_data
@@ -175,7 +203,8 @@ class Kronk::Path::Transaction
           break unless new_curr_data
 
           if i == path.length - 1
-            yield new_curr_data, curr_data, key, path if block_given?
+            tpath = path.make_path target_path if target_path
+            yield new_curr_data, curr_data, key, path, tpath if block_given?
 
           else
             if create_empty
@@ -272,7 +301,7 @@ class Kronk::Path::Transaction
 
   def clear
     @new_data = nil
-    @actions.each{|k,v| v.clear}
+    @actions.clear
     @make_array.clear
   end
 
@@ -281,7 +310,11 @@ class Kronk::Path::Transaction
   # Queues path selects for transaction.
 
   def select *paths
-    @actions[:select].concat paths
+    if @actions.last && @actions.last[0] == :select
+      @actions.last[1].concat paths
+    else
+      @actions << [:select, paths]
+    end
   end
 
 
@@ -289,7 +322,7 @@ class Kronk::Path::Transaction
   # Queues path deletes for transaction.
 
   def delete *paths
-    @actions[:delete].concat paths
+    @actions << [:delete, paths]
   end
 
 
@@ -301,7 +334,7 @@ class Kronk::Path::Transaction
   #          "other/path/*"     => "moved/%d"
 
   def move path_maps
-    @actions[:move].merge! path_maps
+    @actions << [:move, path_maps.to_a]
   end
 
 
@@ -312,6 +345,6 @@ class Kronk::Path::Transaction
   #          "other/path/*"     => "moved/%d"
 
   def map path_maps
-    @actions[:map].merge! path_maps
+    @actions << [:map, path_maps.to_a]
   end
 end
