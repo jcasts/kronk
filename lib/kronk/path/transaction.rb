@@ -124,22 +124,11 @@ class Kronk::Path::Transaction
 
   def transaction_select data, *data_paths # :nodoc:
     return data if data_paths.empty?
-    map_hash = {}
 
-    new_data =
-      transaction data, data_paths, true do |sdata, cdata, key, path, tpath|
-        if tpath
-          map_hash[tpath] = cdata[key]
-
-        else
-          sdata[key] = cdata[key]
-          @make_array[tpath] = true if @make_array[path]
-        end
-      end
-
-    new_data = force_assign_paths new_data, map_hash unless map_hash.empty?
-
-    new_data
+    transaction data, data_paths, true do |sdata, cdata, key, path, tpath|
+      sdata[key] = cdata[key]
+      @make_array[tpath] = true if @make_array[path]
+    end
   end
 
 
