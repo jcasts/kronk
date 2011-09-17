@@ -71,8 +71,8 @@ class Kronk::Path::Transaction
     prev_data = nil
 
     @actions.each do |type, paths|
-      new_data = prev_data if [:select, :map].include?(prev_type) &&
-                              [:select, :map].include?(type)
+      #new_data = prev_data if [:select, :map].include?(prev_type) &&
+      #                        [:select, :map].include?(type)
 
       new_data = send("transaction_#{type}", new_data, *paths)
 #p type
@@ -164,19 +164,16 @@ class Kronk::Path::Transaction
   end
 
 
-  def transaction_map data, *match_target_hash # :nodoc:
-    return data if match_target_hash.empty?
+  def transaction_map data, *path_pairs # :nodoc:
+    return data if path_pairs.empty?
     path_val_hash = {}
 
-    match_target_hash.each do |data_path, path_map|
-      Kronk::Path.find data_path, data do |sdata, key, spath|
-        mapped_path = spath.make_path path_map
-        path_val_hash[mapped_path] = sdata[key]
-        remap_make_arrays(mapped_path, spath)
-      end
+    transaction data, path_pairs do |sdata, cdata, key, path, tpath|
+      path_val_hash[tpath] = sdata.delete key
+      remap_make_arrays(tpath, path)
     end
 
-    force_assign_paths @new_data, path_val_hash
+    force_assign_paths data.class.new, path_val_hash
   end
 
 
@@ -231,7 +228,7 @@ class Kronk::Path::Transaction
 
   def force_assign_paths data, path_val_hash # :nodoc:
     return data if path_val_hash.empty?
-    @new_data ||= (data.dup rescue [])
+    @new_data = (data.dup rescue [])
 
     path_val_hash.each do |path, value|
       curr_data     = data

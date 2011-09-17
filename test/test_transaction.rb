@@ -46,6 +46,24 @@ class TestTransaction < Test::Unit::TestCase
   end
 
 
+  def test_many_transactions_with_map
+    data = @trans.run do |t|
+      t.select "findme/0..1", "key(1|3)"
+      t.map [["key3/*/0", "key_value"], ["key?", "thing%1"]]
+      t.delete "findme/0"
+      t.move "findme/1" => "last_thing"
+    end
+
+    expected = {
+      "key_value"=>"val1",
+      "thing1"=>{:key1a=>["foo", "bar", "foobar", {:findme=>"thing"}],
+        "key1b"=>"findme"},
+      "thing3"=>{:key3a=>["val2", "val3"]}}
+
+    assert_equal expected, data
+  end
+
+
   def test_class_run
     block = lambda do |t|
       t.delete "key3/key*/2", "**=thing"
@@ -337,15 +355,17 @@ class TestTransaction < Test::Unit::TestCase
   def test_transaction_map
     expected = {
       "mapped"=>{
-        "1-a"=>["foo", "bar", "foobar", {:findme=>"thing"}],
+        "1-a"=>["foo", "bar", "foobar", {}],
         "1-b"=>"findme", "3-a"=>["val1", "val2", "val3"]},
       "more"=>{:findme=>"thing"}
     }
 
     data = @trans.transaction_map @data,
+              ["**=thing",   "more/%1"],
               ["key*/key??", "mapped/%1-%3"],
-              ["mapped",     "remapped"],
-              ["**=thing",   "more/%1"]
+              ["mapped",     "remapped"]
+
+    data = @trans.remake_arrays data
 
     assert_equal expected, data
     assert_not_equal @data, data
