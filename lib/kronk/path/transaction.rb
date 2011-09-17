@@ -66,17 +66,6 @@ class Kronk::Path::Transaction
   # pass the :keep_indicies => true option.
 
   def results opts={}
-    #new_data = transaction_select @data, *@actions[:select]
-    #new_data = transaction_map    @data,  @actions[:map]
-    #new_data = transaction_move   @data,  @actions[:move]
-    #new_data = transaction_delete @data, *@actions[:delete]
-
-
-# - :select and :map must operate both on the same parent data and
-# write to the same child data. Make them the same action!
-# - :delete can run on the child data of :select/:map
-# - :move ??? Move seems to be the culprit making looping necessary.
-# Do we care about moving things that haven't been selected? Probably not.
     new_data  = @data
     prev_type = nil
     prev_data = nil
@@ -122,7 +111,9 @@ class Kronk::Path::Transaction
   end
 
 
-  def remap_make_arrays new_path, old_path
+  def remap_make_arrays new_path, old_path # :nodoc:
+    @make_array[new_path] = true and return if @make_array[old_path]
+
     @make_array.keys.each do |path|
       if path[0...old_path.length] == old_path
         path[0...old_path.length] = new_path
@@ -167,7 +158,6 @@ class Kronk::Path::Transaction
       transaction data, path_pairs do |sdata, cdata, key, path, tpath|
         path_val_hash[tpath] = sdata.delete key
         remap_make_arrays(tpath, path)
-        #@make_array[tpath] = true if @make_array[path]
       end
 
     force_assign_paths new_data, path_val_hash
@@ -183,7 +173,6 @@ class Kronk::Path::Transaction
         mapped_path = spath.make_path path_map
         path_val_hash[mapped_path] = sdata[key]
         remap_make_arrays(mapped_path, spath)
-        #@make_array[mapped_path] = true if @make_array[spath]
       end
     end
 
