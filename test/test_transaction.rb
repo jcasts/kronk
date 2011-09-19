@@ -372,6 +372,26 @@ class TestTransaction < Test::Unit::TestCase
   end
 
 
+  def test_transaction_map_no_target
+    expected = {
+      "mapped"=>{
+        "1-a"=>["foo", "bar", "foobar", {}],
+        "1-b"=>"findme", "3-a"=>["val1", "val2", "val3"]},
+      :key1=>{:key1a => [{:findme=>"thing"}]}
+    }
+
+    data = @trans.transaction_map @data,
+              "**=thing",
+              ["key*/key??", "mapped/%1-%3"],
+              ["mapped",     "remapped"]
+
+    data = @trans.remake_arrays data
+
+    assert_equal expected, data
+    assert_not_equal @data, data
+  end
+
+
   def test_transaction_move_array_conflicting
     expected = {:key1=>{:key1a=>[], "key1b"=>"findme"},:key2=>"foobar",
       :key3=>{:key3a=>[]}, "findme"=>[123, 456, {:findme=>123456}]}

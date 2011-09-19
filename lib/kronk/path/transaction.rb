@@ -127,7 +127,6 @@ class Kronk::Path::Transaction
 
     transaction data, data_paths, true do |sdata, cdata, key, path, tpath|
       sdata[key] = cdata[key]
-      @make_array[tpath] = true if @make_array[path]
     end
   end
 
@@ -158,6 +157,7 @@ class Kronk::Path::Transaction
     path_val_hash = {}
 
     transaction data, path_pairs do |sdata, cdata, key, path, tpath|
+      tpath ||= path
       path_val_hash[tpath] = sdata.delete key
       remap_make_arrays(tpath, path)
     end
@@ -231,7 +231,7 @@ class Kronk::Path::Transaction
           new_curr_data          = ary_to_hash new_curr_data
           prev_data[prev_key]    = new_curr_data if prev_data
           @new_data              = new_curr_data if i == 0
-          @make_array[prev_path] = true
+          @make_array[prev_path] = true          if i == 0
         end
 
         last      = i == path.length - 1
@@ -320,7 +320,7 @@ class Kronk::Path::Transaction
   #          "other/path/*"     => "moved/%d"
 
   def move path_maps
-    @actions << [:move, path_maps.to_a]
+    @actions << [:move, Array(path_maps)]
   end
 
 
@@ -331,6 +331,6 @@ class Kronk::Path::Transaction
   #          "other/path/*"     => "moved/%d"
 
   def map path_maps
-    @actions << [:map, path_maps.to_a]
+    @actions << [:map, Array(path_maps)]
   end
 end
