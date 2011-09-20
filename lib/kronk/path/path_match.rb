@@ -3,17 +3,28 @@
 
 class Kronk::Path::PathMatch < Array
 
-  attr_accessor :matches
+  attr_accessor :matches, :splat
 
   def initialize *args
     @matches = []
+    @splat   = []
     super
+  end
+
+
+  def append_splat id, key
+    if @splat[-1] && @splat[-1][0] == id
+      @splat[-1][1] << key
+    else
+      @splat << [id, [key]]
+    end
   end
 
 
   def dup # :nodoc:
     path_match = super
     path_match.matches = @matches.dup
+    path_match.splat   = @splat.map{|key, sp| [key, sp.dup]}
     path_match
   end
 
@@ -32,6 +43,7 @@ class Kronk::Path::PathMatch < Array
   # Builds a path array by replacing %n values with matches.
 
   def make_path path_map, regex_opts=nil, &block
+    tmpsplat = @splat.dup
     path     = []
     escape   = false
     replace  = false
@@ -47,7 +59,27 @@ class Kronk::Path::PathMatch < Array
         new_item = true
 
       when Kronk::Path::RCH
-        replace = true
+        if replace
+          if rindex.empty?
+            unless tmpsplat.empty?
+              items = tmpsplat.shift[1].dup
+              if new_item
+                new_item = false
+              else
+                path[-1] = path[-1].dup << items.shift
+              end
+              path.concat items
+            end
+            replace = false
+          else
+            append_match_for(rindex, path)
+            rindex = ""
+          end
+
+          next
+        else
+          replace = true
+        end
       end and next unless escape
 
       if replace

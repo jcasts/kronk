@@ -107,10 +107,13 @@ class TestPathMatcher < Test::Unit::TestCase
     matcher = Kronk::Path::Matcher.new :key       => :findme,
                                        :recursive => true
 
-    matcher.find_in @data do |data, key|
+    path_matches = matcher.find_in @data do |data, key|
       keys << key.to_s
       data_points << data
     end
+
+    assert_equal [[matcher, [:key1, :key1a, 3]]],
+      path_matches.first.splat
 
     assert_equal 3, keys.length
     assert_equal 1, keys.uniq.length
@@ -204,6 +207,11 @@ class TestPathMatcher < Test::Unit::TestCase
       [:key3]
     ]
 
+    paths.each do |path|
+      assert path.splat.empty?,
+        "Expected empty splat for #{path.inspect} but got #{path.splat.inspect}"
+    end
+
     assert_equal expected_paths, (expected_paths | paths)
     assert_equal Kronk::Path::PathMatch, paths.first.class
     assert_equal expected_paths, (expected_paths | paths.map{|p| p.matches})
@@ -266,6 +274,23 @@ class TestPathMatcher < Test::Unit::TestCase
 
     assert_equal [[:key3, :key3a]], paths
     assert_equal ["key"], paths.first.matches
+  end
+
+
+  def test_find_in_match_splat
+    matcher = Kronk::Path::Matcher.new :key       => "findme",
+                                       :recursive => true
+
+    matches = matcher.find_in @data
+
+    assert_equal [:key1, :key1a, 3, :findme], matches[0]
+    assert_equal [:key1, :key1a, 3], matches[0].splat[0][1]
+
+    assert_equal ["findme"], matches[1]
+    assert_equal [], matches[1].splat[0][1]
+
+    assert_equal ["findme", 2, :findme], matches[2]
+    assert_equal ["findme", 2], matches[2].splat[0][1]
   end
 
 

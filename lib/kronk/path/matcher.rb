@@ -91,16 +91,20 @@ class Kronk::Path::Matcher
       found, kmatch = match_node(@key, key)     if @key
       found, vmatch = match_node(@value, value) if @value && (!@key || found)
 
+      c_path.append_splat self, key if @recursive
+
       if found
         c_path.matches.concat kmatch.to_a
         c_path.matches.concat vmatch.to_a
 
-        yield data, key, c_path if block_given?
-        paths << c_path
+        f_path = c_path.dup
+        f_path.splat[-1][-1].pop unless !@key || f_path.splat.empty?
+
+        yield data, key, f_path if block_given?
+        paths << f_path
       end
 
-      paths.concat \
-        find_in(data[key], c_path, &block) if @recursive
+      paths.concat find_in(data[key], c_path, &block) if @recursive
     end
 
     paths
