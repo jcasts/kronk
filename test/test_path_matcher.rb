@@ -294,6 +294,20 @@ class TestPathMatcher < Test::Unit::TestCase
   end
 
 
+  def test_find_in_match_splat_value
+    matcher = Kronk::Path::Matcher.new :value     => "foobar",
+                                       :recursive => true
+
+    matches = matcher.find_in @data
+
+    assert_equal [:key1, :key1a, 2], matches[0]
+    assert_equal [:key1, :key1a, 2], matches[0].splat[0][1]
+
+    assert_equal [:key2], matches[1]
+    assert_equal [:key2], matches[1].splat[0][1]
+  end
+
+
   def test_parse_node_range
     assert_equal 1..4,   @matcher.parse_node("1..4")
     assert_equal 1...4,  @matcher.parse_node("1...4")
