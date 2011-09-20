@@ -557,19 +557,6 @@ class TestKronk < Test::Unit::TestCase
   end
 
 
-  def test_parse_data_path_args
-    options = {}
-    argv = %w{this is --argv -- one -two -- -three four}
-
-    options = Kronk::Cmd.parse_data_path_args options, argv
-
-    assert_equal %w{one four}, options[:only_data]
-    assert_equal %w{two - three}, options[:ignore_data]
-
-    assert_equal %w{this is --argv}, argv
-  end
-
-
   private
 
   def mock_uri_options

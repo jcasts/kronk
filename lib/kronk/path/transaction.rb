@@ -36,6 +36,8 @@ class Kronk::Path::Transaction
   end
 
 
+  attr_accessor :actions
+
   ##
   # Create a new Transaction instance with a the data object to perform
   # operations on.
@@ -71,17 +73,9 @@ class Kronk::Path::Transaction
     prev_data = nil
 
     @actions.each do |type, paths|
-      #new_data = prev_data if [:select, :map].include?(prev_type) &&
-      #                        [:select, :map].include?(type)
-
       new_data = send("transaction_#{type}", new_data, *paths)
-#p type
-#p new_data
-      prev_type = type
-      prev_data = new_data
     end
 
-#p @make_array
     remake_arrays new_data, opts[:keep_indicies]
   end
 

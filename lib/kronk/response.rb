@@ -277,8 +277,19 @@ class Kronk
     # :no_body:: Bool - Don't return the body; default nil
     # :show_headers:: Bool/String/Array - Return headers; default nil
     # :parser:: Object - The parser to use for the body; default nil
+    # :transform:: Array - Action/path(s) pairs to modify data.
+    #
+    # Deprecated Options:
     # :ignore_data:: String/Array - Removes the data from given data paths
     # :only_data:: String/Array - Extracts the data from given data paths
+    #
+    # Example:
+    #   response.selective_data :transform => [:delete, ["foo/0", "bar/1"]]
+    #   response.selective_data do |trans|
+    #     trans.delete "foo/0", "bar/1"
+    #   end
+    #
+    # See Kronk::Path::Transaction for supported transform actions.
 
     def selective_data options={}
       data = nil
@@ -294,8 +305,13 @@ class Kronk
       end
 
       Path::Transaction.run data, options do |t|
-        t.select(*options[:only_data])
-        t.delete(*options[:ignore_data])
+        # Backward compatibility support
+        t.select(*options[:only_data])   if options[:only_data]
+        t.delete(*options[:ignore_data]) if options[:ignore_data]
+
+        t.actions.concat options[:transform] if options[:transform]
+
+        yield t if block_given?
       end
     end
 
@@ -311,12 +327,15 @@ class Kronk
     # :raw:: Boolean - Force using the unparsed raw response
     # :keep_indicies:: Boolean - indicies of modified arrays display as hashes.
     # :show_headers:: Boolean/String/Array - defines which headers to include
+    #
+    # If block is given, yields a Kronk::Path::Transaction instance to make
+    # transformations on the data. See Kronk::Response#selective_data
 
-    def stringify options={}
+    def stringify options={}, &block
       options = options.empty? ? @stringify_opts : merge_stringify_opts(options)
 
       if !options[:raw] && (options[:parser] || @parser || options[:no_body])
-        data = selective_data options
+        data = selective_data options, &block
         DataString.new data, options
       else
         selective_string options

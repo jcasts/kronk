@@ -410,20 +410,49 @@ Parse and run diffs against data from live and cached http responses.
     # Returns the array [only_paths, except_paths]
 
     def self.parse_data_path_args options, argv
-      return options unless argv.include? "--"
+      path_index = argv.index("--")
+      return options unless path_index && path_index < argv.length - 1
 
-      data_paths = argv.slice! argv.index("--")..-1
+      data_paths = argv.slice! path_index..-1
       data_paths.shift
 
+      options[:transform] = []
+
       data_paths.each do |path|
-        if path[0,1] == "-"
-          (options[:ignore_data] ||= []) << path[1..-1]
+        action, path = process_path path
+
+        # Merge identical actions into the same transaction action
+        if options[:transform][-1] && options[:transform][-1][0] == action
+          options[:transform][-1][1] << path
+
+        # Merge successive maps and selects together
+        elsif options[:transform][-1] &&
+          [options[:transform][-1][0], action, :map, :select].uniq.length == 2
+          options[:transform][-1][0] = :map
+          options[:transform][-1][1] << path
+
         else
-          (options[:only_data] ||= []) << path
+          options[:transform] << [action, [path]]
         end
       end
 
       options
+    end
+
+
+    def self.process_path path # :nodoc:
+      case path
+      when /^-/
+        [:delete, path[1..-1]]
+      when /([^\\]>>)/
+        index = path.index $1
+        [:move, [path[0..index], path[index+3..-1]]]
+      when /([^\\]>)/
+        index = path.index $1
+        [:map, [path[0..index], path[index+2..-1]]]
+      else
+        [:select, path]
+      end
     end
 
 

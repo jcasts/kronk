@@ -98,8 +98,8 @@ class TestCmd < Test::Unit::TestCase
     argv = %w{opt1 opt2 -- path1 path2 -path3}
     Kronk::Cmd.parse_data_path_args opts, argv
 
-    assert_equal %w{path1 path2}, opts[:only_data]
-    assert_equal %w{path3}, opts[:ignore_data]
+    assert_equal [:select, %w{path1 path2}], opts[:transform][0]
+    assert_equal [:delete, %w{path3}],       opts[:transform][1]
   end
 
 
@@ -110,6 +110,34 @@ class TestCmd < Test::Unit::TestCase
 
     assert_nil opts[:only_data]
     assert_nil opts[:ignore_data]
+  end
+
+
+  def test_parse_data_path_args_double
+    options = {}
+    argv = %w{this is --argv -- one -two -- -three four}
+
+    options = Kronk::Cmd.parse_data_path_args options, argv
+
+    assert_equal [:select, %w{one}],         options[:transform][0]
+    assert_equal [:delete, %w{two - three}], options[:transform][1]
+    assert_equal [:select, %w{four}],        options[:transform][2]
+
+    assert_equal %w{this is --argv}, argv
+  end
+
+
+  def test_parse_data_path_args_select_and_map_join
+    options = {}
+    argv = %w{this is --argv -- one two>foo -three four}
+
+    options = Kronk::Cmd.parse_data_path_args options, argv
+
+    assert_equal [:map, ['one', ['two', 'foo']]], options[:transform][0]
+    assert_equal [:delete, %w{three}],            options[:transform][1]
+    assert_equal [:select, %w{four}],             options[:transform][2]
+
+    assert_equal %w{this is --argv}, argv
   end
 
 
@@ -348,8 +376,8 @@ class TestCmd < Test::Unit::TestCase
 
   def test_parse_args_paths
     opts = Kronk::Cmd.parse_args %w{uri -- path1 path2 -path3}
-    assert_equal %w{path3}, opts[:ignore_data]
-    assert_equal %w{path1 path2}, opts[:only_data]
+    assert_equal [:delete, %w{path3}],       opts[:transform][1]
+    assert_equal [:select, %w{path1 path2}], opts[:transform][0]
   end
 
 

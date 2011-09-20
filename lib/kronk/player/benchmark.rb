@@ -175,7 +175,7 @@ Request Percentages (ms)
 
         out << "
 Avg. Slowest Paths (ms, #)
-#{slowest_paths.map{|arr| "  #{(arr[1])}  #{arr[0]}"}.join "\n" }" if @hostname
+#{slowest_paths.map{|arr| "  #{arr[1]}  #{arr[0]}"}.join "\n" }" if @hostname
 
         out
       end
