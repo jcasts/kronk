@@ -63,6 +63,34 @@ class TestPath < Test::Unit::TestCase
     assert data_points.include?(@data['findme'].last)
 
     assert_equal expected_paths, (expected_paths | paths)
+
+    assert_equal [:key1, :key1a, 3], paths.first.splat[0][1]
+  end
+
+
+  def test_find_recursive_many_splat
+    path_match = nil
+
+    Kronk::Path.find "**/key1a/**=thing", @data do |data, key, path|
+      path_match = path
+    end
+
+    assert path_match
+    assert_equal [:key1], path_match.splat[0][1]
+    assert_equal [3], path_match.splat[1][1]
+  end
+
+
+  def test_find_recursive_many_splat_end_match
+    path_match = nil
+
+    Kronk::Path.find "**/key1a/**/*=thing", @data do |data, key, path|
+      path_match = path
+    end
+
+    assert path_match
+    assert_equal [:key1], path_match.splat[0][1]
+    assert_equal [3], path_match.splat[1][1]
   end
 
 

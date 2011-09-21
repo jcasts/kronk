@@ -98,7 +98,7 @@ class Kronk::Path::Matcher
         c_path.matches.concat vmatch.to_a
 
         f_path = c_path.dup
-        f_path.splat[-1][-1].pop unless !@key || f_path.splat.empty?
+        f_path.splat[-1][-1].pop if @key && !f_path.splat.empty?
 
         yield data, key, f_path if block_given?
         paths << f_path

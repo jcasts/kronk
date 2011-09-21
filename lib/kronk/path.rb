@@ -282,6 +282,7 @@ class Kronk
             end
           end
 
+          # Make sure we're not trying to access /./thing
           unless key =~ /^\.?$/ && !value
             matcher = Matcher.new :key        => key,
                                   :value      => value,
