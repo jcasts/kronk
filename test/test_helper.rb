@@ -72,6 +72,18 @@ def assert_require req, msg=nil
 end
 
 
+def assert_proxy_auth expected
+  assert_equal expected,
+    Base64.decode64(Kronk::CLIENT.proxy_auth.basic_auth.instance_variable_get("@cred"))
+end
+
+
+def assert_proxy expected
+  expected = "http://#{expected}" unless expected =~ %w{^https?://}
+  assert_equal URI.parse(expected), Kronk::CLIENT.proxy
+end
+
+
 $catch_exit = nil
 alias kernel_exit exit
 def exit status=true

@@ -92,4 +92,8 @@ class Kronk
     :use_cookies    => true,
     :user_agents    => USER_AGENTS.dup
   }
+
+
+  # HTTP Client instance
+  CLIENT = HTTPClient.new
 end

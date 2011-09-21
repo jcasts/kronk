@@ -338,10 +338,10 @@ Parse and run diffs against data from live and cached http responses.
 
         opt.on('-U', '--proxy-user STR', String,
                'Set proxy user and/or password: usr[:pass]') do |value|
-          options[:proxy][:username], options[:proxy][:password] =
-            value.split ":", 2
+          username, password = value.split ":", 2
+          password ||= query_password "Proxy password:"
 
-          options[:proxy][:password] ||= query_password "Proxy password:"
+          CLIENT.set_proxy_auth username, password
         end
 
 
@@ -362,7 +362,8 @@ Parse and run diffs against data from live and cached http responses.
 
         opt.on('-x', '--proxy STR', String,
                'Use HTTP proxy on given port: host[:port]') do |value|
-          options[:proxy][:address], options[:proxy][:port] = value.split ":", 2
+          value = "http://#{value}" unless value =~ %r{^https?://}
+          CLIENT.proxy = value
         end
 
         opt.separator nil

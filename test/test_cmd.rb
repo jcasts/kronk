@@ -350,7 +350,7 @@ class TestCmd < Test::Unit::TestCase
     assert_equal "bar",   opts[:query]
     assert_equal "/tail", opts[:uri_suffix]
     assert_equal "PUT",   opts[:http_method]
-    assert_equal({:address => "example.com", :port => "2000"}, opts[:proxy])
+    assert_proxy "example.com:2000"
 
     opts = Kronk::Cmd.parse_args %w{uri -L 3}
     assert_equal 3, opts[:follow_redirects]
@@ -363,14 +363,14 @@ class TestCmd < Test::Unit::TestCase
 
     opts = Kronk::Cmd.parse_args %w{uri -u svruser -U proxuser}
     assert_equal({:username => "svruser", :password => "svr"}, opts[:auth])
-    assert_equal({:username => "proxuser", :password => "prox"}, opts[:proxy])
+    assert_proxy_auth "proxuser:prox"
 
     Kronk::Cmd.expects(:query_password).with("Server password:").never
     Kronk::Cmd.expects(:query_password).with("Proxy password:").never
 
     opts = Kronk::Cmd.parse_args %w{uri -u svruser:svr2 -U proxuser:prox2}
     assert_equal({:username => "svruser", :password => "svr2"}, opts[:auth])
-    assert_equal({:username => "proxuser", :password => "prox2"}, opts[:proxy])
+    assert_proxy_auth "proxuser:prox2"
   end
 
 
