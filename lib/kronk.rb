@@ -2,6 +2,7 @@ require 'rubygems'
 
 require 'json'
 require 'cookiejar'
+require 'httpclient'
 
 require 'thread'
 require 'stringio'
