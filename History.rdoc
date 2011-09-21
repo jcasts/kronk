@@ -4,7 +4,7 @@
 
   * Full URL support for player input.
 
-  * Move and map path transaction support.
+  * Move and map path transaction support with matches and splats.
 
 * Bugfixes:
 

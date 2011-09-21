@@ -357,11 +357,11 @@ class TestTransaction < Test::Unit::TestCase
       "mapped"=>{
         "1-a"=>["foo", "bar", "foobar", {}],
         "1-b"=>"findme", "3-a"=>["val1", "val2", "val3"]},
-      "more"=>{:findme=>"thing"}
+      "more"=>[{:findme=>"thing"}]
     }
 
     data = @trans.transaction_map @data,
-              ["**=thing",   "more/%1"],
+              ["**=thing",   "more/12/%1"],
               ["key*/key??", "mapped/%1-%3"],
               ["mapped",     "remapped"]
 
@@ -461,6 +461,14 @@ class TestTransaction < Test::Unit::TestCase
     expected[3]['other'] = ['val4', 'val3', ['val5']]
     new_data = @trans.remake_arrays new_data
     assert_equal expected, new_data
+  end
+
+
+  def test_is_integer
+    assert @trans.is_integer?("123")
+    assert @trans.is_integer?(:"123")
+    assert !@trans.is_integer?("foo123")
+    assert !@trans.is_integer?(:foo123)
   end
 
 

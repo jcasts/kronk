@@ -235,7 +235,7 @@ class Kronk::Path::Transaction
 
         # new_curr_data is a hash from here on
 
-        @make_array.delete prev_path unless Integer === key
+        @make_array.delete prev_path unless is_integer?(key)
 
         new_curr_data[key] = value and break if last
 
@@ -243,7 +243,7 @@ class Kronk::Path::Transaction
           new_curr_data[key] ||= curr_data[key]
 
         elsif !ary_or_hash?(new_curr_data[key])
-          new_curr_data[key] = Integer === next_key ? [] : {}
+          new_curr_data[key] = is_integer?(next_key) ? [] : {}
         end
 
         @make_array[curr_path] = true if Array === new_curr_data[key]
@@ -256,6 +256,11 @@ class Kronk::Path::Transaction
     end
 
     @new_data
+  end
+
+
+  def is_integer? item # :nodoc:
+    item.to_s.to_i.to_s == item.to_s
   end
 
 
