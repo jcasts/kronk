@@ -11,9 +11,13 @@ Kronk was made possible by the sponsoring of AT&T Interactive.
 
 * Parse and display or diff data from http response body and/or headers.
 
-* Include or exclude specific data points with file-glob-like paths.
+* Include, exclude or map specific data points with file-glob-like paths.
+
+* Query and logfile playback with custom output.
 
 * Supports json, rails-ish xml, and plist.
+
+* URI-specific configuration.
 
 * Support for custom data parsers and diff formatters.
 
@@ -25,11 +29,7 @@ Kronk was made possible by the sponsoring of AT&T Interactive.
 
 * Easy-to-read output (color or ascii, line numbers, etc).
 
-* URI-specific configuration.
-
 * Helper methods for test suites.
-
-* Query and logfile playback with custom output.
 
 * Yes, it works on Windows.
 
@@ -158,10 +158,15 @@ Bash completion is available by sourcing the file returned by:
   $ kronk --completion
   [gem path]/script/kronk_completion
 
-== DATA TRAVERSING:
+== DATA MANIPULATION:
 
 One of Kronk's most powerful features is its ability to segregate data.
-From the command line, this is done by passing data paths after '--':
+From the command line, this is done by passing data paths after '--'
+
+=== Selecting and Deleting:
+
+The first kind of data transformation is the ability to select and delete
+data by path:
 
   $ kronk http://host.com -- data/path1 data/path2/1/child
 
@@ -240,6 +245,37 @@ end of the path in the following fashion:
     }
   }
 
+=== Mapping and Moving:
+
+In Kronk, mapping equates to selecting and renaming a given path in an empty
+data structure. Moving refers to deleting the path value and placing it
+back in the original data structure at the new path.
+
+  # Mapping is done with the > operator:
+  $ kronk host.com -- data/path3 "data/path(1|2)>moved%1"
+
+  {
+    "data": {
+      "path3": "value3"
+    }
+    "moved1": "value1",
+    "moved2": "value2"
+  }
+
+
+  # Moving is done with the >> operator:
+  $ kronk host.com -- "data/path(1|2)>moved%1"
+
+  {
+    "data": {
+      "path3": "value3",
+      "path4": "value4"
+    }
+    "moved1": "value1",
+    "moved2": "value2"
+  }
+
+=== Special Characters:
 
 There are additionally a variety of wildcard and special characters that
 are supported:
@@ -263,7 +299,17 @@ are supported:
 
 * \\ escapes any special path character
 
-Check out Kronk::Path and Kronk::DataSet for more details on data traversing.
+* > is used to exclusively map one path to another
+
+* >> moves a path to another within the original data structure
+
+* %NUM is used in the target path to reference a given match
+
+* %% is used to reference splats from the original path and assign it in the
+  target path
+
+Check out Kronk::Path and Kronk::Path::Transaction for more details
+on data manipulation.
 
 Note: Bash may try to parse your data paths, especially if they start with
 wildcards or if they contain the pipe "|" character, so you may need to put
