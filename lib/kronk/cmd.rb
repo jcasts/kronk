@@ -48,7 +48,7 @@ class Kronk
 
 
     ##
-    # Parse ARGV
+    # Parse ARGV into options and Kronk config.
 
     def self.parse_args argv
       options = {
@@ -440,7 +440,10 @@ Parse and run diffs against data from live and cached http responses.
     end
 
 
-    def self.process_path path # :nodoc:
+    ##
+    # Determine the cmd-given path's action and Kronk::Path representation.
+
+    def self.process_path path
       case path
       when /^-/
         [:delete, path[1..-1]]

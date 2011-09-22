@@ -1,7 +1,7 @@
 class Kronk
 
   ##
-  # Creates ordered data strings renders.
+  # Creates ordered data string renders.
 
   class DataString < String
 
@@ -52,6 +52,15 @@ class Kronk
     ##
     # Create a new DataString that is diff-able, meaning sorted by
     # Hash keys when available.
+    #
+    # Options supported are:
+    # :indentation:: Integer - how many spaces to indent by; default 1
+    # :render_lang:: String - output to 'ruby' or 'json'; default 'json'
+    # :struct:: Boolean - class names used instead of values; default nil
+    #
+    # If block is given, will yield the type of object to render and
+    # an optional object to render. Types given are :key_assign, :key, :value,
+    # or :struct. By default DataString uses the TO_JSON proc.
 
     def initialize data=nil, opts={}, &block
       @struct_only = opts[:struct]
@@ -133,15 +142,21 @@ class Kronk
     end
 
 
-   def << str
-     if str.class == self.class
-       @meta.concat str.meta
-     else
-       @meta.concat([@meta.last] * str.length)
-     end
-     super str
-   end
+    ##
+    # Similar to String#<< but adds metadata.
 
+    def << str
+      if str.class == self.class
+        @meta.concat str.meta
+      else
+        @meta.concat([@meta.last] * str.length)
+      end
+      super str
+    end
+
+
+    ##
+    # Similar to String#[] but keeps metadata.
 
     def [] arg
       dstr = self.class.new super
@@ -149,6 +164,9 @@ class Kronk
       dstr
     end
 
+
+    ##
+    # Similar to String#split but keeps metadata.
 
     def split pattern=$;, *more
       arr      = super
