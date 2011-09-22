@@ -65,7 +65,16 @@ class Kronk
 
 
   ##
-  # Find a fully qualified ruby namespace/constant.
+  # Find a fully qualified ruby namespace/constant. Supports file paths,
+  # constants, or path:Constant combinations:
+  #   Kronk.find_const "json"
+  #   #=> JSON
+  #
+  #   Kronk.find_const "namespace/mylib"
+  #   #=> Namespace::MyLib
+  #
+  #   Kronk.find_const "path/to/somefile.rb:Namespace::MyLib"
+  #   #=> Namespace::MyLib
 
   def self.find_const name_or_file, case_insensitive=false
     return name_or_file unless String === name_or_file
@@ -161,7 +170,7 @@ class Kronk
 
 
   ##
-  # Load the saved cookies file.
+  # Load the saved cookies file. Defaults to Kronk::config[:cookies_file].
 
   def self.load_cookie_jar file=nil
     file ||= config[:cookies_file]
@@ -260,7 +269,7 @@ class Kronk
   # Query arguments may be set to the special value :cache to use the
   # last live http response retrieved.
   #
-  # Returns a diff object.
+  # Assigns @response, @responses, @diff. Returns the Diff instance.
 
   def compare uri1, uri2
     str1 = str2 = ""
@@ -289,6 +298,7 @@ class Kronk
 
   ##
   # Returns a Response instance from a url, file, or IO as a String.
+  # Assigns @response, @responses, @diff.
 
   def retrieve uri
     options = Kronk.config[:no_uri_options] ? @options : options_for_uri(uri)
