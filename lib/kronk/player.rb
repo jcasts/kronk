@@ -8,7 +8,7 @@ class Kronk
 
   class Player
 
-    attr_accessor :number, :concurrency, :queue, :count, :input,
+    attr_accessor :number, :concurrency, :queue, :count, :input, :input_proc,
                   :output, :mutex, :threads, :reader_thread
 
     ##
@@ -26,11 +26,13 @@ class Kronk
       @concurrency = 1 if !@concurrency || @concurrency <= 0
       self.output_from opts[:output] || Suite
 
-      @count     = 0
-      @queue     = []
-      @threads   = []
-      @input     = InputReader.new opts[:io], opts[:parser]
-      @last_req  = nil
+      @count      = 0
+      @queue      = []
+      @threads    = []
+      @input      = InputReader.new opts[:io], opts[:parser]
+
+      @input_proc = nil
+      @last_req   = nil
 
       @mutex = Mutex.new
     end
@@ -84,7 +86,10 @@ class Kronk
 
     def compare uri1, uri2, opts={}, &block
       return Cmd.compare uri1, uri2, @queue.shift.merge(opts) if single_request?
-      run [uri1, uri2], opts, &block
+
+      run !block_given? do |kronk_opts|
+        process_one :compare, [uri1, uri2], kronk_opts.merge(opts), &block
+      end
     end
 
 
@@ -94,29 +99,36 @@ class Kronk
 
     def request uri, opts={}, &block
       return Cmd.request(uri, @queue.shift.merge(opts)) if single_request?
-      run uri, opts, &block
+
+      run !block_given? do |kronk_opts|
+        process_one :request, uri, kronk_opts.merge(opts), &block
+      end
     end
 
 
-    def run uris, opts={}, &block
+    ##
+    # Runs the queue and reads from input until it's exhausted or
+    # @number is reached. Yields a queue item and a mutex when to passed
+    # block.
+
+    def run use_output=true
       uris = Array(uris)[0,2]
-      type = uris.length > 1 ? :compare : :request
 
       trap 'INT' do
         @threads.each{|t| t.kill}
         @threads.clear
         @reader_thread.kill
-        @output.completed unless block_given?
+        @output.completed if use_output
         exit 2
       end
 
-      @output.start unless block_given?
+      @output.start if use_output
 
-      process_queue do |kronk_opts|
-        process_one type, uris, kronk_opts.merge(opts), &block
+      process_queue do |queue_item|
+        yield queue_item, @mutex if block_given?
       end
 
-      @output.completed unless block_given?
+      @output.completed if use_output
     end
 
 
@@ -126,7 +138,7 @@ class Kronk
 
     def single_request?
       @queue << next_request if @queue.empty? && (!@number || @number <= 1)
-      @queue.length == 1 && @input.eof?
+      @queue.length == 1 && !@input_proc && @input.eof?
     end
 
 
@@ -167,14 +179,14 @@ class Kronk
     def try_fill_queue
       Thread.new do
         loop do
-          break if !@number && @input.eof?
+          break if !@number && !@input_proc && @input.eof?
           next  if @queue.length >= @concurrency * 2
 
           max_new = @concurrency * 2 - @queue.length
 
           max_new.times do
             @queue << next_request
-            break if !@number && @input.eof?
+            break if !@number && !@input_proc && @input.eof?
           end
         end
       end
@@ -187,7 +199,26 @@ class Kronk
     # If both fail, returns an empty Hash.
 
     def next_request
-      @last_req = @input.get_next || @queue.last || @last_req || Hash.new
+      @last_req = (@input_proc ? @input_proc.call : @input.get_next) ||
+                    @queue.last || @last_req || Hash.new
+    end
+
+
+    ##
+    # Assigns an input block to read from instead of @input. The return value
+    # of the block is appended to the queue.
+
+    def on_input &block
+      @input_proc = block
+    end
+
+
+    ##
+    # Permanently stop input reading by killing the reader thread for a given
+    # Player#run or Player#process_queue session.
+
+    def stop_input!
+      @reader_thread && @reader_thread.kill
     end
 
 
@@ -195,8 +226,10 @@ class Kronk
     # Returns true if processing queue should be stopped, otherwise false.
 
     def finished?
-      (@number && @count >= @number) || @queue.empty? &&
-      @input.eof? && @count > 0 && !@reader_thread.alive?
+      (@number && @count >= @number) ||
+       @queue.empty? && @count > 0 &&
+      (!@input_proc && @input.eof? ||
+        (@reader_thread && !@reader_thread.alive?))
     end
 
 

@@ -123,13 +123,6 @@ class TestPlayer < Test::Unit::TestCase
     @player.input.stubs(:eof?).returns true
     assert !@player.finished?
 
-    @player.count = 4
-    @player.queue.clear
-    @player.input.stubs(:eof?).returns true
-    @player.reader_thread = "mock thread"
-    @player.reader_thread.expects(:alive?).returns true
-    assert !@player.finished?
-
     @player.queue << "test"
     @player.input.stubs(:eof?).returns true
     @player.reader_thread.stubs(:alive?).returns false
@@ -147,16 +140,23 @@ class TestPlayer < Test::Unit::TestCase
     @player.number = nil
     @player.count  = 1
     @player.queue.clear
-    @player.input.stubs(:eof?).returns true
+    @player.input.stubs(:eof?).returns false
     @player.reader_thread = "mock thread"
     @player.reader_thread.expects(:alive?).returns false
+    assert @player.finished?
+
+    @player.count = 4
+    @player.queue.clear
+    @player.input.stubs(:eof?).returns true
+    @player.reader_thread = "mock thread"
+    @player.reader_thread.expects(:alive?).never
     assert @player.finished?
 
     @player.number = 10
     @player.count  = 1
     @player.queue.clear
     @player.input.stubs(:eof?).returns true
-    @player.reader_thread.expects(:alive?).returns false
+    @player.reader_thread.expects(:alive?).never
     assert @player.finished?
   end
 
@@ -212,11 +212,14 @@ class TestPlayer < Test::Unit::TestCase
 
 
   def test_request
-    @player.concurrency  = 3
-    @player.input.parser = Kronk::Player::RequestParser
-    @player.input.io << "/req3\n/req4\n/req5\n"
-    @player.input.io.rewind
-    @player.input.io.close_write
+    @player.concurrency = 3
+
+    paths = %w{/req3 /req4 /req5}
+
+    @player.on_input do
+      @player.stop_input! if paths.empty?
+      {:uri_suffix => paths.shift}
+    end
 
     @player.queue.concat [{:uri_suffix => "/req1"}, {:uri_suffix => "/req2"}]
 
@@ -235,9 +238,13 @@ class TestPlayer < Test::Unit::TestCase
         :query      => "foo=bar"
     end
 
-    @player.request "example.com", :query => "foo=bar"
+    result_calls = 0
 
-    assert_equal 5, @player.output.result_calls
+    @player.request "example.com", :query => "foo=bar" do |kronk, err, mutex|
+      result_calls += 1
+    end
+
+    assert_equal 5, result_calls
   end
 
 
