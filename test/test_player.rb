@@ -240,7 +240,7 @@ class TestPlayer < Test::Unit::TestCase
 
     result_calls = 0
 
-    @player.request "example.com", :query => "foo=bar" do |kronk, err, mutex|
+    @player.request "example.com", :query => "foo=bar" do |kronk, err|
       result_calls += 1
     end
 
