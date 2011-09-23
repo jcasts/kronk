@@ -6,6 +6,8 @@
 
   * Move and map path transaction support with matches and splats.
 
+  * Block support for player input and result.
+
 * Bugfixes:
 
   * More accurate data diff metadata output.
