@@ -1,14 +1,15 @@
 class Kronk
 
   ##
-  # Performs HTTP requests or retrieves HTTP responses.
+  # Performs HTTP requests and returns a Kronk::Response instance.
 
   class Request
 
     # Raised by Request.parse when parsing invalid http request string.
     class ParseError < Kronk::Exception; end
 
-    # Matches the first line of an http request string.
+    # Matches the first line of an http request string or a fully
+    # qualified URL.
     REQUEST_LINE_MATCHER =
       %r{([a-z]+)?(?:^|[\s'"])(https?://[^/]+)?(/[^\s'";]*)?[\s"']*}i
 
