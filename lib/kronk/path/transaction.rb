@@ -329,8 +329,8 @@ class Kronk::Path::Transaction
   ##
   # Queues path mapping for transaction. Mapping a path will only keep the
   # mapped values, completely replacing the original data structure.
-  #   t.move "my/path/1..4/key" => "new_path/%d/key",
-  #          "other/path/*"     => "moved/%d"
+  #   t.map "my/path/1..4/key" => "new_path/%d/key",
+  #         "other/path/*"     => "moved/%d"
 
   def map path_maps
     @actions << [:map, Array(path_maps)]
