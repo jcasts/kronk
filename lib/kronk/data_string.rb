@@ -1,7 +1,27 @@
 class Kronk
 
   ##
-  # Creates ordered data string renders.
+  # Creates ordered data string renders for diffing with character-precise
+  # path information.
+  #
+  #   dstr = DataString.new({'a' => 'foo', 'b' => 'bar', 'c' => ["one", "two"]})
+  #   # {
+  #   #  "a": "foo",
+  #   #  "b": "bar",
+  #   #  "c": [
+  #   #   "one",
+  #   #   "two"
+  #   #  ]
+  #   # }
+  #
+  #   dstr.meta[dstr.index("\"a\"")]
+  #   # /
+  #
+  #   dstr.meta[dstr.index("\"foo\"")]
+  #   # /a
+  #
+  #   dstr.meta[dstr.index("\"two\"")]
+  #   # /c/1
 
   class DataString < String
 
