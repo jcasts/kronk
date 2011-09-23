@@ -52,7 +52,7 @@ class Kronk
 
         @kronk = Kronk.new options
 
-        uri2 ? @kronk.compare(uri1, uri2) : @kronk.retrieve(uri1)
+        uri2 ? @kronk.compare(uri1, uri2) : @kronk.request(uri1)
 
         @responses = @kronk.responses
         @response  = @kronk.response

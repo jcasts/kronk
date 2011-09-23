@@ -578,7 +578,7 @@ class TestCmd < Test::Unit::TestCase
     kronk = Kronk.new
     io    = StringIO.new(mock_200_response)
 
-    kronk.retrieve io
+    kronk.request io
     expect_request_output mock_200_response, :times => 2
 
     assert_equal Kronk::Cmd.render_response(kronk.response),
@@ -650,7 +650,7 @@ class TestCmd < Test::Unit::TestCase
 
   def test_render_response
     kronk = Kronk.new
-    kronk.retrieve StringIO.new(mock_200_response)
+    kronk.request StringIO.new(mock_200_response)
 
     $stdout.expects(:puts).with kronk.response.stringify
     assert Kronk::Cmd.render_response(kronk.response),
@@ -661,7 +661,7 @@ class TestCmd < Test::Unit::TestCase
   def test_render_response_lines
     with_config :show_lines => true do
       kronk = Kronk.new
-      kronk.retrieve StringIO.new(mock_200_response)
+      kronk.request StringIO.new(mock_200_response)
 
       expected = Kronk::Diff.insert_line_nums kronk.response.stringify
       $stdout.expects(:puts).with expected
@@ -678,7 +678,7 @@ class TestCmd < Test::Unit::TestCase
       io    = StringIO.new(mock_200_response)
 
       $stdout.expects(:<<).with "Reading IO #{io}\n"
-      kronk.retrieve io
+      kronk.request io
 
       expected = kronk.response.stringify
       $stdout.expects(:puts).with expected
@@ -692,7 +692,7 @@ class TestCmd < Test::Unit::TestCase
 
   def test_render_response_failed
     kronk = Kronk.new
-    kronk.retrieve StringIO.new(mock_302_response)
+    kronk.request StringIO.new(mock_302_response)
 
     $stdout.expects(:puts).with kronk.response.stringify
     assert !Kronk::Cmd.render_response(kronk.response),

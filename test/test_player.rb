@@ -105,12 +105,6 @@ class TestPlayer < Test::Unit::TestCase
   end
 
 
-  def test_output_results
-    @player.output.expects(:completed).with().returns "FINISHED"
-    assert_equal "FINISHED", @player.output_results
-  end
-
-
   def test_finished_false
     @player.number = nil
 
@@ -177,6 +171,9 @@ class TestPlayer < Test::Unit::TestCase
 
 
   def test_compare
+    @player.output.expects :start
+    @player.output.expects :completed
+
     @player.concurrency  = 3
     @player.input.parser = Kronk::Player::RequestParser
     @player.input.io << "/req3\n/req4\n/req5\n"
@@ -244,14 +241,14 @@ class TestPlayer < Test::Unit::TestCase
   end
 
 
-  def test_process_queue_interrupted
+  def test_run_interrupted
     @player.concurrency = 0
 
     @player.output.expects :start
     @player.output.expects :completed
 
     thread = Thread.new do
-      @player.process_queue
+      @player.run "foo"
     end
 
     sleep 0.1
@@ -269,9 +266,6 @@ class TestPlayer < Test::Unit::TestCase
     requests = (1..20).map{|n| "request #{n}"}
     @player.queue.concat requests.dup
     @player.input.io.close
-
-    @player.output.expects :start
-    @player.output.expects :completed
 
     start     = Time.now
     processed = []
@@ -293,9 +287,6 @@ class TestPlayer < Test::Unit::TestCase
 
   def test_process_queue_from_io
     @player.concurrency = 10
-    @player.output.expects :start
-    @player.output.expects :completed
-
     @player.input.parser.stubs(:start_new?).returns true
     @player.input.parser.stubs(:start_new?).with("").returns false
 
@@ -434,7 +425,7 @@ class TestPlayer < Test::Unit::TestCase
   end
 
 
-  def test_process_compare
+  def test_process_compare_one
     mock_thread = "mock_thread"
     Thread.expects(:new).twice.yields.returns mock_thread
     mock_thread.expects(:join).twice
@@ -462,14 +453,14 @@ class TestPlayer < Test::Unit::TestCase
       true
     end
 
-    @player.process_compare "example.com", "beta-example.com",
+    @player.process_one :compare, ["example.com", "beta-example.com"],
       :uri_suffix => "/test", :include_headers => true
 
     assert @got_results, "Expected output to get results but didn't"
   end
 
 
-  def test_process_compare_error
+  def test_process_one_compare_error
     @got_results = []
 
     @player.output.expects(:error).times(3).with do |error, kronk, mutex|
@@ -481,9 +472,11 @@ class TestPlayer < Test::Unit::TestCase
 
     errs = [Kronk::Exception, Kronk::Response::MissingParser, Errno::ECONNRESET]
     errs.each do |eklass|
-      Kronk.any_instance.expects(:compare).raises eklass
+      Kronk.any_instance.expects(:send).
+        with(:compare, "example.com", "beta-example.com").
+        raises eklass
 
-      @player.process_compare "example.com", "beta-example.com",
+      @player.process_one :compare, ["example.com", "beta-example.com"],
         :uri_suffix => "/test", :include_headers => true
     end
 
@@ -491,17 +484,19 @@ class TestPlayer < Test::Unit::TestCase
   end
 
 
-  def test_process_compare_error_not_caught
-    Kronk.any_instance.expects(:compare).raises RuntimeError
+  def test_process_one_compare_error_not_caught
+    Kronk.any_instance.expects(:send).
+      with(:compare, "example.com", "beta-example.com").
+      raises RuntimeError
 
     assert_raises RuntimeError do
-      @player.process_compare "example.com", "beta-example.com",
+      @player.process_one :compare, ["example.com", "beta-example.com"],
         :uri_suffix => "/test", :include_headers => true
     end
   end
 
 
-  def test_process_request
+  def test_process_one_request
     resp = Kronk::Response.new mock_resp("200_response.json")
     resp.parser = JSON
 
@@ -519,14 +514,14 @@ class TestPlayer < Test::Unit::TestCase
       true
     end
 
-    @player.process_request "example.com",
+    @player.process_one :request, "example.com",
       :uri_suffix => "/test", :include_headers => true
 
     assert @got_results, "Expected output to get results but didn't"
   end
 
 
-  def test_process_request_error
+  def test_process_one_request_error
     @got_results = []
 
     @player.output.expects(:error).times(3).with do |error, kronk, mutex|
@@ -538,9 +533,10 @@ class TestPlayer < Test::Unit::TestCase
 
     errs = [Kronk::Exception, Kronk::Response::MissingParser, Errno::ECONNRESET]
     errs.each do |eklass|
-      Kronk.any_instance.expects(:retrieve).raises eklass
+      Kronk.any_instance.expects(:send).with(:request, "example.com").
+        raises eklass
 
-      @player.process_request "example.com",
+      @player.process_one :request, "example.com",
         :uri_suffix => "/test", :include_headers => true
     end
 
@@ -548,11 +544,12 @@ class TestPlayer < Test::Unit::TestCase
   end
 
 
-  def test_process_request_error_not_caught
-    Kronk.any_instance.expects(:retrieve).raises RuntimeError
+  def test_process_one_request_error_not_caught
+    Kronk.any_instance.expects(:send).with(:request, "example.com").
+      raises RuntimeError
 
     assert_raises RuntimeError do
-      @player.process_request "example.com",
+      @player.process_one :request, "example.com",
         :uri_suffix => "/test", :include_headers => true
     end
   end

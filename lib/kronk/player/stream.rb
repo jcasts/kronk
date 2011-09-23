@@ -11,11 +11,11 @@ class Kronk
   #   io2   = StringIO.new "this is the rest"
   #
   #   kronk = Kronk.new
-  #   kronk.retrieve io1
+  #   kronk.request io1
   #   out.result kronk
   #   #=> "23\r\nthis is the first chunk\r\n"
   #
-  #   kronk.retrieve io2
+  #   kronk.request io2
   #   out.result kronk
   #   #=> "16\r\nthis is the rest\r\n"
   #

@@ -225,13 +225,16 @@ class Kronk
 
 
   ##
-  # See Kronk#retrieve. Short for:
-  #   Kronk.new(opts).retrieve(uri)
+  # See Kronk#request. Short for:
+  #   Kronk.new(opts).request(uri)
 
-  def self.retrieve uri, opts={}
-    new(opts).retrieve uri
+  def self.request uri, opts={}
+    new(opts).request uri
   end
 
+  class << self
+    alias retrieve request
+  end
 
   attr_accessor :diff, :options, :response, :responses
 
@@ -276,12 +279,12 @@ class Kronk
     res1 = res2 = nil
 
     t1 = Thread.new do
-          res1 = retrieve uri1
+          res1 = request uri1
           str1 = res1.stringify
          end
 
     t2 = Thread.new do
-          res2 = retrieve uri2
+          res2 = request uri2
           str2 = res2.stringify
          end
 
@@ -300,7 +303,7 @@ class Kronk
   # Returns a Response instance from a url, file, or IO as a String.
   # Assigns @response, @responses, @diff.
 
-  def retrieve uri
+  def request uri
     options = Kronk.config[:no_uri_options] ? @options : options_for_uri(uri)
 
     if IO === uri || StringIO === uri
@@ -340,6 +343,8 @@ class Kronk
   rescue Timeout::Error
     raise TimeoutError, "#{uri} took too long to respond"
   end
+
+  alias retrieve request
 
 
   ##

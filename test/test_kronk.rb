@@ -365,11 +365,11 @@ class TestKronk < Test::Unit::TestCase
                          :show_headers => true,
                          :raw => true
 
-    resp1 = Kronk.retrieve "test/mocks/200_response.json",
+    resp1 = Kronk.request "test/mocks/200_response.json",
                              :show_headers => true,
                              :raw => true
 
-    resp2 = Kronk.retrieve "test/mocks/200_response.xml",
+    resp2 = Kronk.request "test/mocks/200_response.xml",
                              :show_headers => true,
                              :raw => true
 
@@ -446,10 +446,10 @@ class TestKronk < Test::Unit::TestCase
                          "test/mocks/200_response.xml",
                          :show_headers => true
 
-    resp1 = Kronk.retrieve "test/mocks/200_response.json",
+    resp1 = Kronk.request "test/mocks/200_response.json",
                              :show_headers => true
 
-    resp2 = Kronk.retrieve "test/mocks/200_response.xml",
+    resp2 = Kronk.request "test/mocks/200_response.xml",
                              :show_headers => true
 
     exp_diff = Kronk::Diff.new_from_data \
@@ -475,7 +475,7 @@ class TestKronk < Test::Unit::TestCase
 
     assert_raises Timeout::Error do
       timeout(2) do
-        Kronk.retrieve "http://www.google.com/", :follow_redirects => true
+        Kronk.request "http://www.google.com/", :follow_redirects => true
       end
     end
   end
@@ -492,33 +492,33 @@ class TestKronk < Test::Unit::TestCase
     Kronk::Request.expects(:new).
       with("http://www.google.com/", :follow_redirects => 3).returns req
 
-    Kronk.retrieve "http://www.google.com/", :follow_redirects => 3
+    Kronk.request "http://www.google.com/", :follow_redirects => 3
   end
 
 
   def test_follow_redirect_no_redirect
     res = Kronk::Response.new mock_200_response
     req = Kronk::Request.new "http://www.google.com/"
-    req.stubs(:retrieve).returns res
+    req.stubs(:request).returns res
 
     Kronk::Request.expects(:new).with("http://www.google.com/",{}).never
     Kronk::Request.expects(:new).
       with("http://www.google.com/", :follow_redirects => true).returns req
 
-    Kronk.retrieve "http://www.google.com/", :follow_redirects => true
+    Kronk.request "http://www.google.com/", :follow_redirects => true
   end
 
 
   def test_do_not_follow_redirect
     res = Kronk::Response.new mock_302_response
     req = Kronk::Request.new "http://www.google.com/"
-    req.stubs(:retrieve).returns res
+    req.stubs(:request).returns res
 
     Kronk::Request.expects(:new).with("http://www.google.com/",{}).never
     Kronk::Request.expects(:new).
       with("http://www.google.com/", :follow_redirects => false).returns req
 
-    Kronk.retrieve "http://www.google.com/", :follow_redirects => false
+    Kronk.request "http://www.google.com/", :follow_redirects => false
   end
 
 
@@ -536,8 +536,8 @@ class TestKronk < Test::Unit::TestCase
     assert_equal 2,             kronk.responses.length
     assert_equal diff,          kronk.diff
 
-    resp1 = kronk.retrieve "test/mocks/200_response.xml"
-    resp2 = kronk.retrieve "test/mocks/200_response.json"
+    resp1 = kronk.request "test/mocks/200_response.xml"
+    resp2 = kronk.request "test/mocks/200_response.json"
 
     assert_equal json_resp.raw, kronk.response.raw
     assert_equal json_resp.raw, kronk.responses.last.raw

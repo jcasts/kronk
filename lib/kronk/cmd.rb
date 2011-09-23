@@ -536,13 +536,13 @@ Parse and run diffs against data from live and cached http responses.
 
     def self.request uri, options={}
       kronk = Kronk.new options
-      kronk.retrieve uri
+      kronk.request uri
       render kronk, options
     end
 
 
     ##
-    # Renders the results of a Kronk compare or retrieve
+    # Renders the results of a Kronk compare or request
     # to $stdout.
 
     def self.render kronk, options={}

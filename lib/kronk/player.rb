@@ -82,12 +82,9 @@ class Kronk
     # Process the queue to compare two uris.
     # If options are given, they are merged into every request.
 
-    def compare uri1, uri2, opts={}
+    def compare uri1, uri2, opts={}, &block
       return Cmd.compare uri1, uri2, @queue.shift.merge(opts) if single_request?
-
-      process_queue do |kronk_opts|
-        process_compare uri1, uri2, kronk_opts.merge(opts)
-      end
+      run [uri1, uri2], opts, &block
     end
 
 
@@ -95,12 +92,31 @@ class Kronk
     # Process the queue to request uris.
     # If options are given, they are merged into every request.
 
-    def request uri, opts={}
+    def request uri, opts={}, &block
       return Cmd.request(uri, @queue.shift.merge(opts)) if single_request?
+      run uri, opts, &block
+    end
+
+
+    def run uris, opts={}, &block
+      uris = Array(uris)[0,2]
+      type = uris.length > 1 ? :compare : :request
+
+      trap 'INT' do
+        @threads.each{|t| t.kill}
+        @threads.clear
+        @reader_thread.kill
+        @output.completed unless block_given?
+        exit 2
+      end
+
+      @output.start unless block_given?
 
       process_queue do |kronk_opts|
-        process_request uri, kronk_opts.merge(opts)
+        process_one type, uris, kronk_opts.merge(opts), &block
       end
+
+      @output.completed unless block_given?
     end
 
 
@@ -124,16 +140,6 @@ class Kronk
 
     def process_queue
       @reader_thread = try_fill_queue
-
-      trap 'INT' do
-        @threads.each{|t| t.kill}
-        @threads.clear
-        @reader_thread.kill
-        output_results
-        exit 2
-      end
-
-      @output.start
       @count = 0
 
       until finished?
@@ -151,8 +157,6 @@ class Kronk
       @threads.clear
 
       @reader_thread.kill
-
-      output_results
     end
 
 
@@ -197,37 +201,28 @@ class Kronk
 
 
     ##
-    # Process and output the results.
-    # Calls Output#completed method.
+    # Run a single compare or request and call the Output#result or
+    # Output#error method.
 
-    def output_results
-      @output.completed
-    end
-
-
-    ##
-    # Run a single compare and call the Output#result or Output#error method.
-
-    def process_compare uri1, uri2, opts={}
+    def process_one type, uris, opts={}, &block
+      error = nil
+      uris  = Array(uris)[0,2]
       kronk = Kronk.new opts
-      kronk.compare uri1, uri2
-      @output.result kronk, @mutex
 
-    rescue Kronk::Exception, Response::MissingParser, Errno::ECONNRESET => e
-      @output.error e, kronk, @mutex
-    end
+      begin
+        kronk.send(type, *uris)
+      rescue Kronk::Exception, Response::MissingParser, Errno::ECONNRESET => e
+        error = e
+      end
 
-
-    ##
-    # Run a single request and call the Output#result or Output#error method.
-
-    def process_request uri, opts={}
-      kronk = Kronk.new opts
-      kronk.retrieve uri
-      @output.result kronk, @mutex
-
-    rescue Kronk::Exception, Response::MissingParser, Errno::ECONNRESET => e
-      @output.error e, kronk, @mutex
+      if block_given?
+        @mutex.synchronize do
+          yield kronk, error
+        end
+      else
+        error ? @output.error(error, kronk, @mutex) :
+                @output.result(kronk, @mutex)
+      end
     end
   end
 end
