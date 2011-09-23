@@ -11,9 +11,12 @@
 #     {:name => "Tory",  :id => "12345"},
 #   ]
 #
-#   # Select all element names but delete the one at index 2
+#   # Select all element names, delete the one at index 2,
+#   # and move the element with the value "Tory" to the same path but
+#   # with the key renamed to "boo"
 #   Transaction.run data do |t|
 #     t.select "*/name"
+#     t.move "**=Tory" => "%%/boo"
 #     t.delete "2"
 #   end
 #
@@ -21,7 +24,7 @@
 #   #  {:name => "Jamie"},
 #   #  {:name => "Adam"},
 #   #  {:name => "Grant"},
-#   #  {:name => "Tory"},
+#   #  {"boo" => "Tory"},
 #   # ]
 
 class Kronk::Path::Transaction
