@@ -7,7 +7,7 @@ class Kronk
   class Player::RequestParser
 
     ##
-    # Returns true-ish if the line given is the start of a new request.
+    # Returns true if the line given is the start of a new request.
 
     def self.start_new? line
       line =~ Request::REQUEST_LINE_MATCHER
@@ -18,6 +18,7 @@ class Kronk
 
     ##
     # Parse a single http request kronk options hash.
+    # See Kronk::Request.parse for more about request parsing.
 
     def self.parse string
       Kronk::Request.parse_to_hash string

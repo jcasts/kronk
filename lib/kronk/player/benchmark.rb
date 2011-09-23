@@ -17,10 +17,10 @@ class Kronk
 
     class ResultSet
 
-      attr_reader :byterate, :count, :fastest, :hostname, :precision,
+      attr_reader :byterate, :count, :fastest, :precision,
                   :slowest, :total_bytes
 
-      def initialize uri, start_time
+      def initialize start_time
         @times = Hash.new(0)
         @count = 0
         @r5XX  = 0
@@ -38,8 +38,6 @@ class Kronk
 
         @start_time = start_time
         @total_time = 0
-
-        @hostname = "#{uri.scheme}://#{uri.host}:#{uri.port}" if uri
       end
 
 
@@ -55,7 +53,7 @@ class Kronk
         @slowest = time if !@slowest || @slowest < time
         @fastest = time if !@fastest || @fastest > time
 
-        log_path resp.uri.path, time if resp.uri
+        log_path resp.uri.to_s, time if resp.uri
 
         @total_bytes += resp.raw.bytes.count
 
@@ -139,14 +137,13 @@ class Kronk
       end
 
 
-      def slowest_paths
-        @paths.to_a.sort{|x,y| y[1] <=> x[1]}[0..9]
+      def slowest_reqs
+        @slowest_reqs ||= @paths.to_a.sort{|x,y| y[1] <=> x[1]}[0..9]
       end
 
 
       def to_s
         out = <<-STR
-Host:          #{@hostname || "<IO>"}
 Completed:     #{@count}
 400s:          #{@r4XX}
 500s:          #{@r5XX}
@@ -173,9 +170,11 @@ Request Percentages (ms)
   100%    #{self.percentages[100]} (longest request)
         STR
 
-        out << "
-Avg. Slowest Paths (ms, #)
-#{slowest_paths.map{|arr| "  #{arr[1]}  #{arr[0]}"}.join "\n" }" if @hostname
+        unless slowest_reqs.empty?
+          out << "
+Avg. Slowest Requests (ms, #)
+#{slowest_reqs.map{|arr| "  #{arr[1]}  #{arr[0]}"}.join "\n" }"
+        end
 
         out
       end
@@ -203,7 +202,7 @@ Avg. Slowest Paths (ms, #)
       kronk.responses.each_with_index do |resp, i|
         mutex.synchronize do
           @count += 1
-          @results[i] ||= ResultSet.new(resp.uri, @start_time)
+          @results[i] ||= ResultSet.new(@start_time)
           @results[i].add_result resp
 
           puts "#{@count} requests" if @count % @div == 0

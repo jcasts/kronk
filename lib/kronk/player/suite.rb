@@ -17,7 +17,7 @@ class Kronk
 
       @results <<
         if kronk.diff
-          status = "F"             if kronk.diff.count > 0
+          status = "F"             if kronk.diff.any?
           text   = diff_text kronk if status == "F"
           time   =
             (kronk.responses[0].time.to_f + kronk.responses[1].time.to_f) / 2
