@@ -1,5 +1,5 @@
 ##
-# Represents a single match of a relative path against a data set.
+# Represents the single match of a relative path against a data set.
 
 class Kronk::Path::PathMatch < Array
 
@@ -12,7 +12,7 @@ class Kronk::Path::PathMatch < Array
   end
 
 
-  def append_splat id, key
+  def append_splat id, key # :nodoc:
     if @splat[-1] && @splat[-1][0] == id
       @splat[-1][1] << key
     else
@@ -40,7 +40,19 @@ class Kronk::Path::PathMatch < Array
 
 
   ##
-  # Builds a path array by replacing %n values with matches.
+  # Builds a path array by replacing %n and %% values with matches and splat.
+  #
+  #   matches = Path.find_in "**/foo=bar", data
+  #   # [["path", "to", "foo"]]
+  #
+  #   matches.first.make_path "root/%%/foo"
+  #   # ["root", "path", "to", "foo"]
+  #
+  #   matches = Path.find_in "path/*/(foo)=bar", data
+  #   # [["path", "to", "foo"]]
+  #
+  #   matches.first.make_path "root/%1/%2"
+  #   # ["root", "to", "foo"]
 
   def make_path path_map, regex_opts=nil, &block
     tmpsplat = @splat.dup

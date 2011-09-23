@@ -25,7 +25,7 @@ class Kronk
     ENCODING_MATCHER = /(^|;\s?)charset=(.*?)\s*(;|$)/
 
     ##
-    # Read http response from a file and return a HTTPResponse instance.
+    # Read http response from a file and return a Kronk::Response instance.
 
     def self.read_file path
       file     = File.open(path, "rb")
