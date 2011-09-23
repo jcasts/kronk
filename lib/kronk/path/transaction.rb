@@ -318,8 +318,8 @@ class Kronk::Path::Transaction
   # Queues path moving for transaction. Moving a path will attempt to
   # keep the original data structure and only affect the given paths.
   # Empty hashes or arrays after a move are deleted.
-  #   t.move "my/path/1..4/key" => "new_path/%d/key",
-  #          "other/path/*"     => "moved/%d"
+  #   t.move "my/path/1..4/key" => "new_path/%1/key",
+  #          "other/path/*"     => "moved/%1"
 
   def move path_maps
     @actions << [:move, Array(path_maps)]
@@ -329,8 +329,8 @@ class Kronk::Path::Transaction
   ##
   # Queues path mapping for transaction. Mapping a path will only keep the
   # mapped values, completely replacing the original data structure.
-  #   t.map "my/path/1..4/key" => "new_path/%d/key",
-  #         "other/path/*"     => "moved/%d"
+  #   t.map "my/path/1..4/key" => "new_path/%1/key",
+  #         "other/path/*"     => "moved/%1"
 
   def map path_maps
     @actions << [:map, Array(path_maps)]
