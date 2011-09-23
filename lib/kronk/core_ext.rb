@@ -11,7 +11,7 @@ class Kronk
 
     def has_path? path
       Kronk::Path.find path, self do |d,k,p|
-        return !!p
+        return true
       end
 
       false
