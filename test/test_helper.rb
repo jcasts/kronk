@@ -74,7 +74,8 @@ end
 
 def assert_proxy_auth expected
   assert_equal expected,
-    Base64.decode64(Kronk::CLIENT.proxy_auth.basic_auth.instance_variable_get("@cred"))
+    Base64.decode64(Kronk::CLIENT.proxy_auth.
+      basic_auth.instance_variable_get("@cred"))
 end
 
 
