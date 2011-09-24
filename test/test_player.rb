@@ -255,7 +255,9 @@ class TestPlayer < Test::Unit::TestCase
     @player.output.expects :completed
 
     thread = Thread.new do
-      @player.run "foo"
+      @player.run do |item, mutex|
+        sleep 0.1
+      end
     end
 
     sleep 0.1
