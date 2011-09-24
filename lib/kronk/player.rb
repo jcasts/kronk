@@ -31,6 +31,8 @@ class Kronk
       @threads    = []
       @input      = InputReader.new opts[:io], opts[:parser]
 
+      @reader_thread = nil
+
       @input_proc = nil
       @last_req   = nil
 
@@ -87,7 +89,7 @@ class Kronk
     def compare uri1, uri2, opts={}, &block
       return Cmd.compare uri1, uri2, @queue.shift.merge(opts) if single_request?
 
-      run !block_given? do |kronk_opts|
+      run !block_given? do |kronk_opts, mutex|
         process_one :compare, [uri1, uri2], kronk_opts.merge(opts), &block
       end
     end
@@ -100,7 +102,7 @@ class Kronk
     def request uri, opts={}, &block
       return Cmd.request(uri, @queue.shift.merge(opts)) if single_request?
 
-      run !block_given? do |kronk_opts|
+      run !block_given? do |kronk_opts, mutex|
         process_one :request, uri, kronk_opts.merge(opts), &block
       end
     end
@@ -117,16 +119,16 @@ class Kronk
       trap 'INT' do
         @threads.each{|t| t.kill}
         @threads.clear
-        @reader_thread.kill
-        @output.completed if use_output
+        @reader_thread.kill if @reader_thread
+        @output.completed   if use_output
         exit 2
       end
 
       @output.start if use_output
 
       process_queue do |queue_item|
-        yield queue_item, @mutex if block_given?
-      end
+        yield queue_item, @mutex
+      end if block_given?
 
       @output.completed if use_output
     end
@@ -168,7 +170,7 @@ class Kronk
       @threads.each{|t| t.join}
       @threads.clear
 
-      @reader_thread.kill
+      @reader_thread.kill if @reader_thread
     end
 
 
@@ -178,16 +180,21 @@ class Kronk
 
     def try_fill_queue
       Thread.new do
-        loop do
-          break if !@number && !@input_proc && @input.eof?
-          next  if @queue.length >= @concurrency * 2
-
-          max_new = @concurrency * 2 - @queue.length
-
-          max_new.times do
-            @queue << next_request
+        begin
+          loop do
             break if !@number && !@input_proc && @input.eof?
+            next  if @queue.length >= @concurrency * 2
+
+            max_new = @concurrency * 2 - @queue.length
+
+            max_new.times do
+              @queue << next_request
+              break if !@number && !@input_proc && @input.eof?
+            end
           end
+
+        rescue => e
+          Thread.main.raise e
         end
       end
     end
@@ -199,8 +206,12 @@ class Kronk
     # If both fail, returns an empty Hash.
 
     def next_request
-      @last_req = (@input_proc ? @input_proc.call : @input.get_next) ||
-                    @queue.last || @last_req || Hash.new
+      new_req = @input_proc ? @input_proc.call : @input.get_next
+
+      # Green-Thread scheduling is weird if previous line called Thread.kill.
+      Thread.pass if RUBY_VERSION[0,3] == "1.8"
+
+      @last_req = new_req || @queue.last || @last_req || Hash.new
     end
 
 
@@ -226,10 +237,10 @@ class Kronk
     # Returns true if processing queue should be stopped, otherwise false.
 
     def finished?
-      (@number && @count >= @number) ||
-       @queue.empty? && @count > 0 &&
-      (!@input_proc && @input.eof? ||
-        (@reader_thread && !@reader_thread.alive?))
+      return true if @number && @count >= @number
+
+      @queue.empty? && @count > 0 &&
+        (!@reader_thread || !@reader_thread.alive?)
     end
 
 

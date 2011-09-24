@@ -110,7 +110,8 @@ class TestPlayer < Test::Unit::TestCase
 
     @player.queue.clear
     @player.count = 2
-    @player.input.stubs(:eof?).returns false
+    @player.reader_thread = "mock thread"
+    @player.reader_thread.stubs(:alive?).returns true
     assert !@player.finished?
 
     @player.queue << "test"
@@ -140,23 +141,20 @@ class TestPlayer < Test::Unit::TestCase
     @player.number = nil
     @player.count  = 1
     @player.queue.clear
-    @player.input.stubs(:eof?).returns false
     @player.reader_thread = "mock thread"
     @player.reader_thread.expects(:alive?).returns false
     assert @player.finished?
 
     @player.count = 4
     @player.queue.clear
-    @player.input.stubs(:eof?).returns true
     @player.reader_thread = "mock thread"
-    @player.reader_thread.expects(:alive?).never
+    @player.reader_thread.expects(:alive?).returns false
     assert @player.finished?
 
     @player.number = 10
     @player.count  = 1
     @player.queue.clear
-    @player.input.stubs(:eof?).returns true
-    @player.reader_thread.expects(:alive?).never
+    @player.reader_thread = nil
     assert @player.finished?
   end
 
