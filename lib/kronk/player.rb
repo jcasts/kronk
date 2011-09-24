@@ -61,15 +61,6 @@ class Kronk
 
 
     ##
-    # Adds kronk request hash options to queue.
-    # See Kronk#compare for supported options.
-
-    def queue_req kronk_opts
-      @queue << kronk_opts
-    end
-
-
-    ##
     # Populate the queue by reading from the given IO instance and
     # parsing it into kronk options.
     #

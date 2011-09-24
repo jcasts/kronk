@@ -87,13 +87,6 @@ class TestPlayer < Test::Unit::TestCase
   end
 
 
-  def test_queue_req
-    @player.queue_req :first_item
-    @player.queue_req :second_item
-    assert_equal [:first_item, :second_item], @player.queue
-  end
-
-
   def test_from_io
     @player.from_io "mock"
     assert_equal "mock", @player.input.io
