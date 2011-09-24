@@ -10,6 +10,8 @@ class TestRequestParser < Test::Unit::TestCase
     assert Kronk::Player::RequestParser.start_new?("https://foo.com/\r\n")
     assert Kronk::Player::RequestParser.start_new?("/\r\n")
     assert Kronk::Player::RequestParser.start_new?("https://foo.com/bar\r\n")
+    assert Kronk::Player::RequestParser.start_new?(
+      "10.1.8.10 - - [20/Sep/2011:20:57:54 +0000] \"GET /users/d7399ed0-c5f1-012e-cf4d-00163e2aabff.json HTTP/1.1\" 200 550 \"-\" \"Ruby\" \"-\" 0.009\n")
     assert !Kronk::Player::RequestParser.start_new?("foobar\r\n")
   end
 

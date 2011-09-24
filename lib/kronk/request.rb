@@ -11,7 +11,7 @@ class Kronk
     # Matches the first line of an http request string or a fully
     # qualified URL.
     REQUEST_LINE_MATCHER =
-      %r{([a-z]+)?(?:^|[\s'"])(https?://[^/]+)?(/[^\s'";]*)?[\s"']*}i
+ %r{(?:^|[\s'"])(?:([a-z]+)\s)?(?:(https?://[^/]+)(/[^\s'";]*)?|(/[^\s'";]*))}i
 
     ##
     # Creates a query string from data.
@@ -90,7 +90,7 @@ class Kronk
       lines.shift.strip =~ REQUEST_LINE_MATCHER
       opts.merge! :http_method => $1,
                   :host        => $2,
-                  :uri_suffix  => $3
+                  :uri_suffix  => ($3 || $4)
 
       lines.each_with_index do |line, i|
         case line
