@@ -224,7 +224,14 @@ class Kronk
 
     ##
     # Assigns an input block to read from instead of @input. The return value
-    # of the block is appended to the queue.
+    # of the block is appended to the queue. Use Player#stop_input! to end
+    # calls to this block.
+    #
+    #   io = $stdin
+    #   player.on_input do
+    #     player.stop_input! if io.eof?
+    #     io.gets.strip
+    #   end
 
     def on_input &block
       @input_proc = block
