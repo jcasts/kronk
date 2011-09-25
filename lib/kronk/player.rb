@@ -26,10 +26,10 @@ class Kronk
       @concurrency = 1 if !@concurrency || @concurrency <= 0
       self.output_from opts[:output] || Suite
 
-      @count      = 0
-      @queue      = []
-      @threads    = []
-      @input      = InputReader.new opts[:io], opts[:parser]
+      @count   = 0
+      @queue   = []
+      @threads = []
+      @input   = InputReader.new opts[:io], opts[:parser]
 
       @reader_thread = nil
 
