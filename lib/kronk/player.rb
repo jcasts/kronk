@@ -232,6 +232,10 @@ class Kronk
     #     player.stop_input! if io.eof?
     #     io.gets.strip
     #   end
+    #
+    # The input block runs in the Player#reader_thread thread (not the main
+    # thread) which means a mutex may be needed if the block uses a shared
+    # object.
 
     def on_input &block
       @input_proc = block
