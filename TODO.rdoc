@@ -1,10 +1,8 @@
 = TODO
 
-== Path
+== Done
 
 * Support move and map for path transactions.
-
-== Done
 
 * Read full URIs for player input but strip off the protocol and host.
 
