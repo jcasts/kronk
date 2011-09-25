@@ -207,7 +207,7 @@ class TestPlayer < Test::Unit::TestCase
 
     paths = %w{/req3 /req4 /req5}
 
-    @player.on_input do
+    @player.on :input do
       @player.stop_input! if paths.empty?
       {:uri_suffix => paths.shift}
     end
@@ -246,7 +246,7 @@ class TestPlayer < Test::Unit::TestCase
     @player.output.expects :completed
 
     thread = Thread.new do
-      @player.run true do |item, mutex|
+      @player.run do |item, mutex|
         sleep 0.1
       end
     end
@@ -405,23 +405,23 @@ class TestPlayer < Test::Unit::TestCase
   end
 
 
-  def test_next_request
+  def test_next_input
     @player.input.expects(:get_next).returns "NEXT ITEM"
-    assert_equal "NEXT ITEM", @player.next_request
+    assert_equal "NEXT ITEM", @player.trigger(:input)
 
     @player.input.expects(:get_next).returns nil
     @player.queue.concat ["FIRST ITEM", "QUEUE REPEAT"]
-    assert_equal "QUEUE REPEAT", @player.next_request
+    assert_equal "QUEUE REPEAT", @player.trigger(:input)
 
     @player.input.expects(:get_next).returns nil
     @player.queue.clear
     @player.instance_variable_set "@last_req", "LAST REQ"
-    assert_equal "LAST REQ", @player.next_request
+    assert_equal "LAST REQ", @player.trigger(:input)
 
     @player.input.expects(:get_next).returns nil
     @player.queue.clear
     @player.instance_variable_set "@last_req", nil
-    assert_equal Hash.new, @player.next_request
+    assert_equal Hash.new, @player.trigger(:input)
   end
 
 

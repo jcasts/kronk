@@ -6,37 +6,46 @@ class Kronk
   # Kronk includes a Suite (test-like) output, a Stream (chunked) output,
   # and a Benchmark output.
 
-  class Player
+  class Player < Kronk::QueueRunner
 
-    attr_accessor :number, :concurrency, :queue, :count, :input, :input_proc,
-                  :output, :mutex, :threads, :reader_thread
+    attr_accessor :input, :output
 
     ##
     # Create a new Player for batch diff or response validation.
     # Supported options are:
-    # :concurrency:: Fixnum - The maximum number of concurrent requests to make
-    # :number:: Fixnum - The number of requests to make
     # :io:: IO - The IO instance to read from
     # :output:: Class - The output class to use (see Player::Output)
     # :parser:: Class - The IO parser to use.
 
     def initialize opts={}
-      @number      = opts[:number]
-      @concurrency = opts[:concurrency]
-      @concurrency = 1 if !@concurrency || @concurrency <= 0
+      super
       self.output_from opts[:output] || Suite
 
-      @count   = 0
-      @queue   = []
-      @threads = []
-      @input   = InputReader.new opts[:io], opts[:parser]
-
-      @reader_thread = nil
-
-      @input_proc = nil
+      @input      = InputReader.new opts[:io], opts[:parser]
+      @use_output = true
       @last_req   = nil
+      @on_input   = proc do
+        stop_input! if !@number && @input.eof?
+        @last_req = @input.get_next || @queue.last || @last_req || {}
+      end
 
-      @mutex = Mutex.new
+      on(:input, &@on_input)
+      on(:interrupt){ exit 2 }
+      on(:start){ @output.start if @use_output }
+      on(:complete){ @output.completed if @use_output }
+    end
+
+
+    ##
+    # Populate the queue by reading from the given IO instance and
+    # parsing it into kronk options.
+    #
+    # Default parser is RequestParser. See InputReader for parser requirements.
+
+    def from_io io, parser=nil
+      @input.io     = io
+      @input.parser = parser if parser
+      @input
     end
 
 
@@ -61,27 +70,16 @@ class Kronk
 
 
     ##
-    # Populate the queue by reading from the given IO instance and
-    # parsing it into kronk options.
-    #
-    # Default parser is RequestParser. See InputReader for parser requirements.
-
-    def from_io io, parser=nil
-      @input.io     = io
-      @input.parser = parser if parser
-      @input
-    end
-
-
-    ##
     # Process the queue to compare two uris.
     # If options are given, they are merged into every request.
 
     def compare uri1, uri2, opts={}, &block
       return Cmd.compare uri1, uri2, @queue.shift.merge(opts) if single_request?
 
-      run !block_given? do |kronk_opts, mutex|
-        process_one :compare, [uri1, uri2], kronk_opts.merge(opts), &block
+      using_output !block_given? do
+        run do |kronk_opts, mutex|
+          process_one :compare, [uri1, uri2], kronk_opts.merge(opts), &block
+        end
       end
     end
 
@@ -93,172 +91,11 @@ class Kronk
     def request uri, opts={}, &block
       return Cmd.request(uri, @queue.shift.merge(opts)) if single_request?
 
-      run !block_given? do |kronk_opts, mutex|
-        process_one :request, uri, kronk_opts.merge(opts), &block
-      end
-    end
-
-
-    ##
-    # Runs the queue and reads from input until it's exhausted or
-    # @number is reached. Yields a queue item and a mutex when to passed
-    # block:
-    #
-    #   player = Player.new :concurrency => 10
-    #   player.queue.concat %w{item1 item2 item3}
-    #
-    #   player.run do |q_item, mutex|
-    #     # This block is run in its own thread.
-    #     mutex.synchronize{ do_something_with q_item }
-    #   end
-
-    def run use_output=false
-      uris = Array(uris)[0,2]
-
-      trap 'INT' do
-        kill
-        @output.completed if use_output
-        exit 2
-      end
-
-      @output.start if use_output
-
-      process_queue do |queue_item|
-        yield queue_item, @mutex if block_given?
-      end
-
-      @output.completed if use_output
-    end
-
-
-    ##
-    # Immediately end all player processing and threads.
-
-    def kill
-      stop_input!
-      @threads.each{|t| t.kill}
-      @threads.clear
-    end
-
-
-    ##
-    # Check if we're only processing a single case.
-    # If so, yield a single item and return immediately.
-
-    def single_request?
-      @queue << next_request if @queue.empty? && (!@number || @number <= 1)
-      @queue.length == 1 && !@input_proc && @input.eof?
-    end
-
-
-    ##
-    # Start processing the queue and reading from IO if available.
-    # Calls Output#start method and returns the value of Output#completed
-    # once processing is finished.
-    #
-    # Yields queue item until queue and io (if available) are empty and the
-    # totaly number of requests to run is met (if number is set).
-
-    def process_queue
-      start_input!
-      @count = 0
-
-      until finished?
-        @threads.delete_if{|t| !t.alive? }
-        next if @threads.length >= @concurrency || @queue.empty?
-
-        @threads << Thread.new(@queue.shift) do |kronk_opts|
-          yield kronk_opts if block_given?
-        end
-
-        @count += 1
-      end
-
-      @threads.each{|t| t.join}
-      @threads.clear
-
-      stop_input!
-    end
-
-
-    ##
-    # Attempt to fill the queue by reading from the IO instance.
-    # Starts a new thread and returns the thread instance.
-
-    def start_input!
-      @reader_thread = Thread.new do
-        begin
-          loop do
-            break if !@number && !@input_proc && @input.eof?
-            next  if @queue.length >= @concurrency * 2
-
-            max_new = @concurrency * 2 - @queue.length
-
-            max_new.times do
-              @queue << next_request
-              break if !@number && !@input_proc && @input.eof?
-            end
-          end
-
-        rescue => e
-          Thread.main.raise e
+      using_output !block_given? do
+        run do |kronk_opts, mutex|
+          process_one :request, uri, kronk_opts.merge(opts), &block
         end
       end
-    end
-
-
-    ##
-    # Gets the next request to perform and always returns a Hash.
-    # Tries from input first, then from the last item in the queue.
-    # If both fail, returns an empty Hash.
-
-    def next_request
-      new_req = @input_proc ? @input_proc.call : @input.get_next
-
-      # Green-Thread scheduling is weird if previous line called Thread.kill.
-      Thread.pass if RUBY_VERSION[0,3] == "1.8"
-
-      @last_req = new_req || @queue.last || @last_req || Hash.new
-    end
-
-
-    ##
-    # Assigns an input block to read from instead of @input. The return value
-    # of the block is appended to the queue. Use Player#stop_input! to end
-    # calls to this block.
-    #
-    #   io = $stdin
-    #   player.on_input do
-    #     player.stop_input! if io.eof?
-    #     io.gets.strip
-    #   end
-    #
-    # The input block runs in the Player#reader_thread thread (not the main
-    # thread) which means a mutex may be needed if the block uses a shared
-    # object.
-
-    def on_input &block
-      @input_proc = block
-    end
-
-
-    ##
-    # Permanently stop input reading by killing the reader thread for a given
-    # Player#run or Player#process_queue session.
-
-    def stop_input!
-      @reader_thread && @reader_thread.kill
-    end
-
-
-    ##
-    # Returns true if processing queue should be stopped, otherwise false.
-
-    def finished?
-      return true if @number && @count >= @number
-
-      @queue.empty? && @count > 0 &&
-        (!@reader_thread || !@reader_thread.alive?)
     end
 
 
@@ -285,6 +122,29 @@ class Kronk
         error ? @output.error(error, kronk, @mutex) :
                 @output.result(kronk, @mutex)
       end
+    end
+
+
+    ##
+    # Check if we're only processing a single case.
+    # If so, yield a single item and return immediately.
+
+    def single_request?
+      @queue << trigger(:input) if @queue.empty? && (!@number || @number <= 1)
+      @queue.length == 1 && @triggers[:input] == @on_input && @input.eof?
+    end
+
+
+    ##
+    # Enable or disable output and run the block. Restores the previous
+    # value of @use_output after the block is run. Returns the value of
+    # the given block.
+
+    def using_output state
+      old_value, @use_output = @use_output, state
+      out_value = yield
+      @use_output = old_value
+      out_value
     end
   end
 end

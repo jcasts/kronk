@@ -25,6 +25,7 @@ lib/kronk/player/request_parser.rb
 lib/kronk/player/suite.rb
 lib/kronk/player/stream.rb
 lib/kronk/plist_parser.rb
+lib/kronk/queue_runner.rb
 lib/kronk/request.rb
 lib/kronk/response.rb
 lib/kronk/test.rb

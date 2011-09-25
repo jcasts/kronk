@@ -17,6 +17,7 @@ class Kronk
   VERSION = '1.7.0'
 
   require 'kronk/constants'
+  require 'kronk/queue_runner'
   require 'kronk/player'
   require 'kronk/player/output'
   require 'kronk/player/suite'
