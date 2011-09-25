@@ -246,7 +246,7 @@ class TestPlayer < Test::Unit::TestCase
     @player.output.expects :completed
 
     thread = Thread.new do
-      @player.run do |item, mutex|
+      @player.run true do |item, mutex|
         sleep 0.1
       end
     end
@@ -343,13 +343,13 @@ class TestPlayer < Test::Unit::TestCase
   end
 
 
-  def test_try_fill_queue_from_input
+  def test_start_input_from_input
     @player.input.stubs(:get_next).returns "mock_request"
 
     @player.concurrency = 5
     @player.number      = 20
 
-    thread = @player.try_fill_queue
+    thread = @player.start_input!
     assert_equal Thread, thread.class
 
     sleep 0.2
@@ -365,14 +365,14 @@ class TestPlayer < Test::Unit::TestCase
   end
 
 
-  def test_try_fill_queue_from_last
+  def test_start_input_from_last
     @player.input.stubs(:get_next).returns nil
     @player.input.stubs(:eof?).returns false
 
     @player.concurrency = 5
     @player.queue << "mock_request"
 
-    thread = @player.try_fill_queue
+    thread = @player.start_input!
     assert_equal Thread, thread.class
 
     sleep 0.2
@@ -388,13 +388,13 @@ class TestPlayer < Test::Unit::TestCase
   end
 
 
-  def test_try_fill_queue_no_input
+  def test_start_input_no_input
     @player.input.stubs(:eof?).returns true
 
     @player.concurrency = 5
     @player.queue << "mock_request"
 
-    thread = @player.try_fill_queue
+    thread = @player.start_input!
     assert_equal Thread, thread.class
 
     sleep 0.2

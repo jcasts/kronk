@@ -104,24 +104,32 @@ class Kronk
     # @number is reached. Yields a queue item and a mutex when to passed
     # block.
 
-    def run use_output=true
+    def run use_output=false
       uris = Array(uris)[0,2]
 
       trap 'INT' do
-        @threads.each{|t| t.kill}
-        @threads.clear
-        @reader_thread.kill if @reader_thread
-        @output.completed   if use_output
+        kill
+        @output.completed if use_output
         exit 2
       end
 
       @output.start if use_output
 
       process_queue do |queue_item|
-        yield queue_item, @mutex
-      end if block_given?
+        yield queue_item, @mutex if block_given?
+      end
 
       @output.completed if use_output
+    end
+
+
+    ##
+    # Immediately end all threads.
+
+    def kill
+      stop_input!
+      @threads.each{|t| t.kill}
+      @threads.clear
     end
 
 
@@ -144,7 +152,7 @@ class Kronk
     # totaly number of requests to run is met (if number is set).
 
     def process_queue
-      @reader_thread = try_fill_queue
+      start_input!
       @count = 0
 
       until finished?
@@ -161,7 +169,7 @@ class Kronk
       @threads.each{|t| t.join}
       @threads.clear
 
-      @reader_thread.kill if @reader_thread
+      stop_input!
     end
 
 
@@ -169,8 +177,8 @@ class Kronk
     # Attempt to fill the queue by reading from the IO instance.
     # Starts a new thread and returns the thread instance.
 
-    def try_fill_queue
-      Thread.new do
+    def start_input!
+      @reader_thread = Thread.new do
         begin
           loop do
             break if !@number && !@input_proc && @input.eof?
