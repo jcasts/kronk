@@ -6,7 +6,7 @@ class Kronk
                   :mutex, :threads, :reader_thread
 
     ##
-    # Create a new Player for batch diff or response validation.
+    # Create a new QueueRunner for batch multi-threaded processing.
     # Supported options are:
     # :concurrency:: Fixnum - Maximum number of concurrent items to process
     # :number:: Fixnum - Total number of items to process
@@ -40,7 +40,7 @@ class Kronk
 
 
     ##
-    # Immediately end all player processing and threads.
+    # Immediately end all runner processing and threads.
 
     def kill
       stop_input!
@@ -64,8 +64,6 @@ class Kronk
 
     ##
     # Start processing the queue and reading from IO if available.
-    # Calls Output#start method and returns the value of Output#completed
-    # once processing is finished.
     #
     # Yields queue item until queue and io (if available) are empty and the
     # totaly number of requests to run is met (if number is set).
@@ -96,13 +94,17 @@ class Kronk
     # @number is reached. Yields a queue item and a mutex when to passed
     # block:
     #
-    #   player = Player.new :concurrency => 10
-    #   player.queue.concat %w{item1 item2 item3}
+    #   runner = QueueRunner.new :concurrency => 10
+    #   runner.queue.concat %w{item1 item2 item3}
     #
-    #   player.run do |q_item, mutex|
+    #   runner.run do |q_item, mutex|
     #     # This block is run in its own thread.
     #     mutex.synchronize{ do_something_with q_item }
     #   end
+    #
+    # Calls the :start trigger before execution begins, calls :complete
+    # when the execution has ended or is interrupted, also calls :interrupt
+    # when execution is interrupted.
 
     def run
       trap 'INT' do
@@ -149,7 +151,7 @@ class Kronk
 
     ##
     # Permanently stop input reading by killing the reader thread for a given
-    # Player#run or Player#process_queue session.
+    # QueueRunner#run or QueueRunner#process_queue session.
 
     def stop_input!
       Thread.pass if RUBY_VERSION[0,3] == "1.8"
