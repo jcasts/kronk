@@ -102,7 +102,15 @@ class Kronk
     ##
     # Runs the queue and reads from input until it's exhausted or
     # @number is reached. Yields a queue item and a mutex when to passed
-    # block.
+    # block:
+    #
+    #   player = Player.new :concurrency => 10
+    #   player.queue.concat %w{item1 item2 item3}
+    #
+    #   player.run do |q_item, mutex|
+    #     # This block is run in its own thread.
+    #     mutex.synchronize{ do_something_with q_item }
+    #   end
 
     def run use_output=false
       uris = Array(uris)[0,2]
@@ -124,7 +132,7 @@ class Kronk
 
 
     ##
-    # Immediately end all threads.
+    # Immediately end all player processing and threads.
 
     def kill
       stop_input!
