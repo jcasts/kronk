@@ -66,6 +66,7 @@ class Kronk
 
     ##
     # Parses a raw HTTP request-like string into a Kronk::Request instance.
+    # Options passed are used as default values for Request#new.
 
     def self.parse str, opts={}
       opts = parse_to_hash str, opts
@@ -77,7 +78,8 @@ class Kronk
 
     ##
     # Parses a raw HTTP request-like string into a Kronk::Request options hash.
-    # Also parses most single access log entries.
+    # Also parses most single access log entries. Options passed are used
+    # as default values for Request#new.
 
     def self.parse_to_hash str, opts={}
       lines = str.split("\n")
@@ -192,7 +194,6 @@ class Kronk
     # Supports the following options:
     # :data:: Hash/String - the data to pass to the http request
     # :query:: Hash/String - the data to append to the http request path
-    # :follow_redirects:: Integer/Bool - number of times to follow redirects
     # :user_agent:: String - user agent string or alias; defaults to 'kronk'
     # :auth:: Hash - must contain :username and :password; defaults to nil
     # :headers:: Hash - extra headers to pass to the request

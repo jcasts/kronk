@@ -34,6 +34,11 @@ class Kronk
 
     attr_accessor :str1, :str2, :char, :output, :meta
 
+    ##
+    # Create a new Diff instance from two strings.
+    # Options supported are those of Kronk::Diff::Output, plus:
+    # :char:: String/Regex - The char to split on for comparisons.
+
     def initialize str1, str2, opts={}
       @str1       = str1
       @str2       = str2

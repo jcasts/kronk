@@ -102,6 +102,16 @@ class Kronk::Diff
 
     attr_accessor :labels, :show_lines, :join_ch, :context, :format
 
+
+    ##
+    # Create a new Kronk::Diff::Output instance.
+    # Options supported are:
+    # :context:: Integer - Number of context lines around diffs; default 3
+    # :diff_format:: String/Object - Formatter for the diff; default AsciiFormat
+    # :join_char:: String - Vharacter to join diff sections with; default \n
+    # :labels:: Array - Left and right names to display; default %w{left right}
+    # :show_lines:: Boolean - Show lines in diff; default false
+
     def initialize diff, opts={}
       @diff = diff
 
