@@ -64,7 +64,8 @@ class TestPath < Test::Unit::TestCase
 
     assert_equal expected_paths, (expected_paths | paths)
 
-    assert_equal [:key1, :key1a, 3], paths.first.splat[0][1]
+    splat_path = paths.find{|pa| pa[0] == :key1}
+    assert_equal [:key1, :key1a, 3], splat_path.splat[0][1]
   end
 
 

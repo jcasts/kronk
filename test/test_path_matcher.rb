@@ -112,9 +112,7 @@ class TestPathMatcher < Test::Unit::TestCase
       data_points << data
     end
 
-    assert_equal [[matcher, [:key1, :key1a, 3]]],
-      path_matches.first.splat
-
+    assert path_matches.find{|pm| pm.splat == [[matcher, [:key1, :key1a, 3]]]}
     assert_equal 3, keys.length
     assert_equal 1, keys.uniq.length
     assert_equal "findme", keys.first
@@ -283,14 +281,14 @@ class TestPathMatcher < Test::Unit::TestCase
 
     matches = matcher.find_in @data
 
-    assert_equal [:key1, :key1a, 3, :findme], matches[0]
-    assert_equal [:key1, :key1a, 3], matches[0].splat[0][1]
+    splat_i = matches.index [:key1, :key1a, 3, :findme]
+    assert_equal [:key1, :key1a, 3], matches[splat_i].splat[0][1]
 
-    assert_equal ["findme"], matches[1]
-    assert_equal [], matches[1].splat[0][1]
+    splat_i = matches.index ["findme"]
+    assert_equal [], matches[splat_i].splat[0][1]
 
-    assert_equal ["findme", 2, :findme], matches[2]
-    assert_equal ["findme", 2], matches[2].splat[0][1]
+    splat_i = matches.index ["findme", 2, :findme]
+    assert_equal ["findme", 2], matches[splat_i].splat[0][1]
   end
 
 
