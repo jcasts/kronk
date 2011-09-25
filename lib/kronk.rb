@@ -252,12 +252,15 @@ class Kronk
   # :user_agent:: String - user agent string or alias; defaults to 'kronk'
   # :auth:: Hash - must contain :username and :password; defaults to nil
   # :proxy:: Hash/String - http proxy to use; defaults to nil
-  # :only_data:: String/Array - extracts the data from given data paths
-  # :ignore_data:: String/Array - defines which data points to exclude
   # :keep_indicies:: Boolean - indicies of modified arrays display as hashes
   # :show_headers:: Boolean/String/Array - which headers to show in output
   # :parser:: Object/String - the parser to use for the body; default nil
   # :raw:: Boolean - run diff on raw strings
+  # :transform:: Array - Action/path(s) pairs to modify data.
+  #
+  # Deprecated Options:
+  # :ignore_data:: String/Array - Removes the data from given data paths
+  # :only_data:: String/Array - Extracts the data from given data paths
 
   def initialize opts={}
     @options   = opts
