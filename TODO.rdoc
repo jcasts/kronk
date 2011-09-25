@@ -1,5 +1,7 @@
 = TODO
 
+* Refactor Kronk::Player into a Player and a QueueRunner.
+
 == Done
 
 * Support move and map for path transactions.
