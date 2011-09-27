@@ -1,8 +1,12 @@
 = TODO
 
-* Refactor Kronk::Player into a Player and a QueueRunner.
+* Investigate the use of EM for QueueRunner.
+
+* Investigate a Kronk console.
 
 == Done
+
+* Refactor Kronk::Player into a Player and a QueueRunner.
 
 * Support move and map for path transactions.
 
