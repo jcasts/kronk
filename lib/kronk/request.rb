@@ -390,6 +390,35 @@ class Kronk
 
 
     ##
+    # Retrieve this requests' response asynchronously with em-http-request.
+    #   req  = Request.new "example.com"
+    #   conn = req.retrieve_async
+    #   conn.callback { ... }
+    #   conn.error    { ... }
+
+    def retrieve_async &block
+      unless @proxy.empty?
+        proxy_opts = @proxy.dup
+        proxy_opts[:authorization] = [
+          proxy_opts.delete(:username),
+          proxy_opts.delete(:password)
+        ] if proxy_opts[:username] || proxy_opts[:password]
+      end
+
+      header_opts = @headers.dup
+
+      if @auth
+        header_opts['Authorization'] ||= []
+        header_opts['Authorization'][0] = @auth[:username] if @auth[:username]
+        header_opts['Authorization'][1] = @auth[:password] if @auth[:password]
+      end
+
+      conn = EventMachine::HttpRequest.new(@uri, :proxy => proxy_opts).
+              setup_request(@http_method, :head => header_opts, &block)
+    end
+
+
+    ##
     # Returns the raw HTTP request String.
 
     def to_s
