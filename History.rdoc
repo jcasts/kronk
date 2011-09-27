@@ -8,6 +8,8 @@
 
   * Block support for player input and result.
 
+  * Request proxy :address key changed to :host.
+
 * Bugfixes:
 
   * More accurate data diff metadata output.

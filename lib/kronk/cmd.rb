@@ -362,7 +362,7 @@ Parse and run diffs against data from live and cached http responses.
 
         opt.on('-x', '--proxy STR', String,
                'Use HTTP proxy on given port: host[:port]') do |value|
-          options[:proxy][:address], options[:proxy][:port] = value.split ":", 2
+          options[:proxy][:host], options[:proxy][:port] = value.split ":", 2
         end
 
         opt.separator nil

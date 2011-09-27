@@ -185,7 +185,7 @@ class Kronk
     end
 
 
-    attr_accessor :body, :headers, :response, :timeout
+    attr_accessor :body, :headers, :proxy, :response, :timeout
 
     attr_reader :http_method, :uri, :use_cookies
 
@@ -198,13 +198,12 @@ class Kronk
     # :auth:: Hash - must contain :username and :password; defaults to nil
     # :headers:: Hash - extra headers to pass to the request
     # :http_method:: Symbol - the http method to use; defaults to :get
-    # :proxy:: Hash/String - http proxy to use; defaults to nil
+    # :proxy:: Hash/String - http proxy to use; defaults to {}
     #
     # Note: if no http method is specified and data is given, will default
     # to using a post request.
 
     def initialize uri, options={}
-      @HTTP = Net::HTTP
       @auth = options[:auth]
 
       @body = nil
@@ -219,18 +218,15 @@ class Kronk
 
       @uri = self.class.build_uri uri, options
 
+      @proxy = options[:proxy] || {}
+      @proxy = {:host => @proxy} unless Hash === @proxy
+
       self.user_agent ||= options[:user_agent]
 
       self.http_method = options[:http_method] || (@body ? "POST" : "GET")
 
       self.use_cookies = options.has_key?(:no_cookies) ?
                           !options[:no_cookies] : Kronk.config[:use_cookies]
-
-      if Hash === options[:proxy]
-        self.use_proxy options[:proxy][:address], options[:proxy]
-      else
-        self.use_proxy options[:proxy]
-      end
     end
 
 
@@ -284,8 +280,8 @@ class Kronk
     # The proxy_opts arg can be a uri String or a Hash with the :address key
     # and optional :username and :password keys.
 
-    def use_proxy addr, opts={}
-      return @HTTP = Net::HTTP unless addr
+    def http_proxy addr, opts={}
+      return Net::HTTP unless addr
 
       host, port = addr.split ":"
       port ||= opts[:port] || 8080
@@ -295,7 +291,7 @@ class Kronk
 
       Kronk::Cmd.verbose "Using proxy #{addr}\n" if host
 
-      @HTTP = Net::HTTP::Proxy host, port, user, pass
+      Net::HTTP::Proxy host, port, user, pass
     end
 
 
@@ -361,7 +357,9 @@ class Kronk
     # Retrieve this requests' response.
 
     def retrieve
-      @_req = @HTTP.new @uri.host, @uri.port
+      http_class = http_proxy @proxy[:host], @proxy
+
+      @_req = http_class.new @uri.host, @uri.port
 
       @_req.read_timeout = @timeout if @timeout
       @_req.use_ssl      = true     if @uri.scheme =~ /^https$/

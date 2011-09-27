@@ -2,7 +2,7 @@
 
 * Investigate the use of EM for QueueRunner.
 
-* Investigate a Kronk console.
+* Investigate Kronk console.
 
 == Done
 

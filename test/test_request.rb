@@ -376,7 +376,7 @@ class TestRequest < Test::Unit::TestCase
 
   def test_retrieve_proxy
     proxy = {
-      :address  => "proxy.com",
+      :host     => "proxy.com",
       :username => "john",
       :password => "smith"
     }
@@ -403,12 +403,12 @@ class TestRequest < Test::Unit::TestCase
 
 
   def test_proxy_nil
-    assert_equal Net::HTTP, Kronk::Request.new("host.com").use_proxy(nil)
+    assert_equal Net::HTTP, Kronk::Request.new("host.com").http_proxy(nil)
   end
 
 
   def test_proxy_string
-    proxy_class = Kronk::Request.new("host.com").use_proxy("myproxy.com:80")
+    proxy_class = Kronk::Request.new("host.com").http_proxy("myproxy.com:80")
 
     assert_equal "myproxy.com",
       proxy_class.instance_variable_get("@proxy_address")
@@ -421,7 +421,7 @@ class TestRequest < Test::Unit::TestCase
 
 
   def test_proxy_no_port
-    proxy_class = Kronk::Request.new("host.com").use_proxy("myproxy.com")
+    proxy_class = Kronk::Request.new("host.com").http_proxy("myproxy.com")
 
     assert_equal "myproxy.com",
       proxy_class.instance_variable_get("@proxy_address")
@@ -435,12 +435,12 @@ class TestRequest < Test::Unit::TestCase
 
   def test_proxy_hash
     req = Kronk::Request.new "http://example.com",
-            :proxy => { :address  => "myproxy.com",
+            :proxy => { :host     => "myproxy.com",
                         :port     => 8080,
                         :username => "john",
                         :password => "smith" }
 
-    proxy_class = req.instance_variable_get "@HTTP"
+    proxy_class = req.http_proxy req.proxy[:host], req.proxy
 
     assert_equal "myproxy.com",
       proxy_class.instance_variable_get("@proxy_address")

@@ -350,7 +350,7 @@ class TestCmd < Test::Unit::TestCase
     assert_equal "bar",   opts[:query]
     assert_equal "/tail", opts[:uri_suffix]
     assert_equal "PUT",   opts[:http_method]
-    assert_equal({:address => "example.com", :port => "2000"}, opts[:proxy])
+    assert_equal({:host => "example.com", :port => "2000"}, opts[:proxy])
 
     opts = Kronk::Cmd.parse_args %w{uri -L 3}
     assert_equal 3, opts[:follow_redirects]
