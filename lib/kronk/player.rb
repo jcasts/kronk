@@ -109,7 +109,9 @@ class Kronk
       kronk = Kronk.new opts
 
       begin
-        kronk.send(type, *uris)
+        type == :request ?
+          kronk.request(uris[0]) :
+          kronk.compare(uris[0], uris[1])
       rescue Kronk::Exception, Response::MissingParser, Errno::ECONNRESET => e
         error = e
       end

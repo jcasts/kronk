@@ -472,8 +472,8 @@ class TestPlayer < Test::Unit::TestCase
 
     errs = [Kronk::Exception, Kronk::Response::MissingParser, Errno::ECONNRESET]
     errs.each do |eklass|
-      Kronk.any_instance.expects(:send).
-        with(:compare, "example.com", "beta-example.com").
+      Kronk.any_instance.expects(:compare).
+        with("example.com", "beta-example.com").
         raises eklass
 
       @player.process_one :compare, ["example.com", "beta-example.com"],
@@ -485,8 +485,8 @@ class TestPlayer < Test::Unit::TestCase
 
 
   def test_process_one_compare_error_not_caught
-    Kronk.any_instance.expects(:send).
-      with(:compare, "example.com", "beta-example.com").
+    Kronk.any_instance.expects(:compare).
+      with("example.com", "beta-example.com").
       raises RuntimeError
 
     assert_raises RuntimeError do
@@ -533,7 +533,7 @@ class TestPlayer < Test::Unit::TestCase
 
     errs = [Kronk::Exception, Kronk::Response::MissingParser, Errno::ECONNRESET]
     errs.each do |eklass|
-      Kronk.any_instance.expects(:send).with(:request, "example.com").
+      Kronk.any_instance.expects(:request).with("example.com").
         raises eklass
 
       @player.process_one :request, "example.com",
@@ -545,7 +545,7 @@ class TestPlayer < Test::Unit::TestCase
 
 
   def test_process_one_request_error_not_caught
-    Kronk.any_instance.expects(:send).with(:request, "example.com").
+    Kronk.any_instance.expects(:request).with("example.com").
       raises RuntimeError
 
     assert_raises RuntimeError do
