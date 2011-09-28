@@ -120,7 +120,11 @@ class Kronk
 
       EM.run do
         EM.add_periodic_timer do
-          kill if finished?
+          if finished?
+            next if EM.connection_count > 0
+            kill
+          end
+
           next if @queue.empty? || EM.connection_count >= @concurrency
 
           q_item = @queue.shift
