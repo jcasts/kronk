@@ -391,20 +391,16 @@ class Kronk
 
     ##
     # Retrieve this requests' response asynchronously with em-http-request.
+    #
     #   req  = Request.new "example.com"
-    #   conn = req.retrieve_async
-    #   conn.callback { ... }
-    #   conn.error    { ... }
+    #   em_req = req.retrieve_async do |kronk_response|
+    #     # do something with Kronk::Response instance here
+    #   end
+    #
+    #   em_req.callback { ... }
+    #   em_req.error    { ... }
 
     def retrieve_async &block
-      unless @proxy.empty?
-        proxy_opts = @proxy.dup
-        proxy_opts[:authorization] = [
-          proxy_opts.delete(:username),
-          proxy_opts.delete(:password)
-        ] if proxy_opts[:username] || proxy_opts[:password]
-      end
-
       header_opts = @headers.dup
 
       if @auth
@@ -413,8 +409,59 @@ class Kronk
         header_opts['Authorization'][1] = @auth[:password] if @auth[:password]
       end
 
-      conn = EventMachine::HttpRequest.new(@uri, :proxy => proxy_opts).
-              setup_request(@http_method, :head => header_opts, &block)
+      req = async_http.setup_request @http_method,
+                :head => header_opts, :body => @body, &block
+
+      req.callback do |resp|
+        yield async_response(resp) if block_given?
+      end
+
+      req.error do |err|
+        raise err
+      end
+
+      req
+    end
+
+
+    ##
+    # Build a Kronk::Response instance from an EM::HttpRequest callback.
+
+    def async_response resp
+      head = resp.response_header
+      head["CONTENT_LENGTH"] ||= resp.response.bytes.count
+
+      str_resp = "HTTP/#{head.http_version} "
+      str_resp << "#{head.status} #{head.http_reason}\r\n"
+
+      resp.response_header.each do |key, value|
+        str_resp << "#{key}: #{value}\r\n"
+      end
+
+      str_resp << "\r\n#{resp.response}"
+
+      Response.new str_resp, nil, self
+    end
+
+
+    ##
+    # Return an EM::HttpRequest instance.
+
+    def async_http
+      unless @proxy.empty?
+        proxy_opts = @proxy.dup
+        proxy_opts[:authorization] = [
+          proxy_opts.delete(:username),
+          proxy_opts.delete(:password)
+        ] if proxy_opts[:username] || proxy_opts[:password]
+      end
+
+      conn = EventMachine::HttpRequest.new @uri,
+              :connect_timeout    => @timeout,
+              :inactivity_timeout => @timeout,
+              :proxy              => proxy_opts
+
+      conn
     end
 
 
