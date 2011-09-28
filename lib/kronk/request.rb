@@ -409,8 +409,10 @@ class Kronk
         header_opts['Authorization'][1] = @auth[:password] if @auth[:password]
       end
 
+      conn = async_http
+
       start_time = Time.now
-      req = async_http.setup_request @http_method,
+      req  = conn.setup_request @http_method,
                 :head => header_opts, :body => @body, &block
 
       req.callback do |resp|
