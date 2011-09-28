@@ -26,6 +26,8 @@ class Kronk
 
     ##
     # Read http response from a file and return a Kronk::Response instance.
+    #
+    # TODO: Response.read_file_async, Response.new with async
 
     def self.read_file path
       file     = File.open(path, "rb")
@@ -143,7 +145,7 @@ class Kronk
     # Ruby inspect.
 
     def inspect
-      "#<#{self.class}:#{self.code} #{self['Content-Type']}>"
+      "#<#{self.class}:#{self.code} #{self['Content-Type']} #{total_bytes}bytes>"
     end
 
 

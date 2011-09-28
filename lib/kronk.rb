@@ -350,6 +350,53 @@ class Kronk
 
   alias retrieve request
 
+  ##
+  # Returns an EventMachine Connection instance from a url, file, or IO.
+  # Calls the given block with a Kronk::Response object on completion.
+  # Assigns @response, @responses, @diff.
+
+  def request_async uri
+    options = Kronk.config[:no_uri_options] ? @options : options_for_uri(uri)
+
+    max_rdir = options[:follow_redirects]
+
+    handler = Proc.new do |resp|
+      Kronk.history << resp.request.uri if resp.request
+
+      resp.parser         = options[:parser] if options[:parser]
+      resp.stringify_opts = options
+
+      if max_rdir == true || Fixnum === max_rdir && max_rdir > 0
+        Cmd.verbose "Following redirect..."
+        resp.follow_redirect_async &handler
+        max_rdir = max_rdir - 1 if Fixnum === max_rdir
+      else
+        @responses = [resp]
+        @response  = resp
+        @diff      = nil
+
+        yield self if block_given?
+
+        resp
+      end
+    end
+
+    if IO === uri || StringIO === uri
+      Cmd.verbose "Reading IO #{uri}"
+      resp = Response.new uri
+
+    elsif File.file? uri.to_s
+      Cmd.verbose "Reading file:  #{uri}\n"
+      resp = Response.read_file uri
+
+    else
+      req = Request.new uri, options
+      Cmd.verbose "Retrieving URL:  #{req.uri}\n"
+
+      conn = req.retrieve_async &handler
+    end
+  end
+
 
   ##
   # Returns merged config-defined options for a given uri.

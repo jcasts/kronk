@@ -2,6 +2,16 @@ class Kronk
 
   class QueueRunner
 
+    def self.async= value
+      @async = !!value
+    end
+
+
+    def self.async
+      @async
+    end
+
+
     attr_accessor :number, :concurrency, :queue, :count,
                   :mutex, :threads, :reader_thread
 
@@ -90,6 +100,42 @@ class Kronk
 
 
     ##
+    # Start processing the queue and reading from IO if available.
+    #
+    # Yields queue item until queue and io (if available) are empty and the
+    # totaly number of requests to run is met (if number is set).
+    #
+    # Uses EventMachine to run asynchronously.
+    #
+    # Note: If the block given doesn't use EM, it will be blocking.
+    #
+    # TODO: Make input use EM from QueueRunner and Player IO.
+
+    def process_queue_async &block
+      require 'em-http-request' unless defined?(EventMachine::HttpRequest)
+
+      start_input!
+
+      @count = 0
+
+      EM.run do
+        Thread.new do
+          until finished?
+            next if @queue.empty? || EM.connection_count >= @concurrency
+
+            q_item = @queue.shift
+            yield q_item
+
+            @count += 1
+          end
+
+          kill
+        end
+      end
+    end
+
+
+    ##
     # Runs the queue and reads from input until it's exhausted or
     # @number is reached. Yields a queue item and a mutex when to passed
     # block:
@@ -115,7 +161,9 @@ class Kronk
 
       trigger :start
 
-      process_queue do |q_item|
+      method = self.class.async ? :process_queue_async : :process_queue
+
+      send method do |q_item|
         yield q_item, @mutex if block_given?
       end
 
@@ -154,6 +202,7 @@ class Kronk
     # QueueRunner#run or QueueRunner#process_queue session.
 
     def stop_input!
+      EM.stop if defined?(EM) && EM.reactor_running?
       Thread.pass if RUBY_VERSION[0,3] == "1.8"
       @reader_thread && @reader_thread.kill
     end

@@ -403,7 +403,7 @@ class Kronk
     def retrieve_async &block
       header_opts = @headers.dup
 
-      if @auth
+      if @auth && !@auth.empty?
         header_opts['Authorization'] ||= []
         header_opts['Authorization'][0] = @auth[:username] if @auth[:username]
         header_opts['Authorization'][1] = @auth[:password] if @auth[:password]
@@ -427,7 +427,7 @@ class Kronk
 
 
     ##
-    # Build a Kronk::Response instance from an EM::HttpRequest callback.
+    # Build a Kronk::Response instance from an EM::HttpRequest response.
 
     def async_response resp
       head = resp.response_header
@@ -457,12 +457,10 @@ class Kronk
         ] if proxy_opts[:username] || proxy_opts[:password]
       end
 
-      conn = EventMachine::HttpRequest.new @uri,
-              :connect_timeout    => @timeout,
-              :inactivity_timeout => @timeout,
-              :proxy              => proxy_opts
-
-      conn
+      EventMachine::HttpRequest.new @uri,
+        :connect_timeout    => @timeout,
+        :inactivity_timeout => @timeout,
+        :proxy              => proxy_opts
     end
 
 

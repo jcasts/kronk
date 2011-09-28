@@ -24,7 +24,7 @@ class Kronk
       @input      = InputReader.new opts[:io], opts[:parser]
       @use_output = true
       @last_req   = nil
-      @on_input   = proc do
+      @on_input   = Proc.new do
         stop_input! if !@number && @input.eof?
         @last_req = @input.get_next || @queue.last || @last_req || {}
       end
@@ -76,9 +76,11 @@ class Kronk
     def compare uri1, uri2, opts={}, &block
       return Cmd.compare uri1, uri2, @queue.shift.merge(opts) if single_request?
 
+      method = self.class.async ? :process_one_async : :process_one
+
       using_output !block_given? do
         run do |kronk_opts, mutex|
-          process_one :compare, [uri1, uri2], kronk_opts.merge(opts), &block
+          send method, :compare, [uri1, uri2], kronk_opts.merge(opts), &block
         end
       end
     end
@@ -91,9 +93,11 @@ class Kronk
     def request uri, opts={}, &block
       return Cmd.request(uri, @queue.shift.merge(opts)) if single_request?
 
+      method = self.class.async ? :process_one_async : :process_one
+
       using_output !block_given? do
         run do |kronk_opts, mutex|
-          process_one :request, uri, kronk_opts.merge(opts), &block
+          send method, :request, uri, kronk_opts.merge(opts), &block
         end
       end
     end
@@ -128,6 +132,36 @@ class Kronk
 
 
     ##
+    # Run a single compare or request and call the Output#result or
+    # Output#error method using EventMachine.
+
+    def process_one_async type, uris, opts={}, &block
+      rescuable_errors =
+        [Kronk::Exception, Response::MissingParser, Errno::ECONNRESET]
+
+      error = nil
+      uris  = Array(uris)[0,2]
+      kronk = Kronk.new opts
+
+      handler = Proc.new do |kronk, err|
+        raise err if err && !rescuable_errors.include?(err.class)
+
+        if block_given?
+          yield kronk, err
+        elsif err
+          @output.error(err, kronk, @mutex)
+        else
+          @output.result(kronk, @mutex)
+        end
+      end
+
+      type == :request ?
+        kronk.request_async(uris[0], &handler) :
+        kronk.compare_async(uris[0], uris[1], &handler)
+    end
+
+
+    ##
     # Check if we're only processing a single case.
     # If so, yield a single item and return immediately.
 
@@ -150,3 +184,6 @@ class Kronk
     end
   end
 end
+
+Kronk::Player.async = true
+puts "async: #{Kronk::Player.async}"
