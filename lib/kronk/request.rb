@@ -414,8 +414,9 @@ class Kronk
                 :head => header_opts, :body => @body, &block
 
       req.callback do |resp|
+        elapsed_time   = Time.now - start_time
         @response      = async_response resp
-        @response.time = Time.now - start_time
+        @response.time = elapsed_time
         yield @response
       end if block_given?
 
