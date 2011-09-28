@@ -254,6 +254,16 @@ class Kronk
 
 
     ##
+    # Follow the redirect and return a new Response instance.
+    # Returns nil if not redirect-able.
+
+    def follow_redirect_async opts={}, &block
+      return if !redirect?
+      Request.new(@_res['Location'], opts).retrieve_async &block
+    end
+
+
+    ##
     # Returns the raw response with selective headers and/or the body of
     # the response. Supports the following options:
     # :no_body:: Bool - Don't return the body; default nil
