@@ -409,11 +409,14 @@ class Kronk
         header_opts['Authorization'][1] = @auth[:password] if @auth[:password]
       end
 
+      start_time = Time.now
       req = async_http.setup_request @http_method,
                 :head => header_opts, :body => @body, &block
 
       req.callback do |resp|
-        yield async_response(resp) if block_given?
+        @response      = async_response resp
+        @response.time = Time.now - start_time
+        yield @response if block_given?
       end
 
       req.error do |err|
@@ -429,7 +432,6 @@ class Kronk
 
     def async_response resp
       head = resp.response_header
-      head["CONTENT_LENGTH"] ||= resp.response.bytes.count
 
       str_resp = "HTTP/#{head.http_version} "
       str_resp << "#{head.status} #{head.http_reason}\r\n"
