@@ -119,17 +119,14 @@ class Kronk
       @count = 0
 
       EM.run do
-        Thread.new do
-          until finished?
-            next if @queue.empty? || EM.connection_count >= @concurrency
+        EM.add_periodic_timer do
+          kill if finished?
+          next if @queue.empty? || EM.connection_count >= @concurrency
 
-            q_item = @queue.shift
-            yield q_item
+          q_item = @queue.shift
+          yield q_item
 
-            @count += 1
-          end
-
-          kill
+          @count += 1
         end
       end
     end
