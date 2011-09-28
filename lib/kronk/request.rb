@@ -416,12 +416,8 @@ class Kronk
       req.callback do |resp|
         @response      = async_response resp
         @response.time = Time.now - start_time
-        yield @response if block_given?
-      end
-
-      req.error do |err|
-        raise err
-      end
+        yield @response
+      end if block_given?
 
       req
     end
