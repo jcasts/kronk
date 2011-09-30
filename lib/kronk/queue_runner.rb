@@ -118,7 +118,7 @@ class Kronk
     # TODO: Make input use EM from QueueRunner and Player IO.
 
     def process_queue_async &block
-      require 'em-http-request' unless defined?(EventMachine::HttpRequest)
+      require 'em-http-request' unless defined?(EM::HttpRequest)
 
       start_input!
 
@@ -135,6 +135,7 @@ class Kronk
             Thread.pass
             next
           end
+
           yield @queue.shift
           @count += 1
         end
