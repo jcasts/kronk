@@ -209,9 +209,6 @@ class Kronk
           Thread.main.raise e
         end
       end
-
-      @reader_thread.priority = -1
-      @reader_thread
     end
 
 
