@@ -185,5 +185,5 @@ class Kronk
   end
 end
 
-#Kronk::Player.async = true
+Kronk::Player.async = true
 puts "async: #{Kronk::Player.async}"
