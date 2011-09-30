@@ -54,6 +54,7 @@ class Kronk
 
     def kill
       stop_input!
+      EM.stop if defined?(EM) && EM.reactor_running?
       @threads.each{|t| t.kill}
       @threads.clear
     end
@@ -84,7 +85,12 @@ class Kronk
 
       until finished?
         @threads.delete_if{|t| !t.alive? }
-        next if @threads.length >= @concurrency || @queue.empty?
+
+        if @threads.length >= @concurrency || @queue.empty?
+          Thread.pass
+          next
+        end
+
         @threads << Thread.new(@queue.shift) do |q_item|
           yield q_item if block_given?
         end
@@ -125,7 +131,10 @@ class Kronk
             kill
           end
 
-          next if @queue.empty? || EM.connection_count >= @concurrency
+          if @queue.empty? || EM.connection_count >= @concurrency
+            Thread.pass
+            next
+          end
           yield @queue.shift
           @count += 1
         end
@@ -211,7 +220,6 @@ class Kronk
     # QueueRunner#run or QueueRunner#process_queue session.
 
     def stop_input!
-      EM.stop if defined?(EM) && EM.reactor_running?
       Thread.pass if RUBY_VERSION[0,3] == "1.8"
       @reader_thread && @reader_thread.kill
     end
