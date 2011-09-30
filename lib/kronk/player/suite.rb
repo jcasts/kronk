@@ -100,7 +100,8 @@ class Kronk
 
     def resp_text kronk
       <<-STR
-  Request: #{kronk.response.code} - #{kronk.response.uri}
+  Request: #{kronk.response.code} - #{kronk.response.request.http_method} \
+#{kronk.response.uri}
   Options: #{kronk.options.inspect}
       STR
     end
@@ -108,8 +109,12 @@ class Kronk
 
     def diff_text kronk
       <<-STR
-  Request: #{kronk.responses[0].code} - #{kronk.responses[0].uri}
-           #{kronk.responses[1].code} - #{kronk.responses[1].uri}
+  Request: #{kronk.responses[0].code} - \
+#{kronk.responses[0].request.http_method} \
+#{kronk.responses[0].uri}
+           #{kronk.responses[1].code} - \
+#{kronk.responses[0].request.http_method} \
+#{kronk.responses[1].uri}
   Options: #{kronk.options.inspect}
   Diffs: #{kronk.diff.count}
       STR
@@ -117,12 +122,12 @@ class Kronk
 
 
     def error_text err, kronk=nil
-      str = "#{err.class}: #{err.message}"
+      str = "  #{err.class}: #{err.message}"
 
       if kronk
-        str << "\n  Options: #{kronk.options.inspect}\n\n"
+        str << "\n  Options: #{kronk.options.inspect}\n"
       else
-        str << "\n #{err.backtrace}\n\n"
+        str << "\n #{err.backtrace}\n"
       end
 
       str
