@@ -352,8 +352,12 @@ class Kronk
 
   ##
   # Returns an EventMachine Connection instance from a url, file, or IO.
-  # Calls the given block with a Kronk::Response object on completion.
+  # Calls the given block with a Kronk::Response object on completion or error.
   # Assigns @response, @responses, @diff.
+  #
+  #   kronk.request_async do |kronk, err|
+  #     # handle response or error
+  #   end
 
   def request_async uri
     options = Kronk.config[:no_uri_options] ? @options : options_for_uri(uri)
@@ -395,6 +399,9 @@ class Kronk
 
       conn = req.retrieve_async &handler
     end
+
+  rescue => e
+    yield self, e
   end
 
 

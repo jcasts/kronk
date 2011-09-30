@@ -137,7 +137,8 @@ class Kronk
 
     def process_one_async type, uris, opts={}, &block
       rescuable_errors =
-        [Kronk::Exception, Response::MissingParser, Errno::ECONNRESET]
+        [Kronk::Exception, Response::MissingParser,
+          Errno::ECONNRESET, URI::InvalidURIError]
 
       error = nil
       uris  = Array(uris)[0,2]
@@ -162,7 +163,7 @@ class Kronk
 
 
     ##
-    # Check if we're only processing a single case.
+    # Check if w6ce5e2ce're only processing a single case.
     # If so, yield a single item and return immediately.
 
     def single_request?
