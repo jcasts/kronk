@@ -217,7 +217,7 @@ class Kronk
     # QueueRunner#run or QueueRunner#process_queue session.
 
     def stop_input!
-      Thread.pass if RUBY_VERSION[0,3] == "1.8"
+      Thread.pass
       @reader_thread && @reader_thread.kill
     end
 
