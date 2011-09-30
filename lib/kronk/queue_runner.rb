@@ -195,10 +195,8 @@ class Kronk
               next
             end
 
-            max_new = max_queue_size - @queue.length
-
             Thread.exclusive do
-              max_new.times do
+              while @queue.length < max_queue_size
                 @queue << trigger(:input)
               end
             end
