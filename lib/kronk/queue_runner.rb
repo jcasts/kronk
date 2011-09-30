@@ -182,7 +182,10 @@ class Kronk
       @reader_thread = Thread.new do
         begin
           loop do
-            next if @queue.length >= @concurrency * 2
+            if @queue.length >= @concurrency * 2
+              Thread.pass
+              next
+            end
 
             max_new = @concurrency * 2 - @queue.length
 
@@ -195,6 +198,9 @@ class Kronk
           Thread.main.raise e
         end
       end
+
+      @reader_thread.priority = -1
+      @reader_thread
     end
 
 
