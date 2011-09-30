@@ -261,7 +261,8 @@ class Kronk
 
     def follow_redirect_async opts={}, &block
       return if !redirect?
-      Request.new(@_res['Location'], opts).retrieve_async &block
+      loc = @_res['Location'] || @_res['LOCATION']
+      Request.new(loc, opts).retrieve_async &block
     end
 
 

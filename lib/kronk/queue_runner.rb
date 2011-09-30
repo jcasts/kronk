@@ -8,7 +8,7 @@ class Kronk
 
 
     def self.async
-      @async
+      !!@async
     end
 
 
@@ -126,10 +126,7 @@ class Kronk
           end
 
           next if @queue.empty? || EM.connection_count >= @concurrency
-
-          q_item = @queue.shift
-          yield q_item
-
+          yield @queue.shift
           @count += 1
         end
       end
@@ -179,19 +176,24 @@ class Kronk
     def start_input!
       return unless @triggers[:input]
 
+      max_queue_size = @concurrency * 2
+
       @reader_thread = Thread.new do
         begin
           loop do
-            if @queue.length >= @concurrency * 2
+            if @queue.length >= max_queue_size
               Thread.pass
               next
             end
 
-            max_new = @concurrency * 2 - @queue.length
+            max_new = max_queue_size - @queue.length
 
-            max_new.times do
-              @queue << trigger(:input)
+            Thread.exclusive do
+              max_new.times do
+                @queue << trigger(:input)
+              end
             end
+            Thread.pass
           end
 
         rescue => e
