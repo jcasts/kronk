@@ -116,7 +116,8 @@ class Kronk
         type == :request ?
           kronk.request(uris[0]) :
           kronk.compare(uris[0], uris[1])
-      rescue Kronk::Exception, Response::MissingParser, Errno::ECONNRESET => e
+      rescue Kronk::Exception, Response::MissingParser,
+                Errno::ECONNRESET, URI::InvalidURIError => e
         error = e
       end
 
