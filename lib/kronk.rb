@@ -328,11 +328,11 @@ class Kronk
     resp.parser         = options[:parser] if options[:parser]
     resp.stringify_opts = options
 
-    max_rdir = options[:follow_redirects]
-    while resp.redirect? && (max_rdir == true || max_rdir.to_s.to_i > 0)
+    rdir = options[:follow_redirects]
+    while resp.redirect? && (rdir == true || rdir.to_s.to_i > 0)
       Cmd.verbose "Following redirect..."
-      resp     = resp.follow_redirect
-      max_rdir = max_rdir - 1 if Fixnum === max_rdir
+      resp = resp.follow_redirect
+      rdir = rdir - 1 if Fixnum === rdir
     end
 
     @responses = [resp]
@@ -350,10 +350,11 @@ class Kronk
 
   alias retrieve request
 
+
   ##
   # Returns an EventMachine Connection instance from a url, file, or IO.
   # Calls the given block with a Kronk::Response object on completion or error.
-  # Assigns @response, @responses, @diff.
+  # Assigns @response, @responses, @diff. Must be called from an EM loop.
   #
   #   kronk.request_async do |kronk, err|
   #     # handle response or error
@@ -362,7 +363,7 @@ class Kronk
   def request_async uri
     options = Kronk.config[:no_uri_options] ? @options : options_for_uri(uri)
 
-    max_rdir = options[:follow_redirects]
+    rdir = options[:follow_redirects]
 
     handler = Proc.new do |resp|
       Kronk.history << resp.request.uri if resp.request
@@ -370,10 +371,11 @@ class Kronk
       resp.parser         = options[:parser] if options[:parser]
       resp.stringify_opts = options
 
-      if max_rdir == true || Fixnum === max_rdir && max_rdir > 0
-        Cmd.verbose "Following redirect..."
+      if resp.redirect? && (rdir == true || Fixnum === rdir && rdir > 0)
+        Cmd.verbose "Following redirect to #{resp['LOCATION']}"
         resp.follow_redirect_async &handler
-        max_rdir = max_rdir - 1 if Fixnum === max_rdir
+        rdir = rdir - 1 if Fixnum === rdir
+
       else
         @responses = [resp]
         @response  = resp
@@ -384,6 +386,8 @@ class Kronk
         resp
       end
     end
+
+    # TODO: read from IOs asynchronously.
 
     if IO === uri || StringIO === uri
       Cmd.verbose "Reading IO #{uri}"
