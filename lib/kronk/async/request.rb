@@ -11,8 +11,6 @@ class Kronk
     #
     #   em_req.callback { ... }
     #   em_req.error    { ... }
-    #
-    # TODO: error handling
 
     def retrieve_async &block
       header_opts = @headers.dup

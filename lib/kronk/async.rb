@@ -28,12 +28,12 @@ class Kronk
       if resp.redirect? && (rdir == true || Fixnum === rdir && rdir > 0)
         Cmd.verbose "Following redirect to #{resp['LOCATION']}"
 
+        rdir = rdir - 1 if Fixnum === rdir
+
         conn = resp.follow_redirect_async(&handler)
         conn.errback do |c|
           yield self, c.error
         end
-
-        rdir = rdir - 1 if Fixnum === rdir
 
       else
         @responses = [resp]
