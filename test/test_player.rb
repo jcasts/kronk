@@ -27,6 +27,8 @@ class TestPlayer < Test::Unit::TestCase
 
 
   def setup
+    Kronk::Player.async = false
+
     @io        = MockPipe.new
     @parser    = MockParser
     @output    = MockOutput

@@ -27,7 +27,7 @@ class Kronk
 
       if resp.redirect? && (rdir == true || Fixnum === rdir && rdir > 0)
         Cmd.verbose "Following redirect to #{resp['LOCATION']}"
-        resp.follow_redirect_async &handler
+        resp.follow_redirect_async(&handler)
         rdir = rdir - 1 if Fixnum === rdir
 
       else
@@ -55,7 +55,7 @@ class Kronk
       req = Request.new uri, options
       Cmd.verbose "Retrieving URL:  #{req.uri}\n"
 
-      conn = req.retrieve_async &handler
+      conn = req.retrieve_async(&handler)
     end
 
   rescue => e

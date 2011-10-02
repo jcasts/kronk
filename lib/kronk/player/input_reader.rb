@@ -28,7 +28,7 @@ class Kronk
 
       @buffer << gets if @buffer.empty?
 
-      until @io.eof?
+      until @io.eof? && @io_buf.empty?
         line = gets
         next unless line
 
@@ -49,6 +49,8 @@ class Kronk
     # Read one line from @io, thread-non-blocking.
 
     def gets
+      return @io.gets if StringIO === @io
+
       next_line = io_buf_line
       return next_line if next_line
 
