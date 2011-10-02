@@ -36,6 +36,12 @@ class Kronk
         yield @response
       end if block_given?
 
+      req.errback do |c|
+        next if c.error
+        c.instance_variable_set :@error,
+          Kronk::NotFoundError.new("#{@uri} could not be found")
+      end
+
       req
     end
 
