@@ -146,7 +146,7 @@ class Kronk
       kronk = Kronk.new opts
 
       handler = Proc.new do |kronk, err|
-        raise err if err && !rescuable_errors.include?(err.class)
+        raise err if err && !rescuable_errors.find{|eclass| eclass === err}
 
         if block_given?
           yield kronk, err
