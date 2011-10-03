@@ -1,5 +1,9 @@
 === 1.7.0 / 2011-10
 
+* Major Enhancements:
+
+  * EventMachine backend for Player.
+
 * Enhancements:
 
   * Full URL support for player input.
