@@ -129,6 +129,7 @@ class Kronk
           if finished?
             next if EM.connection_count > 0
             kill
+            next
           end
 
           if @queue.empty? || EM.connection_count >= @concurrency
