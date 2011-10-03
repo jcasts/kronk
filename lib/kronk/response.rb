@@ -26,10 +26,9 @@ class Kronk
 
     ##
     # Read http response from a file and return a Kronk::Response instance.
-    #
-    # TODO: Response.read_file_async, Response.new with async
 
     def self.read_file path
+      # TODO: Response.read_file_async, Response.new with async
       file     = File.open(path, "rb")
       resp     = new file
       resp.uri = path

@@ -114,10 +114,9 @@ class Kronk
     # Uses EventMachine to run asynchronously.
     #
     # Note: If the block given doesn't use EM, it will be blocking.
-    #
-    # TODO: Make input use EM from QueueRunner and Player IO.
 
     def process_queue_async &block
+      # TODO: Make input use EM from QueueRunner and Player IO.
       require 'kronk/async' unless defined?(EM::HttpRequest)
 
       start_input!
