@@ -28,7 +28,6 @@ class Kronk
     # Read http response from a file and return a Kronk::Response instance.
 
     def self.read_file path
-      # TODO: Response.read_file_async, Response.new with async
       file     = File.open(path, "rb")
       resp     = new file
       resp.uri = path
@@ -50,6 +49,7 @@ class Kronk
     # Create a new Response object from a String or IO.
 
     def initialize io=nil, res=nil, request=nil
+      # TODO: Response.new with async
       return unless io
       io = StringIO.new io if String === io
 
