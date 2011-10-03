@@ -1,4 +1,4 @@
-=== 1.7.0 / 2011-09
+=== 1.7.0 / 2011-10
 
 * Enhancements:
 
@@ -11,6 +11,8 @@
   * Request proxy :address key changed to :host.
 
 * Bugfixes:
+
+  * Support relative URLs in redirects.
 
   * More accurate data diff metadata output.
 

@@ -236,6 +236,16 @@ class Kronk
 
 
     ##
+    # Returns the location to redirect to. Prepends request url if location
+    # header is relative.
+
+    def location
+      return @_res['Location'] if !@request || !@request.uri
+      @request.uri.merge @_res['Location']
+    end
+
+
+    ##
     # Check if this is a redirect response.
 
     def redirect?
@@ -249,7 +259,7 @@ class Kronk
 
     def follow_redirect opts={}
       return if !redirect?
-      Request.new(@_res['Location'], opts).retrieve
+      Request.new(self.location, opts).retrieve
     end
 
 
