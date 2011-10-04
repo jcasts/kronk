@@ -90,7 +90,7 @@ class Kronk
       method = self.class.async ? :process_one_async : :process_one
 
       run do |kronk_opts, mutex|
-        send method, kronk_opts.merge(opts), :compare, uri1, uri2, &block
+        send method, kronk_opts.merge(opts), 'compare', uri1, uri2, &block
       end
     end
 
@@ -105,7 +105,7 @@ class Kronk
       method = self.class.async ? :process_one_async : :process_one
 
       run do |kronk_opts, mutex|
-        send method, kronk_opts.merge(opts), :request, uri, &block
+        send method, kronk_opts.merge(opts), 'request', uri, &block
       end
     end
 
@@ -152,7 +152,8 @@ class Kronk
         trigger_result kronk, err, &block
       end
 
-      kronk.send(*args)
+      method = args.shift.to_s + '_async'
+      kronk.send(method, *args, &handler)
     end
 
 
