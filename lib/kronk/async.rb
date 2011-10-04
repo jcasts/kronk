@@ -7,7 +7,7 @@ class Kronk
 
   ##
   # Returns an EM::MultiRequest instance from a url, file, or IO pair.
-  # Calls the given block with a Kronk::Response object on completion or error.
+  # Calls the given block with a Kronk::Diff object on completion or error.
   # Assigns @response, @responses, @diff. Must be called from an EM loop.
   #
   #   kronk.compare_async uri1, uri2 do |diff, err|
