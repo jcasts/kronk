@@ -49,6 +49,9 @@ class Kronk
     end
 
     multi
+
+  rescue => e
+    yield nil, e
   end
 
 
