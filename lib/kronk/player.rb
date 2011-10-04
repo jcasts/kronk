@@ -145,15 +145,13 @@ class Kronk
     # Returns either a EM::MultiRequest or an EM::Connection handler.
 
     def process_one_async opts={}, *args, &block
-      kronk = Kronk.new opts
+      kronk  = Kronk.new opts
+      method = args.shift.to_s + '_async'
 
-      handler = Proc.new do |resp, err|
+      kronk.send(method, *args) do |obj, err|
         raise err if err && !RESCUABLE.find{|eclass| eclass === err}
         trigger_result kronk, err, &block
       end
-
-      method = args.shift.to_s + '_async'
-      kronk.send(method, *args, &handler)
     end
 
 
