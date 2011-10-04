@@ -30,7 +30,10 @@ class Kronk
       end
 
       on(:input, &@on_input)
-      on(:interrupt){ exit 2 }
+      on(:interrupt){
+        @output.completed if @use_output
+        exit 2
+      }
       on(:start){ @output.start if @use_output }
       on(:complete){ @output.completed if @use_output }
     end
