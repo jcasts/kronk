@@ -163,7 +163,7 @@ class Kronk
     def run
       trap 'INT' do
         kill
-        trigger(:interrupt) || exit 1
+        (trigger(:interrupt) || exit(1))
       end
 
       trigger :start

@@ -455,8 +455,8 @@ class TestPlayer < Test::Unit::TestCase
       true
     end
 
-    @player.process_one :compare, ["example.com", "beta-example.com"],
-      :uri_suffix => "/test", :include_headers => true
+    opts = {:uri_suffix => "/test", :include_headers => true}
+    @player.process_one opts, :compare, "example.com", "beta-example.com"
 
     assert @got_results, "Expected output to get results but didn't"
   end
@@ -478,8 +478,8 @@ class TestPlayer < Test::Unit::TestCase
         with("example.com", "beta-example.com").
         raises eklass
 
-      @player.process_one :compare, ["example.com", "beta-example.com"],
-        :uri_suffix => "/test", :include_headers => true
+      opts = {:uri_suffix => "/test", :include_headers => true}
+      @player.process_one opts, :compare, "example.com", "beta-example.com"
     end
 
     assert_equal errs, @got_results, "Expected output to get errors but didn't"
@@ -492,8 +492,8 @@ class TestPlayer < Test::Unit::TestCase
       raises RuntimeError
 
     assert_raises RuntimeError do
-      @player.process_one :compare, ["example.com", "beta-example.com"],
-        :uri_suffix => "/test", :include_headers => true
+      opts = {:uri_suffix => "/test", :include_headers => true}
+      @player.process_one opts, :compare, "example.com", "beta-example.com"
     end
   end
 
@@ -516,8 +516,8 @@ class TestPlayer < Test::Unit::TestCase
       true
     end
 
-    @player.process_one :request, "example.com",
-      :uri_suffix => "/test", :include_headers => true
+    opts = {:uri_suffix => "/test", :include_headers => true}
+    @player.process_one opts, :request, "example.com"
 
     assert @got_results, "Expected output to get results but didn't"
   end
@@ -538,8 +538,8 @@ class TestPlayer < Test::Unit::TestCase
       Kronk.any_instance.expects(:request).with("example.com").
         raises eklass
 
-      @player.process_one :request, "example.com",
-        :uri_suffix => "/test", :include_headers => true
+      opts = {:uri_suffix => "/test", :include_headers => true}
+      @player.process_one opts, :request, "example.com"
     end
 
     assert_equal errs, @got_results, "Expected output to get errors but didn't"
@@ -551,8 +551,8 @@ class TestPlayer < Test::Unit::TestCase
       raises RuntimeError
 
     assert_raises RuntimeError do
-      @player.process_one :request, "example.com",
-        :uri_suffix => "/test", :include_headers => true
+      opts = {:uri_suffix => "/test", :include_headers => true}
+      @player.process_one opts, :request, "example.com"
     end
   end
 

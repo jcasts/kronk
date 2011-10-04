@@ -18,8 +18,8 @@ class Kronk
 
   class Response
 
-    class MissingParser < Exception; end
-    class InvalidParser < Exception; end
+    class MissingParser < Kronk::Exception; end
+    class InvalidParser < Kronk::Exception; end
 
 
     ENCODING_MATCHER = /(^|;\s?)charset=(.*?)\s*(;|$)/

@@ -8,6 +8,8 @@ class Kronk
 
   class Player < Kronk::QueueRunner
 
+    RESCUABLE = [Kronk::Exception, Errno::ECONNRESET, URI::InvalidURIError]
+
     attr_accessor :input, :output
 
     ##
@@ -24,9 +26,15 @@ class Kronk
       @input      = InputReader.new opts[:io], opts[:parser]
       @use_output = true
       @last_req   = nil
+
       @on_input   = Proc.new do
         stop_input! if !@number && @input.eof?
         @last_req = @input.get_next || @queue.last || @last_req || {}
+      end
+
+      @on_result  = Proc.new do |kronk, err, mutex|
+        err ? @output.error(err, kronk, mutex) :
+              @output.result(kronk, mutex)
       end
 
       on(:input, &@on_input)
@@ -81,10 +89,8 @@ class Kronk
 
       method = self.class.async ? :process_one_async : :process_one
 
-      using_output !block_given? do
-        run do |kronk_opts, mutex|
-          send method, :compare, [uri1, uri2], kronk_opts.merge(opts), &block
-        end
+      run do |kronk_opts, mutex|
+        send method, kronk_opts.merge(opts), :compare, uri1, uri2, &block
       end
     end
 
@@ -94,14 +100,12 @@ class Kronk
     # If options are given, they are merged into every request.
 
     def request uri, opts={}, &block
-      return Cmd.request(uri, @queue.shift.merge(opts)) if single_request?
+      return Cmd.request uri, @queue.shift.merge(opts) if single_request?
 
       method = self.class.async ? :process_one_async : :process_one
 
-      using_output !block_given? do
-        run do |kronk_opts, mutex|
-          send method, :request, uri, kronk_opts.merge(opts), &block
-        end
+      run do |kronk_opts, mutex|
+        send method, kronk_opts.merge(opts), :request, uri, &block
       end
     end
 
@@ -109,60 +113,62 @@ class Kronk
     ##
     # Run a single compare or request and call the Output#result or
     # Output#error method.
+    #
+    # If given a block, will yield the Kronk instance and error. If
+    # a third argument is given, mutex will also be passed and the
+    # block won't be called from a mutex lock.
+    #
+    # Returns the result of the block or of the called Output method.
 
-    def process_one type, uris, opts={}, &block
-      error = nil
-      uris  = Array(uris)[0,2]
+    def process_one opts={}, *args, &block
+      err   = nil
       kronk = Kronk.new opts
 
       begin
-        type == :request ?
-          kronk.request(uris[0]) :
-          kronk.compare(uris[0], uris[1])
-      rescue Kronk::Exception, Response::MissingParser,
-                Errno::ECONNRESET, URI::InvalidURIError => e
-        error = e
+        kronk.send(*args)
+      rescue *RESCUABLE => e
+        err = e
       end
 
-      if block_given?
-        @mutex.synchronize do
-          yield kronk, error
-        end
-      else
-        error ? @output.error(error, kronk, @mutex) :
-                @output.result(kronk, @mutex)
-      end
+      trigger_result kronk, err, &block
     end
 
 
     ##
     # Run a single compare or request and call the Output#result or
     # Output#error method using EventMachine.
+    #
+    # If given a block, will yield the Kronk instance and error. If
+    # a third argument is given, mutex will also be passed and the
+    # block won't be called from a mutex lock.
+    #
+    # Returns either a EM::MultiRequest or an EM::Connection handler.
 
-    def process_one_async type, uris, opts={}, &block
-      rescuable_errors =
-        [Kronk::Exception, Response::MissingParser,
-          Errno::ECONNRESET, URI::InvalidURIError]
-
-      error = nil
-      uris  = Array(uris)[0,2]
+    def process_one_async opts={}, *args, &block
       kronk = Kronk.new opts
 
       handler = Proc.new do |resp, err|
-        raise err if err && !rescuable_errors.find{|eclass| eclass === err}
-
-        if block_given?
-          yield kronk, err
-        elsif err
-          @output.error(err, kronk, @mutex)
-        else
-          @output.result(kronk, @mutex)
-        end
+        raise err if err && !RESCUABLE.find{|eclass| eclass === err}
+        trigger_result kronk, err, &block
       end
 
-      type == :request ?
-        kronk.request_async(uris[0], &handler) :
-        kronk.compare_async(uris[0], uris[1], &handler)
+      kronk.send(*args)
+    end
+
+
+    ##
+    # Trigger a single kronk result callback.
+
+    def trigger_result kronk, err, &block
+      block ||= @on_result
+
+      if block.arity > 2 || block.arity < 0
+        block.call kronk, err, @mutex
+      else
+        @mutex.synchronize do
+          block.call kronk, err
+        end
+      end
     end
 
 
@@ -173,19 +179,6 @@ class Kronk
     def single_request?
       @queue << trigger(:input) if @queue.empty? && (!@number || @number <= 1)
       @queue.length == 1 && @triggers[:input] == @on_input && @input.eof?
-    end
-
-
-    ##
-    # Enable or disable output and run the block. Restores the previous
-    # value of @use_output after the block is run. Returns the value of
-    # the given block.
-
-    def using_output state
-      old_value, @use_output = @use_output, state
-      out_value = yield
-      @use_output = old_value
-      out_value
     end
   end
 end
