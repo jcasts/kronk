@@ -145,7 +145,7 @@ class Kronk
       uris  = Array(uris)[0,2]
       kronk = Kronk.new opts
 
-      handler = Proc.new do |kronk, err|
+      handler = Proc.new do |resp, err|
         raise err if err && !rescuable_errors.find{|eclass| eclass === err}
 
         if block_given?
