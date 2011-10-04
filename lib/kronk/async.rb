@@ -37,7 +37,7 @@ class Kronk
     multi.add :right, conn2
 
     multi.callback do
-      next yield(err1 || err2) if err1 || err2
+      next yield(nil, (err1 || err2)) if err1 || err2
 
       @responses = [res1, res2]
       @response  = res2
