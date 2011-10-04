@@ -11,7 +11,7 @@ class Kronk
 
     def follow_redirect_async opts={}, &block
       return if !redirect?
-      Request.new(self.location, opts).retrieve_async &block
+      Request.new(self.location, opts).retrieve_async(&block)
     end
   end
 end
