@@ -164,7 +164,7 @@ class Kronk
       trap 'INT' do
         kill
         trigger :complete
-        trigger :interrupt
+        trigger(:interrupt) || exit 1
       end
 
       trigger :start
