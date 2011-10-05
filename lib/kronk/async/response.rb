@@ -36,11 +36,14 @@ class Kronk
 
     ##
     # Response.new with asynchronous IO input.
+    # Returns an EM::Connection subclass (AsyncHandler) instance.
     #
     # Passing a block will yield a Kronk::Response instance and/or
     # an Exception instance if an error was caught.
     #
-    # Returns an EM::Connection instance.
+    #   conn = Response.from_async_io do |resp, err|
+    #     # do something with Kronk::Response instance here
+    #   end
 
     def self.from_async_io io, req=nil, &block
       conn = EM.attach io, AsyncHandler, req
