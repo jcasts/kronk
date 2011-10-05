@@ -72,8 +72,6 @@ class Kronk
     handler = Proc.new do |resp, err|
       next yield(resp, err) if err
 
-      Kronk.history << resp.request.uri if resp.request
-
       resp.parser         = options[:parser] if options[:parser]
       resp.stringify_opts = options
 
@@ -114,6 +112,7 @@ class Kronk
       req = Request.new uri, options
       Cmd.verbose "Retrieving URL:  #{req.uri}\n"
       conn = req.retrieve_async(&handler)
+      conn.callback{ Kronk.history << uri }
     end
 
   rescue => e
