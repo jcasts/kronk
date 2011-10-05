@@ -39,11 +39,14 @@ class Kronk
     #
     # Passing a block will yield a Kronk::Response instance and/or
     # an Exception instance if an error was caught.
+    #
+    # Returns an EM::Connection instance.
 
     def self.from_async_io io, req=nil, &block
       conn = EM.attach io, AsyncHandler, req
       conn.comm_inactivity_timeout = 2
       conn.callback(&block)
+      conn
     end
 
 

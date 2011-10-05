@@ -3,9 +3,13 @@ class Kronk
 
     ##
     # Retrieve this requests' response asynchronously with em-http-request.
+    # Returns a EM::HttpConnection instance.
+    #
+    # Passing a block will yield a Kronk::Response instance and/or
+    # an Exception instance if an error was caught.
     #
     #   req  = Request.new "example.com"
-    #   em_req = req.retrieve_async do |kronk_response|
+    #   em_req = req.retrieve_async do |kronk_response, err|
     #     # do something with Kronk::Response instance here
     #   end
     #
@@ -31,13 +35,13 @@ class Kronk
         elapsed_time   = Time.now - start_time
         @response      = Response.new resp.raw_response, nil, self
         @response.time = elapsed_time
-        yield @response
+        yield @response, nil
       end if block_given?
 
       req.errback do |c|
-        next if c.error
-        c.instance_variable_set :@error,
-          Kronk::NotFoundError.new("#{@uri} could not be found")
+        err = c.error || Kronk::NotFoundError.new("#{@uri} could not be found")
+        c.instance_variable_set :@error, err unless c.error
+        yield nil, err
       end
 
       req
