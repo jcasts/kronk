@@ -78,7 +78,7 @@ class Kronk
       resp.stringify_opts = options
 
       if resp.redirect? && (rdir == true || Fixnum === rdir && rdir > 0)
-        Cmd.verbose "Following redirect to #{resp['LOCATION']}"
+        Cmd.verbose "Following redirect to #{resp.location}"
 
         rdir = rdir - 1 if Fixnum === rdir
         opts = options_for_uri resp.location
