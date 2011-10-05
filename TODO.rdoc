@@ -1,6 +1,6 @@
 = TODO
 
-* Response#stringify is slow!
+* DataString.new is waaay slow!
 
 * Investigate Kronk console.
 
