@@ -22,6 +22,8 @@
 
   * Lots of Diff::Output and DataString cleanup.
 
+  * Assign URI options to redirects.
+
 === 1.6.2 / 2011-09-12
 
 * Bugfixes:
