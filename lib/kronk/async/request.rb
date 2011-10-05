@@ -1,6 +1,8 @@
 class Kronk
   class Request
 
+    class EMError < Kronk::Exception; end
+
     ##
     # Retrieve this requests' response asynchronously with em-http-request.
     # Returns a EM::HttpConnection instance.
@@ -39,8 +41,10 @@ class Kronk
       end if block_given?
 
       req.errback do |c|
-        err = c.error || Kronk::NotFoundError.new("#{@uri} could not be found")
-        c.instance_variable_set :@error, err unless c.error
+        err = c.error ?
+              EMError.new(c.error) :
+              Kronk::NotFoundError.new("#{@uri} could not be found")
+
         yield nil, err
       end
 
