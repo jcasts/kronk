@@ -26,7 +26,9 @@ class Kronk
         return unless @callback
 
         @_res = Kronk::Response.new @buffer, nil, @_req
-        @callback.call @_res, nil
+        err = Kronk::Request::EMError.new "IO read error" if error?
+
+        @callback.call @_res, err
 
       rescue => e
         @callback.call @_res, e
