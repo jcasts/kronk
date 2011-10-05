@@ -80,10 +80,7 @@ class Kronk
 
         rdir = rdir - 1 if Fixnum === rdir
         opts = options_for_uri resp.location
-        conn = resp.follow_redirect_async(opts, &handler)
-        conn.errback do |c|
-          yield self, c.error
-        end
+        resp.follow_redirect_async(opts, &handler)
 
       else
         @responses = [resp]
