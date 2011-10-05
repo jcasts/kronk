@@ -469,7 +469,9 @@ class TestKronk < Test::Unit::TestCase
     req = Kronk::Request.new "http://www.google.com/"
     req.stubs(:retrieve).returns res
 
-    Kronk::Request.stubs(:new).with("http://www.google.com/",{}).returns req
+    Kronk::Request.stubs(:new).
+      with("http://www.google.com/",{:follow_redirects => true}).returns req
+
     Kronk::Request.expects(:new).
       with("http://www.google.com/", :follow_redirects => true).returns req
 
@@ -487,7 +489,8 @@ class TestKronk < Test::Unit::TestCase
     req.stubs(:retrieve).returns res
 
     Kronk::Request.expects(:new).
-      with("http://www.google.com/",{}).returns(req).times(3)
+      with("http://www.google.com/",{:follow_redirects => 3}).returns(req).
+      times(3)
 
     Kronk::Request.expects(:new).
       with("http://www.google.com/", :follow_redirects => 3).returns req
