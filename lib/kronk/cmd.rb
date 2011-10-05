@@ -464,10 +464,10 @@ Parse and run diffs against data from live and cached http responses.
 
     def self.query_password str=nil
       $stderr << "#{(str || "Password:")} "
-      system "stty -echo"
+      system "stty -echo" unless windows?
       password = $stdin.gets.chomp
     ensure
-      system "stty echo"
+      system "stty echo" unless windows?
       $stderr << "\n"
       password
     end
