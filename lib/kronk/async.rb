@@ -69,7 +69,9 @@ class Kronk
 
     rdir = options[:follow_redirects]
 
-    handler = Proc.new do |resp|
+    handler = Proc.new do |resp, err|
+      next yield(resp, err) if err
+
       Kronk.history << resp.request.uri if resp.request
 
       resp.parser         = options[:parser] if options[:parser]
@@ -96,24 +98,22 @@ class Kronk
       end
     end
 
-    # TODO: read from IOs asynchronously.
-
-    if IO === uri || StringIO === uri
+    if IO === uri
       Cmd.verbose "Reading IO #{uri}"
-      resp = Response.new uri
+      Response.from_async_io(uri, &handler)
+
+    elsif StringIO === uri
+      Cmd.verbose "Reading IO #{uri}"
+      handler.call Response.new(uri)
 
     elsif File.file? uri.to_s
       Cmd.verbose "Reading file:  #{uri}\n"
-      resp = Response.read_file uri
+      handler.call Response.read_file(uri)
 
     else
       req = Request.new uri, options
       Cmd.verbose "Retrieving URL:  #{req.uri}\n"
-
       conn = req.retrieve_async(&handler)
-      conn.errback do |c|
-        yield nil, c.error
-      end
     end
 
   rescue => e
