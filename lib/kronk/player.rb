@@ -6,7 +6,7 @@ class Kronk
   # Kronk includes a Suite (test-like) output, a Stream (chunked) output,
   # and a Benchmark output.
 
-  class Player < Kronk::QueueRunner
+  class Player < QueueRunner
 
     RESCUABLE = [Kronk::Exception, Errno::ECONNRESET, URI::InvalidURIError]
 
@@ -181,6 +181,3 @@ class Kronk
     end
   end
 end
-
-Kronk::Player.async = true
-puts "async: #{Kronk::Player.async}"

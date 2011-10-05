@@ -2,14 +2,22 @@ class Kronk
 
   class QueueRunner
 
+    ##
+    # Define whether to use the EventMachine or the threaded behavior.
+
     def self.async= value
       @async = !!value
     end
 
 
+    ##
+    # Returns true if EventMachine is enabled
+
     def self.async
-      !!@async
+      @async
     end
+
+    self.async = false
 
 
     attr_accessor :number, :concurrency, :queue, :count,
@@ -118,6 +126,7 @@ class Kronk
     def process_queue_async &block
       # TODO: Make input use EM from QueueRunner and Player IO.
       require 'kronk/async' unless defined?(EM::HttpRequest)
+      Cmd.verbose "Running async"
 
       start_input!
 

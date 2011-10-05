@@ -4,6 +4,7 @@ class TestKronk < Test::Unit::TestCase
 
   def test_default_config
     expected = {
+      :async         => 'auto',
       :content_types => {
         'js'      => 'JSON',
         'json'    => 'JSON',
@@ -31,6 +32,7 @@ class TestKronk < Test::Unit::TestCase
   def test_load_config
     with_config do
       mock_config = {
+        :async         => false,
         :content_types => {
           'soap' => "SOAPParser",
           'js'   => "JsEngine"
@@ -60,6 +62,7 @@ class TestKronk < Test::Unit::TestCase
       Kronk.load_config "foobar"
 
       expected = {
+        :async         => false,
         :content_types => {
           'soap'  => "SOAPParser",
           'js'    => "JsEngine",

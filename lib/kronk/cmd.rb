@@ -405,6 +405,7 @@ Parse and run diffs against data from live and cached http responses.
 
       unless options[:player].empty?
         options[:player] = Player.new options[:player]
+        set_player_backend
       else
         options.delete :player
       end
@@ -602,6 +603,26 @@ Parse and run diffs against data from live and cached http responses.
       verbose "\nResp. Time: #{response.time.to_f}"
 
       response.success?
+    end
+
+
+    ##
+    # Set Player async state based on Kronk config.
+
+    def self.set_player_backend
+      case Kronk.config[:async]
+      when 'auto', :auto, nil
+        Kronk::Player.async = defined?(EM::HttpRequest)
+
+      when true
+        unless defined?(EM::HttpRequest)
+          raise Kronk::Exception, "Async mode requires the em-http-request gem"
+        end
+        Kronk::Player.async = true
+
+      else
+        Kronk::Player.async = false
+      end
     end
 
 
