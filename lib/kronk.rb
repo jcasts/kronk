@@ -331,7 +331,7 @@ class Kronk
     rdir = options[:follow_redirects]
     while resp.redirect? && (rdir == true || rdir.to_s.to_i > 0)
       Cmd.verbose "Following redirect to #{resp['Location']}"
-      resp = resp.follow_redirect
+      resp = resp.follow_redirect options_for_uri(resp.location)
       rdir = rdir - 1 if Fixnum === rdir
     end
 
