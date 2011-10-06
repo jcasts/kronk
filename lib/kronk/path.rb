@@ -136,16 +136,20 @@ class Kronk
     end
 
 
+    SPECIAL_CHARS = "*?()|/."
+    R_SPECIAL_CHARS = /[\0#{Regexp.escape SPECIAL_CHARS}]/u
+
     ##
     # Joins an Array into a path String.
 
     def self.join path_arr, escape=true
-      path_esc = "*?()|/."
-      path_arr.map! do |k|
-        k.to_s.gsub(/([#{path_esc}])/){|m| "\\#{m}"}
-      end if escape
-
-      path_arr.join(DCH)
+      path_str = path_arr.join("\0")
+      if escape
+        path_str.gsub!(R_SPECIAL_CHARS){|c| c == "\0" ? DCH : "\\#{c}"}
+      else
+        path_str.gsub! "\0", DCH
+      end
+      path_str
     end
 
 
