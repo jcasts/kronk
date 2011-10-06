@@ -1,10 +1,10 @@
 = TODO
 
-* Investigate the use of EM for QueueRunner.
-
 * Investigate Kronk console.
 
 == Done
+
+* Investigate the use of EM for QueueRunner.
 
 * Refactor Kronk::Player into a Player and a QueueRunner.
 
