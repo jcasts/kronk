@@ -29,6 +29,8 @@ class Kronk::Diff
 
       def add obj, meta=nil
         @lmeta, @rmeta = meta if meta && !@lmeta && !@rmeta
+        @lmeta = ary_to_path @lmeta if Array === @rmeta
+        @rmeta = ary_to_path @rmeta if Array === @rmeta
 
         if String === obj
           add_common obj
@@ -68,6 +70,11 @@ class Kronk::Diff
 
         line_nums = @format.lines [nil, @rlen+@rindex], @cwidth if @cwidth
         @lines << "#{line_nums}#{@format.added obj}"
+      end
+
+
+      def ary_to_path ary
+        "#{Kronk::Path::DCH}#{Kronk::Path.join ary}"
       end
 
 
