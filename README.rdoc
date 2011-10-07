@@ -79,12 +79,12 @@ Kronk pulls it's config from $HOME/.kronk/rc and supports the following:
 
 Set the file to save the last http response retrieved in:
 
-  :cache_file: ~/.kronk_cache
+  cache_file: ~/.kronk_cache
 
 Content types to match to a parser. Keys are used as a part of
 a regexp and values are evaluated by const_get.
 
-  :content_types:
+  content_types:
     xml:   XMLParser
     plist: PlistParser
     json:  JSON
@@ -92,23 +92,23 @@ a regexp and values are evaluated by const_get.
 Number of lines of context to use for diff. Full diff is returned when
 set to false:
 
-  :context: 5     # show 5 lines before and after diff
-  :context: false # show the full file
+  context: 5     # show 5 lines before and after diff
+  context: false # show the full file
 
 How to format the diff output. Supports the "special" values
-:ascii_diff and :color_diff or any string that will correctly
+'ascii' and 'color' or any string that will correctly
 resolve to a constant:
 
-  :diff_format: :ascii_diff
+  diff_format: ascii
 
 Adding User-Agent aliases is useful and simple!
 
-  :user_agents:
+  user_agents:
     win_ie9: Mozilla/4.0 (compatible; MSIE 9.0; Windows NT 6.0)
 
 Disabling cookies altogether may be done as so:
 
-  :use_cookies: false
+  use_cookies: false
 
 Setting URI-specific config options - useful if you always need to send
 headers or use one-off configs. Each URI option key is dropped in a regexp
@@ -116,40 +116,40 @@ to match against the given URIs so this also works for local files.
 See Kronk::Request.retrieve and Kronk::Response#selective_data
 for all options supported:
 
-  :uri_options:
+  uri_options:
     example.com:
-      :parser:      XMLParser
-      :http_method: POST
+      parser:      XMLParser
+      http_method: POST
 
-      :follow_redirects: true
+      follow_redirects: true
 
-      :ignore_data:
+      ignore_data:
         - path/to/data/point
 
-      :headers:
+      headers:
         X-Something: custom header value
 
-      :query:
+      query:
         offset: 1
         limit:  10
 
 Require specific files or gems in the ruby runtime:
 
-  :requires:
+  requires:
     - kronk-my_custom_parser
     - kronk-my_custom_diff_formatter
 
 Show line numbers in the output:
 
-  :show_lines: true
+  show_lines: true
 
 Assign a default host to use when none is specified:
 
-  :default_host: http://localhost:3000
+  default_host: http://localhost:3000
 
 Set the number of spaces for indentation:
 
-  :indentation: 2
+  indentation: 2
 
 === Bash Completion:
 

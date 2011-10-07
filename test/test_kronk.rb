@@ -83,7 +83,7 @@ class TestKronk < Test::Unit::TestCase
         :ignore_headers => ["Content-Type"],
         :uri_options => {'example.com' => {:parser => 'JSON'}},
         :user_agents =>
-          Kronk::USER_AGENTS.merge(:win_ie6 => 'piece of crap browser'),
+          Kronk::USER_AGENTS.merge('win_ie6' => 'piece of crap browser'),
         :foo => :bar
       }
 

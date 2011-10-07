@@ -55,13 +55,26 @@ class Kronk
   def self.load_config filepath=DEFAULT_CONFIG_FILE
     conf = YAML.load_file filepath
 
-    self.config[:requires].concat [*conf.delete(:requires)] if conf[:requires]
+    conf.each do |key, value|
+      skey = key.to_sym
 
-    [:content_types, :uri_options, :user_agents].each do |key|
-      self.config[key].merge! conf.delete(key) if conf[key]
+      case skey
+      when :content_types, :user_agents
+        conf[key].each{|k,v| self.config[skey][k.to_s] = v }
+
+      when :requires
+        self.config[skey].concat Array(value)
+
+      when :uri_options
+        conf[key].each do |matcher, opts|
+          self.config[skey][matcher.to_s] = opts
+          opts.keys.each{|k| opts[k.to_sym] = opts.delete(k) if String === k}
+        end
+
+      else
+        self.config[skey] = value
+      end
     end
-
-    self.config.merge! conf
   end
 
 
