@@ -1,7 +1,5 @@
 = TODO
 
-* Cookie lookup is slow on redirect.
-
 * Investigate Kronk console.
 
 == Done
