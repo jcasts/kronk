@@ -2,12 +2,5 @@
 
 $: << File.join(File.dirname(__FILE__), "../lib") if $0 == "bin/kronk"
 
-begin
-  require 'kronk/async'
-
-rescue LoadError => e
-  em_msg = "no such file to load -- em-http-request"
-  raise unless e.message.index em_msg
-end
-
+require 'kronk'
 Kronk::Cmd.run
