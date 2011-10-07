@@ -101,9 +101,12 @@ class Kronk::Diff
       return unless name
 
       return name        if Class === name
-      return AsciiFormat if name == :ascii_diff
-      return ColorFormat if name == :color_diff
-      Kronk.find_const name rescue name
+      return AsciiFormat if name.to_s =~ /^ascii(_diff)?$/
+      return ColorFormat if name.to_s =~ /^color(_diff)?$/
+      Kronk.find_const name
+
+    rescue NameError => e
+      raise Kronk::Exception, "No such formatter: #{name.inspect}"
     end
 
 
