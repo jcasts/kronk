@@ -1,7 +1,5 @@
 = TODO
 
-* DataString.new is waaay slow!
-
 * Investigate Kronk console.
 
 == Done
