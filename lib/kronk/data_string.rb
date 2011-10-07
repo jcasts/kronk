@@ -27,7 +27,7 @@ class Kronk
 
     TO_RUBY = proc do |type, obj|
       case type
-      when :key_assign then " =>"
+      when :key_assign then " => "
       when :key        then obj.inspect
       when :value      then obj.inspect
       when :struct
@@ -38,7 +38,7 @@ class Kronk
 
     TO_JSON = proc do |type, obj|
       case type
-      when :key_assign then ":"
+      when :key_assign then ": "
       when :key
         (Symbol === obj ? obj.inspect : obj.to_s).to_json
       when :value
@@ -47,6 +47,7 @@ class Kronk
         ((obj == true || obj == false) ? "Boolean" : obj.class).to_json
       end
     end
+
 
     ##
     # Returns a ruby data string that is diff-able, meaning sorted by
@@ -108,59 +109,59 @@ class Kronk
     def render data, path=[], &block
       indent   = (path.length + 1) * @indentation
       pad      = " " * indent
-      path_str = "/" << Path.join(path)
 
       case data
 
       when Hash
-        append("{}", path_str) and return if data.empty?
-        append "{\n", path_str
+        append("{}", path) and return if data.empty?
+        append "{\n", path
 
         sort_any(data.keys).each_with_index do |key, i|
-          append "#{pad}#{ yield(:key, key) }#{ yield(:key_assign) } ", path_str
+          append "#{pad}#{ yield(:key, key) }#{ yield(:key_assign) }", path
 
           value    = data[key]
           new_path = path.dup << key
           render value, new_path, &block
 
-          append(",", path_str) unless i == data.length - 1
-          append("\n", path_str)
+          append(",", path) unless i == data.length - 1
+          append("\n", path)
         end
 
-        append(("#{" " * (indent - @indentation)}}"), path_str)
+        append(("#{" " * (indent - @indentation)}}"), path)
 
       when Array
-        append("[]", path_str) and return if data.empty?
-        append "[\n", path_str
+        append("[]", path) and return if data.empty?
+        append "[\n", path
 
         (0...data.length).each do |key|
-          append pad, path_str
+          append pad, path
 
           value    = data[key]
           new_path = path.dup << key
           render value, new_path, &block
 
-          append(",", path_str) unless key == data.length - 1
-          append("\n", path_str)
+          append(",", path) unless key == data.length - 1
+          append("\n", path)
         end
 
-        append(("#{" " * (indent - @indentation)}]"), path_str)
+        append(("#{" " * (indent - @indentation)}]"), path)
 
       else
         output = @struct_only ? yield(:struct, data) : yield(:value, data)
-        append output.to_s, path_str
+        append output.to_s, path
       end
     end
 
+
+    alias append_arrow <<
 
     ##
     # Add a string with metadata to the data string.
 
     def append str, metadata=nil
       @meta.concat([metadata] * str.length)
-      self[self.length,str.length] = str
+      self.append_arrow str
     end
-
 
     ##
     # Similar to String#<< but adds metadata.
@@ -236,31 +237,15 @@ class Kronk
     end
 
 
+    CLASS_ORDER = {Fixnum => 2, String => 1, Symbol => 0}
+
     ##
     # Compares Numerics, Strings, and Symbols and returns true if the left
     # side is 'smaller' than the right side.
 
     def smaller? left, right
-      case left
-      when Numeric
-        case right
-        when Numeric then right > left
-        else              true
-        end
-
-      when Symbol
-        case right
-        when Numeric then false
-        when Symbol  then right.to_s > left.to_s
-        else              true
-        end
-
-      when String
-        case right
-        when String  then right > left
-        else              false
-        end
-      end
+      left.class == right.class && left.to_s < right.to_s ||
+        CLASS_ORDER[left.class] < CLASS_ORDER[right.class]
     end
   end
 end

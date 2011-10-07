@@ -6,6 +6,23 @@ class Kronk
   class Cmd
 
     ##
+    # Saves the raw http response to a cache file.
+
+    def self.cache_response resp, filepath=nil
+      filepath ||= Kronk.config[:cache_file]
+      return unless filepath
+
+      begin
+        File.open(filepath, "wb+") do |file|
+          file.write resp.raw
+        end
+      rescue => e
+        error "#{e.class}: #{e.message}"
+      end
+    end
+
+
+    ##
     # Start an IRB console with the given Kronk::Response object.
 
     def self.irb resp
@@ -23,6 +40,22 @@ class Kronk
 
       IRB.start
       false
+    end
+
+
+    ##
+    # Try to load the config file. If not found, create the default one
+    # and exit.
+
+    def self.load_config_file
+      Kronk.load_config
+
+    rescue Errno::ENOENT
+      make_config_file
+      error "No config file was found.\n" +
+            "Created default config in #{DEFAULT_CONFIG_FILE}\n" +
+            "Edit file if necessary and try again.\n"
+      exit 2
     end
 
 
@@ -464,10 +497,10 @@ Parse and run diffs against data from live and cached http responses.
 
     def self.query_password str=nil
       $stderr << "#{(str || "Password:")} "
-      system "stty -echo"
+      system "stty -echo" unless windows?
       password = $stdin.gets.chomp
     ensure
-      system "stty echo"
+      system "stty echo" unless windows?
       $stderr << "\n"
       password
     end
@@ -477,31 +510,14 @@ Parse and run diffs against data from live and cached http responses.
     # Runs the kronk command with the given terminal args.
 
     def self.run argv=ARGV
-      begin
-        Kronk.load_config
-
-      rescue Errno::ENOENT
-        make_config_file
-        error "No config file was found.\n" +
-              "Created default config in #{DEFAULT_CONFIG_FILE}\n" +
-              "Edit file if necessary and try again.\n"
-        exit 2
-      end
-
-      options = parse_args argv
+      load_config_file
 
       Kronk.load_cookie_jar
 
+      options = parse_args argv
       load_requires options.delete(:requires)
 
-      at_exit do
-        Kronk.save_cookie_jar
-        Kronk.save_history
-      end
-
-      trap 'INT' do
-        exit 2
-      end
+      set_exit_behavior
 
       uri1, uri2 = options.delete :uris
       runner     = options.delete(:player) || self
@@ -515,7 +531,7 @@ Parse and run diffs against data from live and cached http responses.
 
       exit 1 unless success
 
-    rescue Kronk::Exception, Response::MissingParser, Errno::ECONNRESET => e
+    rescue Kronk::Exception, Errno::ECONNRESET => e
       error e.message, e.backtrace
       exit 2
     end
@@ -590,18 +606,16 @@ Parse and run diffs against data from live and cached http responses.
 
 
     ##
-    # Saves the raw http response to a cache file.
+    # Assign at_exit and trap :INT behavior.
 
-    def self.cache_response resp, filepath=nil
-      filepath ||= Kronk.config[:cache_file]
-      return unless filepath
+    def self.set_exit_behavior
+      at_exit do
+        Kronk.save_cookie_jar
+        Kronk.save_history
+      end
 
-      begin
-        File.open(filepath, "wb+") do |file|
-          file.write resp.raw
-        end
-      rescue => e
-        error "#{e.class}: #{e.message}"
+      trap 'INT' do
+        exit 2
       end
     end
 

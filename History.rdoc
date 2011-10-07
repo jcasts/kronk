@@ -1,4 +1,4 @@
-=== 1.7.0 / 2011-09
+=== 1.7.0 / 2011-10
 
 * Enhancements:
 
@@ -12,9 +12,13 @@
 
 * Bugfixes:
 
+  * Support relative URLs in redirects.
+
   * More accurate data diff metadata output.
 
   * Lots of Diff::Output and DataString cleanup.
+
+  * Assign URI options to redirects.
 
 === 1.6.2 / 2011-09-12
 

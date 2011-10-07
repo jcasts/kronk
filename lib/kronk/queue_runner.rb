@@ -74,7 +74,12 @@ class Kronk
 
       until finished?
         @threads.delete_if{|t| !t.alive? }
-        next if @threads.length >= @concurrency || @queue.empty?
+
+        if @threads.length >= @concurrency || @queue.empty?
+          Thread.pass
+          next
+        end
+
         @threads << Thread.new(@queue.shift) do |q_item|
           yield q_item if block_given?
         end
@@ -133,13 +138,19 @@ class Kronk
       @reader_thread = Thread.new do
         begin
           loop do
-            next if @queue.length >= @concurrency * 2
+            if @queue.length >= @concurrency * 2
+              Thread.pass
+              next
+            end
 
             max_new = @concurrency * 2 - @queue.length
 
-            max_new.times do
-              @queue << trigger(:input)
+            Thread.exclusive do
+              max_new.times do
+                @queue << trigger(:input)
+              end
             end
+            Thread.pass
           end
 
         rescue => e
@@ -154,7 +165,7 @@ class Kronk
     # QueueRunner#run or QueueRunner#process_queue session.
 
     def stop_input!
-      Thread.pass if RUBY_VERSION[0,3] == "1.8"
+      Thread.pass
       @reader_thread && @reader_thread.kill
     end
 
