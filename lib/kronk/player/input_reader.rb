@@ -12,6 +12,7 @@ class Kronk
     attr_accessor :io, :parser, :buffer
 
     def initialize string_or_io, parser=nil
+      @io_buf = ""
       @buffer = []
       @parser = parser || Kronk::Player::RequestParser
       @io     = string_or_io
@@ -25,10 +26,10 @@ class Kronk
     def get_next
       return if eof?
 
-      @buffer << @io.gets if @buffer.empty?
+      @buffer << gets if @buffer.empty?
 
-      until @io.eof?
-        line = @io.gets
+      until @io.eof? && @io_buf.empty?
+        line = gets
         next unless line
 
         if @parser.start_new?(line) || @buffer.empty?
@@ -41,6 +42,42 @@ class Kronk
 
       return if @buffer.empty?
       @parser.parse(@buffer.slice!(0)) || self.get_next
+    end
+
+
+    ##
+    # Read one line from @io, thread-non-blocking.
+
+    def gets
+      return @io.gets if StringIO === @io
+
+      next_line = io_buf_line
+      return next_line if next_line
+
+      until @io.eof?
+        selected, = select [@io], nil, nil, 0.05
+
+        if selected.nil? || selected.empty?
+          Thread.pass
+          next
+        end
+
+        @io_buf << @io.readpartial(1024)
+
+        next_line = io_buf_line
+        return next_line if next_line
+      end
+    end
+
+
+    ##
+    # Get the first line of the io buffer.
+
+    def io_buf_line
+      index = @io_buf.index "\n"
+      return unless index
+
+      @io_buf.slice!(0..index)
     end
 
 

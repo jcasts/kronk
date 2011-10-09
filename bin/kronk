@@ -1,15 +1,6 @@
 #!/usr/bin/env ruby
 
-$: << File.join(File.dirname(__FILE__), "../lib") if $0 =~ %r{bin/kronk$}
+$: << File.join(File.dirname(__FILE__), "../lib") if $0 == "bin/kronk"
 
-begin
-  require 'kronk'
-
-rescue LoadError => e
-  raise unless e.message =~ %r{no such file to load -- kronk}
-
-  $: << File.join(File.dirname(__FILE__), "../lib")
-  require 'kronk'
-end
-
+require 'kronk'
 Kronk::Cmd.run

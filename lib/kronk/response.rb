@@ -18,8 +18,8 @@ class Kronk
 
   class Response
 
-    class MissingParser < Exception; end
-    class InvalidParser < Exception; end
+    class MissingParser < Kronk::Exception; end
+    class InvalidParser < Kronk::Exception; end
 
 
     ENCODING_MATCHER = /(^|;\s?)charset=(.*?)\s*(;|$)/
@@ -143,7 +143,7 @@ class Kronk
     # Ruby inspect.
 
     def inspect
-      "#<#{self.class}:#{self.code} #{self['Content-Type']}>"
+      "#<#{self.class}:#{self.code} #{self['Content-Type']} #{total_bytes}bytes>"
     end
 
 

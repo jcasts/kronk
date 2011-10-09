@@ -2,6 +2,24 @@ class Kronk
 
   class QueueRunner
 
+    ##
+    # Define whether to use the EventMachine or the threaded behavior.
+
+    def self.async= value
+      @async = !!value
+    end
+
+
+    ##
+    # Returns true if EventMachine is enabled
+
+    def self.async
+      @async
+    end
+
+    self.async = false
+
+
     attr_accessor :number, :concurrency, :queue, :count,
                   :mutex, :threads, :reader_thread
 
@@ -44,6 +62,7 @@ class Kronk
 
     def kill
       stop_input!
+      EM.stop if defined?(EM) && EM.reactor_running?
       @threads.each{|t| t.kill}
       @threads.clear
     end
@@ -95,6 +114,45 @@ class Kronk
 
 
     ##
+    # Start processing the queue and reading from IO if available.
+    #
+    # Yields queue item until queue and io (if available) are empty and the
+    # totaly number of requests to run is met (if number is set).
+    #
+    # Uses EventMachine to run asynchronously.
+    #
+    # Note: If the block given doesn't use EM, it will be blocking.
+
+    def process_queue_async &block
+      # TODO: Make input use EM from QueueRunner and Player IO.
+      require 'kronk/async' unless defined?(EM::HttpRequest)
+      Cmd.verbose "Running async"
+
+      start_input!
+
+      @count = 0
+
+      EM.run do
+        EM.add_periodic_timer do
+          if finished?
+            next if EM.connection_count > 0
+            kill
+            next
+          end
+
+          if @queue.empty? || EM.connection_count >= @concurrency
+            Thread.pass
+            next
+          end
+
+          yield @queue.shift
+          @count += 1
+        end
+      end
+    end
+
+
+    ##
     # Runs the queue and reads from input until it's exhausted or
     # @number is reached. Yields a queue item and a mutex when to passed
     # block:
@@ -114,13 +172,14 @@ class Kronk
     def run
       trap 'INT' do
         kill
-        trigger :complete
-        trigger :interrupt
+        (trigger(:interrupt) || exit(1))
       end
 
       trigger :start
 
-      process_queue do |q_item|
+      method = self.class.async ? :process_queue_async : :process_queue
+
+      send method do |q_item|
         yield q_item, @mutex if block_given?
       end
 
@@ -135,20 +194,18 @@ class Kronk
     def start_input!
       return unless @triggers[:input]
 
+      max_queue_size = @concurrency * 2
+
       @reader_thread = Thread.new do
         begin
           loop do
-            if @queue.length >= @concurrency * 2
+            if @queue.length >= max_queue_size
               Thread.pass
               next
             end
 
-            max_new = @concurrency * 2 - @queue.length
-
-            Thread.exclusive do
-              max_new.times do
-                @queue << trigger(:input)
-              end
+            while @queue.length < max_queue_size
+              @queue << trigger(:input)
             end
             Thread.pass
           end

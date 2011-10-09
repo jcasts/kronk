@@ -7,7 +7,9 @@ class Kronk
 
     def start
       @results = []
-      $stdout.puts "Started"
+      msg = "Started"
+      msg << (Player.async ? " (async)" : " (threaded)")
+      $stdout.puts msg
       super
     end
 

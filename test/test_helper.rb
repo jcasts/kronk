@@ -1,5 +1,5 @@
 require "test/unit"
-require "kronk"
+require "kronk/async"
 require "mocha"
 
 Kronk.config[:context] = nil

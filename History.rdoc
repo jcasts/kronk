@@ -1,4 +1,8 @@
-=== 1.7.0 / 2011-10
+=== 1.7.0 / 2011-10-09
+
+* Major Enhancements:
+
+  * EventMachine backend support for Player.
 
 * Enhancements:
 
