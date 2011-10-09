@@ -95,7 +95,7 @@ set to false:
   context: 5     # show 5 lines before and after diff
   context: false # show the full file
 
-How to format the diff output. Supports the "special" values
+How to format the diff output. Supports the special values
 'ascii' and 'color' or any string that will correctly
 resolve to a constant:
 

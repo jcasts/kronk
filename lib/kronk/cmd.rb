@@ -607,7 +607,7 @@ Parse and run diffs against data from live and cached http responses.
 
 
     ##
-    # Set Player async state based on Kronk config.
+    # Set Player async state.
 
     def self.set_player_backend async=false
       return Kronk::Player.async = false unless
@@ -642,7 +642,7 @@ Parse and run diffs against data from live and cached http responses.
 
 
     ##
-    # Print and error string
+    # Print an error string
 
     def self.error str, more=nil
       $stderr.puts "\nError: #{str}"
