@@ -74,6 +74,11 @@ class Kronk
     def self.make_config_file
       Dir.mkdir Kronk::CONFIG_DIR unless File.directory? Kronk::CONFIG_DIR
 
+      new_config = {}
+      Kronk::DEFAULT_CONFIG.each do |key, value|
+        new_config[key.to_s] = value
+      end
+
       File.open Kronk::DEFAULT_CONFIG_FILE, "w+" do |file|
         file << Kronk::DEFAULT_CONFIG.to_yaml
       end
