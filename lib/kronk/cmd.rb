@@ -80,7 +80,7 @@ class Kronk
       end
 
       File.open Kronk::DEFAULT_CONFIG_FILE, "w+" do |file|
-        file << Kronk::DEFAULT_CONFIG.to_yaml
+        file << new_config.to_yaml
       end
     end
 
@@ -129,12 +129,12 @@ Parse and run diffs against data from live and cached http responses.
         STR
 
         opt.on('--ascii', 'Return ascii formatted diff') do
-          Kronk.config[:diff_format] = :ascii_diff
+          Kronk.config[:diff_format] = 'ascii'
         end
 
 
         opt.on('--color', 'Return color formatted diff') do
-          Kronk.config[:diff_format] = :color_diff
+          Kronk.config[:diff_format] = 'color'
         end
 
 

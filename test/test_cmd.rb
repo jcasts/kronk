@@ -75,7 +75,12 @@ class TestCmd < Test::Unit::TestCase
     Kronk::Cmd.make_config_file
     mock_file.rewind
 
-    assert_equal Kronk::DEFAULT_CONFIG.to_yaml, mock_file.read
+    new_config = {}
+    Kronk::DEFAULT_CONFIG.each do |key, value|
+      new_config[key.to_s] = value
+    end
+
+    assert_equal new_config.to_yaml, mock_file.read
   end
 
 
@@ -89,7 +94,12 @@ class TestCmd < Test::Unit::TestCase
     Kronk::Cmd.make_config_file
     mock_file.rewind
 
-    assert_equal Kronk::DEFAULT_CONFIG.to_yaml, mock_file.read
+    new_config = {}
+    Kronk::DEFAULT_CONFIG.each do |key, value|
+      new_config[key.to_s] = value
+    end
+
+    assert_equal new_config.to_yaml, mock_file.read
   end
 
 
@@ -162,13 +172,13 @@ class TestCmd < Test::Unit::TestCase
   def test_parse_args_diff_format_mapping
     with_config Hash.new do
       opts = Kronk::Cmd.parse_args %w{uri --ascii}
-      assert_equal :ascii_diff, Kronk.config[:diff_format]
+      assert_equal 'ascii', Kronk.config[:diff_format]
 
       opts = Kronk::Cmd.parse_args %w{uri --color}
-      assert_equal :color_diff, Kronk.config[:diff_format]
-
-      opts = Kronk::Cmd.parse_args %w{uri --format color}
       assert_equal 'color', Kronk.config[:diff_format]
+
+      opts = Kronk::Cmd.parse_args %w{uri --format color_diff}
+      assert_equal 'color_diff', Kronk.config[:diff_format]
     end
   end
 

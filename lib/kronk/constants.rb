@@ -84,7 +84,7 @@ class Kronk
     :context        => 3,
     :cookies_file   => DEFAULT_COOKIES_FILE,
     :default_host   => "http://localhost:3000",
-    :diff_format    => :ascii_diff,
+    :diff_format    => 'ascii',
     :history_file   => DEFAULT_HISTORY_FILE,
     :indentation    => 1,
     :requires       => [],
