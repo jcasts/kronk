@@ -53,7 +53,11 @@ class Kronk
         @slowest = time if !@slowest || @slowest < time
         @fastest = time if !@fastest || @fastest > time
 
-        log_path resp.uri.to_s, time if resp.uri
+        if resp.uri
+          uri = resp.uri.dup
+          uri.query = nil
+          log_path uri.to_s, time
+        end
 
         @total_bytes += resp.raw.bytes.count
 
@@ -173,7 +177,7 @@ Request Percentages (ms)
         unless slowest_reqs.empty?
           out << "
 Avg. Slowest Requests (ms, #)
-#{slowest_reqs.map{|arr| "  #{arr[1]}  #{arr[0]}"}.join "\n" }"
+#{slowest_reqs.map{|arr| "  #{arr[1].inspect}  #{arr[0]}"}.join "\n" }"
         end
 
         out
