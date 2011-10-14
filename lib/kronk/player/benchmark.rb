@@ -53,11 +53,7 @@ class Kronk
         @slowest = time if !@slowest || @slowest < time
         @fastest = time if !@fastest || @fastest > time
 
-        if resp.uri
-          uri = resp.uri.dup
-          uri.query = nil
-          log_path uri.to_s, time
-        end
+        log_req resp.request, time if resp.request
 
         @total_bytes += resp.raw.bytes.count
 
@@ -67,13 +63,16 @@ class Kronk
       end
 
 
-      def log_path path, time
-        path = "/" if !path || path.empty?
-        @paths[path] ||= [0, 0]
-        pcount = @paths[path][1] + 1
-        @paths[path][0] = (@paths[path][0] * @paths[path][1] + time) / pcount
-        @paths[path][0] = @paths[path][0].round @precision
-        @paths[path][1] = pcount
+      def log_req req, time
+        uri = req.uri.dup
+        uri.query = nil
+        uri = "#{req.http_method} #{uri.to_s}"
+
+        @paths[uri] ||= [0, 0]
+        pcount = @paths[uri][1] + 1
+        @paths[uri][0] = (@paths[uri][0] * @paths[uri][1] + time) / pcount
+        @paths[uri][0] = @paths[uri][0].round @precision
+        @paths[uri][1] = pcount
       end
 
 
