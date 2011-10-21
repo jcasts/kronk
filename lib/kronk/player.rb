@@ -172,7 +172,7 @@ class Kronk
 
 
     ##
-    # Check if w6ce5e2ce're only processing a single case.
+    # Check if we're only processing a single case.
     # If so, yield a single item and return immediately.
 
     def single_request?
