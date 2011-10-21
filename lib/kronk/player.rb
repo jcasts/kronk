@@ -8,7 +8,7 @@ class Kronk
 
   class Player < QueueRunner
 
-    RESCUABLE = [Kronk::Exception, Errno::ECONNRESET, URI::InvalidURIError]
+    RESCUABLE = [Kronk::Exception, SystemCallError, URI::InvalidURIError]
 
     attr_accessor :input, :output
 

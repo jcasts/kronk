@@ -537,7 +537,7 @@ Parse and run diffs against data from live and cached http responses.
 
       exit 1 unless success
 
-    rescue Kronk::Exception, Errno::ECONNRESET => e
+    rescue Kronk::Exception, SystemCallError => e
       error e.message, e.backtrace
       exit 2
     end

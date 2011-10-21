@@ -354,7 +354,7 @@ class Kronk
 
     resp
 
-  rescue SocketError, Errno::ENOENT, Errno::ECONNREFUSED
+  rescue SocketError, SystemCallError
     raise NotFoundError, "#{uri} could not be found"
 
   rescue Timeout::Error
