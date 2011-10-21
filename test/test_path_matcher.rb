@@ -30,7 +30,7 @@ class TestPathMatcher < Test::Unit::TestCase
   def test_new
     assert_equal %r{\Afoo(.*)\Z},     @matcher.key
     assert_equal %r{\A(.*)bar(.*)\Z}, @matcher.value
-    assert !@matcher.recursive?
+    assert !@matcher.recursive
   end
 
 
@@ -158,7 +158,7 @@ class TestPathMatcher < Test::Unit::TestCase
                                        :recursive => true
     paths = matcher.find_in @data
     assert_equal [[:key1, :key1a, 3, :findme]], paths
-    assert_equal Kronk::Path::PathMatch, paths.first.class
+    assert_equal Kronk::Path::Match, paths.first.class
 
     assert_equal ["me", "in"], paths.first.matches
   end
@@ -176,7 +176,7 @@ class TestPathMatcher < Test::Unit::TestCase
     ]
 
     assert_equal expected_paths, (expected_paths | paths)
-    assert_equal Kronk::Path::PathMatch, paths.first.class
+    assert_equal Kronk::Path::Match, paths.first.class
 
     assert_equal ["findme"], paths.first.matches
   end
@@ -188,7 +188,7 @@ class TestPathMatcher < Test::Unit::TestCase
                                        :recursive => true
     paths = matcher.find_in @data
     assert_equal [[:key1, :key1a, 3, :findme]], paths
-    assert_equal Kronk::Path::PathMatch, paths.first.class
+    assert_equal Kronk::Path::Match, paths.first.class
 
     assert_equal ["findme", "in"], paths.first.matches
   end
@@ -211,7 +211,7 @@ class TestPathMatcher < Test::Unit::TestCase
     end
 
     assert_equal expected_paths, (expected_paths | paths)
-    assert_equal Kronk::Path::PathMatch, paths.first.class
+    assert_equal Kronk::Path::Match, paths.first.class
     assert_equal expected_paths, (expected_paths | paths.map{|p| p.matches})
   end
 

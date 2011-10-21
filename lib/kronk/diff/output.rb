@@ -13,6 +13,10 @@ class Kronk::Diff
       attr_accessor :context, :format, :lindex, :rindex, :llen, :rlen,
                     :lmeta, :rmeta
 
+      ##
+      # Create a new Section to render, with a formatter, lines column
+      # width, and start indexes for left and right side.
+
       def initialize format, line_num_width=nil, lindex=0, rindex=0
         @format  = format
         @cwidth  = line_num_width
@@ -26,6 +30,13 @@ class Kronk::Diff
         @context = 0
       end
 
+
+      ##
+      # Append a line or diff section to the section.
+      # If obj is a String, common section is assumed, if obj is an Array,
+      # a diff section is assumed.
+      #
+      # Metadata is optional but must be an Array of 2 items if given.
 
       def add obj, meta=nil
         @lmeta, @rmeta = meta if meta && !@lmeta && !@rmeta
@@ -43,40 +54,18 @@ class Kronk::Diff
       end
 
 
-      def add_common obj
-        @llen    += 1
-        @rlen    += 1
-        @context += 1
-
-        line_nums =
-          @format.lines [@llen+@lindex, @rlen+@rindex], @cwidth if @cwidth
-
-        @lines << "#{line_nums}#{@format.common obj}"
-      end
-
-
-      def add_left obj
-        @llen   += 1
-        @context = 0
-
-        line_nums = @format.lines [@llen+@lindex, nil], @cwidth if @cwidth
-        @lines << "#{line_nums}#{@format.deleted obj}"
-      end
-
-
-      def add_right obj
-        @rlen   += 1
-        @context = 0
-
-        line_nums = @format.lines [nil, @rlen+@rindex], @cwidth if @cwidth
-        @lines << "#{line_nums}#{@format.added obj}"
-      end
-
+      ##
+      # Create a Kronk::Path String from an Array. Used when the meta data
+      # given for either side of the diff is an Array.
 
       def ary_to_path ary
         "#{Kronk::Path::DCH}#{Kronk::Path.join ary}"
       end
 
+
+      ##
+      # Build the section String output once all lines and meta has been
+      # added.
 
       def render
         cleft  = "#{@lindex+1},#{@llen}"
@@ -90,6 +79,38 @@ class Kronk::Diff
         end
 
         [@format.context(cleft, cright, info), *@lines]
+      end
+
+
+      private
+
+      def add_common obj # :nodoc:
+        @llen    += 1
+        @rlen    += 1
+        @context += 1
+
+        line_nums =
+          @format.lines [@llen+@lindex, @rlen+@rindex], @cwidth if @cwidth
+
+        @lines << "#{line_nums}#{@format.common obj}"
+      end
+
+
+      def add_left obj # :nodoc:
+        @llen   += 1
+        @context = 0
+
+        line_nums = @format.lines [@llen+@lindex, nil], @cwidth if @cwidth
+        @lines << "#{line_nums}#{@format.deleted obj}"
+      end
+
+
+      def add_right obj # :nodoc:
+        @rlen   += 1
+        @context = 0
+
+        line_nums = @format.lines [nil, @rlen+@rindex], @cwidth if @cwidth
+        @lines << "#{line_nums}#{@format.added obj}"
       end
     end
 
@@ -122,9 +143,7 @@ class Kronk::Diff
     # :labels:: Array - Left and right names to display; default %w{left right}
     # :show_lines:: Boolean - Show lines in diff; default false
 
-    def initialize diff, opts={}
-      @diff = diff
-
+    def initialize opts={}
       @format =
         self.class.formatter(opts[:format] || Kronk.config[:diff_format]) ||
         AsciiFormat
@@ -140,46 +159,78 @@ class Kronk::Diff
 
       @show_lines = opts[:show_lines] || Kronk.config[:show_lines]
       @section    = false
-
-      lines1 = diff.str1.lines.count
-      lines2 = diff.str2.lines.count
-      @cwidth = (lines1 > lines2 ? lines1 : lines2).to_s.length
     end
 
 
-    def continue_section? i
+    ##
+    # Determine if index i is a part of a section to render, including
+    # surrounding context.
+
+    def section? i, diff_ary
        !@context ||
-        !!@diff.diff_array[i,@context+1].to_a.find{|da| Array === da}
+        !!diff_ary[i,@context+1].to_a.find{|da| Array === da}
     end
 
 
-    def start_section? i
-      !@section && continue_section?(i)
+    ##
+    # Determine if index i is the beginning of a diff section to render,
+    # including surrounding context.
+
+    def start_section? i, diff_ary
+      !@section && section?(i, diff_ary)
     end
 
 
-    def end_section? i
+    ##
+    # Determine if index i is the end of a diff section to render, including
+    # surrounding context.
+
+    def end_section? i, diff_ary
       @section &&
-        (i >= @diff.diff_array.length ||
-         !continue_section?(i) && @context && @section.context >= @context)
+        (i >= diff_ary.length ||
+         !section?(i, diff_ary) && @context && @section.context >= @context)
     end
 
 
-    def render force=false
+    ##
+    # Determine the width of the line number column from a diff Array.
+
+    def line_col_width diff_ary
+      lines1, lines2 = diff_ary.inject([0,0]) do |prev, obj|
+        if Array === obj
+          [prev[0] + obj[0].length, prev[1] + obj[1].length]
+        else
+          [prev[0] + 1, prev[1] + 1]
+        end
+      end
+
+      (lines1 > lines2 ? lines1 : lines2).to_s.length
+    end
+
+
+    ##
+    # Render a diff String from a diff Array, with optional metadata.
+    #
+    # The meta argument must be an Array of 2 Arrays, one for each side of
+    # the diff.
+
+    def render diff_ary, meta=[]
       output = []
       output << @format.head(*@labels)
 
       line1 = line2 = 0
-      lwidth = @show_lines && @cwidth
+      lwidth = line_col_width diff_ary if @show_lines
 
-      @diff.diff_array.each_with_index do |item, i|
-        @section = Section.new @format, lwidth, line1, line2 if start_section? i
-        @section.add item, @diff.meta[i] if @section
+      diff_ary.each_with_index do |item, i|
+        @section = Section.new @format, lwidth, line1, line2 if
+          start_section? i, diff_ary
+
+        @section.add item, meta[i] if @section
 
         line1 += Array === item ? item[0].length : 1
         line2 += Array === item ? item[1].length : 1
 
-        if end_section?(i+1)
+        if end_section?(i+1, diff_ary)
           output.concat @section.render
           @section = false
         end
@@ -187,7 +238,5 @@ class Kronk::Diff
 
       output.join(@join_ch)
     end
-
-    alias to_s render
   end
 end

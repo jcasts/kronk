@@ -19,7 +19,7 @@ lib/kronk/diff/color_format.rb
 lib/kronk/diff/output.rb
 lib/kronk/path.rb
 lib/kronk/path/matcher.rb
-lib/kronk/path/path_match.rb
+lib/kronk/path/match.rb
 lib/kronk/path/transaction.rb
 lib/kronk/player.rb
 lib/kronk/player/benchmark.rb

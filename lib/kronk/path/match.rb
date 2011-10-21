@@ -1,7 +1,7 @@
 ##
 # Represents the single match of a relative path against a data set.
 
-class Kronk::Path::PathMatch < Array
+class Kronk::Path::Match < Array
 
   attr_accessor :matches, :splat
 

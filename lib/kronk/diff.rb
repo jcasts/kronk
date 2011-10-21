@@ -45,7 +45,7 @@ class Kronk
       @diff_ary   = nil
       @char       = opts[:char] || /\r?\n/
       @meta       = []
-      @output     = Output.new self, opts
+      @output     = Output.new opts
     end
 
 
@@ -55,10 +55,10 @@ class Kronk
     #   str1 = "match1\nin str2\nmore str2\nmatch2\nstr2 val"
     #
     #   Diff.new(str1, str2).create_diff
-    #   ["match 1",
-    #    [[], ["in str2", "more str2"]],
-    #    "match 2",
-    #    [["str1 val"], ["str2 val"]]]
+    #   #=> ["match 1",
+    #   #   [[], ["in str2", "more str2"]],
+    #   #   "match 2",
+    #   #   [["str1 val"], ["str2 val"]]]
 
     def create_diff
       diff_ary = []
@@ -112,7 +112,7 @@ class Kronk
 
 
     ##
-    # Recursively finds common sequences between two arrays and returns
+    # Finds non-overlapping common sequences between two arrays and returns
     # them in the order they occur as an array of arrays:
     #   find_common arr1, arr2
     #   #=> [[size, arr1_index, arr2_index], [size, arr1_index, arr2_index],...]
@@ -145,10 +145,12 @@ class Kronk
 
     ##
     # Returns all common sequences between to arrays ordered by sequence length
-    # according to the following format:
+    # (including overlapping ones) according to the following format:
     #   [[[len1, ix, iy], [len1, ix, iy]],[[len2, ix, iy]]]
     #   # e.g.
     #   [nil,[[1,2,3],[1,2,5]],nil,[[3,4,5],[3,6,9]]
+    #
+    # Output is indexed by sequence size.
 
     def common_sequences arr1, arr2, &block
       sequences = []
@@ -190,21 +192,14 @@ class Kronk
     end
 
 
-    def yield_sequences sequences, dist=0, &block
-      while sequences.length > dist
-        item = sequences.pop
-        next unless item
-        item.each(&block)
-      end
-    end
-
-
     ##
-    # Returns a formatted output as a string.
+    # Returns a formatted output as a String.
 
-    def formatted opts={}
-      @output.render if any?
+    def formatted
+      ( @output.render diff_array, @meta if any? ).to_s
     end
+
+    alias to_s formatted
 
 
     ##
@@ -233,11 +228,14 @@ class Kronk
     alias to_a diff_array
 
 
-    ##
-    # Returns a diff string with the default format.
+    private
 
-    def to_s
-      formatted
+    def yield_sequences sequences, dist=0, &block # :nodoc:
+      while sequences.length > dist
+        item = sequences.pop
+        next unless item
+        item.each(&block)
+      end
     end
   end
 end

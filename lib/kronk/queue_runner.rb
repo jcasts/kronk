@@ -1,5 +1,40 @@
 class Kronk
 
+  ##
+  # A basic queue and input processor that supports both a multi-threaded and
+  # evented backend (using EventMachine).
+  #
+  # Input is optional and specified by creating an input trigger
+  # (passing a block to on(:input)).
+  # Input will be used to fill queue as the queue gets depleted by
+  # being processed.
+  #
+  #   qrunner = QueueRunner.new
+  #   qrunner.concurrency = 20  # thread count
+  #   qrunner.number = 100      # process 100 queue items
+  #
+  #   file = File.open "example.log", "r"
+  #
+  #   qrunner.on :input do
+  #     if file.eof?
+  #       qrunner.finish
+  #     else
+  #       file.readline
+  #     end
+  #   end
+  #
+  #   qrunner.on :complete do
+  #     file.close
+  #     puts "DONE!"
+  #   end
+  #
+  #   # If running in multi-threaded mode, item mutex will also be passed
+  #   # as optional second argument.
+  #   qrunner.run do |queue_item|
+  #     # Do something with item.
+  #     # When running in evented mode, make sure this section is non-blocking.
+  #   end
+
   class QueueRunner
 
     ##
@@ -58,6 +93,17 @@ class Kronk
 
 
     ##
+    # Stop runner processing gracefully.
+
+    def finish
+      stop_input!
+      EM.stop if defined?(EM) && EM.reactor_running?
+      @threads.each{|t| t.join}
+      @threads.clear
+    end
+
+
+    ##
     # Immediately end all runner processing and threads.
 
     def kill
@@ -106,10 +152,7 @@ class Kronk
         @count += 1
       end
 
-      @threads.each{|t| t.join}
-      @threads.clear
-
-      stop_input!
+      finish
     end
 
 
@@ -136,7 +179,7 @@ class Kronk
         EM.add_periodic_timer do
           if finished?
             next if EM.connection_count > 0
-            kill
+            finish
             next
           end
 

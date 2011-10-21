@@ -31,6 +31,14 @@ class Kronk::Path::Matcher
 
 
   attr_reader :key, :value, :regex_opts
+  attr_accessor :recursive
+
+  ##
+  # New instance of Matcher. Options supported:
+  # :key:: String - The path item key to match.
+  # :value:: String - The path item value to match.
+  # :recursive:: Boolean - Look for path item recursively.
+  # :regex_opts:: Fixnum - representing the Regexp options.
 
   def initialize opts={}
     @regex_opts = opts[:regex_opts]
@@ -57,7 +65,7 @@ class Kronk::Path::Matcher
   ##
   # Universal iterator for Hash and Array like objects.
   # The data argument must either respond to both :each_with_index
-  # and :length, or respond to :each yielding a key/value pair.
+  # and :length, or respond to :has_key? and :each yielding a key/value pair.
 
   def each_data_item data, &block
     if data.respond_to?(:has_key?) && data.respond_to?(:each)
@@ -74,7 +82,7 @@ class Kronk::Path::Matcher
 
 
   ##
-  # Finds data with the given key and value matcher, optionally recursively.
+  # Finds data with the given key and value matcher, optionally recursive.
   # Yields data, key and path Array when block is given.
   # Returns an Array of path arrays.
 
@@ -82,8 +90,8 @@ class Kronk::Path::Matcher
     return [] unless Array === data || Hash === data
 
     paths  = []
-    path ||= Kronk::Path::PathMatch.new
-    path   = Kronk::Path::PathMatch.new path if path.class == Array
+    path ||= Kronk::Path::Match.new
+    path   = Kronk::Path::Match.new path if path.class == Array
 
     each_data_item data do |key, value|
       c_path = path.dup << key
@@ -181,13 +189,5 @@ class Kronk::Path::Matcher
     else
       str
     end
-  end
-
-
-  ##
-  # Should this matcher try and find a match recursively.
-
-  def recursive?
-    @recursive
   end
 end

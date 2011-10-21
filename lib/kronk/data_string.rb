@@ -15,13 +15,13 @@ class Kronk
   #   # }
   #
   #   dstr.meta[dstr.index("\"a\"")]
-  #   # /
+  #   # []
   #
   #   dstr.meta[dstr.index("\"foo\"")]
-  #   # /a
+  #   # ['a']
   #
   #   dstr.meta[dstr.index("\"two\"")]
-  #   # /c/1
+  #   # ['c', 1]
 
   class DataString < String
 

@@ -122,6 +122,13 @@ class Kronk
     ##
     # Returns a path-keyed data hash. Be careful of mixed key types in hashes
     # as Symbols and Strings both use #to_s.
+    #
+    #   Path.pathed {'foo' => %w{thing bar}, 'fizz' => {'buzz' => 123}}
+    #   #=> {
+    #   #     '/foo/0' => 'thing',
+    #   #     '/foo/1' => 'bar',
+    #   #     '/fizz/buzz' => 123
+    #   #   }
 
     def self.pathed data, escape=true
       new_data = {}

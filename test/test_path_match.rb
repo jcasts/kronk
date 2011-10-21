@@ -3,7 +3,7 @@ require 'test/test_helper'
 class TestPathMatch < Test::Unit::TestCase
 
   def setup
-    @pmatch = Kronk::Path::PathMatch.new %w{path to resource}
+    @pmatch = Kronk::Path::Match.new %w{path to resource}
     @pmatch.matches = %w{this is 4 foo}
 
     @splat = @pmatch.dup

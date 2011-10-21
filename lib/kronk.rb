@@ -27,7 +27,7 @@ class Kronk
   require 'kronk/player/input_reader'
   require 'kronk/cmd'
   require 'kronk/path'
-  require 'kronk/path/path_match'
+  require 'kronk/path/match'
   require 'kronk/path/matcher'
   require 'kronk/path/transaction'
   require 'kronk/data_string'
