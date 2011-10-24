@@ -12,6 +12,14 @@ class Kronk::Path::Match < Array
   end
 
 
+  def [] *args
+    path_match = super
+    path_match.matches = @matches.dup
+    path_match.splat   = @splat.map{|key, sp| [key, sp.dup]}
+    path_match
+  end
+
+
   def append_splat id, key # :nodoc:
     if @splat[-1] && @splat[-1][0] == id
       @splat[-1][1] << key
