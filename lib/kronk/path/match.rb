@@ -14,8 +14,10 @@ class Kronk::Path::Match < Array
 
   def [] *args
     path_match = super
-    path_match.matches = @matches.dup
-    path_match.splat   = @splat.map{|key, sp| [key, sp.dup]}
+    if self.class === path_match
+      path_match.matches = @matches.dup
+      path_match.splat   = @splat.map{|key, sp| [key, sp.dup]}
+    end
     path_match
   end
 
