@@ -1,3 +1,15 @@
+=== 1.7.3 / 2011-10-25
+
+* Bugfixes:
+
+  * Handling for parent paths with path matchers.
+
+  * Renamed Path::PathMatch to Path::Match.
+
+  * Fix for benchmark output under ruby 1.8.7.
+
+  * Documentation cleanup.
+
 === 1.7.2 / 2011-10-10
 
 * Bugfixes:
