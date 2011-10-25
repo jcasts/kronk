@@ -354,8 +354,8 @@ class Kronk
 
     resp
 
-  rescue SocketError, SystemCallError
-    raise NotFoundError, "#{uri} could not be found"
+  rescue SocketError, SystemCallError => e
+    raise NotFoundError, "#{uri} could not be found (#{e.class})"
 
   rescue Timeout::Error
     raise TimeoutError, "#{uri} took too long to respond"

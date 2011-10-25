@@ -8,8 +8,6 @@ class Kronk
 
   class Player < QueueRunner
 
-    RESCUABLE = [Kronk::Exception, SystemCallError, URI::InvalidURIError]
-
     attr_accessor :input, :output
 
     ##
@@ -126,7 +124,7 @@ class Kronk
 
       begin
         kronk.send(*args)
-      rescue *RESCUABLE => e
+      rescue *Kronk::Cmd::RESCUABLE => e
         err = e
       end
 
@@ -149,7 +147,7 @@ class Kronk
       method = args.shift.to_s + '_async'
 
       kronk.send(method, *args) do |obj, err|
-        raise err if err && !RESCUABLE.find{|eclass| eclass === err}
+        raise err if err && !Kronk::Cmd::RESCUABLE.find{|eclass| eclass === err}
         trigger_result kronk, err, &block
       end
     end

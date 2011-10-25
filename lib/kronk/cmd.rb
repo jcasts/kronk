@@ -5,6 +5,11 @@ class Kronk
 
   class Cmd
 
+    RESCUABLE = [
+      Kronk::Exception, Timeout::Error,
+      SocketError, SystemCallError, URI::InvalidURIError
+    ]
+
     ##
     # Saves the raw http response to a cache file.
 
@@ -537,8 +542,8 @@ Parse and run diffs against data from live and cached http responses.
 
       exit 1 unless success
 
-    rescue Kronk::Exception, SystemCallError => e
-      error e.message, e.backtrace
+    rescue *RESCUABLE => e
+      error e
       exit 2
     end
 
@@ -647,11 +652,18 @@ Parse and run diffs against data from live and cached http responses.
 
 
     ##
-    # Print an error string
+    # Print an error from a String or Exception instance
 
-    def self.error str, more=nil
-      $stderr.puts "\nError: #{str}"
-      $stderr.puts more if Kronk.config[:verbose] && more
+    def self.error err, more=nil
+      msg = ::Exception === err ?
+              "#{err.class}: #{err.message}" : "Error: #{err}"
+
+      $stderr.puts "\n#{msg}"
+
+      if Kronk.config[:verbose]
+        more ||= err.backtrace.join("\n") if ::Exception === err
+        $stderr.puts "#{more}" if more
+      end
     end
 
 

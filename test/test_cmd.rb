@@ -497,7 +497,7 @@ class TestCmd < Test::Unit::TestCase
 
     errs.each do |err, msg|
       Kronk.expects(:load_config)
-      expect_error_output msg
+      expect_error_output msg, err
       Kronk::Cmd.expects(:request).raises(err)
 
       assert_exit 2 do

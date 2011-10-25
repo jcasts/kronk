@@ -113,8 +113,8 @@ def expect_request_output str, opts={}
 end
 
 
-def expect_error_output str
-  $stderr.expects(:puts).with "\nError: #{str}"
+def expect_error_output str, name="Error"
+  $stderr.expects(:puts).with "\n#{name}: #{str}"
 end
 
 
