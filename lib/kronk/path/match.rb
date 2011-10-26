@@ -12,12 +12,14 @@ class Kronk::Path::Match < Array
   end
 
 
-  def [] *args
+  def [] selector
     path_match = super
+
     if self.class === path_match
       path_match.matches = @matches.dup
       path_match.splat   = @splat.map{|key, sp| [key, sp.dup]}
     end
+
     path_match
   end
 

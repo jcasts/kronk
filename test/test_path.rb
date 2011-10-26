@@ -237,10 +237,10 @@ class TestPath < Test::Unit::TestCase
 
     assert_path %w{path/to item/ i}, "path\\/to/item\\//i"
 
-    assert_path [/\Apath\/\.to\Z/i, /\Aitem\Z/i],
+    assert_path [/\A(?:path\/\.to)\Z/i, /\A(?:item)\Z/i],
        "path\\/.to/item", Regexp::IGNORECASE
 
-    assert_path ['path', /\Ato|for\Z/, 'item'], "path/to|for/item"
+    assert_path ['path', /\A(?:to|for)\Z/, 'item'], "path/to|for/item"
   end
 
 
@@ -249,10 +249,11 @@ class TestPath < Test::Unit::TestCase
     assert_path ['path', ["*", 'foo'], 'item'],  "path/*=foo/item"
     assert_path ['path', [nil, 'foo'], 'item'],  "path/=foo/item"
 
-    assert_path ['path', ['to', /\Afoo|bar\Z/], 'item'],
+    assert_path ['path', ['to', /\A(?:foo|bar)\Z/], 'item'],
       "path/to=foo|bar/item"
 
-    assert_path [/\Apath\Z/i, [/\Ato\Z/i, /\Afoo\Z/i], /\Aitem\Z/i],
+    assert_path \
+      [/\A(?:path)\Z/i, [/\A(?:to)\Z/i, /\A(?:foo)\Z/i], /\A(?:item)\Z/i],
       "path/to=foo/item", Regexp::IGNORECASE
   end
 

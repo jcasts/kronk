@@ -180,7 +180,7 @@ class Kronk::Path::Matcher
         str.gsub! %r{(^|[^#{Kronk::Path::RECH}])([#{SUFF_CHARS}])},   '\1(.\2)'
         str.gsub! %r{(^|[^\.#{Kronk::Path::RECH}])([#{SUFF_CHARS}])}, '\1(.\2)'
 
-        Regexp.new "\\A#{str}\\Z", @regex_opts
+        Regexp.new "\\A(?:#{str})\\Z", @regex_opts
 
       else
         str.gsub %r{#{Kronk::Path::RECH}([^#{Kronk::Path::RECH}]|$)}, '\1'

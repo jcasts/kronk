@@ -28,8 +28,8 @@ class TestPathMatcher < Test::Unit::TestCase
 
 
   def test_new
-    assert_equal %r{\Afoo(.*)\Z},     @matcher.key
-    assert_equal %r{\A(.*)bar(.*)\Z}, @matcher.value
+    assert_equal %r{\A(?:foo(.*))\Z},     @matcher.key
+    assert_equal %r{\A(?:(.*)bar(.*))\Z}, @matcher.value
     assert !@matcher.recursive
   end
 
@@ -339,17 +339,18 @@ class TestPathMatcher < Test::Unit::TestCase
 
 
   def test_parse_node_regex
-    assert_equal(/\Atest(.*)\Z/,       @matcher.parse_node("test*"))
-    assert_equal(/\A(.?)test(.*)\Z/,   @matcher.parse_node("?test*"))
-    assert_equal(/\A\?test(.*)\Z/,     @matcher.parse_node("\\?test*"))
-    assert_equal(/\A(.?)test\*(.*)\Z/, @matcher.parse_node("?test\\**"))
-    assert_equal(/\A(.?)test(.*)\Z/,   @matcher.parse_node("?test*?**??"))
-    assert_equal(/\A(.?)test(.?)(.?)(.*)\Z/, @matcher.parse_node("?test??**??"))
-    assert_equal(/\Aa|b\Z/,            @matcher.parse_node("a|b"))
-    assert_equal(/\Aa|b(c|d)\Z/,       @matcher.parse_node("a|b(c|d)"))
+    assert_equal(/\A(?:test(.*))\Z/,       @matcher.parse_node("test*"))
+    assert_equal(/\A(?:(.?)test(.*))\Z/,   @matcher.parse_node("?test*"))
+    assert_equal(/\A(?:\?test(.*))\Z/,     @matcher.parse_node("\\?test*"))
+    assert_equal(/\A(?:(.?)test\*(.*))\Z/, @matcher.parse_node("?test\\**"))
+    assert_equal(/\A(?:(.?)test(.*))\Z/,   @matcher.parse_node("?test*?**??"))
+    assert_equal(/\A(?:(.?)test(.?)(.?)(.*))\Z/,
+      @matcher.parse_node("?test??**??"))
+    assert_equal(/\A(?:a|b)\Z/,            @matcher.parse_node("a|b"))
+    assert_equal(/\A(?:a|b(c|d))\Z/,       @matcher.parse_node("a|b(c|d)"))
 
     matcher = Kronk::Path::Matcher.new :regex_opts => Regexp::IGNORECASE
-    assert_equal(/\Aa|b(c|d)\Z/i, matcher.parse_node("a|b(c|d)"))
+    assert_equal(/\A(?:a|b(c|d))\Z/i, matcher.parse_node("a|b(c|d)"))
   end
 
 
