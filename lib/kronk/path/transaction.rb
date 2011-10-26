@@ -101,7 +101,7 @@ class Kronk::Path::Transaction
     end
 
     new_data = hash_to_ary new_data if
-      Array === @data && Hash === new_data &&
+      (remake_paths.last == [] || Array === @data && Hash === new_data) &&
       (!except_modified || @data.length == new_data.length)
 
     new_data
@@ -159,7 +159,7 @@ class Kronk::Path::Transaction
       remap_make_arrays(tpath, path)
     end
 
-    force_assign_paths data.class.new, path_val_hash
+    force_assign_paths [], path_val_hash
   end
 
 
@@ -242,7 +242,7 @@ class Kronk::Path::Transaction
 
         new_curr_data[key] = value and break if last
 
-        if ary_or_hash?(curr_data) && ary_or_hash?(curr_data[key])
+        if ary_or_hash?(curr_data) && child_ary_or_hash?(curr_data, key)
           new_curr_data[key] ||= curr_data[key]
 
         elsif !ary_or_hash?(new_curr_data[key])
@@ -254,7 +254,7 @@ class Kronk::Path::Transaction
         prev_key      = key
         prev_data     = new_curr_data
         new_curr_data = new_curr_data[key]
-        curr_data     = ary_or_hash?(curr_data) ? curr_data[key] : nil
+        curr_data     = curr_data[key] if ary_or_hash?(curr_data) rescue nil
       end
     end
 
@@ -269,6 +269,11 @@ class Kronk::Path::Transaction
 
   def ary_or_hash? obj # :nodoc:
     Array === obj || Hash === obj
+  end
+
+
+  def child_ary_or_hash? obj, key
+    ary_or_hash?(obj[key]) rescue false
   end
 
 

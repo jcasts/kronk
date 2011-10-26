@@ -459,6 +459,8 @@ class TestTransaction < Test::Unit::TestCase
     assert_equal expected, new_data
 
     expected[3]['other'] = ['val4', 'val3', ['val5']]
+    expected = @trans.hash_to_ary expected
+
     new_data = @trans.remake_arrays new_data
     assert_equal expected, new_data
   end
