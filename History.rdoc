@@ -1,3 +1,13 @@
+=== 1.7.3 / 2011-10-26
+
+* Bugfixes:
+
+  * Support converting root transaction hash to array.
+
+  * Fix for single item selection in Path::Match.
+
+  * Fix for overly-eager Path::Matcher regexp.
+
 === 1.7.3 / 2011-10-25
 
 * Bugfixes:
