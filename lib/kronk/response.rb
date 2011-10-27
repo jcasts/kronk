@@ -61,29 +61,27 @@ class Kronk
       @headers  = @_res.to_hash.dup
       @headers.keys.each{|h| @headers[h] = @headers[h].join(", ")}
 
-      @encoding = "utf-8" unless @_res["Content-Type"]
-      c_type = [*@headers["content-type"]].find{|ct| ct =~ ENCODING_MATCHER}
+      @encoding = "utf-8" unless @headers["content-type"]
+      c_type = @headers["content-type"] =~ ENCODING_MATCHER
       @encoding = $2 if c_type
       @encoding ||= "ASCII-8BIT"
       @encoding = Encoding.find(@encoding) if defined?(Encoding)
 
       raw_req, raw_resp, bytes = read_raw_from debug_io
-      @raw      = try_force_encoding raw_resp
+      @raw = try_force_encoding raw_resp
 
-      @request  = request ||
-                  raw_req = try_force_encoding(raw_req) &&
-                  Request.parse(raw_req)
+      @request = request || raw_req && Request.parse(try_force_encoding raw_req)
 
       @time   = 0
 
       @body   = try_force_encoding(@_res.body) if @_res.body
       @body ||= @raw.split("\r\n\r\n",2)[1]
 
-      @bytes = (@_res['Content-Length'] || @body.bytes.count).to_i
+      @bytes = (@headers["content-length"] || @body.bytes.count).to_i
 
       @code = @_res.code
 
-      @parser = Kronk.parser_for @_res['Content-Type']
+      @parser = Kronk.parser_for @headers["content-type"]
 
       @uri = @request.uri if @request && @request.uri
       @uri = URI.parse io.path if File === io
@@ -143,7 +141,7 @@ class Kronk
     # Ruby inspect.
 
     def inspect
-      "#<#{self.class}:#{self.code} #{self['Content-Type']} #{total_bytes}bytes>"
+      "#<#{self.class}:#{@code} #{self['Content-Type']} #{total_bytes}bytes>"
     end
 
 
@@ -429,7 +427,8 @@ class Kronk
 
       rescue Net::HTTPBadResponse
         ext = "text/html"
-        ext = File.extname(resp_io.path) if WinFileIO === resp_io
+        ext = File.extname(resp_io.path)[1..-1] if
+          WinFileIO === resp_io || File === resp_io
 
         resp_io.rewind
         resp = HeadlessResponse.new resp_io.read, ext
@@ -494,7 +493,6 @@ class Kronk
   end
 
 
-
   ##
   # Mock response object without a header for body-only http responses.
 
@@ -510,7 +508,7 @@ class Kronk
       encoding = body.respond_to?(:encoding) ? body.encoding : "UTF-8"
 
       @header = {
-        'Content-Type' => ["text/#{file_ext}; charset=#{encoding}"]
+        'Content-Type' => "text/#{file_ext}; charset=#{encoding}"
       }
     end
 
@@ -531,7 +529,12 @@ class Kronk
     # Interface method only. Returns empty hash.
 
     def to_hash
-      @header
+      head_out = @header.dup
+      head_out.keys.each do |key|
+        head_out[key.downcase] = [head_out.delete(key)]
+      end
+
+      head_out
     end
   end
 end

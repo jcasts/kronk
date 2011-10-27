@@ -66,7 +66,7 @@ class TestResponse < Test::Unit::TestCase
 
     assert_equal "just this one line!", resp.body
     enc = "".encoding rescue "UTF-8"
-    assert_equal ["text/html; charset=#{enc}"], resp['Content-Type']
+    assert_equal "text/html; charset=#{enc}", resp['Content-Type']
   end
 
 
