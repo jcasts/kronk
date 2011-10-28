@@ -204,6 +204,27 @@ class TestDiff < Test::Unit::TestCase
   end
 
 
+  def test_create_diff_duplicate_match
+    str1 = "line2\nline3a\nline4\nline5\nline6\nline4\nline6\nline7\nline8\nline9"
+    str2 = "line2\nline4\nline5\nline6\nline7\nline8\nline9"
+
+    expected = [
+      "line2",
+      [["line3a"], []],
+      "line4",
+      "line5",
+      [["line6", "line4"], []],
+      "line6",
+      "line7",
+      "line8",
+      "line9"
+    ]
+
+    diff = Kronk::Diff.new str1, str2
+    assert_equal expected, diff.create_diff
+  end
+
+
   def test_count
     assert_equal 4, @diff.count
   end
