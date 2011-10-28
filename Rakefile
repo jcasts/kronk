@@ -80,10 +80,10 @@ namespace :bm do
 
   desc "Run performance benchmarks on diffs"
   task :diff do
-    left = Kronk::Request.retrieve("prod.txt").parsed_body
-    right = Kronk::Request.retrieve("beta.txt").parsed_body
+    left = Kronk.retrieve("prod.txt").body
+    right = Kronk.retrieve("beta.txt").body
 
-    diff = Kronk::Diff.new_from_data left, right
+    diff = Kronk::Diff.new left, right
 
     arr1 = diff.str1.split "\n"
     arr2 = diff.str2.split "\n"

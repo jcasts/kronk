@@ -126,12 +126,16 @@ class Kronk
       common_sequences(arr1, arr2) do |seq|
         next if used1[seq[1]] || used2[seq[2]]
 
-        next if used1[seq[1], seq[0]].to_a.index(true) ||
-                used2[seq[2], seq[0]].to_a.index(true)
+        next if Array(used1[seq[1], seq[0]]).index(true) ||
+                Array(used2[seq[2], seq[0]]).index(true)
 
-        next if used1[seq[1]+seq[0]..-1].to_a.nitems !=
-                  used2[seq[2]+seq[0]..-1].to_a.nitems
-
+        if seq[1] > (used1.length / 2)
+          next if Array(used1[seq[1]+seq[0]..-1]).nitems !=
+                  Array(used2[seq[2]+seq[0]..-1]).nitems
+        else
+          next if Array(used1[0..seq[1]]).nitems !=
+                  Array(used2[0..seq[2]]).nitems
+        end
 
         used1.fill(true, seq[1], seq[0])
         used2.fill(true, seq[2], seq[0])
@@ -177,11 +181,16 @@ class Kronk
 
             line1 = arr1[k]
             line2 = arr2[j]
+          end
 
-            len = j - start_j
+          len = j - start_j
 
-            sequences[len] ||= []
-            sequences[len] << [len, i, start_j]
+          sequences[len] ||= []
+          sequences[len] << [len, i, start_j]
+
+          if len > 1
+            sequences[len-1] ||= []
+            sequences[len-1] << [(len-1), i, start_j]
           end
         end
       end
