@@ -177,12 +177,12 @@ class Kronk
 
             line1 = arr1[k]
             line2 = arr2[j]
+
+            len = j - start_j
+
+            sequences[len] ||= []
+            sequences[len] << [len, i, start_j]
           end
-
-          len = j - start_j
-
-          sequences[len] ||= []
-          sequences[len] << [len, i, start_j]
         end
       end
 
