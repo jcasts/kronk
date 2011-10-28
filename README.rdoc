@@ -75,6 +75,9 @@ Parse the data and run an IRB console with the response:
 
 == CONFIGURATION:
 
+Although Kronk supports Ruby-1.8.7, it's been fine-tuned for Ruby-1.9.2 and
+runs about 5x faster when benchmarking between 1.8.7p249 and 1.9.2p180.
+
 Kronk pulls it's config from $HOME/.kronk/rc and supports the following:
 
 Set the file to save the last http response retrieved in:
