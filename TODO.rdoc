@@ -2,7 +2,7 @@
 
 * Support for response streaming.
 
-* Support for X-Url-\d redirects.
+* Support for X-Url-\d and x-alt-location-\d redirects.
 
 * Investigate Kronk console.
 
