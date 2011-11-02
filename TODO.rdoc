@@ -1,5 +1,9 @@
 = TODO
 
+* Support for response streaming.
+
+* Support for X-Url-\d redirects.
+
 * Investigate Kronk console.
 
 == Done
