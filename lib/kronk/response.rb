@@ -37,12 +37,9 @@ class Kronk
     end
 
 
-    attr_accessor :body, :bytes, :byterate, :code, :headers,
-                  :raw, :stringify_opts, :request, :uri
+    attr_accessor :body, :code,
+                  :raw, :request, :stringify_opts, :time, :uri
 
-    attr_reader :encoding, :parser, :time
-
-    alias to_hash headers
     alias to_s raw
 
     ##
@@ -58,35 +55,22 @@ class Kronk
         @_res, debug_io = request_from_io(io)
       end
 
-      @headers  = @_res.to_hash.dup
-      @headers.keys.each{|h| @headers[h] = @headers[h].join(", ")}
+      @headers = @encoding = @parser = nil
 
-      @encoding = "utf-8" unless @headers["content-type"]
-      c_type = @headers["content-type"] =~ ENCODING_MATCHER
-      @encoding = $2 if c_type
-      @encoding ||= "ASCII-8BIT"
-      @encoding = Encoding.find(@encoding) if defined?(Encoding)
+      @time = 0
 
       raw_req, raw_resp, bytes = read_raw_from debug_io
       @raw = try_force_encoding raw_resp
 
       @request = request || raw_req && Request.parse(try_force_encoding raw_req)
 
-      @time   = 0
-
       @body   = try_force_encoding(@_res.body) if @_res.body
       @body ||= @raw.split("\r\n\r\n",2)[1]
 
-      @bytes = (@headers["content-length"] || @body.bytes.count).to_i
-
       @code = @_res.code
-
-      @parser = Kronk.parser_for @headers["content-type"]
 
       @uri = @request.uri if @request && @request.uri
       @uri = URI.parse io.path if File === io
-
-      @byterate = 0
 
       @stringify_opts = {}
     end
@@ -109,6 +93,24 @@ class Kronk
 
 
     ##
+    # If time was set, returns bytes-per-second for the whole response,
+    # including headers.
+
+    def byterate
+      return 0 unless @raw && @time.to_f > 0
+      @byterate = self.total_bytes / @time.to_f
+    end
+
+
+    ##
+    # Size of the body in bytes.
+
+    def bytes
+      (headers["content-length"] || @body.bytes.count).to_i
+    end
+
+
+    ##
     # Cookie header accessor.
 
     def cookie
@@ -117,7 +119,22 @@ class Kronk
 
 
     ##
-    # Force the encoding of the raw response and body
+    # Return the Ruby-1.9 encoding of the body, or String representation
+    # for Ruby-1.8.
+
+    def encoding
+      return @encoding if @encoding
+      @encoding = "utf-8" unless headers["content-type"]
+      c_type = headers["content-type"] =~ ENCODING_MATCHER
+      @encoding = $2 if c_type
+      @encoding ||= "ASCII-8BIT"
+      @encoding = Encoding.find(@encoding) if defined?(Encoding)
+      @encoding
+    end
+
+
+    ##
+    # Force the encoding of the raw response and body.
 
     def force_encoding new_encoding
       new_encoding = Encoding.find new_encoding unless Encoding === new_encoding
@@ -126,6 +143,19 @@ class Kronk
       try_force_encoding @raw
       @encoding
     end
+
+
+    ##
+    # Accessor for downcased headers.
+
+    def headers
+      return @headers if @headers
+      @headers = @_res.to_hash.dup
+      @headers.keys.each{|h| @headers[h] = @headers[h].join(", ")}
+      @headers
+    end
+
+    alias to_hash headers
 
 
     ##
@@ -150,27 +180,30 @@ class Kronk
     # If no parser is given will look for the default parser based on
     # the Content-Type, or will return the cached parsed body if available.
 
-    def parsed_body parser=nil
+    def parsed_body new_parser=nil
       @parsed_body ||= nil
 
-      return @parsed_body if @parsed_body && !parser
+      return @parsed_body if @parsed_body && !new_parser
 
-      parser ||= @parser
+      new_parser ||= parser
 
       begin
-        parser = Kronk.parser_for(parser) || Kronk.find_const(parser)
+        new_parser = Kronk.parser_for(new_parser) ||
+                     Kronk.find_const(new_parser)
       rescue NameError
-        raise InvalidParser, "No such parser: #{parser}"
-      end if String === parser
+        raise InvalidParser, "No such parser: #{new_parser}"
+      end if String === new_parser
 
       raise MissingParser,
-        "No parser for Content-Type: #{@_res['Content-Type']}" unless parser
+        "No parser for Content-Type: #{@_res['Content-Type']}" unless new_parser
 
       begin
-        @parsed_body = parser.parse(self.body) or raise RuntimeError
+        @parsed_body = new_parser.parse(self.body) or raise RuntimeError
 
       rescue RuntimeError, ::Exception => e
-        msg = ParserError === e ? e.message : "#{parser} failed parsing body"
+        msg = ParserError === e ?
+                e.message : "#{new_parser} failed parsing body"
+
         msg << " returned by #{@uri}" if @uri
         raise ParserError, msg
       end
@@ -181,7 +214,7 @@ class Kronk
     # Returns the parsed header hash.
 
     def parsed_header include_headers=true
-      headers = @headers.dup
+      out_headers = headers.dup
 
       case include_headers
       when nil, false
@@ -191,15 +224,23 @@ class Kronk
         include_headers = [*include_headers].map{|h| h.to_s.downcase}
 
         headers.each do |key, value|
-          headers.delete key unless
+          out_headers.delete key unless
             include_headers.include? key.to_s.downcase
         end
 
-        headers
+        out_headers
 
       when true
-        headers
+        out_headers
       end
+    end
+
+
+    ##
+    # The parser to use on the body.
+
+    def parser
+      @parser ||= Kronk.parser_for headers["content-type"]
     end
 
 
@@ -342,7 +383,7 @@ class Kronk
     def stringify options={}, &block
       options = options.empty? ? @stringify_opts : merge_stringify_opts(options)
 
-      if !options[:raw] && (options[:parser] || @parser || options[:no_body])
+      if !options[:raw] && (options[:parser] || parser || options[:no_body])
         data = selective_data options, &block
         DataString.new data, options
       else
@@ -384,16 +425,6 @@ class Kronk
 
     def success?
       @code.to_s =~ /^2\d\d$/
-    end
-
-
-    ##
-    # Assign how long the request took in seconds.
-
-    def time= new_time
-      @time = new_time
-      @byterate = self.total_bytes / @time.to_f if @raw && @time > 0
-      @time
     end
 
 
@@ -487,7 +518,7 @@ class Kronk
     # Returns the string given with the new encoding.
 
     def try_force_encoding str
-      str.force_encoding @encoding if str.respond_to? :force_encoding
+      str.force_encoding encoding if str.respond_to? :force_encoding
       str
     end
   end

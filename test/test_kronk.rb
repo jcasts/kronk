@@ -9,7 +9,9 @@ class TestKronk < Test::Unit::TestCase
         'js'      => 'JSON',
         'json'    => 'JSON',
         'plist'   => 'PlistParser',
-        'xml'     => 'XMLParser'
+        'xml'     => 'XMLParser',
+        'yaml'    => 'YamlParser',
+        'yml'     => 'YamlParser'
       },
       :context      => nil,
       :cache_file   => Kronk::DEFAULT_CACHE_FILE,
@@ -68,7 +70,9 @@ class TestKronk < Test::Unit::TestCase
           'js'    => "JsEngine",
           'json'  => "JSON",
           'plist' => "PlistParser",
-          'xml'   => "XMLParser"
+          'xml'   => 'XMLParser',
+          'yaml'  => 'YamlParser',
+          'yml'   => 'YamlParser'
         },
         :context     => 3,
         :default_host => "http://localhost:3000",
