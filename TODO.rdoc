@@ -1,5 +1,7 @@
 = TODO
 
+* QPS for player.
+
 * Support for response streaming.
 
 * Support for X-Url-\d and x-alt-location-\d redirects.
