@@ -39,6 +39,7 @@ class Kronk
   require 'kronk/request'
   require 'kronk/plist_parser'
   require 'kronk/xml_parser'
+  require 'kronk/yaml_parser'
 
 
   ##

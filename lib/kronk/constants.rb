@@ -34,10 +34,12 @@ class Kronk
 
   # Default Content-Type header to parser mapping.
   DEFAULT_CONTENT_TYPES = {
-    'js'      => 'JSON',
-    'json'    => 'JSON',
-    'plist'   => 'PlistParser',
-    'xml'     => 'XMLParser'
+    'js'    => 'JSON',
+    'json'  => 'JSON',
+    'plist' => 'PlistParser',
+    'xml'   => 'XMLParser',
+    'yaml'  => 'YamlParser',
+    'yml'   => 'YamlParser'
   }
 
 

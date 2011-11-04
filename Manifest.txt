@@ -36,6 +36,7 @@ lib/kronk/test.rb
 lib/kronk/test/assertions.rb
 lib/kronk/test/helper_methods.rb
 lib/kronk/xml_parser.rb
+lib/kronk/yaml_parser.rb
 script/kronk_completion
 test/mocks/200_response.json
 test/mocks/200_response.plist
