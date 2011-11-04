@@ -4,6 +4,10 @@
 
 * Support for X-Url-\d and x-alt-location-\d redirects.
 
+* Support for gzip.
+
+* Player input IO timeout.
+
 * Investigate Kronk console.
 
 == Done
