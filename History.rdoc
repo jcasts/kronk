@@ -4,6 +4,8 @@
 
   * Support for YAML parsing.
 
+  * Stream chunk size now expressed as hexa-decimals.
+
 === 1.7.6 / 2011-10-28
 
 * Bugfixes:

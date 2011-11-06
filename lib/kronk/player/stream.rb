@@ -3,7 +3,7 @@ class Kronk
   ##
   # Outputs Player results as a stream of Kronk outputs
   # in chunked form, each chunk being one response and the number
-  # of octets being expressed in plain decimal form.
+  # of octets being expressed in hexadecimal form.
   #
   #   out   = Player::StreamOutput.new
   #
@@ -13,11 +13,11 @@ class Kronk
   #   kronk = Kronk.new
   #   kronk.request io1
   #   out.result kronk
-  #   #=> "23\r\nthis is the first chunk\r\n"
+  #   #=> "17\r\nthis is the first chunk\r\n"
   #
   #   kronk.request io2
   #   out.result kronk
-  #   #=> "16\r\nthis is the rest\r\n"
+  #   #=> "10\r\nthis is the rest\r\n"
   #
   # Note: This output class will not render errors.
 
@@ -34,7 +34,7 @@ class Kronk
 
       return unless output
 
-      output = "#{output.length}\r\n#{output}\r\n"
+      output = "#{"%X" % output.length}\r\n#{output}\r\n"
 
       mutex.synchronize do
         $stdout << output
