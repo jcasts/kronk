@@ -45,6 +45,7 @@ class Kronk
 
 
     def completed
+      $stdout << "0\r\n\r\n"
       $stdout.flush
       true
     end
