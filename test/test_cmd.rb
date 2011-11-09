@@ -432,7 +432,7 @@ class TestCmd < Test::Unit::TestCase
     $stderr.expects(:puts).with "See 'kronk --help' for usage\n\n"
 
     assert_exit 2 do
-      opts = Kronk::Cmd.parse_args %w{}
+      Kronk::Cmd.parse_args %w{}
     end
   end
 

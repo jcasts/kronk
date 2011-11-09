@@ -126,7 +126,7 @@ class Kronk::Diff
       return ColorFormat if name.to_s =~ /^color(_diff)?$/
       Kronk.find_const name
 
-    rescue NameError => e
+    rescue NameError
       raise Kronk::Exception, "No such formatter: #{name.inspect}"
     end
 

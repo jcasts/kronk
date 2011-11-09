@@ -159,7 +159,7 @@ class TestRequest < Test::Unit::TestCase
     expect_request "GET", "http://example.com/request/path?foo=bar",
       :headers => {'Cookie' => "mock_cookie", 'User-Agent' => "kronk"}
 
-    resp = Kronk::Request.new("http://example.com/request/path",
+    Kronk::Request.new("http://example.com/request/path",
             :query => "foo=bar", :headers => {'User-Agent' => "kronk"}).retrieve
   end
 
@@ -171,7 +171,7 @@ class TestRequest < Test::Unit::TestCase
     expect_request "GET", "http://example.com/request/path?foo=bar",
       :headers => {'User-Agent' => "kronk"}
 
-    resp = Kronk::Request.new("http://example.com/request/path",
+    Kronk::Request.new("http://example.com/request/path",
             :query => "foo=bar", :headers => {'User-Agent' => "kronk"}).retrieve
   end
 
@@ -185,7 +185,7 @@ class TestRequest < Test::Unit::TestCase
     expect_request "GET", "http://example.com/request/path?foo=bar",
       :headers => {'User-Agent' => "kronk"}
 
-    resp = Kronk::Request.new("http://example.com/request/path",
+    Kronk::Request.new("http://example.com/request/path",
             :query => "foo=bar", :headers => {'User-Agent' => "kronk"},
             :no_cookies => true).retrieve
   end
@@ -203,7 +203,7 @@ class TestRequest < Test::Unit::TestCase
     expect_request "GET", "http://example.com/request/path?foo=bar",
       :headers => {'User-Agent' => "kronk"}
 
-    resp = Kronk::Request.new("http://example.com/request/path",
+    Kronk::Request.new("http://example.com/request/path",
             :query => "foo=bar", :headers => {'User-Agent' => "kronk"}).retrieve
 
     Kronk.config[:use_cookies] = old_config
@@ -222,7 +222,7 @@ class TestRequest < Test::Unit::TestCase
     expect_request "GET", "http://example.com/request/path?foo=bar",
       :headers => {'User-Agent' => "kronk"}
 
-    resp = Kronk::Request.new("http://example.com/request/path",
+    Kronk::Request.new("http://example.com/request/path",
             :query => "foo=bar", :headers => {'User-Agent' => "kronk"},
             :no_cookies => false).retrieve
 
@@ -237,7 +237,7 @@ class TestRequest < Test::Unit::TestCase
     expect_request "GET", "http://example.com/request/path?foo=bar",
       :headers => {'User-Agent' => "kronk"}
 
-    resp = Kronk::Request.new("http://example.com/request/path",
+    Kronk::Request.new("http://example.com/request/path",
             :query => "foo=bar",
             :headers => {'User-Agent' => "kronk", 'Cookie' => "mock_cookie"},
             :no_cookies => true).retrieve
@@ -288,7 +288,7 @@ class TestRequest < Test::Unit::TestCase
       req.expects(:basic_auth).with auth_opts[:username], auth_opts[:password]
     end
 
-    resp = Kronk::Request.new("http://example.com", :auth => auth_opts).retrieve
+    Kronk::Request.new("http://example.com", :auth => auth_opts).retrieve
   end
 
 
@@ -300,7 +300,7 @@ class TestRequest < Test::Unit::TestCase
         never
     end
 
-    resp = Kronk::Request.new("http://example.com", :auth => auth_opts).retrieve
+    Kronk::Request.new("http://example.com", :auth => auth_opts).retrieve
   end
 
 
@@ -309,12 +309,12 @@ class TestRequest < Test::Unit::TestCase
       req.expects(:basic_auth).never
     end
 
-    resp = Kronk::Request.new("http://example.com").retrieve
+    Kronk::Request.new("http://example.com").retrieve
   end
 
 
   def test_retrieve_ssl
-    expr = expect_request "GET", "https://example.com" do |http, req, resp|
+    expect_request "GET", "https://example.com" do |http, req, resp|
       req.expects(:use_ssl=).with true
     end
 
@@ -342,7 +342,7 @@ class TestRequest < Test::Unit::TestCase
         "Kronk/#{Kronk::VERSION} (http://github.com/yaksnrainbows/kronk)"
     }
 
-    resp = Kronk::Request.new("http://example.com").retrieve
+    Kronk::Request.new("http://example.com").retrieve
   end
 
 
@@ -350,7 +350,7 @@ class TestRequest < Test::Unit::TestCase
     expect_request "GET", "http://example.com",
     :headers => {'User-Agent' => "Mozilla/5.0 (compatible; Konqueror/3; Linux)"}
 
-    resp = Kronk::Request.new("http://example.com",
+    Kronk::Request.new("http://example.com",
              :user_agent => 'linux_konqueror').retrieve
   end
 
@@ -359,7 +359,7 @@ class TestRequest < Test::Unit::TestCase
     expect_request "GET", "http://example.com",
     :headers => {'User-Agent' => "custom user agent"}
 
-    resp = Kronk::Request.new("http://example.com",
+    Kronk::Request.new("http://example.com",
              :user_agent => 'custom user agent').retrieve
   end
 
@@ -368,7 +368,7 @@ class TestRequest < Test::Unit::TestCase
     expect_request "GET", "http://example.com",
     :headers => {'User-Agent' => "custom user agent"}
 
-    resp = Kronk::Request.new("http://example.com",
+    Kronk::Request.new("http://example.com",
              :user_agent => 'mac_safari',
              :headers    => {'User-Agent' => "custom user agent"}).retrieve
   end

@@ -195,14 +195,12 @@ class TestResponse < Test::Unit::TestCase
 
   def test_selective_string
     body = @json_resp.raw.split("\r\n\r\n")[1]
-
-    assert_equal body,
-                 @json_resp.selective_string
+    assert_equal body, @json_resp.selective_string
   end
 
 
   def test_selective_string_no_body
-    body = @json_resp.raw.split("\r\n\r\n")[1]
+    @json_resp.raw.split("\r\n\r\n")[1]
 
     assert_nil @json_resp.selective_string(:no_body => true)
 
@@ -238,7 +236,7 @@ class TestResponse < Test::Unit::TestCase
 
   def test_selective_data
     body = JSON.parse @json_resp.body
-    head = @json_resp.to_hash
+    @json_resp.to_hash
 
     assert_equal body, @json_resp.selective_data
 
@@ -283,7 +281,6 @@ class TestResponse < Test::Unit::TestCase
 
 
   def test_selective_data_no_body
-    body = JSON.parse @json_resp.body
     expected = {
         'content-type' => 'application/json; charset=utf-8',
         'date'         => "Fri, 03 Dec 2010 21:49:00 GMT"

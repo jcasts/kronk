@@ -627,7 +627,7 @@ Parse and run diffs against data from live and cached http responses.
         require 'kronk/async'
         Kronk::Player.async = true
 
-      rescue LoadError => e
+      rescue LoadError
         Kronk::Player.async = false
 
         raise Kronk::Exception, "Async mode requires the em-http-request gem" if

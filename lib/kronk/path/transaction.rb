@@ -71,9 +71,7 @@ class Kronk::Path::Transaction
   # pass the :keep_indicies => true option.
 
   def results opts={}
-    new_data  = @data
-    prev_type = nil
-    prev_data = nil
+    new_data = @data
 
     @actions.each do |type, paths|
       new_data = send("transaction_#{type}", new_data, *paths)

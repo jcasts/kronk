@@ -59,7 +59,7 @@ class Kronk
 
       @time = 0
 
-      raw_req, raw_resp, bytes = read_raw_from debug_io
+      raw_req, raw_resp, = read_raw_from debug_io
       @raw = try_force_encoding raw_resp
 
       @request = request || raw_req && Request.parse(try_force_encoding raw_req)

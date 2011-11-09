@@ -213,9 +213,8 @@ class Kronk
     def sort_any arr
       i = 1
       until i >= arr.length
-        j        = i-1
-        val      = arr[i]
-        prev_val = arr[j]
+        j   = i-1
+        val = arr[i]
 
         loop do
           if smaller?(val, arr[j])

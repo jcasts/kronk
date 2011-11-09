@@ -217,12 +217,6 @@ class TestKronk < Test::Unit::TestCase
     expected = {:query => data, :data => data}
 
     with_uri_options do
-      new_data = {
-        "add" => "this",
-        "foo" => {'bar2' => 2, 'bar3' => "three"},
-        "key" => "otherval"
-      }
-
       %w{uri_query hash_query}.each do |qtype|
         opts = Kronk.new(:query => data, :data => data).
                 options_for_uri("http://#{qtype}.com")
@@ -408,7 +402,6 @@ class TestKronk < Test::Unit::TestCase
 
   def test_load_cookie_jar_no_file
     Kronk.clear_cookies!
-    mock_cookie_jar = YAML.load_file("test/mocks/cookies.yml")
 
     File.expects(:file?).with(Kronk::DEFAULT_COOKIES_FILE).returns false
     YAML.expects(:load_file).with(Kronk::DEFAULT_COOKIES_FILE).never
