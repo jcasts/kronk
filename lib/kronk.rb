@@ -36,6 +36,7 @@ class Kronk
   require 'kronk/diff/output'
   require 'kronk/diff'
   require 'kronk/http'
+  require 'kronk/buffered_io'
   require 'kronk/request'
   require 'kronk/response'
   require 'kronk/plist_parser'

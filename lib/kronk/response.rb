@@ -28,9 +28,8 @@ class Kronk
     # Read http response from a file and return a Kronk::Response instance.
 
     def self.read_file path
-      file     = File.open(path, "rb")
-      resp     = new file
-      resp.uri = path
+      file = File.open(path, "rb")
+      resp = new file
       file.close
 
       resp
@@ -45,19 +44,26 @@ class Kronk
     # Create a new Response object from a String or IO.
 
     def initialize io=nil, request=nil
-      return unless io
-      @io = String === io ? StringIO.new(io) : io
+      io ||= ""
 
-      @_res, debug_io = request_from_io(@io)
+      @raw = ""
+
+      @io = String === io ? StringIO.new(io) : io
+      # On windows, read the full file and insert contents into
+      # a StringIO to avoid failures with IO#read_nonblock
+      if Kronk::Cmd.windows? && File === resp_io
+        @io = WinFileIO.new @io.path, @io.read
+      end
+
+      @_res = response_from_io @io
 
       @headers = @encoding = @parser = nil
 
       @time = 0
 
-      raw_req, raw_resp, = read_raw_from debug_io
-      @raw = try_force_encoding raw_resp
+      @raw = try_force_encoding @raw
 
-      @request = request || raw_req && Request.parse(try_force_encoding raw_req)
+      @request = request
 
       @body   = try_force_encoding(@_res.body) if @_res.body
       @body ||= @raw.split("\r\n\r\n",2)[1]
@@ -267,6 +273,7 @@ class Kronk
     # Returns the header portion of the raw http response.
 
     def raw_header include_headers=true
+      return if HeadlessResponse === @_res
       headers = "#{@raw.split("\r\n\r\n", 2)[0]}\r\n"
 
       case include_headers
@@ -457,17 +464,13 @@ class Kronk
 
 
     ##
-    # Creates a Net::HTTPRequest instance from an IO instance.
+    # Creates a Net::HTTPResponse instance from an IO instance.
 
-    def request_from_io resp_io
-      # On windows, read the full file and insert contents into
-      # a StringIO to avoid failures with IO#read_nonblock
-      if Kronk::Cmd.windows? && File === resp_io
-        resp_io = WinFileIO.new resp_io.path, io.read
-      end
+    def response_from_io resp_io
+      io = Kronk::BufferedIO === resp_io ?
+            resp_io : Kronk::BufferedIO.new(resp_io)
 
-      io = Net::BufferedIO === resp_io ? resp_io : Net::BufferedIO.new(resp_io)
-      io.debug_output = debug_io = StringIO.new
+      io.raw_output = @raw
 
       begin
         resp = Net::HTTPResponse.read_new io
@@ -478,54 +481,20 @@ class Kronk
         ext = File.extname(resp_io.path)[1..-1] if
           WinFileIO === resp_io || File === resp_io
 
-        resp_io.rewind
-        resp = HeadlessResponse.new resp_io.read, ext
+        #resp_io.rewind
+        io.read_all
+        resp = HeadlessResponse.new @raw, ext
 
       rescue EOFError
         # If no response was read because it's too short
         unless resp
-          resp_io.rewind
-          resp = HeadlessResponse.new resp_io.read, "html"
+          #resp_io.rewind
+          io.read_all
+          resp = HeadlessResponse.new @raw, "html"
         end
       end
 
-      resp.instance_eval do
-        @socket ||= true
-        @read   ||= true
-      end
-
-      [resp, debug_io]
-    end
-
-
-    ##
-    # Read the raw response from a debug_output instance and return an array
-    # containing the raw request, response, and number of bytes received.
-
-    def read_raw_from debug_io
-      req = nil
-      resp = ""
-      bytes = nil
-
-      debug_io.rewind
-      output = debug_io.read.split "\n"
-
-      if output.first =~ %r{<-\s(.*)}
-        req = instance_eval $1
-        output.delete_at 0
-      end
-
-      if output.last =~ %r{read (\d+) bytes}
-        bytes = $1.to_i
-        output.delete_at(-1)
-      end
-
-      output.map do |line|
-        next unless line[0..2] == "-> "
-        resp << instance_eval(line[2..-1])
-      end
-
-      [req, resp, bytes]
+      resp
     end
 
 
