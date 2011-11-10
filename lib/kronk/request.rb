@@ -362,10 +362,8 @@ class Kronk
       http_class = http_proxy @proxy[:host], @proxy
 
       @_req = http_class.new @uri.host, @uri.port
-      @_req.kronk_req = self
-
       @_req.open_timeout = @_req.read_timeout = @timeout if @timeout
-      @_req.use_ssl      = true     if @uri.scheme =~ /^https$/
+      @_req.use_ssl      = true if @uri.scheme =~ /^https$/
 
       start_time = nil
       socket     = nil
@@ -376,7 +374,8 @@ class Kronk
         http.request self.http_request, @body
       end
 
-      @response.time = Time.now - start_time
+      @response.request = self
+      @response.time    = Time.now - start_time
 
       Kronk.cookie_jar.set_cookies_from_headers @uri.to_s, @response.to_hash if
         self.use_cookies

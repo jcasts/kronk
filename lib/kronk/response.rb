@@ -37,7 +37,7 @@ class Kronk
     end
 
 
-    attr_accessor :body, :code, :raw, :request, :stringify_opts, :time, :uri
+    attr_accessor :body, :code, :raw, :request, :stringify_opts, :time
 
     alias to_s raw
 
@@ -46,9 +46,9 @@ class Kronk
 
     def initialize io=nil, request=nil
       return unless io
-      io = StringIO.new io if String === io
+      @io = String === io ? StringIO.new(io) : io
 
-      @_res, debug_io = request_from_io(io)
+      @_res, debug_io = request_from_io(@io)
 
       @headers = @encoding = @parser = nil
 
@@ -63,9 +63,6 @@ class Kronk
       @body ||= @raw.split("\r\n\r\n",2)[1]
 
       @code = @_res.code
-
-      @uri = @request.uri if @request && @request.uri
-      @uri = URI.parse io.path if File === io
 
       @stringify_opts = {}
     end
@@ -445,6 +442,14 @@ class Kronk
 
     def total_bytes
       self.raw.bytes.count
+    end
+
+
+    ##
+    # The URI of the request if or the file read if available.
+
+    def uri
+      @request && @request.uri || File === @io && URI.parse(@io.path)
     end
 
 

@@ -5,8 +5,6 @@ class Kronk
 
   class HTTP < Net::HTTP
 
-    attr_accessor :kronk_req
-
     def request(req, body = nil, &block)  # :yield: +response+
       unless started?
         start {
@@ -33,7 +31,7 @@ class Kronk
       begin_transport req
       req.exec @socket, @curr_http_version, edit_path(req.path)
       begin
-        res = Kronk::Response.new(@socket.io, @kronk_req)
+        res = Kronk::Response.new(@socket.io)
       end while kronk_resp_type(res) == Net::HTTPContinue
 
       end_transport req, res.instance_variable_get("@_res")
