@@ -281,7 +281,7 @@ class Kronk
     # and optional :username and :password keys.
 
     def http_proxy addr, opts={}
-      return Net::HTTP unless addr
+      return Kronk::HTTP unless addr
 
       host, port = addr.split ":"
       port ||= opts[:port] || 8080
@@ -291,7 +291,7 @@ class Kronk
 
       Kronk::Cmd.verbose "Using proxy #{addr}\n" if host
 
-      Net::HTTP::Proxy host, port, user, pass
+      Kronk::HTTP::Proxy host, port, user, pass
     end
 
 
@@ -354,36 +354,32 @@ class Kronk
 
 
     ##
-    # Retrieve this requests' response.
+    # Retrieve this requests' response. Returns a Kronk::Response once the
+    # full HTTP response has been read. If a block is given, will yield
+    # the body chunks as they get received.
 
     def retrieve
       http_class = http_proxy @proxy[:host], @proxy
 
       @_req = http_class.new @uri.host, @uri.port
+      @_req.kronk_req = self
 
-      @_req.read_timeout = @timeout if @timeout
+      @_req.open_timeout = @_req.read_timeout = @timeout if @timeout
       @_req.use_ssl      = true     if @uri.scheme =~ /^https$/
 
-      elapsed_time = nil
-      socket       = nil
-      socket_io    = nil
+      start_time = nil
+      socket     = nil
+      socket_io  = nil
 
-      @_res = @_req.start do |http|
-        socket = http.instance_variable_get "@socket"
-        socket.debug_output = socket_io = StringIO.new
-
+      @response = @_req.start do |http|
         start_time = Time.now
-        res = http.request self.http_request, @body
-        elapsed_time = Time.now - start_time
-
-        res
+        http.request self.http_request, @body
       end
 
-      Kronk.cookie_jar.set_cookies_from_headers @uri.to_s, @_res.to_hash if
-        self.use_cookies
+      @response.time = Time.now - start_time
 
-      @response      = Response.new socket_io, @_res, self
-      @response.time = elapsed_time
+      Kronk.cookie_jar.set_cookies_from_headers @uri.to_s, @response.to_hash if
+        self.use_cookies
 
       @response
     end

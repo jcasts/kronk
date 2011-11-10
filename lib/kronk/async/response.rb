@@ -25,7 +25,7 @@ class Kronk
       def unbind
         return unless @callback
 
-        @_res = Kronk::Response.new @buffer, nil, @_req
+        @_res = Kronk::Response.new @buffer, @_req
         err = Kronk::Request::EMError.new "IO read error" if error?
 
         @callback.call @_res, err

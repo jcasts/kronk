@@ -37,23 +37,18 @@ class Kronk
     end
 
 
-    attr_accessor :body, :code,
-                  :raw, :request, :stringify_opts, :time, :uri
+    attr_accessor :body, :code, :raw, :request, :stringify_opts, :time, :uri
 
     alias to_s raw
 
     ##
     # Create a new Response object from a String or IO.
 
-    def initialize io=nil, res=nil, request=nil
+    def initialize io=nil, request=nil
       return unless io
       io = StringIO.new io if String === io
 
-      if io && res
-        @_res, debug_io = res, io
-      else
-        @_res, debug_io = request_from_io(io)
-      end
+      @_res, debug_io = request_from_io(io)
 
       @headers = @encoding = @parser = nil
 
@@ -168,10 +163,27 @@ class Kronk
 
 
     ##
+    # The version of the HTTP protocol returned.
+
+    def http_version
+      @_res.http_version
+    end
+
+
+    ##
     # Ruby inspect.
 
     def inspect
-      "#<#{self.class}:#{@code} #{self['Content-Type']} #{total_bytes}bytes>"
+      content_type = self['Content-Type'] || "text/html"
+      "#<#{self.class}:#{@code} #{content_type} #{total_bytes}bytes>"
+    end
+
+
+    ##
+    # Check if connection should be closed or not.
+
+    def keep_alive?
+      @_res.keep_alive?
     end
 
 

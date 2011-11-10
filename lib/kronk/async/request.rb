@@ -29,16 +29,31 @@ class Kronk
 
       conn = async_http
 
+      sock_rd, sock_wr = IO.pipe
+
       start_time = Time.now
       req  = conn.setup_request @http_method,
                 :head => header_opts, :body => @body, &block
 
+      return req unless block_given?
+
+      @response = nil
+
+      req.headers do |resp_headers|
+        async_raw_headers sock_wr, resp_headers
+      end
+
+      req.stream do |chunk|
+        sock_wr << chunk
+      end
+
       req.callback do |resp|
         elapsed_time   = Time.now - start_time
-        @response      = Response.new resp.raw_response, nil, self
+        sock_wr.close
+        @response      = Response.new sock_rd, self
         @response.time = elapsed_time
         yield @response, nil
-      end if block_given?
+      end
 
       req.errback do |c|
         err = c.error ?
@@ -68,6 +83,20 @@ class Kronk
         :connect_timeout    => @timeout,
         :inactivity_timeout => @timeout,
         :proxy              => proxy_opts
+    end
+
+
+    private
+
+    def async_raw_headers device, rheader
+      device << "HTTP/#{rheader.http_version} "
+      device << "#{rheader.status} #{rheader.http_reason}\r\n"
+
+      rheader.each do |key, val|
+        device << "#{key}: #{val}\r\n"
+      end
+
+      device << "\r\n"
     end
   end
 end
