@@ -1,19 +1,6 @@
 class Kronk
 
   ##
-  # Mock File IO to allow rewinding on Windows platforms.
-
-  class WinFileIO < StringIO
-    attr_accessor :path
-
-    def initialize path, str=""
-      @path = path
-      super str
-    end
-  end
-
-
-  ##
   # Standard Kronk response object.
 
   class Response
@@ -49,11 +36,6 @@ class Kronk
       @raw = ""
 
       @io = String === io ? StringIO.new(io) : io
-      # On windows, read the full file and insert contents into
-      # a StringIO to avoid failures with IO#read_nonblock
-      if Kronk::Cmd.windows? && File === resp_io
-        @io = WinFileIO.new @io.path, @io.read
-      end
 
       @_res = response_from_io @io
 
@@ -478,17 +460,14 @@ class Kronk
 
       rescue Net::HTTPBadResponse
         ext = "text/html"
-        ext = File.extname(resp_io.path)[1..-1] if
-          WinFileIO === resp_io || File === resp_io
+        ext = File.extname(resp_io.path)[1..-1] if File === resp_io
 
-        #resp_io.rewind
         io.read_all
         resp = HeadlessResponse.new @raw, ext
 
       rescue EOFError
         # If no response was read because it's too short
         unless resp
-          #resp_io.rewind
           io.read_all
           resp = HeadlessResponse.new @raw, "html"
         end
