@@ -23,36 +23,29 @@ class Kronk
     end
 
 
-    attr_accessor :body, :code, :raw, :request, :stringify_opts, :time
-
-    alias to_s raw
+    attr_reader :code, :raw
+    attr_accessor :request, :stringify_opts, :time
 
     ##
     # Create a new Response object from a String or IO.
 
     def initialize io=nil, request=nil
-      io ||= ""
-
-      @raw = ""
-
-      @io = String === io ? StringIO.new(io) : io
-
-      @_res = response_from_io @io
-
+      @request = request
       @headers = @encoding = @parser = nil
 
+      @stringify_opts = {}
+
+      @raw  = ""
       @time = 0
 
-      @raw = try_force_encoding @raw
+      @io   = io || ""
+      @io   = String === @io ? StringIO.new(@io) : @io
+      @_res = response_from_io @io
 
-      @request = request
-
-      @body   = try_force_encoding(@_res.body) if @_res.body
-      @body ||= @raw.split("\r\n\r\n",2)[1]
+      try_force_encoding @raw
+      try_force_encoding @_res.body
 
       @code = @_res.code
-
-      @stringify_opts = {}
     end
 
 
@@ -73,6 +66,15 @@ class Kronk
 
 
     ##
+    # Returns the body of the response. Will wait for the socket to finish
+    # reading if the body hasn't finished loading.
+
+    def body
+      @_res.read_body
+    end
+
+
+    ##
     # If time was set, returns bytes-per-second for the whole response,
     # including headers.
 
@@ -86,7 +88,7 @@ class Kronk
     # Size of the body in bytes.
 
     def bytes
-      (headers["content-length"] || @body.bytes.count).to_i
+      (headers["content-length"] || self.body.bytes.count).to_i
     end
 
 
@@ -119,7 +121,7 @@ class Kronk
     def force_encoding new_encoding
       new_encoding = Encoding.find new_encoding unless Encoding === new_encoding
       @encoding = new_encoding
-      try_force_encoding @body
+      try_force_encoding self.body
       try_force_encoding @raw
       @encoding
     end
@@ -305,15 +307,18 @@ class Kronk
     ##
     # Returns the raw response with selective headers and/or the body of
     # the response. Supports the following options:
-    # :no_body:: Bool - Don't return the body; default nil
-    # :show_headers:: Bool/String/Array - Return headers; default nil
+    # :body:: Bool - Return the body; default true
+    # :headers:: Bool/String/Array - Return headers; default true
 
-    def selective_string options={}
-      str = @body unless options[:no_body]
+    def to_s opts={}
+      return @raw unless opts[:body] == false ||
+                         !opts[:headers].nil? && opts[:headers] != true
 
-      if options[:show_headers]
-        header = raw_header(options[:show_headers])
-        str = [header, str].compact.join "\r\n"
+      str = self.body unless opts[:body] == false
+
+      if opts[:headers]
+        hstr = raw_header(opts[:headers])
+        str  = [hstr, str].compact.join "\r\n"
       end
 
       str
@@ -333,14 +338,14 @@ class Kronk
     # :only_data:: String/Array - Extracts the data from given data paths
     #
     # Example:
-    #   response.selective_data :transform => [:delete, ["foo/0", "bar/1"]]
-    #   response.selective_data do |trans|
+    #   response.data :transform => [:delete, ["foo/0", "bar/1"]]
+    #   response.data do |trans|
     #     trans.delete "foo/0", "bar/1"
     #   end
     #
     # See Kronk::Path::Transaction for supported transform actions.
 
-    def selective_data options={}
+    def data options={}
       data = nil
 
       unless options[:no_body]
@@ -378,25 +383,30 @@ class Kronk
     # :show_headers:: Boolean/String/Array - defines which headers to include
     #
     # If block is given, yields a Kronk::Path::Transaction instance to make
-    # transformations on the data. See Kronk::Response#selective_data
+    # transformations on the data. See Kronk::Response#data
 
     def stringify options={}, &block
-      options = options.empty? ? @stringify_opts : merge_stringify_opts(options)
+      options = merge_stringify_opts options
 
       if !options[:raw] && (options[:parser] || parser || options[:no_body])
-        data = selective_data options, &block
+        data = self.data options, &block
         DataString.new data, options
+
       else
-        selective_string options
+        self.to_s :body    => !options[:no_body],
+                  :headers => options[:show_headers]
       end
 
     rescue MissingParser
       Cmd.verbose "Warning: No parser for #{@_res['Content-Type']} [#{@uri}]"
-        selective_string options
+      self.to_s :body    => !options[:no_body],
+                :headers => options[:show_headers]
     end
 
 
     def merge_stringify_opts options # :nodoc:
+      return @stringify_opts if options.empty?
+
       options = options.dup
       @stringify_opts.each do |key, val|
         case key
@@ -458,7 +468,9 @@ class Kronk
 
       begin
         resp = Net::HTTPResponse.read_new io
-        resp.reading_body io, true do;end
+        resp.instance_variable_set("@socket", io)
+        resp.instance_variable_set("@body_exist", resp.class.body_permitted?)
+        #resp.reading_body io, true do;end
 
       rescue Net::HTTPBadResponse
         ext = File.extname(resp_io.path)[1..-1] if File === resp_io
