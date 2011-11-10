@@ -366,8 +366,6 @@ class Kronk
       @_req.use_ssl      = true if @uri.scheme =~ /^https$/
 
       start_time = nil
-      socket     = nil
-      socket_io  = nil
 
       @response = @_req.start do |http|
         start_time = Time.now
