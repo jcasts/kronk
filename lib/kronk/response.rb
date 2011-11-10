@@ -212,8 +212,8 @@ class Kronk
 
     def parsed_header include_headers=true
       out_headers = headers.dup
-      out_headers['status']  = @code
-      out_headers['http-version'] = @_res.http_version
+      out_headers['status']       = @code
+      out_headers['http-version'] = http_version
 
       case include_headers
       when nil, false
