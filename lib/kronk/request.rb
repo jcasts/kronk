@@ -209,9 +209,9 @@ class Kronk
       @body = nil
       @body = self.class.build_query options[:data] if options[:data]
 
+      @connection = nil
       @response = nil
       @_req     = nil
-      @_res     = nil
 
       @headers = options[:headers] || {}
       @timeout = options[:timeout] || Kronk.config[:timeout]
@@ -247,6 +247,21 @@ class Kronk
 
 
     ##
+    # Reference to the HTTP connection instance.
+
+    def connection
+      return @connection if @connection
+      http_class = http_proxy @proxy[:host], @proxy
+
+      @connection = http_class.new @uri.host, @uri.port
+      @connection.open_timeout = @connection.read_timeout = @timeout if @timeout
+      @connection.use_ssl      = true if @uri.scheme =~ /^https$/
+
+      @connection
+    end
+
+
+    ##
     # Assigns the cookie string.
 
     def cookie= cookie_str
@@ -259,47 +274,6 @@ class Kronk
 
     def http_method= new_verb
       @http_method = new_verb.to_s.upcase
-    end
-
-
-    ##
-    # Returns the HTTP request object.
-
-    def http_request
-      req = VanillaRequest.new @http_method, @uri.request_uri, @headers
-
-      req.basic_auth @auth[:username], @auth[:password] if
-        @auth && @auth[:username]
-
-      req
-    end
-
-
-    ##
-    # Assign the use of a proxy.
-    # The proxy_opts arg can be a uri String or a Hash with the :address key
-    # and optional :username and :password keys.
-
-    def http_proxy addr, opts={}
-      return Kronk::HTTP unless addr
-
-      host, port = addr.split ":"
-      port ||= opts[:port] || 8080
-
-      user = opts[:username]
-      pass = opts[:password]
-
-      Kronk::Cmd.verbose "Using proxy #{addr}\n" if host
-
-      Kronk::HTTP::Proxy host, port, user, pass
-    end
-
-
-    ##
-    # Assign the uri and io based on if the uri is a file, io, or url.
-
-    def uri= new_uri
-      @uri = self.class.build_uri new_uri
     end
 
 
@@ -359,17 +333,11 @@ class Kronk
     # the body chunks as they get received.
 
     def retrieve
-      http_class = http_proxy @proxy[:host], @proxy
-
-      @_req = http_class.new @uri.host, @uri.port
-      @_req.open_timeout = @_req.read_timeout = @timeout if @timeout
-      @_req.use_ssl      = true if @uri.scheme =~ /^https$/
-
       start_time = nil
 
-      @response = @_req.start do |http|
+      @response = connection.start do |http|
         start_time = Time.now
-        http.request self.http_request, @body
+        http.request http_request, @body
       end
 
       @response.request = self
@@ -389,7 +357,7 @@ class Kronk
       out = "#{@http_method} #{@uri.request_uri} HTTP/1.1\r\n"
       out << "host: #{@uri.host}:#{@uri.port}\r\n"
 
-      self.http_request.each do |name, value|
+      http_request.each do |name, value|
         out << "#{name}: #{value}\r\n" unless name =~ /host/i
       end
 
@@ -404,6 +372,42 @@ class Kronk
     def inspect
       "#<#{self.class}:#{self.http_method} #{self.uri}>"
     end
+
+
+    private
+
+    ##
+    # Returns the HTTP request object.
+
+    def http_request
+      req = VanillaRequest.new @http_method, @uri.request_uri, @headers
+
+      req.basic_auth @auth[:username], @auth[:password] if
+        @auth && @auth[:username]
+
+      req
+    end
+
+
+    ##
+    # Assign the use of a proxy.
+    # The proxy_opts arg can be a uri String or a Hash with the :address key
+    # and optional :username and :password keys.
+
+    def http_proxy addr, opts={}
+      return Kronk::HTTP unless addr
+
+      host, port = addr.split ":"
+      port ||= opts[:port] || 8080
+
+      user = opts[:username]
+      pass = opts[:password]
+
+      Kronk::Cmd.verbose "Using proxy #{addr}\n" if host
+
+      Kronk::HTTP::Proxy host, port, user, pass
+    end
+
 
 
     ##
