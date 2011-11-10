@@ -6,7 +6,6 @@ Rakefile
 bin/kronk
 lib/kronk.rb
 lib/kronk/async.rb
-lib/kronk/async/em_ext.rb
 lib/kronk/async/request.rb
 lib/kronk/async/response.rb
 lib/kronk/cmd.rb
