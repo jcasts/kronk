@@ -459,7 +459,6 @@ class Kronk
         resp.reading_body io, true do;end
 
       rescue Net::HTTPBadResponse
-        ext = "text/html"
         ext = File.extname(resp_io.path)[1..-1] if File === resp_io
 
         io.read_all
@@ -469,7 +468,7 @@ class Kronk
         # If no response was read because it's too short
         unless resp
           io.read_all
-          resp = HeadlessResponse.new @raw, "html"
+          resp = HeadlessResponse.new @raw
         end
       end
 
@@ -504,7 +503,7 @@ class Kronk
       encoding = body.respond_to?(:encoding) ? body.encoding : "UTF-8"
 
       @header = {
-        'Content-Type' => "text/#{file_ext}; charset=#{encoding}"
+        'Content-Type' => "text/#{file_ext || 'html'}; charset=#{encoding}"
       }
     end
 
