@@ -1,3 +1,9 @@
+=== 1.7.8 / 2011-11-10
+
+* Enhancements:
+
+  * Status and http version are now a part of the parsed headers output.
+
 === 1.7.7 / 2011-11-08
 
 * Enhancements:
