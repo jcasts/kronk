@@ -340,8 +340,9 @@ class Kronk
         http.request http_request, @body
       end
 
-      @response.request = self
+      @response.body
       @response.time    = Time.now - start_time
+      @response.request = self
 
       Kronk.cookie_jar.set_cookies_from_headers @uri.to_s, @response.to_hash if
         self.use_cookies
