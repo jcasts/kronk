@@ -215,6 +215,8 @@ class Kronk
 
     def parsed_header include_headers=true
       out_headers = headers.dup
+      out_headers['status']  = @code
+      out_headers['http-version'] = @_res.http_version
 
       case include_headers
       when nil, false
@@ -223,7 +225,7 @@ class Kronk
       when Array, String
         include_headers = [*include_headers].map{|h| h.to_s.downcase}
 
-        headers.each do |key, value|
+        out_headers.keys.each do |key|
           out_headers.delete key unless
             include_headers.include? key.to_s.downcase
         end

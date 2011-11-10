@@ -164,7 +164,11 @@ class TestResponse < Test::Unit::TestCase
 
 
   def test_parsed_header
-    assert_equal @json_resp.to_hash, @json_resp.parsed_header
+    parsed_headers = @json_resp.to_hash.merge(
+                        'http-version' => '1.1',
+                        'status'       => '200')
+
+    assert_equal parsed_headers, @json_resp.parsed_header
 
     assert_equal({'content-type' => "application/json; charset=utf-8"},
                 @json_resp.parsed_header('Content-Type'))
