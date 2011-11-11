@@ -345,25 +345,25 @@ class Kronk
     #
     # See Kronk::Path::Transaction for supported transform actions.
 
-    def data options={}
+    def data opts={}
       data = nil
 
-      unless options[:no_body]
-        data = parsed_body options[:parser]
+      unless opts[:no_body]
+        data = parsed_body opts[:parser]
       end
 
-      if options[:show_headers]
-        header_data = parsed_header(options[:show_headers])
+      if opts[:show_headers]
+        header_data = parsed_header(opts[:show_headers])
         data &&= [header_data, data]
         data ||= header_data
       end
 
-      Path::Transaction.run data, options do |t|
+      Path::Transaction.run data, opts do |t|
         # Backward compatibility support
-        t.select(*options[:only_data])   if options[:only_data]
-        t.delete(*options[:ignore_data]) if options[:ignore_data]
+        t.select(*opts[:only_data])   if opts[:only_data]
+        t.delete(*opts[:ignore_data]) if opts[:ignore_data]
 
-        t.actions.concat options[:transform] if options[:transform]
+        t.actions.concat opts[:transform] if opts[:transform]
 
         yield t if block_given?
       end
@@ -385,48 +385,48 @@ class Kronk
     # If block is given, yields a Kronk::Path::Transaction instance to make
     # transformations on the data. See Kronk::Response#data
 
-    def stringify options={}, &block
-      options = merge_stringify_opts options
+    def stringify opts={}, &block
+      opts = merge_stringify_opts opts
 
-      if !options[:raw] && (options[:parser] || parser || options[:no_body])
-        data = self.data options, &block
-        DataString.new data, options
+      if !opts[:raw] && (opts[:parser] || parser || opts[:no_body])
+        data = self.data opts, &block
+        DataString.new data, opts
 
       else
-        self.to_s :body    => !options[:no_body],
-                  :headers => options[:show_headers]
+        self.to_s :body    => !opts[:no_body],
+                  :headers => opts[:show_headers]
       end
 
     rescue MissingParser
       Cmd.verbose "Warning: No parser for #{@_res['Content-Type']} [#{@uri}]"
-      self.to_s :body    => !options[:no_body],
-                :headers => options[:show_headers]
+      self.to_s :body    => !opts[:no_body],
+                :headers => opts[:show_headers]
     end
 
 
-    def merge_stringify_opts options # :nodoc:
-      return @stringify_opts if options.empty?
+    def merge_stringify_opts opts # :nodoc:
+      return @stringify_opts if opts.empty?
 
-      options = options.dup
+      opts = opts.dup
       @stringify_opts.each do |key, val|
         case key
         # Response headers - Boolean, String, or Array
         when :show_headers
-          next if options.has_key?(key) &&
-                  (options[key].class != Array || val == true || val == false)
+          next if opts.has_key?(key) &&
+                  (opts[key].class != Array || val == true || val == false)
 
-          options[key] = (val == true || val == false) ? val :
-                                      [*options[key]] | [*val]
+          opts[key] = (val == true || val == false) ? val :
+                                      [*opts[key]] | [*val]
 
         # String or Array
         when :only_data, :ignore_data
-          options[key] = [*options[key]] | [*val]
+          opts[key] = [*opts[key]] | [*val]
 
         else
-          options[key] = val if options[key].nil?
+          opts[key] = val if opts[key].nil?
         end
       end
-      options
+      opts
     end
 
 

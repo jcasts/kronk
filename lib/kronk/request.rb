@@ -46,17 +46,17 @@ class Kronk
     # Build the URI to use for the request from the given uri or
     # path and options.
 
-    def self.build_uri uri, options={}
-      uri  ||= options[:host] || Kronk.config[:default_host]
-      suffix = options[:uri_suffix]
+    def self.build_uri uri, opts={}
+      uri  ||= opts[:host] || Kronk.config[:default_host]
+      suffix = opts[:uri_suffix]
 
       uri = "http://#{uri}"   unless uri.to_s =~ %r{^(\w+://|/)}
       uri = "#{uri}#{suffix}" if suffix
       uri = URI.parse uri     unless URI === uri
       uri = URI.parse(Kronk.config[:default_host]) + uri unless uri.host
 
-      if options[:query]
-        query = build_query options[:query]
+      if opts[:query]
+        query = build_query opts[:query]
         uri.query = [uri.query, query].compact.join "&"
       end
 
@@ -203,30 +203,30 @@ class Kronk
     # Note: if no http method is specified and data is given, will default
     # to using a post request.
 
-    def initialize uri, options={}
-      @auth = options[:auth]
+    def initialize uri, opts={}
+      @auth = opts[:auth]
 
       @body = nil
-      @body = self.class.build_query options[:data] if options[:data]
+      @body = self.class.build_query opts[:data] if opts[:data]
 
       @connection = nil
       @response = nil
       @_req     = nil
 
-      @headers = options[:headers] || {}
-      @timeout = options[:timeout] || Kronk.config[:timeout]
+      @headers = opts[:headers] || {}
+      @timeout = opts[:timeout] || Kronk.config[:timeout]
 
-      @uri = self.class.build_uri uri, options
+      @uri = self.class.build_uri uri, opts
 
-      @proxy = options[:proxy] || {}
+      @proxy = opts[:proxy] || {}
       @proxy = {:host => @proxy} unless Hash === @proxy
 
-      self.user_agent ||= options[:user_agent]
+      self.user_agent ||= opts[:user_agent]
 
-      self.http_method = options[:http_method] || (@body ? "POST" : "GET")
+      self.http_method = opts[:http_method] || (@body ? "POST" : "GET")
 
-      self.use_cookies = options.has_key?(:no_cookies) ?
-                          !options[:no_cookies] : Kronk.config[:use_cookies]
+      self.use_cookies = opts.has_key?(:no_cookies) ?
+                          !opts[:no_cookies] : Kronk.config[:use_cookies]
     end
 
 
