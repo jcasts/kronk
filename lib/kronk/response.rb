@@ -23,7 +23,7 @@ class Kronk
     end
 
 
-    attr_reader :code, :raw
+    attr_reader :code
     attr_accessor :request, :stringify_opts, :time
 
     ##
@@ -31,7 +31,7 @@ class Kronk
 
     def initialize io=nil, request=nil
       @request = request
-      @headers = @encoding = @parser = nil
+      @headers = @encoding = @parser = @body = nil
 
       @stringify_opts = {}
 
@@ -41,9 +41,6 @@ class Kronk
       @io   = io || ""
       @io   = String === @io ? StringIO.new(@io) : @io
       @_res = response_from_io @io
-
-      try_force_encoding @raw
-      try_force_encoding @_res.body
 
       @code = @_res.code
     end
@@ -67,10 +64,26 @@ class Kronk
 
     ##
     # Returns the body of the response. Will wait for the socket to finish
-    # reading if the body hasn't finished loading.
+    # reading if the body hasn't finished loading. If a block is given and
+    # the body hasn't been read yet, will iterate yielding the Response
+    # instance and a chunk of the body as it becomes available.
+    #
+    #   resp = Kronk::Response.new io
+    #   resp.body do |resp, chunk|
+    #     # handle stream
+    #   end
 
     def body
-      @_res.read_body
+      return @body if @body
+
+      if block_given?
+        @body = @_res.read_body{|chunk| yield self, try_force_encoding(chunk) }
+      else
+        @body = @_res.read_body
+      end
+
+      try_force_encoding @raw
+      try_force_encoding @body
     end
 
 
@@ -79,7 +92,7 @@ class Kronk
     # including headers.
 
     def byterate
-      return 0 unless @raw && @time.to_f > 0
+      return 0 unless raw && @time.to_f > 0
       @byterate = self.total_bytes / @time.to_f
     end
 
@@ -161,7 +174,7 @@ class Kronk
     # Ruby inspect.
 
     def inspect
-      content_type = self['Content-Type'] || "text/html"
+      content_type = headers['content-type'] || "text/html"
       "#<#{self.class}:#{@code} #{content_type} #{total_bytes}bytes>"
     end
 
@@ -256,11 +269,20 @@ class Kronk
 
 
     ##
+    # Returns the full raw HTTP response string after the full response
+    # has been read.
+
+    def raw
+      body && @raw
+    end
+
+
+    ##
     # Returns the header portion of the raw http response.
 
     def raw_header include_headers=true
       return if HeadlessResponse === @_res
-      headers = "#{@raw.split("\r\n\r\n", 2)[0]}\r\n"
+      headers = "#{raw.split("\r\n\r\n", 2)[0]}\r\n"
 
       case include_headers
       when nil, false
@@ -300,7 +322,9 @@ class Kronk
 
     def follow_redirect opts={}
       return if !redirect?
-      Request.new(self.location, opts).retrieve
+      new_opts = @request ? @request.to_hash : {}
+      new_opts[:http_method] = "GET" if @code == "303"
+      Request.new(self.location, new_opts.merge(opts)).retrieve
     end
 
 
@@ -311,8 +335,8 @@ class Kronk
     # :headers:: Bool/String/Array - Return headers; default true
 
     def to_s opts={}
-      return @raw unless opts[:body] == false ||
-                         !opts[:headers].nil? && opts[:headers] != true
+      return raw unless opts[:body] == false ||
+                        !opts[:headers].nil? && opts[:headers] != true
 
       str = self.body unless opts[:body] == false
 
@@ -511,13 +535,13 @@ class Kronk
 
     def initialize body, file_ext=nil
       @body = body
-      @raw  = body
       @code = "200"
 
       encoding = body.respond_to?(:encoding) ? body.encoding : "UTF-8"
 
       @header = {
-        'Content-Type' => "text/#{file_ext || 'html'}; charset=#{encoding}"
+        'Content-Type'   => "text/#{file_ext || 'html'}; charset=#{encoding}",
+        'Content-Length' => @body.bytes.count
       }
     end
 
@@ -531,6 +555,14 @@ class Kronk
 
     def []= key, value
       @header[key] = value
+    end
+
+
+    ##
+    # Compatibility with HTTPResponse.
+
+    def read_body
+      @body
     end
 
 

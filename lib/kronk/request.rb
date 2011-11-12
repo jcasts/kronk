@@ -185,6 +185,18 @@ class Kronk
     end
 
 
+    class << self
+      %w{get post put delete trace head options}.each do |name|
+        class_eval <<-"END"
+          def #{name} uri, opts={}, &block
+            opts[:http_method] = "#{name}"
+            new(uri, opts).retrieve(&block)
+          end  
+        END
+      end
+    end
+
+
     attr_accessor :body, :headers, :proxy, :response, :timeout
 
     attr_reader :http_method, :uri, :use_cookies
@@ -330,9 +342,9 @@ class Kronk
     ##
     # Retrieve this requests' response. Returns a Kronk::Response once the
     # full HTTP response has been read. If a block is given, will yield
-    # the body chunks as they get received.
+    # the response and body chunks as they get received.
 
-    def retrieve
+    def retrieve &block
       start_time = nil
 
       @response = connection.start do |http|
@@ -340,7 +352,7 @@ class Kronk
         http.request http_request, @body
       end
 
-      @response.body    # read the full body from io
+      @response.body &block    # read the full body from io
       @response.time    = Time.now - start_time
       @response.request = self
 
@@ -348,6 +360,28 @@ class Kronk
         self.use_cookies
 
       @response
+    end
+
+
+    ##
+    # Returns this Request instance as an options hash.
+
+    def to_hash
+      hash = {
+        :host        => "#{@uri.scheme}://#{@uri.host}:#{@uri.port}",
+        :uri_suffix  => @uri.request_uri,
+        :user_agent  => self.user_agent,
+        :timeout     => @timeout,
+        :http_method => self.http_method,
+        :no_cookies  => !self.use_cookies
+      }
+
+      hash[:auth]       = @auth if @auth
+      hash[:data]       = @body if @body
+      hash[:headers]    = @headers unless @headers.empty?
+      hash[:proxy]      = @proxy   unless @proxy.empty?
+
+      hash
     end
 
 
