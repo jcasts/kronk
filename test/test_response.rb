@@ -441,7 +441,7 @@ STR
 
   def test_stringify_raw
     str = Kronk::Response.
-      read_file("test/mocks/200_response.json").stringify :raw => 1
+      read_file("test/mocks/200_response.json").stringify :raw => true
 
     expected = File.read("test/mocks/200_response.json").split("\r\n\r\n")[1]
     assert_equal expected, str
