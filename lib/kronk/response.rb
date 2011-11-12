@@ -16,8 +16,8 @@ class Kronk
 
     def self.read_file path, &block
       file = File.open(path, "rb")
-      resp = new file
-      resp.body &block
+      resp = new(file)
+      resp.body(&block)
       file.close
 
       resp
@@ -30,7 +30,7 @@ class Kronk
     ##
     # Create a new Response object from a String or IO.
 
-    def initialize io=nil, request=nil
+    def initialize io=nil, request=nil, &block
       @request = request
       @headers = @encoding = @parser = @body = nil
 
@@ -44,6 +44,8 @@ class Kronk
       @_res = response_from_io @io
 
       @code = @_res.code
+
+      body(&block) if block_given?
     end
 
 
@@ -346,7 +348,7 @@ class Kronk
 
       if opts[:headers]
         hstr = raw_header(opts[:headers])
-        str  = [hstr, str].compact.join "\r\n\r\n"
+        str  = [hstr, str].compact.join "\r\n"
       end
 
       str
@@ -565,7 +567,8 @@ class Kronk
     ##
     # Compatibility with HTTPResponse.
 
-    def read_body
+    def read_body &block
+      yield @body if block_given?
       @body
     end
 

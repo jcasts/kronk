@@ -383,8 +383,8 @@ class TestRequest < Test::Unit::TestCase
 
     expect_request "GET", "http://example.com"
 
-    Net::HTTP.expects(:Proxy).with("proxy.com", 8080, "john", "smith").
-      returns Net::HTTP
+    Kronk::HTTP.expects(:Proxy).with("proxy.com", 8080, "john", "smith").
+      returns Kronk::HTTP
 
     Kronk::Request.new("http://example.com", :proxy => proxy).retrieve
   end
@@ -395,8 +395,8 @@ class TestRequest < Test::Unit::TestCase
 
     expect_request "GET", "http://example.com"
 
-    Net::HTTP.expects(:Proxy).with("proxy.com", "8888", nil, nil).
-      returns Net::HTTP
+    Kronk::HTTP.expects(:Proxy).with("proxy.com", "8888", nil, nil).
+      returns Kronk::HTTP
 
     Kronk::Request.new("http://example.com", :proxy => proxy).retrieve
   end
