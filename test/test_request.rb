@@ -403,7 +403,7 @@ class TestRequest < Test::Unit::TestCase
 
 
   def test_proxy_nil
-    assert_equal Net::HTTP, Kronk::Request.new("host.com").http_proxy(nil)
+    assert_equal Kronk::HTTP, Kronk::Request.new("host.com").http_proxy(nil)
   end
 
 

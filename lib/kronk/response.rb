@@ -228,7 +228,7 @@ class Kronk
         msg = ParserError === e ?
                 e.message : "#{new_parser} failed parsing body"
 
-        msg << " returned by #{@uri}" if @uri
+        msg << " returned by #{uri}" if uri
         raise ParserError, msg
       end
     end
@@ -352,8 +352,8 @@ class Kronk
 
       str = self.body unless opts[:body] == false
 
-      if opts[:headers]
-        hstr = raw_header(opts[:headers])
+      if opts[:headers] || opts[:headers].nil?
+        hstr = raw_header(opts[:headers] || true)
         str  = [hstr, str].compact.join "\r\n"
       end
 
@@ -434,7 +434,7 @@ class Kronk
       end
 
     rescue MissingParser
-      Cmd.verbose "Warning: No parser for #{@_res['Content-Type']} [#{@uri}]"
+      Cmd.verbose "Warning: No parser for #{@_res['Content-Type']} [#{uri}]"
       self.to_s :body    => !opts[:no_body],
                 :headers => (opts[:show_headers] || false)
     end

@@ -199,9 +199,7 @@ class TestResponse < Test::Unit::TestCase
     body = @json_resp.raw.split("\r\n\r\n")[1]
 
     expected = "Content-Type: application/json; charset=utf-8\r\n\r\n#{body}"
-    assert_equal expected,
-                 @json_resp.to_s(:body => false,
-                                             :headers => "Content-Type")
+    assert_equal expected, @json_resp.to_s(:headers => "Content-Type")
   end
 
 
@@ -209,14 +207,11 @@ class TestResponse < Test::Unit::TestCase
     body = @json_resp.raw.split("\r\n\r\n")[1]
 
     expected = "Date: Fri, 03 Dec 2010 21:49:00 GMT\r\nContent-Type: application/json; charset=utf-8\r\n\r\n#{body}"
-    assert_equal expected,
-                 @json_resp.to_s(:body => false,
-                    :headers => ["Content-Type", "Date"])
+    assert_equal expected, @json_resp.to_s(:headers => ["Content-Type", "Date"])
 
     expected = "Date: Fri, 03 Dec 2010 21:49:00 GMT\r\nContent-Type: application/json; charset=utf-8\r\n"
     assert_equal expected,
-                 @json_resp.to_s(
-                    :headers => ["Content-Type", "Date"])
+      @json_resp.to_s(:body => false, :headers => ["Content-Type", "Date"])
   end
 
 
@@ -226,7 +221,7 @@ class TestResponse < Test::Unit::TestCase
 
     assert_equal body, @json_resp.data
 
-    assert_nil @json_resp.data(:body => false, :headers => false)
+    assert_nil @json_resp.data(:no_body => true, :show_headers => false)
 
     assert_equal "#{@json_resp.raw.split("\r\n\r\n")[0]}\r\n",
                  @json_resp.to_s(:body => false)

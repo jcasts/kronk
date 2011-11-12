@@ -153,6 +153,7 @@ def expect_request req_method, url, options={}
 
   resp = Kronk::Response.new(options[:returns] || mock_200_response)
   resp.stubs(:code).returns(options[:status] || '200')
+  resp.stubs(:to_hash).returns Hash.new
 
   http   = mock 'http'
   socket = mock 'socket'
