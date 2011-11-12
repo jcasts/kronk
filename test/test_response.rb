@@ -438,7 +438,7 @@ STR
 
 
   def test_stringify_missing_parser
-    str = Kronk::Response.read_file("test/mocks/200_response.txt").stringify
+    str = @html_resp.stringify
     expected = File.read("test/mocks/200_response.txt").split("\r\n\r\n")[1]
 
     assert_equal expected, str

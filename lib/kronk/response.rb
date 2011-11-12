@@ -86,9 +86,8 @@ class Kronk
           (@body ||= "") << chunk
           yield self, chunk if block_given?
         end
-      rescue EOFError
-      rescue IOError
-        @body = @_res.body
+      rescue IOError, EOFError
+        @body = HeadlessResponse === @_res ? @raw : @raw.split("\r\n\r\n")[1]
         yield self, try_force_encoding(@body) if block_given?
       end
 
