@@ -422,13 +422,13 @@ class Kronk
 
       else
         self.to_s :body    => !opts[:no_body],
-                  :headers => opts[:show_headers]
+                  :headers => (opts[:show_headers] || false)
       end
 
     rescue MissingParser
       Cmd.verbose "Warning: No parser for #{@_res['Content-Type']} [#{@uri}]"
       self.to_s :body    => !opts[:no_body],
-                :headers => opts[:show_headers]
+                :headers => (opts[:show_headers] || false)
     end
 
 
