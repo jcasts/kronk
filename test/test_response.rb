@@ -81,24 +81,6 @@ class TestResponse < Test::Unit::TestCase
   end
 
 
-  def test_read_raw_from
-    resp   = mock_200_response
-    chunks = [resp[0..123], resp[124..200], resp[201..-1]]
-    chunks = chunks.map{|c| "-> #{c.inspect}"}
-    str = [chunks[0], "<- reading 123 bytes", chunks[1], chunks[2]].join "\n"
-    str = "<- \"mock debug request\"\n#{str}\nread 123 bytes"
-
-    io = StringIO.new str
-
-    resp = Kronk::Response.new mock_200_response
-    req, resp, bytes = resp.send :read_raw_from, io
-
-    assert_equal "mock debug request", req
-    assert_equal mock_200_response, resp
-    assert_equal 123, bytes
-  end
-
-
   def test_parsed_body_json
     raw = File.read "test/mocks/200_response.json"
     expected = JSON.parse raw.split("\r\n\r\n")[1]
@@ -197,44 +179,44 @@ class TestResponse < Test::Unit::TestCase
   end
 
 
-  def test_selective_string
-    body = @json_resp.raw.split("\r\n\r\n")[1]
-    assert_equal body, @json_resp.selective_string
+  def test_to_s
+    body = @json_resp.raw
+    assert_equal body, @json_resp.to_s
   end
 
 
-  def test_selective_string_no_body
+  def test_to_s_no_body
     @json_resp.raw.split("\r\n\r\n")[1]
 
-    assert_nil @json_resp.selective_string(:no_body => true)
+    assert_nil @json_resp.to_s(:body => false, :headers => false)
 
     assert_equal "#{@json_resp.raw.split("\r\n\r\n")[0]}\r\n",
-                 @json_resp.selective_string(:no_body => true,
-                  :show_headers => true)
+                 @json_resp.to_s(:body => false)
   end
 
 
-  def test_selective_string_single_header
+  def test_to_s_single_header
     body = @json_resp.raw.split("\r\n\r\n")[1]
 
     expected = "Content-Type: application/json; charset=utf-8\r\n\r\n#{body}"
     assert_equal expected,
-                 @json_resp.selective_string(:show_headers => "Content-Type")
+                 @json_resp.to_s(:body => false,
+                                             :headers => "Content-Type")
   end
 
 
-  def test_selective_multiple_headers
+  def test_to_s_multiple_headers
     body = @json_resp.raw.split("\r\n\r\n")[1]
 
     expected = "Date: Fri, 03 Dec 2010 21:49:00 GMT\r\nContent-Type: application/json; charset=utf-8\r\n\r\n#{body}"
     assert_equal expected,
-                 @json_resp.selective_string(
-                    :show_headers => ["Content-Type", "Date"])
+                 @json_resp.to_s(:body => false,
+                    :headers => ["Content-Type", "Date"])
 
     expected = "Date: Fri, 03 Dec 2010 21:49:00 GMT\r\nContent-Type: application/json; charset=utf-8\r\n"
     assert_equal expected,
-                 @json_resp.selective_string(:no_body => true,
-                    :show_headers => ["Content-Type", "Date"])
+                 @json_resp.to_s(
+                    :headers => ["Content-Type", "Date"])
   end
 
 
@@ -244,11 +226,10 @@ class TestResponse < Test::Unit::TestCase
 
     assert_equal body, @json_resp.data
 
-    assert_nil @json_resp.data(:no_body => true)
+    assert_nil @json_resp.data(:body => false, :headers => false)
 
     assert_equal "#{@json_resp.raw.split("\r\n\r\n")[0]}\r\n",
-                 @json_resp.selective_string(:no_body => true,
-                  :show_headers => true)
+                 @json_resp.to_s(:body => false)
   end
 
 

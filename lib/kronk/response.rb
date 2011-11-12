@@ -38,6 +38,7 @@ class Kronk
 
       @raw  = ""
       @time = 0
+      @read = false
 
       @io   = io || ""
       @io   = String === @io ? StringIO.new(@io) : @io
@@ -77,7 +78,7 @@ class Kronk
     #   end
 
     def body
-      return @body if @body
+      return @body if @read
 
       begin
         @_res.read_body do |chunk|
@@ -86,7 +87,12 @@ class Kronk
           yield self, chunk if block_given?
         end
       rescue EOFError
+      rescue IOError
+        @body = @_res.body
+        yield self, try_force_encoding(@body) if block_given?
       end
+
+      @read = true
 
       try_force_encoding @raw
       try_force_encoding @body
@@ -500,7 +506,6 @@ class Kronk
         resp = Net::HTTPResponse.read_new io
         resp.instance_variable_set("@socket", io)
         resp.instance_variable_set("@body_exist", resp.class.body_permitted?)
-        #resp.reading_body io, true do;end
 
       rescue Net::HTTPBadResponse
         ext = File.extname(resp_io.path)[1..-1] if File === resp_io

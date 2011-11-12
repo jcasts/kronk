@@ -374,8 +374,8 @@ class TestKronk < Test::Unit::TestCase
                              :show_headers => true,
                              :raw => true
 
-    exp_diff = Kronk::Diff.new resp1.selective_string(:show_headers => true),
-                               resp2.selective_string(:show_headers => true),
+    exp_diff = Kronk::Diff.new resp1.to_s,
+                               resp2.to_s,
                                :labels => [
                                  "test/mocks/200_response.json",
                                  "test/mocks/200_response.xml"
