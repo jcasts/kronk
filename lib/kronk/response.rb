@@ -346,7 +346,7 @@ class Kronk
 
       if opts[:headers]
         hstr = raw_header(opts[:headers])
-        str  = [hstr, str].compact.join "\r\n"
+        str  = [hstr, str].compact.join "\r\n\r\n"
       end
 
       str
