@@ -14,9 +14,10 @@ class Kronk
     ##
     # Read http response from a file and return a Kronk::Response instance.
 
-    def self.read_file path
+    def self.read_file path, &block
       file = File.open(path, "rb")
       resp = new file
+      resp.body &block
       file.close
 
       resp
@@ -76,10 +77,13 @@ class Kronk
     def body
       return @body if @body
 
-      if block_given?
-        @body = @_res.read_body{|chunk| yield self, try_force_encoding(chunk) }
-      else
-        @body = @_res.read_body
+      begin
+        @_res.read_body do |chunk|
+          try_force_encoding chunk
+          (@body ||= "") << chunk
+          yield self, chunk if block_given?
+        end
+      rescue EOFError
       end
 
       try_force_encoding @raw
