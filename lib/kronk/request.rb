@@ -409,8 +409,6 @@ class Kronk
     end
 
 
-    private
-
     ##
     # Returns the HTTP request object.
 

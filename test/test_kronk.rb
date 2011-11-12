@@ -453,8 +453,8 @@ class TestKronk < Test::Unit::TestCase
                              :show_headers => true
 
     exp_diff = Kronk::Diff.new_from_data \
-                  resp1.selective_data(:show_headers => true),
-                  resp2.selective_data(:show_headers => true),
+                  resp1.data(:show_headers => true),
+                  resp2.data(:show_headers => true),
                   :labels => [
                     "test/mocks/200_response.json",
                     "test/mocks/200_response.xml"
@@ -548,8 +548,8 @@ class TestKronk < Test::Unit::TestCase
     assert_equal nil,           kronk.diff
 
     exp_diff = Kronk::Diff.new_from_data \
-                  resp2.selective_data(:show_headers => true),
-                  resp1.selective_data(:show_headers => true),
+                  resp2.data(:show_headers => true),
+                  resp1.data(:show_headers => true),
                   :labels => [
                     "test/mocks/200_response.json",
                     "test/mocks/200_response.xml"

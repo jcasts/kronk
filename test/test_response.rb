@@ -238,13 +238,13 @@ class TestResponse < Test::Unit::TestCase
   end
 
 
-  def test_selective_data
+  def test_data
     body = JSON.parse @json_resp.body
     @json_resp.to_hash
 
-    assert_equal body, @json_resp.selective_data
+    assert_equal body, @json_resp.data
 
-    assert_nil @json_resp.selective_data(:no_body => true)
+    assert_nil @json_resp.data(:no_body => true)
 
     assert_equal "#{@json_resp.raw.split("\r\n\r\n")[0]}\r\n",
                  @json_resp.selective_string(:no_body => true,
@@ -252,26 +252,26 @@ class TestResponse < Test::Unit::TestCase
   end
 
 
-  def test_selective_data_parser
+  def test_data_parser
     assert_raises Kronk::ParserError do
-      @json_resp.selective_data :parser => Kronk::PlistParser
+      @json_resp.data :parser => Kronk::PlistParser
     end
 
-    assert @json_resp.selective_data(:parser => JSON)
+    assert @json_resp.data(:parser => JSON)
   end
 
 
-  def test_selective_data_single_header
+  def test_data_single_header
     body = JSON.parse @json_resp.body
     expected =
       [{'content-type' => 'application/json; charset=utf-8'}, body]
 
     assert_equal expected,
-                 @json_resp.selective_data(:show_headers => "Content-Type")
+                 @json_resp.data(:show_headers => "Content-Type")
   end
 
 
-  def test_selective_data_multiple_headers
+  def test_data_multiple_headers
     body = JSON.parse @json_resp.body
     expected =
       [{'content-type' => 'application/json; charset=utf-8',
@@ -279,66 +279,66 @@ class TestResponse < Test::Unit::TestCase
       }, body]
 
     assert_equal expected,
-                 @json_resp.selective_data(
+                 @json_resp.data(
                     :show_headers => ["Content-Type", "Date"])
   end
 
 
-  def test_selective_data_no_body
+  def test_data_no_body
     expected = {
         'content-type' => 'application/json; charset=utf-8',
         'date'         => "Fri, 03 Dec 2010 21:49:00 GMT"
       }
 
     assert_equal expected,
-                 @json_resp.selective_data(:no_body => true,
+                 @json_resp.data(:no_body => true,
                     :show_headers => ["Content-Type", "Date"])
   end
 
 
-  def test_selective_data_only_data
+  def test_data_only_data
     expected = {"business"        => {"id" => "1234"},
                 "original_request"=> {"id"=>"1234"}}
 
     assert_equal expected,
-      @json_resp.selective_data(:only_data => "**/id")
+      @json_resp.data(:only_data => "**/id")
   end
 
 
-  def test_selective_data_multiple_only_data
+  def test_data_multiple_only_data
     expected = {"business"    => {"id" => "1234"},
                 "request_id"  => "mock_rid"}
 
     assert_equal expected,
-      @json_resp.selective_data(:only_data => ["business/id", "request_id"])
+      @json_resp.data(:only_data => ["business/id", "request_id"])
   end
 
 
-  def test_selective_data_ignore_data
+  def test_data_ignore_data
     expected = JSON.parse @json_resp.body
     expected['business'].delete 'id'
     expected['original_request'].delete 'id'
 
     assert_equal expected,
-      @json_resp.selective_data(:ignore_data => "**/id")
+      @json_resp.data(:ignore_data => "**/id")
   end
 
 
-  def test_selective_data_multiple_ignore_data
+  def test_data_multiple_ignore_data
     expected = JSON.parse @json_resp.body
     expected['business'].delete 'id'
     expected.delete 'request_id'
 
     assert_equal expected,
-      @json_resp.selective_data(:ignore_data => ["business/id", "request_id"])
+      @json_resp.data(:ignore_data => ["business/id", "request_id"])
   end
 
 
-  def test_selective_data_collected_and_ignored
+  def test_data_collected_and_ignored
     expected = {"business" => {"id" => "1234"}}
 
     assert_equal expected,
-      @json_resp.selective_data(:only_data => "**/id",
+      @json_resp.data(:only_data => "**/id",
         :ignore_data => "original_request")
   end
 

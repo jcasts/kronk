@@ -58,7 +58,7 @@ class Kronk
         @response  = @kronk.response
         @datas     = @responses.map do |r|
                        begin
-                         r.selective_data options
+                         r.data options
                        rescue Kronk::Response::MissingParser
                          r.body
                        end
