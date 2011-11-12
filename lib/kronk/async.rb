@@ -1,7 +1,6 @@
 require 'em-http-request'
 
 require 'kronk'
-require 'kronk/async/em_ext'
 require 'kronk/async/request'
 require 'kronk/async/response'
 
