@@ -284,7 +284,8 @@ class Kronk
     # has been read.
 
     def raw
-      body && @raw
+      body
+      @raw
     end
 
 
@@ -293,7 +294,7 @@ class Kronk
 
     def raw_header include_headers=true
       return if HeadlessResponse === @_res
-      headers = "#{raw.split("\r\n\r\n", 2)[0]}\r\n"
+      headers = "#{@raw.split("\r\n\r\n", 2)[0]}\r\n"
 
       case include_headers
       when nil, false
@@ -314,6 +315,7 @@ class Kronk
     # header is relative.
 
     def location
+      return unless @_res['Location']
       return @_res['Location'] if !@request || !@request.uri
       @request.uri.merge @_res['Location']
     end
@@ -331,11 +333,11 @@ class Kronk
     # Follow the redirect and return a new Response instance.
     # Returns nil if not redirect-able.
 
-    def follow_redirect opts={}
+    def follow_redirect opts={}, &block
       return if !redirect?
       new_opts = @request ? @request.to_hash : {}
       new_opts[:http_method] = "GET" if @code == "303"
-      Request.new(self.location, new_opts.merge(opts)).retrieve
+      Request.new(self.location, new_opts.merge(opts)).retrieve(&block)
     end
 
 
@@ -474,10 +476,19 @@ class Kronk
 
 
     ##
+    # Check if the Response body has been read.
+
+    def read?
+      @read
+    end
+
+
+    ##
     # Number of bytes of the response including the header.
 
     def total_bytes
-      self.raw.bytes.count
+      return raw.bytes.count if @read
+      raw_header.bytes.count + headers['content-length'].to_i
     end
 
 
