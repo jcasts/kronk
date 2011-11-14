@@ -50,7 +50,7 @@ class Kronk
       req.callback do |resp|
         elapsed_time   = Time.now - start_time
         sock_wr.close
-        @response      = Response.new sock_rd, self
+        @response      = Response.new sock_rd, :request => self
         @response.time = elapsed_time
         yield @response, nil
       end

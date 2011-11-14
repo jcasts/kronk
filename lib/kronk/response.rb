@@ -14,9 +14,9 @@ class Kronk
     ##
     # Read http response from a file and return a Kronk::Response instance.
 
-    def self.read_file path, &block
+    def self.read_file path, opts={}, &block
       file = File.open(path, "rb")
-      resp = new(file)
+      resp = new(file, opts)
       resp.body(&block)
       file.close
 
@@ -24,14 +24,17 @@ class Kronk
     end
 
 
-    attr_reader :code
+    attr_reader :code, :io
     attr_accessor :request, :stringify_opts, :time
 
     ##
     # Create a new Response object from a String or IO.
+    # Options supported are:
+    # :request:: The Kronk::Request instance for this response.
+    # :timeout:: The read timeout value in seconds.
 
-    def initialize io=nil, request=nil, &block
-      @request = request
+    def initialize io, opts={}, &block
+      @request = opts[:request]
       @headers = @encoding = @parser = @body = nil
 
       @stringify_opts = {}
@@ -40,8 +43,12 @@ class Kronk
       @time = 0
       @read = false
 
-      @io   = io || ""
-      @io   = String === @io ? StringIO.new(@io) : @io
+      @io = io || ""
+      @io = String === @io ? StringIO.new(@io) : @io
+      @io = BufferedIO.new @io unless BufferedIO === @io
+      @io.raw_output   = @raw
+      @io.read_timeout = opts[:timeout] if opts[:timeout]
+
       @_res = response_from_io @io
 
       @code = @_res.code
@@ -308,6 +315,22 @@ class Kronk
 
 
     ##
+    # Maximum time to wait on IO.
+
+    def read_timeout
+      @io.read_timeout
+    end
+
+
+    ##
+    # Assign maximum time to wait for IO data.
+
+    def read_timeout= val
+      @io.read_timeout = val
+    end
+
+
+    ##
     # Returns the location to redirect to. Prepends request url if location
     # header is relative.
 
@@ -493,7 +516,7 @@ class Kronk
     # The URI of the request if or the file read if available.
 
     def uri
-      @request && @request.uri || File === @io && URI.parse(@io.path)
+      @request && @request.uri || File === @io.io && URI.parse(@io.io.path)
     end
 
 
@@ -503,27 +526,22 @@ class Kronk
     ##
     # Creates a Net::HTTPResponse instance from an IO instance.
 
-    def response_from_io resp_io
-      io = Kronk::BufferedIO === resp_io ?
-            resp_io : Kronk::BufferedIO.new(resp_io)
-
-      io.raw_output = @raw
-
+    def response_from_io buff_io
       begin
-        resp = Net::HTTPResponse.read_new io
-        resp.instance_variable_set("@socket", io)
+        resp = Net::HTTPResponse.read_new buff_io
+        resp.instance_variable_set("@socket", buff_io)
         resp.instance_variable_set("@body_exist", resp.class.body_permitted?)
 
       rescue Net::HTTPBadResponse
-        ext = File.extname(resp_io.path)[1..-1] if File === resp_io
+        ext = File.extname(resp_io.path)[1..-1] if File === buff_io.io
 
-        io.read_all
+        buff_io.read_all
         resp = HeadlessResponse.new @raw, ext
 
       rescue EOFError
         # If no response was read because it's too short
         unless resp
-          io.read_all
+          buff_io.read_all
           resp = HeadlessResponse.new @raw
         end
       end

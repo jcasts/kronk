@@ -31,7 +31,7 @@ class Kronk
       begin_transport req
       req.exec @socket, @curr_http_version, edit_path(req.path)
       begin
-        res = Kronk::Response.new(@socket.io)
+        res = Kronk::Response.new(@socket.io, :timeout => @socket.read_timeout)
       end while kronk_resp_type(res) == Net::HTTPContinue
 
       end_transport req, res.instance_variable_get("@_res")
