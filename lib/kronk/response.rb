@@ -292,16 +292,13 @@ class Kronk
     ##
     # Returns the header portion of the raw http response.
 
-    def raw_header include_headers=true
-      return if HeadlessResponse === @_res
+    def raw_header show=true
+      return if !show || HeadlessResponse === @_res
       headers = "#{@raw.split("\r\n\r\n", 2)[0]}\r\n"
 
-      case include_headers
-      when nil, false
-        nil
-
+      case show
       when Array, String
-        includes = [*include_headers].join("|")
+        includes = [*show].join("|")
         headers.scan(%r{^((?:#{includes}): [^\n]*\n)}im).flatten.join
 
       when true

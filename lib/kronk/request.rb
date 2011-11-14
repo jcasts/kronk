@@ -352,7 +352,7 @@ class Kronk
         http.request http_request, @body
       end
 
-      @response.body &block    # read the full body from io
+      @response.body(&block)    # read the full body from io
       @response.time    = Time.now - start_time
       @response.request = self
 
