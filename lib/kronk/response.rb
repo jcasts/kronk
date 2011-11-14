@@ -378,7 +378,7 @@ class Kronk
         str  = [hstr, str].compact.join "\r\n"
       end
 
-      str
+      str.to_s
     end
 
 
