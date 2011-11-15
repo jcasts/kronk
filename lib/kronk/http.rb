@@ -36,6 +36,10 @@ class Kronk
 
       @socket = res.io
 
+      res.body {
+        yield res
+      } if block_given?
+
       end_transport req, res.instance_variable_get("@_res")
       res
     rescue => exception
