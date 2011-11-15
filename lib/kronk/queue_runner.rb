@@ -77,7 +77,8 @@ class Kronk
 
       @triggers = {}
 
-      @mutex = Mutex.new
+      @mutex  = Mutex.new
+      @qmutex = Mutex.new
     end
 
 
@@ -145,7 +146,9 @@ class Kronk
           next
         end
 
-        @threads << Thread.new(@queue.shift) do |q_item|
+        item = @qmutex.synchronize{ @queue.shift }
+
+        @threads << Thread.new(item) do |q_item|
           yield q_item if block_given?
         end
 
@@ -188,7 +191,7 @@ class Kronk
             next
           end
 
-          yield @queue.shift
+          yield @qmutex.synchronize{ @queue.shift }
           @count += 1
         end
       end
@@ -248,7 +251,8 @@ class Kronk
             end
 
             while @queue.length < max_queue_size
-              @queue << trigger(:input)
+              item = trigger(:input)
+              @qmutex.synchronize{ @queue << item }
             end
             Thread.pass
           end
