@@ -27,12 +27,25 @@ class Kronk
 
     private
 
-    def transport_request(req)
+    def transport_request(req, allow_retry=true)
+      # Check if previous request was made on same socket and needs
+      # to be completed before we can read the new response.
+      if Kronk::BufferedIO === @socket && !@socket.response.read?
+        @socket.response.body
+      end
+
       begin_transport req
       req.exec @socket, @curr_http_version, edit_path(req.path)
+
       begin
         res = Kronk::Response.new(@socket.io, :timeout => @socket.read_timeout)
       end while kronk_resp_type(res) == Net::HTTPContinue
+
+      if res.headless?
+        raise Net::HTTPBadResponse, "Invalid HTTP response" unless allow_retry
+        @socket.io.close
+        res = transport_request(req, false)
+      end
 
       @socket = res.io
 
@@ -42,6 +55,7 @@ class Kronk
 
       end_transport req, res.instance_variable_get("@_res")
       res
+
     rescue => exception
       D "Conn close because of error #{exception}"
       @socket.close if @socket and not @socket.closed?

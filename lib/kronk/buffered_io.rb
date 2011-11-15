@@ -6,10 +6,12 @@ class Kronk
   class BufferedIO < Net::BufferedIO
 
     attr_accessor :raw_output
+    attr_accessor :response
 
     def initialize io
       super
       @raw_output = nil
+      @response   = nil
     end
 
 

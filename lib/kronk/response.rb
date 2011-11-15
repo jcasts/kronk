@@ -47,6 +47,7 @@ class Kronk
       @io = String === @io ? StringIO.new(@io) : @io
       @io = BufferedIO.new @io unless BufferedIO === @io
       @io.raw_output   = @raw
+      @io.response     = self
       @io.read_timeout = opts[:timeout] if opts[:timeout]
 
       @_res = response_from_io @io
