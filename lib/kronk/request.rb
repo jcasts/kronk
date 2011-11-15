@@ -349,11 +349,30 @@ class Kronk
 
       @response = connection.start do |http|
         start_time = Time.now
-        http.request http_request, @body
+        res = http.request http_request, @body
+        res.body(&block)    # read the full body from io
+        res.time    = Time.now - start_time
+        res.request = self
+        res
       end
 
-      @response.body(&block)    # read the full body from io
-      @response.time    = Time.now - start_time
+      Kronk.cookie_jar.set_cookies_from_headers @uri.to_s, @response.to_hash if
+        self.use_cookies
+
+      @response
+    end
+
+
+    ##
+    # Retrieve this requests' response but only reads HTTP headers before
+    # returning and leaves the connection open.
+    #
+    # Connection must be closed using:
+    #   request.connection.finish
+
+    def stream
+      http = connection.started? ? connection : connection.start
+      @response = http.request http_request, @body
       @response.request = self
 
       Kronk.cookie_jar.set_cookies_from_headers @uri.to_s, @response.to_hash if

@@ -508,7 +508,7 @@ class Kronk
 
     def total_bytes
       return raw.bytes.count if @read
-      raw_header.bytes.count + headers['content-length'].to_i
+      raw_header.bytes.count + headers['content-length'].to_i + 2
     end
 
 

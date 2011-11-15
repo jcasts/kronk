@@ -34,12 +34,30 @@ class Kronk
         res = Kronk::Response.new(@socket.io, :timeout => @socket.read_timeout)
       end while kronk_resp_type(res) == Net::HTTPContinue
 
+      @socket = res.io
+
       end_transport req, res.instance_variable_get("@_res")
       res
     rescue => exception
       D "Conn close because of error #{exception}"
       @socket.close if @socket and not @socket.closed?
       raise exception
+    end
+
+
+    def end_transport(req, res)
+      @curr_http_version = res.http_version
+      if @socket.closed?
+        D 'Conn socket closed'
+      elsif keep_alive?(req, res)
+        D 'Conn keep-alive'
+      elsif not res.body and @close_on_empty_response
+        D 'Conn close'
+        @socket.close
+      else
+        D 'Conn close'
+        @socket.close
+      end
     end
 
 
