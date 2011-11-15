@@ -188,7 +188,7 @@ class TestResponse < Test::Unit::TestCase
   def test_to_s_no_body
     @json_resp.raw.split("\r\n\r\n")[1]
 
-    assert_nil @json_resp.to_s(:body => false, :headers => false)
+    assert_equal "", @json_resp.to_s(:body => false, :headers => false)
 
     assert_equal "#{@json_resp.raw.split("\r\n\r\n")[0]}\r\n",
                  @json_resp.to_s(:body => false)
