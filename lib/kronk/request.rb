@@ -349,8 +349,8 @@ class Kronk
 
       @response = connection.start do |http|
         start_time = Time.now
-        res = http.request http_request, @body
-        res.body(&block)    # read the full body from io
+        res = http.request http_request, @body, &block
+        res.body # make sure to read the full body from io
         res.time    = Time.now - start_time
         res.request = self
         res
