@@ -1,6 +1,6 @@
 = TODO
 
-* QPS for player.
+* QPS option for player.
 
 * Support for response streaming.
 
