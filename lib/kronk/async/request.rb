@@ -29,7 +29,7 @@ class Kronk
 
       conn = async_http
 
-      sock_rd, sock_wr = IO.pipe
+      sock = StringIO.new
 
       start_time = Time.now
       req  = conn.setup_request @http_method,
@@ -40,17 +40,16 @@ class Kronk
       @response = nil
 
       req.headers do |resp_headers|
-        async_raw_headers sock_wr, resp_headers
+        async_raw_headers sock, resp_headers
       end
 
       req.stream do |chunk|
-        sock_wr << chunk
+        sock << chunk
       end
 
       req.callback do |resp|
         elapsed_time   = Time.now - start_time
-        sock_wr.close
-        @response      = Response.new sock_rd, :request => self
+        @response      = Response.new sock, :request => self
         @response.time = elapsed_time
         yield @response, nil
       end
