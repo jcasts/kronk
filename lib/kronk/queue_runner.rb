@@ -177,6 +177,7 @@ class Kronk
       start_input!
 
       @count = 0
+      @async_reqs = 0
 
       EM.run do
         EM.add_periodic_timer do
@@ -186,11 +187,12 @@ class Kronk
             next
           end
 
-          if @queue.empty? || EM.connection_count >= @concurrency
+          if @queue.empty? || @async_reqs >= @concurrency
             Thread.pass
             next
           end
 
+          @async_reqs += 1
           yield @qmutex.synchronize{ @queue.shift }
           @count += 1
         end

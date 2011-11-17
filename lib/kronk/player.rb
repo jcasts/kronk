@@ -24,6 +24,7 @@ class Kronk
       @input      = InputReader.new opts[:io], opts[:parser]
       @use_output = true
       @last_req   = nil
+      @async_reqs = 0
 
       @on_input   = Proc.new do
         stop_input! if !@number && @input.eof?
@@ -147,6 +148,7 @@ class Kronk
       method = args.shift.to_s + '_async'
 
       kronk.send(method, *args) do |obj, err|
+        @async_reqs = @async_reqs - 1
         raise err if err && !Kronk::Cmd::RESCUABLE.find{|eclass| eclass === err}
         trigger_result kronk, err, &block
       end
