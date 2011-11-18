@@ -187,6 +187,8 @@ class Kronk
             next
           end
 
+          @async_reqs = EM.connection_count if EM.connection_count < @async_reqs
+
           if @queue.empty? || @async_reqs >= @concurrency
             Thread.pass
             next
