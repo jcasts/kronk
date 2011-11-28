@@ -51,8 +51,8 @@ class Kronk
 
       @socket = res.io
 
-      res.body {|res, chunk|
-        yield res, chunk
+      res.body {|r, chunk|
+        yield r, chunk
       } if block_given?
 
       end_transport req, res

@@ -541,7 +541,6 @@ Parse and run diffs against data from live and cached http responses.
         end
 
       exit 1 unless success
-      exit 0
 
     rescue *RESCUABLE => e
       error e

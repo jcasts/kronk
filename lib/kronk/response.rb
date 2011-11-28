@@ -238,7 +238,7 @@ class Kronk
 
     ##
     # If there was an error parsing the input as a standard http response,
-    # the input is assumed to be a body and HeadlessResponse is used.
+    # the input is assumed to be a body.
 
     def headless?
       @headless
@@ -265,15 +265,23 @@ class Kronk
     ##
     # Check if connection should be closed or not.
 
-    def connection_close?
+    def close?
       @headers['connection'].to_s.include?('close') ||
       @headers['proxy-connection'].to_s.include?('close')
     end
 
-    def connection_keep_alive?
+    alias connection_close? close?
+
+
+    ##
+    # Check if connection should stay alive.
+
+    def keep_alive?
       @headers['connection'].to_s.include?('keep-alive') ||
       @headers['proxy-connection'].to_s.include?('keep-alive')
     end
+
+    alias connection_keep_alive? keep_alive?
 
 
     ##
@@ -616,12 +624,11 @@ class Kronk
     # Get response status and headers from BufferedIO instance.
 
     def response_from_io buff_io, allow_headless=false
-      retried = false
       begin
         @http_version, @code, @msg = read_status_line buff_io
         @headers = read_headers buff_io
 
-      rescue Kronk::HTTPBadResponse
+      rescue EOFError, Kronk::HTTPBadResponse
         raise unless allow_headless
         @http_version, @code, @msg = ["1.0", "200", "OK"]
 

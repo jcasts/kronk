@@ -156,7 +156,6 @@ def expect_request req_method, url, options={}
   resp.stubs(:to_hash).returns Hash.new
 
   http   = mock 'http'
-  socket = mock 'socket'
   req    = mock 'req'
 
   data   = options[:data]
