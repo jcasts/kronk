@@ -1,5 +1,7 @@
 class Kronk
 
+  class HTTPBadResponse < Net::HTTPBadResponse; end
+
   ##
   # Wrapper for Net::HTTP
 
@@ -53,7 +55,7 @@ class Kronk
         yield res, chunk
       } if block_given?
 
-      end_transport req, res.instance_variable_get("@_res")
+      end_transport req, res
       res
 
     rescue => exception

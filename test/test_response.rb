@@ -75,7 +75,6 @@ class TestResponse < Test::Unit::TestCase
 
     expected_header = "#{mock_200_response.split("\r\n\r\n", 2)[0]}\r\n"
 
-    assert Net::HTTPResponse === resp.instance_variable_get("@_res")
     assert_equal mock_200_response, resp.raw
     assert_equal expected_header, resp.raw_header
   end
