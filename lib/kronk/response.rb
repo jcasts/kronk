@@ -25,13 +25,14 @@ class Kronk
 
 
     attr_reader :code, :io
-    attr_accessor :request, :stringify_opts, :time
+    attr_accessor :read, :request, :stringify_opts, :time
 
     ##
     # Create a new Response object from a String or IO.
     # Options supported are:
     # :request:: The Kronk::Request instance for this response.
     # :timeout:: The read timeout value in seconds.
+    # :no_body:: Ignore reading the body of the response.
 
     def initialize io, opts={}, &block
       @request = opts[:request]
@@ -43,7 +44,6 @@ class Kronk
 
       @raw  = ""
       @time = 0
-      @read = false
 
       @io = io || ""
       @io = String === @io ? StringIO.new(@io) : @io
@@ -58,6 +58,7 @@ class Kronk
 
       response_from_io @io, allow_headless
 
+      @read = !!opts[:no_body]
       body(&block) if block_given?
     end
 

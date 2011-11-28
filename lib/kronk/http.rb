@@ -7,7 +7,7 @@ class Kronk
 
   class HTTP < Net::HTTP
 
-    def request(req, body = nil, &block)  # :yield: +response+
+    def request(req, body=nil, opts={}, &block)  # :yield: +response+
       unless started?
         start {
           req['connection'] ||= 'close'
@@ -18,10 +18,10 @@ class Kronk
         req.proxy_basic_auth proxy_user(), proxy_pass() unless use_ssl?
       end
       req.set_body_internal body
-      res = transport_request(req, &block)
+      res = transport_request(req, true, opts, &block)
       if sspi_auth?(res)
         sspi_auth(req)
-        res = transport_request(req, &block)
+        res = transport_request(req, true, opts, &block)
       end
       res
     end
@@ -29,7 +29,7 @@ class Kronk
 
     private
 
-    def transport_request(req, allow_retry=true)
+    def transport_request(req, allow_retry=true, opts={})
       # Check if previous request was made on same socket and needs
       # to be completed before we can read the new response.
       if Kronk::BufferedIO === @socket && !@socket.response.read?
@@ -40,13 +40,14 @@ class Kronk
       req.exec @socket, @curr_http_version, edit_path(req.path)
 
       begin
-        res = Kronk::Response.new(@socket.io, :timeout => @socket.read_timeout)
+        opts[:timeout] ||= @socket.read_timeout
+        res = Kronk::Response.new(@socket.io, opts)
       end while kronk_resp_type(res) == Net::HTTPContinue
 
       if res.headless?
         raise Net::HTTPBadResponse, "Invalid HTTP response" unless allow_retry
         @socket.io.close
-        res = transport_request(req, false)
+        res = transport_request(req, false, opts)
       end
 
       @socket = res.io

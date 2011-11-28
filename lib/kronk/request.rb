@@ -343,13 +343,15 @@ class Kronk
     # Retrieve this requests' response. Returns a Kronk::Response once the
     # full HTTP response has been read. If a block is given, will yield
     # the response and body chunks as they get received.
+    #
+    # Options are passed directly to the Kronk::Response constructor.
 
-    def retrieve &block
+    def retrieve opts={}, &block
       start_time = nil
 
       @response = connection.start do |http|
         start_time = Time.now
-        res = http.request http_request, @body, &block
+        res = http.request http_request, @body, opts, &block
         res.body # make sure to read the full body from io
         res.time    = Time.now - start_time
         res.request = self
@@ -367,12 +369,14 @@ class Kronk
     # Retrieve this requests' response but only reads HTTP headers before
     # returning and leaves the connection open.
     #
+    # Options are passed directly to the Kronk::Response constructor.
+    #
     # Connection must be closed using:
     #   request.connection.finish
 
-    def stream
+    def stream opts={}
       http = connection.started? ? connection : connection.start
-      @response = http.request http_request, @body
+      @response = http.request http_request, @body, opts
       @response.request = self
 
       Kronk.cookie_jar.set_cookies_from_headers @uri.to_s, @response.to_hash if

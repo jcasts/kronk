@@ -328,16 +328,16 @@ class Kronk
 
     if IO === uri || StringIO === uri
       Cmd.verbose "Reading IO #{uri}"
-      resp = Response.new uri
+      resp = Response.new uri, options
 
     elsif File.file? uri.to_s
       Cmd.verbose "Reading file:  #{uri}\n"
-      resp = Response.read_file uri
+      resp = Response.read_file uri, options
 
     else
       req = Request.new uri, options
       Cmd.verbose "Retrieving URL:  #{req.uri}\n"
-      resp = req.retrieve
+      resp = req.retrieve options
       Kronk.history << uri
     end
 
