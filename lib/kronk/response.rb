@@ -95,16 +95,13 @@ class Kronk
 
       raise IOError, 'Socket closed.' if @io.closed?
 
-      block = lambda do |chunk|
-        try_force_encoding chunk
-        (@body ||= "") << chunk
-        yield self, chunk if block_given?
-      end
-
-      dest = Net::ReadAdapter.new(block)
-
       begin
-        read_body dest
+        read_body do |chunk|
+          try_force_encoding chunk
+          (@body ||= "") << chunk
+          yield self, chunk if block_given?
+        end
+
       rescue IOError, EOFError
         @io.read_all
         @body = headless? ? @raw : @raw.split("\r\n\r\n")[1]
@@ -650,7 +647,9 @@ class Kronk
     ##
     # Read the body from IO.
 
-    def read_body dest
+    def read_body dest=nil, &block
+      dest ||= Net::ReadAdapter.new block
+
       if chunked?
         read_chunked dest
         return
