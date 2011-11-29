@@ -36,7 +36,8 @@ class Kronk
 
     def initialize io, opts={}, &block
       @request = opts[:request]
-      @headers = @encoding = @parser = @body = nil
+      @headers = {}
+      @encoding = @parser = @body = nil
 
       @headless = false
 
@@ -288,6 +289,7 @@ class Kronk
     # the Content-Type, or will return the cached parsed body if available.
 
     def parsed_body new_parser=nil
+      return unless body
       @parsed_body ||= nil
 
       return @parsed_body if @parsed_body && !new_parser
@@ -632,7 +634,8 @@ class Kronk
         @http_version, @code, @msg = ["1.0", "200", "OK"]
 
         ext = File === buff_io.io ? File.extname(resp_io.path)[1..-1] : "html"
-        encoding = @raw.respond_to?(:encoding) ? @raw.encoding : "UTF-8"
+        encoding = buff_io.io.respond_to?(:external_encoding) ?
+                    buff_io.io.external_encoding : "UTF-8"
         @headers = {
           'content-type' => "text/#{ext}; charset=#{encoding}",
         }
@@ -647,8 +650,16 @@ class Kronk
     ##
     # Read the body from IO.
 
-    def read_body dest=nil, &block
-      dest ||= Net::ReadAdapter.new block
+    def read_body target=nil
+      block = lambda do |str|
+        if block_given?
+          yield str
+        else
+          target << str
+        end
+      end
+
+      dest = Net::ReadAdapter.new block
 
       if chunked?
         read_chunked dest
