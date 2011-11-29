@@ -18,7 +18,7 @@ class Kronk
     #   em_req.callback { ... }
     #   em_req.error    { ... }
 
-    def retrieve_async &block
+    def retrieve_async opts={}, &block
       header_opts = @headers.dup
 
       if @auth && !@auth.empty?
@@ -41,21 +41,29 @@ class Kronk
 
       req.headers do |resp_headers|
         async_raw_headers sock, resp_headers
-      end
-
-      req.stream do |chunk|
-        sock << chunk
-      end
-
-      req.callback do |resp|
-        elapsed_time   = Time.now - start_time
         sock.rewind
-        @response      = Response.new sock, :request => self
-        @response.time = elapsed_time
-        yield @response, nil
+        @response = Response.new sock, opts
+        if opts[:no_body]
+          yield @response, nil
+          conn.conn.unbind
+        end
+      end
+
+      unless opts[:no_body]
+        req.stream do |chunk|
+          sock << chunk
+        end
+
+        req.callback do |resp|
+          elapsed_time   = Time.now - start_time
+          opts[:request] ||= self
+          @response.time = elapsed_time
+          yield @response, nil
+        end
       end
 
       req.errback do |c|
+        next if @response && opts[:no_body]
         err = c.error ?
               EMError.new(c.error) :
               Kronk::NotFoundError.new("#{@uri} could not be found")

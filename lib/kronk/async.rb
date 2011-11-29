@@ -96,20 +96,20 @@ class Kronk
 
     if IO === uri
       Cmd.verbose "Reading IO #{uri}"
-      Response.from_async_io(uri, &handler)
+      Response.from_async_io(uri, options, &handler)
 
     elsif StringIO === uri
       Cmd.verbose "Reading IO #{uri}"
-      handler.call Response.new(uri)
+      handler.call Response.new(uri, options)
 
     elsif File.file? uri.to_s
       Cmd.verbose "Reading file:  #{uri}\n"
-      handler.call Response.read_file(uri)
+      handler.call Response.read_file(uri, options)
 
     else
       req = Request.new uri, options
       Cmd.verbose "Retrieving URL:  #{req.uri}\n"
-      conn = req.retrieve_async(&handler)
+      conn = req.retrieve_async(options, &handler)
       conn.callback{ Kronk.history << uri }
     end
 
