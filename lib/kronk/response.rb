@@ -437,7 +437,8 @@ class Kronk
       return if !redirect?
       new_opts = @request ? @request.to_hash : {}
       new_opts[:http_method] = "GET" if @code == "303"
-      Request.new(self.location, new_opts.merge(opts)).retrieve(&block)
+      new_opts.merge!(opts)
+      Request.new(self.location, new_opts).retrieve(new_opts, &block)
     end
 
 
