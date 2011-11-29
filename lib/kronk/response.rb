@@ -127,10 +127,10 @@ class Kronk
 
 
     ##
-    # Size of the body in bytes.
+    # Size of the raw body in bytes.
 
     def bytes
-      (headers["content-length"] || self.body.bytes.count).to_i
+      (headers["content-length"] || self.raw_body.bytes.count).to_i
     end
 
 
@@ -372,6 +372,14 @@ class Kronk
     def raw
       body
       @raw
+    end
+
+
+    ##
+    # Returns the body portion of the raw http response.
+
+    def raw_body
+      headless? ? raw : raw.split("\r\n\r\n", 2)[1]
     end
 
 

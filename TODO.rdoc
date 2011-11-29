@@ -2,7 +2,7 @@
 
 * QPS option for player.
 
-* Ruby-evented IO selection.
+* System-evented IO selection.
 
 * Support for response streaming.
 
