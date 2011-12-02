@@ -373,7 +373,7 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
-        opt.on('-t', '--timeout INT', Integer,
+        opt.on('-t', '--timeout INT', Float,
                'Timeout for http connection in seconds') do |value|
           Kronk.config[:timeout] = value
         end
