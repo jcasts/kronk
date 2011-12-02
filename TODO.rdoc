@@ -1,5 +1,7 @@
 = TODO
 
+* Use persistent connection pools.
+
 * QPS option for player.
 
 * System-evented IO selection.
