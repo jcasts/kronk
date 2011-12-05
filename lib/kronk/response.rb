@@ -65,7 +65,7 @@ class Kronk
 
 
     ##
-    # Accessor for the HTTPResponse instance []
+    # Accessor for the HTTP headers []
 
     def [] key
       @headers[key.to_s.downcase]
@@ -73,7 +73,7 @@ class Kronk
 
 
     ##
-    # Accessor for the HTTPResponse instance []
+    # Setter for the HTTP headers []
 
     def []= key, value
       @headers[key.to_s.downcase] = value
