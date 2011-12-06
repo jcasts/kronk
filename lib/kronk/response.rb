@@ -47,9 +47,6 @@ class Kronk
       @raw  = ""
       @time = 0
 
-      self.gzip = opts[:force_gzip]
-      gzip?
-
       @io = io || ""
       @io = String === @io ? StringIO.new(@io) : @io
       @io = BufferedIO.new @io unless BufferedIO === @io
@@ -62,6 +59,10 @@ class Kronk
                         headless_ok?(io)
 
       response_from_io @io, allow_headless
+
+      @gzip_io  = StringIO.new
+      self.gzip = opts[:force_gzip]
+      gzip?
 
       @read = !!opts[:no_body]
       body(&block) if block_given?
@@ -111,7 +112,8 @@ class Kronk
 
       rescue IOError, EOFError
         @io.read_all
-        @body = headless? ? @raw : @raw.split("\r\n\r\n")[1]
+        @body = headless? ? @raw : @raw.split("\r\n\r\n", 2)[1]
+        @body = unzip @body if gzip?
         yield self, try_force_encoding(@body) if block_given?
       end
 
@@ -619,11 +621,6 @@ class Kronk
     # Require the use of gzip for reading the body.
 
     def gzip= value
-      if value
-        require 'zlib'
-        @gzip_io = StringIO.new
-      end
-
       @use_gzip = value
     end
 
@@ -633,7 +630,8 @@ class Kronk
 
     def gzip?
       return @use_gzip unless @use_gzip.nil?
-      @use_gzip = headers["content-encoding"] == "gzip"
+      @use_gzip = headers["content-encoding"] == "gzip" if
+        headers["content-encoding"]
     end
 
 
