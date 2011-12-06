@@ -47,8 +47,8 @@ class Kronk
       @raw  = ""
       @time = 0
 
-      @use_gzip = nil
       self.gzip = opts[:force_gzip]
+      gzip?
 
       @io = io || ""
       @io = String === @io ? StringIO.new(@io) : @io
