@@ -102,6 +102,8 @@ class Kronk
 
       begin
         read_body do |chunk|
+          chunk = unzip chunk if gzip?
+
           try_force_encoding chunk
           (@body ||= "") << chunk
           yield self, chunk if block_given?
@@ -686,8 +688,6 @@ class Kronk
 
     def read_body target=nil
       block = lambda do |str|
-        str = unzip str if gzip?
-
         if block_given?
           yield str
         else
