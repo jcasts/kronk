@@ -30,9 +30,10 @@ class Kronk
     ##
     # Create a new Response object from a String or IO.
     # Options supported are:
-    # :request:: The Kronk::Request instance for this response.
-    # :timeout:: The read timeout value in seconds.
-    # :no_body:: Ignore reading the body of the response.
+    # :request::    The Kronk::Request instance for this response.
+    # :timeout::    The read timeout value in seconds.
+    # :no_body::    Ignore reading the body of the response.
+    # :force_gzip:: Force decoding body with gzip.
 
     def initialize io, opts={}, &block
       @request = opts[:request]
@@ -45,6 +46,9 @@ class Kronk
 
       @raw  = ""
       @time = 0
+
+      @use_gzip = nil
+      self.gzip = opts[:force_gzip]
 
       @io = io || ""
       @io = String === @io ? StringIO.new(@io) : @io
@@ -609,6 +613,28 @@ class Kronk
     end
 
 
+    ##
+    # Require the use of gzip for reading the body.
+
+    def gzip= value
+      if value
+        require 'zlib'
+        @gzip_io = StringIO.new
+      end
+
+      @use_gzip = value
+    end
+
+
+    ##
+    # Check if gzip should be used.
+
+    def gzip?
+      return @use_gzip unless @use_gzip.nil?
+      @use_gzip = headers["content-encoding"] == "gzip"
+    end
+
+
     private
 
 
@@ -660,6 +686,8 @@ class Kronk
 
     def read_body target=nil
       block = lambda do |str|
+        str = unzip str if gzip?
+
         if block_given?
           yield str
         else
@@ -684,6 +712,22 @@ class Kronk
         return
       end
       @io.read_all dest
+    end
+
+
+    ##
+    # Unzip a chunk of the body being read.
+
+    def unzip str
+      return str if str.empty?
+
+      pos = @gzip_io.pos
+      @gzip_io << str
+      @gzip_io.pos = pos
+
+      @gzip ||= Zlib::GzipReader.new @gzip_io
+
+      @gzip.read rescue ""
     end
 
 

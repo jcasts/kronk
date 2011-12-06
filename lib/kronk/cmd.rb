@@ -180,6 +180,11 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
+        opt.on('--gzip', 'Decode body with gzip') do
+          options[:force_gzip] = true
+        end
+
+
         opt.on('-i', '--include [HEADER1,HEADER2]', Array,
                'Include all or given headers in response') do |value|
           options[:show_headers] ||= []

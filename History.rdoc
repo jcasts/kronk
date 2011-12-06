@@ -1,3 +1,19 @@
+=== 2.0.0 / 201
+
+* Enhancements:
+
+  * Support for response streaming.
+
+  * Support for gzip decoding.
+
+  * No longer use net/http for response reading.
+
+* Bugfixes:
+
+  * Pass request init options to redirects.
+
+  * QueueRunner multithreading fix for Rubys with no interpreter lock.
+
 === 1.7.8 / 2011-11-10
 
 * Enhancements:
