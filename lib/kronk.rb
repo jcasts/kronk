@@ -8,6 +8,7 @@ require 'stringio'
 require 'base64'
 
 require 'net/https'
+require 'zlib'
 require 'optparse'
 require 'yaml'
 
