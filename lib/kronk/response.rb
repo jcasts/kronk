@@ -60,9 +60,11 @@ class Kronk
 
       response_from_io @io, allow_headless
 
-      @gzip_io  = StringIO.new
-      self.gzip = opts[:force_gzip]
+      @gzip_io     = StringIO.new
+      self.gzip    = opts[:force_gzip]
+      self.deflate = opts[:force_inflate]
       gzip?
+      deflated?
 
       @read = !!opts[:no_body]
       body(&block) if block_given?
@@ -116,6 +118,8 @@ class Kronk
         @body = unzip @body if gzip?
         yield self, try_force_encoding(@body) if block_given?
       end
+
+      @body = Zlib::Inflate.inflate(@body) if deflated?
 
       @read = true
 
@@ -203,6 +207,24 @@ class Kronk
 
     def cookie
       headers['cookie']
+    end
+
+
+    ##
+    # Check if content encoding is deflated.
+
+    def deflated?
+      return !gzip? && @use_inflate unless @use_inflate.nil?
+      @use_inflate = headers["content-encoding"] == "deflate" if
+        headers["content-encoding"]
+    end
+
+
+    ##
+    # Force the use of inflate.
+
+    def inflate= value
+      @use_inflate = value
     end
 
 

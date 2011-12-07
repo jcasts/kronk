@@ -226,7 +226,7 @@ class Kronk
       @_req     = nil
 
       @headers = opts[:headers] || {}
-      @headers["accept-encoding"] ||= "gzip;q=1.0,identity;q=0.3"
+      @headers["accept-encoding"] ||= "gzip;q=1.0,deflate;q=0.6,identity;q=0.3"
 
       @timeout = opts[:timeout] || Kronk.config[:timeout]
 
