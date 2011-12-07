@@ -1,22 +1,24 @@
 = TODO
 
-* Use persistent connection pools.
-
 * QPS option for player.
 
 * System-evented IO selection.
 
-* Support for response streaming.
-
 * Support for X-Url-\d and x-alt-location-\d redirects.
 
-* Support for gzip.
-
-* Player input IO timeout.
+* Refactor player Output to inherit Player.
 
 * Investigate Kronk console.
 
+== Not Viable
+
+* Use persistent connection pools.
+
 == Done
+
+* Support for gzip.
+
+* Support for response streaming.
 
 * Investigate the use of EM for QueueRunner.
 
