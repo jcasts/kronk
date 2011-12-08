@@ -62,7 +62,7 @@ class Kronk
 
       @gzip_io     = StringIO.new
       self.gzip    = opts[:force_gzip]
-      self.deflate = opts[:force_inflate]
+      self.inflate = opts[:force_inflate]
       gzip?
       deflated?
 
