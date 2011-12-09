@@ -17,7 +17,7 @@ class Kronk
     def result kronk, mutex=nil
       status = "."
 
-      @results <<
+      result =
         if kronk.diff
           status = "F"             if kronk.diff.any?
           text   = diff_text kronk if status == "F"
@@ -40,14 +40,16 @@ class Kronk
           [status, kronk.response.time, text]
         end
 
+      mutex.synchronize{ @results << result }
+
       $stdout << status
       $stdout.flush
     end
 
 
     def error err, kronk=nil, mutex=nil
-      status = "E"
-      @results << [status, 0, error_text(err, kronk)]
+      result = ["E", 0, error_text(err, kronk)]
+      mutex.synchronize{ @results << result }
 
       $stdout << status
       $stdout.flush
