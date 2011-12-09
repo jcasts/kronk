@@ -664,7 +664,7 @@ class Kronk
     # Check if the response should have a body or not.
 
     def body_permitted?
-      Net::HTTPResponse::CODE_TO_OBJ[@code]::HAS_BODY
+      Net::HTTPResponse::CODE_TO_OBJ[@code].const_get(:HAS_BODY) rescue true
     end
 
 
