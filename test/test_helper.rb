@@ -162,7 +162,8 @@ def expect_request req_method, url, options={}
   data &&= Hash === data ? Kronk::Request.build_query(data) : data.to_s
 
   headers = options[:headers] || Hash.new
-  headers['User-Agent'] ||= Kronk::DEFAULT_USER_AGENT
+  headers['User-Agent']      ||= Kronk::DEFAULT_USER_AGENT
+  headers["Accept-Encoding"] ||= "gzip;q=1.0,deflate;q=0.6,identity;q=0.3"
 
   req.expects(:start).yields(http).returns resp
 
