@@ -63,11 +63,13 @@ class Kronk
     # Supported options are:
     # :concurrency:: Fixnum - Maximum number of concurrent items to process
     # :number:: Fixnum - Total number of items to process
+    # :qps::  Fixnum - Number of queries to process per second
 
     def initialize opts={}
       @number      = opts[:number]
       @concurrency = opts[:concurrency]
       @concurrency = 1 if !@concurrency || @concurrency <= 0
+      @qps         = opts[:qps]
 
       @count   = 0
       @queue   = []
@@ -129,7 +131,7 @@ class Kronk
 
 
     ##
-    # Start processing the queue and reading from IO if available.
+    # Process the queue and read from IO if available.
     #
     # Yields queue item until queue and io (if available) are empty and the
     # totaly number of requests to run is met (if number is set).
@@ -152,6 +154,8 @@ class Kronk
           yield q_item if block_given?
         end
 
+        @threads.last.abort_on_exception = true
+
         @count += 1
       end
 
@@ -160,7 +164,37 @@ class Kronk
 
 
     ##
-    # Start processing the queue and reading from IO if available.
+    # Process the queue with periodic timer and a given QPS.
+
+    def periodic_process_queue
+      start_input!
+      @count = 0
+      period = 1.0 / @qps.to_f
+
+      until finished?
+        sleep period unless @count == 0
+
+        until item = @qmutex.synchronize{ @queue.shift }
+          Thread.pass
+        end
+
+        @threads.delete_if{|t| !t.alive? }
+
+        @threads << Thread.new(item) do |q_item|
+          yield q_item if block_given?
+        end
+
+        @threads.last.abort_on_exception = true
+
+        @count += 1
+      end
+
+      finish
+    end
+
+
+    ##
+    # Process the queue and read from IO if available.
     #
     # Yields queue item until queue and io (if available) are empty and the
     # totaly number of requests to run is met (if number is set).
@@ -228,6 +262,7 @@ class Kronk
       trigger :start
 
       method = self.class.async ? :process_queue_async : :process_queue
+      method = :periodic_process_queue if @qps
 
       send method do |q_item|
         yield q_item, @mutex if block_given?

@@ -309,6 +309,12 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
+        opt.on('--qps NUM', Integer,
+                'Number of queries per second to make; overrides -c') do |num|
+          options[:player][:qps] = num
+        end
+
+
         opt.on('--benchmark [FILE]', 'Same as -p [FILE] -o benchmark') do |file|
           options[:player][:io]   = File.open(file, "r") if file
           options[:player][:io] ||= $stdin if !$stdin.tty?
