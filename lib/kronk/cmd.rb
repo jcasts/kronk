@@ -220,6 +220,11 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
+        opt.on('--inflate', 'Decode body with Zlib Inflate') do
+          options[:force_inflate] = true
+        end
+
+
         opt.on('--irb', 'Start an IRB console with the response') do
           options[:irb] = true
         end
