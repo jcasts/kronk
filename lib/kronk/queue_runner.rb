@@ -170,9 +170,10 @@ class Kronk
       start_input!
       @count = 0
       period = 1.0 / @qps.to_f
+      start  = Time.now
 
       until finished?
-        sleep period unless @count == 0
+        sleep period unless @count < ((Time.now - start) / period).ceil
 
         until item = @qmutex.synchronize{ @queue.shift }
           Thread.pass
