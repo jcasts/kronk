@@ -8,6 +8,8 @@
 
   * Threaded player performance much improved.
 
+  * Support for setting player qps.
+
   * Support for response streaming.
 
   * Support for gzip and inflate decoding.
@@ -18,7 +20,7 @@
 
   * Pass request init options to redirects.
 
-  * QueueRunner multithreading fix for Rubys with no interpreter lock.
+  * QueueRunner multithreading fix for Rubys with no GIL.
 
 === 1.7.8 / 2011-11-10
 
