@@ -80,7 +80,6 @@ class Kronk
 
   # Default config to use.
   DEFAULT_CONFIG = {
-    :async          => 'auto',
     :content_types  => DEFAULT_CONTENT_TYPES.dup,
     :cache_file     => DEFAULT_CACHE_FILE,
     :context        => 3,

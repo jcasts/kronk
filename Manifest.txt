@@ -5,9 +5,6 @@ README.rdoc
 Rakefile
 bin/kronk
 lib/kronk.rb
-lib/kronk/async.rb
-lib/kronk/async/request.rb
-lib/kronk/async/response.rb
 lib/kronk/cmd.rb
 lib/kronk/constants.rb
 lib/kronk/core_ext.rb

@@ -37,24 +37,6 @@ class Kronk
 
   class QueueRunner
 
-    ##
-    # Define whether to use the EventMachine or the threaded behavior.
-
-    def self.async= value
-      @async = !!value
-    end
-
-
-    ##
-    # Returns true if EventMachine is enabled
-
-    def self.async
-      @async
-    end
-
-    self.async = false
-
-
     attr_accessor :number, :concurrency, :queue, :count,
                   :mutex, :threads, :reader_thread
 
@@ -148,15 +130,23 @@ class Kronk
           next
         end
 
-        item = @qmutex.synchronize{ @queue.shift }
+        num_threads = @concurrency - @threads.length
+        num_threads = @number - @count if
+          @number && @number - @count < num_threads
 
-        @threads << Thread.new(item) do |q_item|
-          yield q_item if block_given?
+        num_threads.times do
+          until item = @qmutex.synchronize{ @queue.shift }
+            Thread.pass
+          end
+
+          @threads << Thread.new(item) do |q_item|
+            yield q_item if block_given?
+          end
+
+          @threads.last.abort_on_exception = true
+
+          @count += 1
         end
-
-        @threads.last.abort_on_exception = true
-
-        @count += 1
       end
 
       finish
@@ -195,49 +185,6 @@ class Kronk
 
 
     ##
-    # Process the queue and read from IO if available.
-    #
-    # Yields queue item until queue and io (if available) are empty and the
-    # totaly number of requests to run is met (if number is set).
-    #
-    # Uses EventMachine to run asynchronously.
-    #
-    # Note: If the block given doesn't use EM, it will be blocking.
-
-    def process_queue_async &block
-      # TODO: Make input use EM from QueueRunner and Player IO.
-      require 'kronk/async' unless defined?(EM::HttpRequest)
-      Cmd.verbose "Running async"
-
-      start_input!
-
-      @count = 0
-      @async_reqs = 0
-
-      EM.run do
-        EM.add_periodic_timer do
-          if finished?
-            next if EM.connection_count > 0
-            finish
-            next
-          end
-
-          @async_reqs = EM.connection_count if EM.connection_count < @async_reqs
-
-          if @queue.empty? || @async_reqs >= @concurrency
-            Thread.pass
-            next
-          end
-
-          @async_reqs += 1
-          yield @qmutex.synchronize{ @queue.shift }
-          @count += 1
-        end
-      end
-    end
-
-
-    ##
     # Runs the queue and reads from input until it's exhausted or
     # @number is reached. Yields a queue item and a mutex when to passed
     # block:
@@ -262,8 +209,7 @@ class Kronk
 
       trigger :start
 
-      method = self.class.async ? :process_queue_async : :process_queue
-      method = :periodic_process_queue if @qps
+      method = @qps ? :periodic_process_queue : :process_queue
 
       send method do |q_item|
         yield q_item, @mutex if block_given?

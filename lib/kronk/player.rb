@@ -24,7 +24,6 @@ class Kronk
       @input      = InputReader.new opts[:io], opts[:parser]
       @use_output = true
       @last_req   = nil
-      @async_reqs = 0
 
       @on_input   = Proc.new do
         stop_input! if !@number && @input.eof?
@@ -86,10 +85,8 @@ class Kronk
     def compare uri1, uri2, opts={}, &block
       return Cmd.compare uri1, uri2, @queue.shift.merge(opts) if single_request?
 
-      method = self.class.async ? :process_one_async : :process_one
-
       run do |kronk_opts, mutex|
-        send method, kronk_opts.merge(opts), 'compare', uri1, uri2, &block
+        process_one kronk_opts.merge(opts), 'compare', uri1, uri2, &block
       end
     end
 
@@ -101,10 +98,8 @@ class Kronk
     def request uri, opts={}, &block
       return Cmd.request uri, @queue.shift.merge(opts) if single_request?
 
-      method = self.class.async ? :process_one_async : :process_one
-
       run do |kronk_opts, mutex|
-        send method, kronk_opts.merge(opts), 'request', uri, &block
+        process_one kronk_opts.merge(opts), 'request', uri, &block
       end
     end
 
@@ -130,28 +125,6 @@ class Kronk
       end
 
       trigger_result kronk, err, &block
-    end
-
-
-    ##
-    # Run a single compare or request and call the Output#result or
-    # Output#error method using EventMachine.
-    #
-    # If given a block, will yield the Kronk instance and error. If
-    # a third argument is given, mutex will also be passed and the
-    # block won't be called from a mutex lock.
-    #
-    # Returns either a EM::MultiRequest or an EM::Connection handler.
-
-    def process_one_async opts={}, *args, &block
-      kronk  = Kronk.new opts
-      method = args.shift.to_s + '_async'
-
-      kronk.send(method, *args) do |obj, err|
-        @async_reqs = @async_reqs - 1
-        raise err if err && !Kronk::Cmd::RESCUABLE.find{|eclass| eclass === err}
-        trigger_result kronk, err, &block
-      end
     end
 
 
