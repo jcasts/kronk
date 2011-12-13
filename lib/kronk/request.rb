@@ -401,10 +401,10 @@ class Kronk
         :no_cookies  => !self.use_cookies
       }
 
-      hash[:auth]       = @auth if @auth
-      hash[:data]       = @body if @body
-      hash[:headers]    = @headers unless @headers.empty?
-      hash[:proxy]      = @proxy   unless @proxy.empty?
+      hash[:auth]    = @auth if @auth
+      hash[:data]    = @body if @body
+      hash[:headers] = @headers unless @headers.empty?
+      hash[:proxy]   = @proxy   unless @proxy.empty?
 
       hash
     end
