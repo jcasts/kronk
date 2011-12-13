@@ -24,6 +24,7 @@ class Kronk
       @input      = InputReader.new opts[:io], opts[:parser]
       @use_output = true
       @last_req   = nil
+      @mutex      = Mutex.new
 
       @on_input   = Proc.new do
         stop_input! if !@number && @input.eof?
@@ -85,7 +86,9 @@ class Kronk
     def compare uri1, uri2, opts={}, &block
       return Cmd.compare uri1, uri2, @queue.shift.merge(opts) if single_request?
 
-      run do |kronk_opts, mutex|
+      on(:result){|(kronk, err)| trigger_result(kronk, err, &block) }
+
+      run do |kronk_opts|
         process_one kronk_opts.merge(opts), 'compare', uri1, uri2, &block
       end
     end
@@ -98,7 +101,9 @@ class Kronk
     def request uri, opts={}, &block
       return Cmd.request uri, @queue.shift.merge(opts) if single_request?
 
-      run do |kronk_opts, mutex|
+      on(:result){|(kronk, err)| trigger_result(kronk, err, &block) }
+
+      run do |kronk_opts|
         process_one kronk_opts.merge(opts), 'request', uri, &block
       end
     end
@@ -124,7 +129,7 @@ class Kronk
         err = e
       end
 
-      trigger_result kronk, err, &block
+      [kronk, err]
     end
 
 

@@ -53,15 +53,15 @@ class Kronk
       @concurrency = 1 if !@concurrency || @concurrency <= 0
       @qps         = opts[:qps]
 
-      @count   = 0
-      @queue   = []
-      @threads = []
+      @count    = 0
+      @queue    = []
+      @threads  = []
+      @rthreads = []
 
       @reader_thread = nil
 
       @triggers = {}
 
-      @mutex  = Mutex.new
       @qmutex = Mutex.new
     end
 
@@ -83,8 +83,15 @@ class Kronk
     def finish
       stop_input!
       EM.stop if defined?(EM) && EM.reactor_running?
-      @threads.each{|t| t.join}
+
+      @threads.each do |t|
+        @rthreads << Thread.new(t.value){|value| trigger :result, value }
+      end
+
+      @rthreads.each(&:join)
+
       @threads.clear
+      @rthreads.clear
     end
 
 
@@ -95,7 +102,9 @@ class Kronk
       stop_input!
       EM.stop if defined?(EM) && EM.reactor_running?
       @threads.each{|t| t.kill}
+      @rthreads.each{|t| t.kill}
       @threads.clear
+      @rthreads.clear
     end
 
 
@@ -118,13 +127,8 @@ class Kronk
     # Yields queue item until queue and io (if available) are empty and the
     # totaly number of requests to run is met (if number is set).
 
-    def process_queue
-      start_input!
-      @count = 0
-
-      until finished?
-        @threads.delete_if{|t| !t.alive? }
-
+    def concurrently &block
+      until_finished do
         if @threads.length >= @concurrency || @queue.empty?
           Thread.pass
           next
@@ -135,52 +139,23 @@ class Kronk
           @number && @number - @count < num_threads
 
         num_threads.times do
-          until item = @qmutex.synchronize{ @queue.shift }
-            Thread.pass
-          end
-
-          @threads << Thread.new(item) do |q_item|
-            yield q_item if block_given?
-          end
-
-          @threads.last.abort_on_exception = true
-
-          @count += 1
+          yield_queue_item &block
         end
       end
-
-      finish
     end
 
 
     ##
     # Process the queue with periodic timer and a given QPS.
 
-    def periodic_process_queue
-      start_input!
-      @count = 0
+    def periodically &block
       period = 1.0 / @qps.to_f
       start  = Time.now
 
-      until finished?
+      until_finished do
         sleep period unless @count < ((Time.now - start) / period).ceil
-
-        until item = @qmutex.synchronize{ @queue.shift }
-          Thread.pass
-        end
-
-        @threads.delete_if{|t| !t.alive? }
-
-        @threads << Thread.new(item) do |q_item|
-          yield q_item if block_given?
-        end
-
-        @threads.last.abort_on_exception = true
-
-        @count += 1
+        yield_queue_item &block
       end
-
-      finish
     end
 
 
@@ -202,6 +177,18 @@ class Kronk
     # when execution is interrupted.
 
     def run
+      method = @qps ? :periodically : :concurrently
+
+      send method do |q_item|
+        yield q_item if block_given?
+      end
+    end
+
+
+    ##
+    # Loop and read from input continually until finished.
+
+    def until_finished
       trap 'INT' do
         kill
         (trigger(:interrupt) || exit(1))
@@ -209,13 +196,46 @@ class Kronk
 
       trigger :start
 
-      method = @qps ? :periodic_process_queue : :process_queue
+      start_input!
+      @count = 0
 
-      send method do |q_item|
-        yield q_item, @mutex if block_given?
+      until finished?
+        @rthreads.delete_if{|t| !t.alive? }
+
+        results = []
+        @threads.delete_if do |t|
+          !t.alive? &&
+            results << t.value
+        end
+
+        @rthreads << Thread.new(results) do |values|
+          values.each{|value| trigger :result, value }
+        end unless results.empty?
+
+        yield if block_given?
       end
 
+      finish
+
       trigger :complete
+    end
+
+
+    ##
+    # Shifts one item off the queue and yields it to the given block.
+
+    def yield_queue_item
+      until item = @qmutex.synchronize{ @queue.shift }
+        Thread.pass
+      end
+
+      @threads << Thread.new(item) do |q_item|
+        yield q_item if block_given?
+      end
+
+      @threads.last.abort_on_exception = true
+
+      @count += 1
     end
 
 
@@ -263,9 +283,9 @@ class Kronk
     ##
     # Run a previously defined callback. See QueueRunner#on.
 
-    def trigger name
+    def trigger name, *args
       t = @triggers[name]
-      t && t.call
+      t && t.call(*args)
     end
   end
 end

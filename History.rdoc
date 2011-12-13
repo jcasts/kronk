@@ -6,7 +6,7 @@
 
 * Enhancements:
 
-  * Threaded player performance much improved.
+  * Many Player performance improvements.
 
   * Support for setting player qps.
 
