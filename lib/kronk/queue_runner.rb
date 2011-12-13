@@ -82,7 +82,6 @@ class Kronk
 
     def finish
       stop_input!
-      EM.stop if defined?(EM) && EM.reactor_running?
 
       @threads.each do |t|
         @rthreads << Thread.new(t.value){|value| trigger :result, value }
@@ -100,7 +99,6 @@ class Kronk
 
     def kill
       stop_input!
-      EM.stop if defined?(EM) && EM.reactor_running?
       @threads.each{|t| t.kill}
       @rthreads.each{|t| t.kill}
       @threads.clear
