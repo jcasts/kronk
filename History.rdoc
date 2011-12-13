@@ -1,10 +1,16 @@
 === 2.0.0 / 201
 
+* Major Enhancements:
+
+  * Removed evented model support; too costly to maintain.
+
 * Enhancements:
+
+  * Threaded player performance much improved.
 
   * Support for response streaming.
 
-  * Support for gzip decoding.
+  * Support for gzip and inflate decoding.
 
   * No longer use net/http for response reading.
 
