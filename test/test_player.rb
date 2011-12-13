@@ -33,6 +33,8 @@ class TestPlayer < Test::Unit::TestCase
     @player    = Kronk::Player.new :io     => @io,
                                    :parser => @parser,
                                    :output => @output
+
+    @player.on(:result){|(kronk, err)| @player.trigger_result(kronk, err) }
   end
 
 
@@ -261,7 +263,7 @@ class TestPlayer < Test::Unit::TestCase
   end
 
 
-  def test_process_queue
+  def test_concurrently
     @player.concurrency = 10
     requests = (1..20).map{|n| "request #{n}"}
     @player.queue.concat requests.dup
@@ -270,7 +272,7 @@ class TestPlayer < Test::Unit::TestCase
     start     = Time.now
     processed = []
 
-    @player.process_queue do |req|
+    @player.concurrently do |req|
       processed << req
       sleep 0.5
     end
@@ -285,7 +287,7 @@ class TestPlayer < Test::Unit::TestCase
   end
 
 
-  def test_process_queue_from_io
+  def test_concurrently_from_io
     @player.concurrency = 10
     @player.input.parser.stubs(:start_new?).returns true
     @player.input.parser.stubs(:start_new?).with("").returns false
@@ -298,7 +300,7 @@ class TestPlayer < Test::Unit::TestCase
     @player.from_io StringIO.new(requests.join)
 
     start_time = Time.now
-    @player.process_queue do |req|
+    @player.concurrently do |req|
       processed << req
       sleep 0.5
     end
@@ -454,7 +456,9 @@ class TestPlayer < Test::Unit::TestCase
     end
 
     opts = {:uri_suffix => "/test", :include_headers => true}
-    @player.process_one opts, :compare, "example.com", "beta-example.com"
+
+    @player.trigger :result,
+      @player.process_one(opts, :compare, "example.com", "beta-example.com")
 
     assert @got_results, "Expected output to get results but didn't"
   end
@@ -477,7 +481,9 @@ class TestPlayer < Test::Unit::TestCase
         raises eklass
 
       opts = {:uri_suffix => "/test", :include_headers => true}
-      @player.process_one opts, :compare, "example.com", "beta-example.com"
+
+      @player.trigger :result,
+        @player.process_one(opts, :compare, "example.com", "beta-example.com")
     end
 
     assert_equal errs, @got_results, "Expected output to get errors but didn't"
@@ -487,11 +493,13 @@ class TestPlayer < Test::Unit::TestCase
   def test_process_one_compare_error_not_caught
     Kronk.any_instance.expects(:compare).
       with("example.com", "beta-example.com").
-      raises RuntimeError
+      raises ArgumentError
 
-    assert_raises RuntimeError do
+    assert_raises ArgumentError do
       opts = {:uri_suffix => "/test", :include_headers => true}
-      @player.process_one opts, :compare, "example.com", "beta-example.com"
+
+      @player.trigger :result,
+        @player.process_one(opts, :compare, "example.com", "beta-example.com")
     end
   end
 
@@ -515,7 +523,9 @@ class TestPlayer < Test::Unit::TestCase
     end
 
     opts = {:uri_suffix => "/test", :include_headers => true}
-    @player.process_one opts, :request, "example.com"
+
+    @player.trigger :result,
+      @player.process_one(opts, :request, "example.com")
 
     assert @got_results, "Expected output to get results but didn't"
   end
@@ -537,7 +547,9 @@ class TestPlayer < Test::Unit::TestCase
         raises eklass
 
       opts = {:uri_suffix => "/test", :include_headers => true}
-      @player.process_one opts, :request, "example.com"
+
+      @player.trigger :result,
+        @player.process_one(opts, :request, "example.com")
     end
 
     assert_equal errs, @got_results, "Expected output to get errors but didn't"

@@ -139,7 +139,7 @@ class Kronk
           @number && @number - @count < num_threads
 
         num_threads.times do
-          yield_queue_item &block
+          yield_queue_item(&block)
         end
       end
     end
@@ -154,7 +154,7 @@ class Kronk
 
       until_finished do
         sleep period unless @count < ((Time.now - start) / period).ceil
-        yield_queue_item &block
+        yield_queue_item(&block)
       end
     end
 
