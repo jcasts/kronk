@@ -6,6 +6,8 @@
 
 * Refactor player Output to inherit Player.
 
+* Consider allowing Output-specific cmd options.
+
 * Investigate Kronk console.
 
 == Not Viable
