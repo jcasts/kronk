@@ -32,7 +32,7 @@ class Kronk
           kronk.response.stringify
         end
 
-      return unless output
+      return unless output && !output.empty?
 
       mutex.synchronize do
         $stderr << "#{"%X" % output.length}\r\n"
