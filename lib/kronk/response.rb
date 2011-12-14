@@ -30,10 +30,11 @@ class Kronk
     ##
     # Create a new Response object from a String or IO.
     # Options supported are:
-    # :request::    The Kronk::Request instance for this response.
-    # :timeout::    The read timeout value in seconds.
-    # :no_body::    Ignore reading the body of the response.
-    # :force_gzip:: Force decoding body with gzip.
+    # :request::       The Kronk::Request instance for this response.
+    # :timeout::       The read timeout value in seconds.
+    # :no_body::       Ignore reading the body of the response.
+    # :force_gzip::    Force decoding body with gzip.
+    # :force_inflate:: Force decoding body with gzip.
 
     def initialize io, opts={}, &block
       @request = opts[:request]
@@ -50,6 +51,7 @@ class Kronk
       @io = io || ""
       @io = String === @io ? StringIO.new(@io) : @io
       @io = BufferedIO.new @io unless BufferedIO === @io
+      @io.io.rewind if StringIO === @io.io && @io.io.eof?
       @io.raw_output   = @raw
       @io.response     = self
       @io.read_timeout = opts[:timeout] if opts[:timeout]
@@ -108,9 +110,10 @@ class Kronk
           chunk = unzip chunk if gzip?
 
           try_force_encoding chunk
-          (@body ||= "") << chunk
           yield self, chunk if block_given?
         end
+
+        @body = headless? ? @raw : @raw.split("\r\n\r\n", 2)[1]
 
       rescue IOError, EOFError
         @io.read_all
@@ -673,7 +676,7 @@ class Kronk
     # to the constructor.
 
     def headless_ok? io
-      File === io || String === io || StringIO === io || !@request
+      File === io || String === io || StringIO === io #|| !@request
     end
 
 
@@ -689,7 +692,9 @@ class Kronk
         raise unless allow_headless
         @http_version, @code, @msg = ["1.0", "200", "OK"]
 
-        ext = File === buff_io.io ? File.extname(resp_io.path)[1..-1] : "html"
+        ext = File === buff_io.io ?
+                File.extname(buff_io.io.path)[1..-1] : "html"
+
         encoding = buff_io.io.respond_to?(:external_encoding) ?
                     buff_io.io.external_encoding : "UTF-8"
         @headers = {
