@@ -309,6 +309,9 @@ class Kronk
           str2 = res2.stringify
          end
 
+    t1.abort_on_exception = true
+    t2.abort_on_exception = true
+
     t1.join
     t2.join
 
@@ -327,7 +330,7 @@ class Kronk
   def request uri
     options = Kronk.config[:no_uri_options] ? @options : options_for_uri(uri)
 
-    if IO === uri || StringIO === uri
+    if IO === uri || StringIO === uri || BufferedIO === uri
       Cmd.verbose "Reading IO #{uri}"
       resp = Response.new uri, options
 
