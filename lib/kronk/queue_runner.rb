@@ -214,7 +214,7 @@ class Kronk
       @count = 0
 
       until finished?
-        @rthreads.delete_if{|t| !t.alive? }
+        @rthreads.delete_if{|t| !t.alive? && t.join }
 
         results = []
         @threads.delete_if do |t|
