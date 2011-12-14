@@ -1,8 +1,7 @@
 class Kronk
 
   ##
-  # A basic queue and input processor that supports both a multi-threaded and
-  # evented backend (using EventMachine).
+  # A basic queue and input processor that runs multi-threaded.
   #
   # Input is optional and specified by creating an input trigger
   # (passing a block to on(:input)).
@@ -32,7 +31,24 @@ class Kronk
   #   # as optional second argument.
   #   qrunner.run do |queue_item|
   #     # Do something with item.
-  #     # When running in evented mode, make sure this section is non-blocking.
+  #   end
+  #
+  # Additionally, the :interrupt trigger may be used to handle behavior when
+  # SIGINT is sent to the process.
+  #
+  #   qrunner.on :interrupt do
+  #     qrunner.kill
+  #     puts "Caught SIGINT"
+  #     exit 1
+  #   end
+  #
+  # The :result trigger may also be used to
+  # perform actions with the return value of the block given to QueueRunner#run.
+  # This is useful for post-processing data without affecting concurrency as
+  # it will be run in a separate thread.
+  #
+  #   qrunner.on :result do |result|
+  #     p result
   #   end
 
   class QueueRunner

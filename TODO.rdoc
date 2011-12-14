@@ -1,10 +1,8 @@
 = TODO
 
-* QPS option for player.
+* Revisit how QueueRunner handles SIGINT.
 
-* System-evented IO selection.
-
-* Support for X-Url-\d and x-alt-location-\d redirects.
+* Consider getting off of net/http.
 
 * Refactor player Output to inherit Player.
 
@@ -15,6 +13,8 @@
 * Use persistent connection pools.
 
 == Done
+
+* QPS option for player.
 
 * Support for gzip.
 
