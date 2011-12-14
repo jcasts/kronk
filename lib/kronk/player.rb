@@ -88,8 +88,8 @@ class Kronk
 
       on(:result){|(kronk, err)| trigger_result(kronk, err, &block) }
 
-      run do |kronk_opts|
-        process_one kronk_opts.merge(opts), 'compare', uri1, uri2, &block
+      run opts do |kronk|
+        kronk.compare uri1, uri2
       end
     end
 
@@ -103,8 +103,27 @@ class Kronk
 
       on(:result){|(kronk, err)| trigger_result(kronk, err, &block) }
 
-      run do |kronk_opts|
-        process_one kronk_opts.merge(opts), 'request', uri, &block
+      run opts do |kronk|
+        kronk.request uri
+      end
+    end
+
+
+    ##
+    # Similar to QueueRunner#run but yields a Kronk instance.
+
+    def run opts={}
+      super() do |kronk_opts|
+        err = nil
+        kronk = Kronk.new kronk_opts.merge(opts)
+
+        begin
+          yield kronk
+        rescue *Kronk::Cmd::RESCUABLE => e
+          err = e
+        end
+
+        [kronk, err]
       end
     end
 
@@ -119,7 +138,7 @@ class Kronk
     #
     # Returns the result of the block or of the called Output method.
 
-    def process_one opts={}, *args, &block
+    def process_one opts={}, *args
       err   = nil
       kronk = Kronk.new opts
 
