@@ -58,7 +58,7 @@ class Kronk
 
       allow_headless = opts.has_key?(:allow_headless) ?
                         opts[:allow_headless] :
-                        headless_ok?(io)
+                        headless_ok?(@io.io)
 
       response_from_io @io, allow_headless
 
@@ -785,7 +785,7 @@ class Kronk
     # Read the first line of the response. (Stolen from Net::HTTP)
 
     def read_status_line sock
-      str = sock.readline
+      str = sock.readline until str && !str.empty?
       m = /\AHTTP(?:\/(\d+\.\d+))?\s+(\d\d\d)\s*(.*)\z/in.match(str) or
         raise Kronk::HTTPBadResponse, "wrong status line: #{str.dump}"
       m.captures
