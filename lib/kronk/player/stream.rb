@@ -34,10 +34,10 @@ class Kronk
 
       return unless output
 
-      output = "#{"%X" % output.length}\r\n#{output}\r\n"
-
       mutex.synchronize do
+        $stderr << "#{"%X" % output.length}\r\n"
         $stdout << output
+        $stderr << "\r\n"
       end
 
       output
@@ -45,7 +45,8 @@ class Kronk
 
 
     def completed
-      $stdout << "0\r\n\r\n"
+      $stderr << "0\r\n\r\n"
+      $stderr.flush
       $stdout.flush
       true
     end
