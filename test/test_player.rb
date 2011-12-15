@@ -263,7 +263,6 @@ class TestPlayer < Test::Unit::TestCase
 
 
   def test_concurrently
-    @player.concurrency = 10
     requests = (1..20).map{|n| "request #{n}"}
     @player.queue.concat requests.dup
     @player.input.io.close
@@ -271,7 +270,7 @@ class TestPlayer < Test::Unit::TestCase
     start     = Time.now
     processed = []
 
-    @player.concurrently do |req|
+    @player.concurrently 10 do |req|
       processed << req
       sleep 0.5
     end
@@ -287,7 +286,6 @@ class TestPlayer < Test::Unit::TestCase
 
 
   def test_concurrently_from_io
-    @player.concurrency = 10
     @player.input.parser.stubs(:start_new?).returns true
     @player.input.parser.stubs(:start_new?).with("").returns false
 
@@ -299,7 +297,7 @@ class TestPlayer < Test::Unit::TestCase
     @player.from_io StringIO.new(requests.join)
 
     start_time = Time.now
-    @player.concurrently do |req|
+    @player.concurrently 10 do |req|
       processed << req
       sleep 0.5
     end
@@ -347,10 +345,9 @@ class TestPlayer < Test::Unit::TestCase
   def test_start_input_from_input
     @player.input.stubs(:get_next).returns "mock_request"
 
-    @player.concurrency = 5
-    @player.number      = 20
+    @player.number = 30
 
-    thread = @player.start_input!
+    thread = @player.start_input! 10
     assert_equal Thread, thread.class
 
     sleep 0.2
@@ -370,10 +367,9 @@ class TestPlayer < Test::Unit::TestCase
     @player.input.stubs(:get_next).returns nil
     @player.input.stubs(:eof?).returns false
 
-    @player.concurrency = 5
     @player.queue << "mock_request"
 
-    thread = @player.start_input!
+    thread = @player.start_input! 10
     assert_equal Thread, thread.class
 
     sleep 0.2

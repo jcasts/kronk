@@ -53,26 +53,21 @@ class Kronk
 
   class QueueRunner
 
-    attr_accessor :number, :concurrency, :queue, :count,
-                  :mutex, :threads, :reader_thread
+    attr_accessor :number, :queue, :count, :threads, :reader_thread
 
     ##
     # Create a new QueueRunner for batch multi-threaded processing.
     # Supported options are:
-    # :concurrency:: Fixnum - Maximum number of concurrent items to process
     # :number:: Fixnum - Total number of items to process
-    # :qps::  Fixnum - Number of queries to process per second
 
     def initialize opts={}
-      @number      = opts[:number]
-      @concurrency = opts[:concurrency]
-      @concurrency = 1 if !@concurrency || @concurrency <= 0
-      @qps         = opts[:qps]
-
+      @number   = opts[:number]
       @count    = 0
       @queue    = []
       @threads  = []
       @rthreads = []
+
+      @max_queue_size = 100
 
       @reader_thread = nil
 
@@ -141,16 +136,18 @@ class Kronk
     # Yields queue item until queue and io (if available) are empty and the
     # totaly number of requests to run is met (if number is set).
 
-    def concurrently &block
-      until_finished do
-        if @threads.length >= @concurrency || @queue.empty?
+    def concurrently concurrency=1, &block
+      @max_queue_size = concurrency * 2
+
+      until_finished do |count, active_count|
+        if active_count >= concurrency || @queue.empty?
           Thread.pass
           next
         end
 
-        num_threads = @concurrency - @threads.length
-        num_threads = @number - @count if
-          @number && @number - @count < num_threads
+        num_threads = concurrency - active_count
+        num_threads = @number - count if
+          @number && @number - count < num_threads
 
         num_threads.times do
           yield_queue_item(&block)
@@ -160,43 +157,35 @@ class Kronk
 
 
     ##
-    # Process the queue with periodic timer and a given QPS.
+    # Process the queue with periodic timer and a given period in seconds.
+    #
+    # Yields queue item until queue and io (if available) are empty and the
+    # totaly number of requests to run is met (if number is set).
 
-    def periodically &block
-      period = 1.0 / @qps.to_f
-      start  = Time.now
+    def periodically period=0.01, &block
+      @max_queue_size = 0.5 / period
+      @max_queue_size = 2 if @max_queue_size < 2
 
-      until_finished do
-        sleep period unless @count < ((Time.now - start) / period).ceil
-        yield_queue_item(&block)
+      start = Time.now
+
+      until_finished do |count, active_count|
+        num_threads    = 1
+        expected_count = ((Time.now - start) / period).ceil
+
+        if count <= expected_count
+          num_threads = expected_count - count + 1
+          num_threads = @number - count if
+            @number && @number - count < num_threads
+        else
+          sleep period
+        end
+
+        num_threads.times do
+          yield_queue_item(&block)
+        end
       end
     end
 
-
-    ##
-    # Runs the queue and reads from input until it's exhausted or
-    # @number is reached. Yields a queue item and a mutex when to passed
-    # block:
-    #
-    #   runner = QueueRunner.new :concurrency => 10
-    #   runner.queue.concat %w{item1 item2 item3}
-    #
-    #   runner.run do |q_item, mutex|
-    #     # This block is run in its own thread.
-    #     mutex.synchronize{ do_something_with q_item }
-    #   end
-    #
-    # Calls the :start trigger before execution begins, calls :complete
-    # when the execution has ended or is interrupted, also calls :interrupt
-    # when execution is interrupted.
-
-    def run
-      method = @qps ? :periodically : :concurrently
-
-      send method do |q_item|
-        yield q_item if block_given?
-      end
-    end
 
 
     ##
@@ -226,7 +215,7 @@ class Kronk
           values.each{|value| trigger :result, value }
         end unless results.empty?
 
-        yield if block_given?
+        yield @count, @threads.count if block_given?
       end
 
       finish
@@ -257,20 +246,18 @@ class Kronk
     # Attempt to fill the queue by reading from the IO instance.
     # Starts a new thread and returns the thread instance.
 
-    def start_input!
+    def start_input! max_queue=@max_queue_size
       return unless @triggers[:input]
-
-      max_queue_size = @concurrency * 2
 
       @reader_thread = Thread.new do
         begin
           loop do
-            if @queue.length >= max_queue_size
+            if max_queue && @queue.length >= max_queue
               Thread.pass
               next
             end
 
-            while @queue.length < max_queue_size
+            while !max_queue || @queue.length < max_queue
               item = trigger(:input)
               @qmutex.synchronize{ @queue << item }
             end

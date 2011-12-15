@@ -8,7 +8,7 @@ class Kronk
 
   class Player < QueueRunner
 
-    attr_accessor :input, :output
+    attr_accessor :input, :output, :qps, :concurrency, :mutex
 
     ##
     # Create a new Player for batch diff or response validation.
@@ -16,9 +16,16 @@ class Kronk
     # :io:: IO - The IO instance to read from
     # :output:: Class - The output class to use (see Player::Output)
     # :parser:: Class - The IO parser to use.
+    # :concurrency:: Fixnum - Maximum number of concurrent items to process
+    # :qps::  Fixnum - Number of queries to process per second
 
     def initialize opts={}
       super
+
+      @concurrency = opts[:concurrency]
+      @concurrency = 1 if !@concurrency || @concurrency <= 0
+      @qps         = opts[:qps]
+
       self.output_from opts[:output] || Suite
 
       @input      = InputReader.new opts[:io], opts[:parser]
@@ -113,7 +120,15 @@ class Kronk
     # Similar to QueueRunner#run but yields a Kronk instance.
 
     def run opts={}
-      super() do |kronk_opts|
+      if @qps
+        method = :periodically
+        arg    = 1.0 / @qps.to_f
+      else
+        method = :concurrently
+        arg    = @concurrency
+      end
+
+      send method, arg do |kronk_opts|
         err = nil
         kronk = Kronk.new kronk_opts.merge(opts)
 
