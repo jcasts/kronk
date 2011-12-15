@@ -110,10 +110,9 @@ class Kronk
           chunk = unzip chunk if gzip?
 
           try_force_encoding chunk
+          (@body ||= "") << chunk
           yield self, chunk if block_given?
         end
-
-        @body = headless? ? @raw : @raw.split("\r\n\r\n", 2)[1]
 
       rescue IOError, EOFError
         @io.read_all
