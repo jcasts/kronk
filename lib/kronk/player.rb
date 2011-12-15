@@ -129,30 +129,6 @@ class Kronk
 
 
     ##
-    # Run a single compare or request and call the Output#result or
-    # Output#error method.
-    #
-    # If given a block, will yield the Kronk instance and error. If
-    # a third argument is given, mutex will also be passed and the
-    # block won't be called from a mutex lock.
-    #
-    # Returns the result of the block or of the called Output method.
-
-    def process_one opts={}, *args
-      err   = nil
-      kronk = Kronk.new opts
-
-      begin
-        kronk.send(*args)
-      rescue *Kronk::Cmd::RESCUABLE => e
-        err = e
-      end
-
-      [kronk, err]
-    end
-
-
-    ##
     # Trigger a single kronk result callback.
 
     def trigger_result kronk, err, &block

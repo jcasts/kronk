@@ -167,7 +167,6 @@ class TestPlayer < Test::Unit::TestCase
     @player.output.expects :start
     @player.output.expects :completed
 
-    @player.concurrency  = 3
     @player.input.parser = Kronk::Player::RequestParser
     @player.input.io << "/req3\n/req4\n/req5\n"
     @player.input.io.rewind
@@ -427,12 +426,7 @@ class TestPlayer < Test::Unit::TestCase
   end
 
 
-  def test_process_compare_one
-    mock_thread = "mock_thread"
-    Thread.expects(:new).twice.yields.returns mock_thread
-    mock_thread.expects(:join).twice
-    mock_thread.expects(:abort_on_exception=).twice
-
+  def test_run
     resp1 = Kronk::Response.new mock_resp("200_response.json")
     resp1.parser = JSON
     resp2 = Kronk::Response.new mock_resp("200_response.txt")
@@ -457,16 +451,22 @@ class TestPlayer < Test::Unit::TestCase
     end
 
     opts = {:uri_suffix => "/test", :include_headers => true}
+    @player.number = 1
+    @player.concurrency = 1
+    @player.queue << opts
 
-    @player.trigger :result,
-      @player.process_one(opts, :compare, "example.com", "beta-example.com")
+    @player.run do |kronk|
+      kronk.compare "example.com", "beta-example.com"
+    end
 
     assert @got_results, "Expected output to get results but didn't"
   end
 
 
-  def test_process_one_compare_error
+  def test_run_error
     @got_results = []
+    @player.number = 1
+    @player.concurrency = 1
 
     @player.output.expects(:error).times(3).with do |error, kronk, mutex|
       @got_results << error.class
@@ -483,15 +483,19 @@ class TestPlayer < Test::Unit::TestCase
 
       opts = {:uri_suffix => "/test", :include_headers => true}
 
-      @player.trigger :result,
-        @player.process_one(opts, :compare, "example.com", "beta-example.com")
+      @player.run opts do |kronk|
+        kronk.compare "example.com", "beta-example.com"
+      end
     end
 
     assert_equal errs, @got_results, "Expected output to get errors but didn't"
   end
 
 
-  def test_process_one_compare_error_not_caught
+  def test_run_error_not_caught
+    @player.number = 1
+    @player.concurrency = 1
+
     Kronk.any_instance.expects(:compare).
       with("example.com", "beta-example.com").
       raises ArgumentError
@@ -499,71 +503,9 @@ class TestPlayer < Test::Unit::TestCase
     assert_raises ArgumentError do
       opts = {:uri_suffix => "/test", :include_headers => true}
 
-      @player.trigger :result,
-        @player.process_one(opts, :compare, "example.com", "beta-example.com")
-    end
-  end
-
-
-  def test_process_one_request
-    resp = Kronk::Response.new mock_resp("200_response.json")
-    resp.parser = JSON
-
-    req = Kronk::Request.new "example.com"
-    req.expects(:retrieve).returns resp
-
-    Kronk::Request.expects(:new).returns req
-
-    @got_results = nil
-
-    @player.output.expects(:result).with do |kronk, mutex|
-      @got_results = true
-      assert_equal @player.mutex, mutex
-      assert_equal resp, kronk.response
-      true
-    end
-
-    opts = {:uri_suffix => "/test", :include_headers => true}
-
-    @player.trigger :result,
-      @player.process_one(opts, :request, "example.com")
-
-    assert @got_results, "Expected output to get results but didn't"
-  end
-
-
-  def test_process_one_request_error
-    @got_results = []
-
-    @player.output.expects(:error).times(3).with do |error, kronk, mutex|
-      @got_results << error.class
-      assert_equal @player.mutex, mutex
-      assert_equal Kronk,         kronk.class
-      true
-    end
-
-    errs = [Kronk::Exception, Kronk::Response::MissingParser, Errno::ECONNRESET]
-    errs.each do |eklass|
-      Kronk.any_instance.expects(:request).with("example.com").
-        raises eklass
-
-      opts = {:uri_suffix => "/test", :include_headers => true}
-
-      @player.trigger :result,
-        @player.process_one(opts, :request, "example.com")
-    end
-
-    assert_equal errs, @got_results, "Expected output to get errors but didn't"
-  end
-
-
-  def test_process_one_request_error_not_caught
-    Kronk.any_instance.expects(:request).with("example.com").
-      raises RuntimeError
-
-    assert_raises RuntimeError do
-      opts = {:uri_suffix => "/test", :include_headers => true}
-      @player.process_one opts, :request, "example.com"
+      @player.run opts do |kronk|
+        kronk.compare "example.com", "beta-example.com"
+      end
     end
   end
 
