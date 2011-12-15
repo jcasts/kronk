@@ -190,6 +190,7 @@ class Kronk
 
     ##
     # Loop and read from input continually until finished.
+    # Yields total_count and active_count if passed a block.
 
     def until_finished
       trap 'INT' do
