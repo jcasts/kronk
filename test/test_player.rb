@@ -431,6 +431,7 @@ class TestPlayer < Test::Unit::TestCase
     mock_thread = "mock_thread"
     Thread.expects(:new).twice.yields.returns mock_thread
     mock_thread.expects(:join).twice
+    mock_thread.expects(:abort_on_exception=).twice
 
     resp1 = Kronk::Response.new mock_resp("200_response.json")
     resp1.parser = JSON
