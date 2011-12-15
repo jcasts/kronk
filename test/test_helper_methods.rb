@@ -13,7 +13,8 @@ class TestHelperMethods < Test::Unit::TestCase
     @mock_req   = stub("mock_req", :retrieve => @mock_resp,  :uri => "host.com")
     @mock_req2  = stub("mock_req", :retrieve => @mock_resp2, :uri => "host.com")
 
-    @mock_thread = stub("mock_thread", :join => nil)
+    @mock_thread = stub("mock_thread", :join => true,
+                         :abort_on_exception= => true)
 
     Thread.stubs(:new).yields.returns @mock_thread
     Kronk::Request.any_instance.stubs(:new).returns @mock_req
