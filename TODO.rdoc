@@ -10,6 +10,8 @@
 
 * GNU-Plot support.
 
+* Animate Suite player cursor when waiting for input.
+
 == Not Viable
 
 * Use persistent connection pools.

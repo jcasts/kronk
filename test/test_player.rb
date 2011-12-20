@@ -461,7 +461,7 @@ class TestPlayer < Test::Unit::TestCase
       true
     end
 
-    errs = [Kronk::Exception, Kronk::Response::MissingParser, Errno::ECONNRESET]
+    errs = [Kronk::Error, Kronk::Response::MissingParser, Errno::ECONNRESET]
     errs.each do |eklass|
       Kronk.any_instance.expects(:compare).
         with("example.com", "beta-example.com").

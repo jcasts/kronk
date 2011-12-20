@@ -6,7 +6,7 @@ class Kronk
   class Cmd
 
     RESCUABLE = [
-      Kronk::Exception, Timeout::Error,
+      Kronk::Error, Timeout::Error,
       SocketError, SystemCallError, URI::InvalidURIError
     ]
 

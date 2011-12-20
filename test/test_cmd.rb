@@ -491,7 +491,7 @@ class TestCmd < Test::Unit::TestCase
 
   def test_run_caught_errors
     errs = {
-      Kronk::Exception               => "Kronk::Exception",
+      Kronk::Error                   => "Kronk::Error",
       Kronk::Response::MissingParser => "Kronk::Response::MissingParser",
       Errno::ECONNRESET              => "Connection reset by peer"
     }

@@ -6,7 +6,7 @@ class Kronk
   class Request
 
     # Raised by Request.parse when parsing invalid http request string.
-    class ParseError < Kronk::Exception; end
+    class ParseError < Kronk::Error; end
 
     # Matches the first line of an http request string or a fully
     # qualified URL.

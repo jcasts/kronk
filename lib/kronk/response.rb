@@ -5,8 +5,8 @@ class Kronk
 
   class Response
 
-    class MissingParser < Kronk::Exception; end
-    class InvalidParser < Kronk::Exception; end
+    class MissingParser < Kronk::Error; end
+    class InvalidParser < Kronk::Error; end
 
 
     ENCODING_MATCHER = /(^|;\s?)charset=(.*?)\s*(;|$)/
@@ -341,7 +341,7 @@ class Kronk
       begin
         @parsed_body = new_parser.parse(self.body) or raise RuntimeError
 
-      rescue RuntimeError, ::Exception => e
+      rescue => e
         msg = ParserError === e ?
                 e.message : "#{new_parser} failed parsing body"
 
