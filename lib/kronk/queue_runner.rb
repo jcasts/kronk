@@ -145,9 +145,7 @@ class Kronk
           next
         end
 
-        num_threads = concurrency - active_count
-        num_threads = @number - count if
-          @number && @number - count < num_threads
+        num_threads = smaller_count(concurrency - active_count)
 
         num_threads.times do
           yield_queue_item(&block)
@@ -173,9 +171,7 @@ class Kronk
         expected_count = ((Time.now - start) / period).ceil
 
         if count <= expected_count
-          num_threads = expected_count - count + 1
-          num_threads = @number - count if
-            @number && @number - count < num_threads
+          num_threads = smaller_count(expected_count - count + 1)
         else
           sleep period
         end
@@ -193,9 +189,11 @@ class Kronk
     # Yields total_count and active_count if passed a block.
 
     def until_finished
-      trap 'INT' do
+      old_trap = trap 'INT' do
         kill
-        (trigger(:interrupt) || exit(1))
+        trigger(:interrupt)
+        trap 'INT', old_trap
+        Process.kill 'INT', Process.pid
       end
 
       trigger :start
@@ -288,6 +286,13 @@ class Kronk
     def trigger name, *args
       t = @triggers[name]
       t && t.call(*args)
+    end
+
+
+    private
+
+    def smaller_count num
+      @number && (@number - count < num) || num
     end
   end
 end
