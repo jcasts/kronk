@@ -6,6 +6,10 @@
 
 * Investigate Kronk console.
 
+* Parsed cookie diffing.
+
+* GNU-Plot support.
+
 == Not Viable
 
 * Use persistent connection pools.
