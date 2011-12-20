@@ -1,4 +1,4 @@
-=== 2.0.0 / 201
+=== 1.8.0 / 2011-12
 
 * Major Enhancements:
 
@@ -13,8 +13,6 @@
   * Support for response streaming.
 
   * Support for gzip and inflate decoding.
-
-  * No longer use net/http for response reading.
 
 * Bugfixes:
 

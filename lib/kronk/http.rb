@@ -45,7 +45,7 @@ class Kronk
       end while kronk_resp_type(res) == Net::HTTPContinue
 
       if res.headless?
-        raise Net::HTTPBadResponse, "Invalid HTTP response" unless allow_retry
+        raise HTTPBadResponse, "Invalid HTTP response" unless allow_retry
         @socket.io.close
         res = transport_request(req, false, opts)
       end
