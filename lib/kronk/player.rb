@@ -167,5 +167,8 @@ class Kronk
       @queue << trigger(:input) if @queue.empty? && (!@number || @number <= 1)
       @queue.length == 1 && @triggers[:input] == @on_input && @input.eof?
     end
+
+
+    private :on
   end
 end

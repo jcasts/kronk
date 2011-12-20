@@ -292,7 +292,7 @@ class Kronk
     private
 
     def smaller_count num
-      @number && (@number - count < num) || num
+      @number && (@number - count < num) ? (@number - count) : num
     end
   end
 end
