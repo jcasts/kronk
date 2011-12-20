@@ -91,8 +91,8 @@ class Kronk
       $stdout.puts "\n#{@results.length} cases, " +
                    "#{failure_count} failures, #{error_count} errors"
 
-      $stdout.puts "Avg Time: #{avg_time}"
-      $stdout.puts "Avg QPS: #{avg_qps}"
+      $stdout.puts "Avg Time: #{(avg_time * 1000).round 3}ms"
+      $stdout.puts "Avg QPS:  #{avg_qps.round 3}"
 
       return bad_count == 0
     end
