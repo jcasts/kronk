@@ -170,8 +170,8 @@ class Kronk
         num_threads    = 1
         expected_count = ((Time.now - start) / period).ceil
 
-        if count <= expected_count
-          num_threads = smaller_count(expected_count - count + 1)
+        if count < expected_count
+          num_threads = smaller_count(expected_count - count)
         else
           sleep period
         end
@@ -190,11 +190,14 @@ class Kronk
 
     def until_finished
       old_trap = trap 'INT' do
+        @stop_time = Time.now
         kill
         trigger(:interrupt)
         trap 'INT', old_trap
         Process.kill 'INT', Process.pid
       end
+
+      @start_time = Time.now
 
       trigger :start
 
@@ -216,6 +219,8 @@ class Kronk
 
         yield @count, @threads.count if block_given?
       end
+
+      @stop_time = Time.now
 
       finish
 

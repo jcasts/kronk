@@ -61,8 +61,8 @@ class TestPlayer < Test::Unit::TestCase
 
   def test_init_opts
     player = Kronk::Player.new_type :stream,
-                               :number      => 1000,
-                               :concurrency => 10
+                                    :number      => 1000,
+                                    :concurrency => 10
 
     assert_equal Kronk::Player::Stream,        player.class
     assert_equal Kronk::Player::RequestParser, player.input.parser

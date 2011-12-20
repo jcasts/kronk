@@ -17,10 +17,12 @@ class Kronk
 
     class ResultSet
 
+      attr_accessor :total_time
+
       attr_reader :byterate, :count, :fastest, :precision,
                   :slowest, :total_bytes, :err_count
 
-      def initialize start_time
+      def initialize
         @times     = Hash.new(0)
         @count     = 0
         @r5XX      = 0
@@ -37,7 +39,6 @@ class Kronk
         @total_bytes = 0
         @byterate    = 0
 
-        @start_time = start_time
         @total_time = 0
       end
 
@@ -59,8 +60,6 @@ class Kronk
         @total_bytes += resp.raw.bytes.count
 
         @byterate = (@byterate * (@count-1) + resp.byterate) / @count
-
-        @total_time = (Time.now - @start_time).to_f
       end
 
 
@@ -199,7 +198,7 @@ Avg. Slowest Requests (ms, count)
     def result kronk
       @mutex.synchronize do
         kronk.responses.each_with_index do |resp, i|
-          @results[i] ||= ResultSet.new(@start_time)
+          @results[i] ||= ResultSet.new
           @results[i].add_result resp
         end
 
@@ -230,6 +229,8 @@ Avg. Slowest Requests (ms, count)
 
 
     def render_body
+      @results.each{|res| res.total_time = @stop_time - @start_time }
+
       if @results.length > 1
         puts Diff.new(@results[0].to_s, @results[1].to_s).formatted
       else

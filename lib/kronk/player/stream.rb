@@ -36,8 +36,11 @@ class Kronk
 
       @mutex.synchronize do
         $stderr << "#{"%X" % output.length}\r\n"
+        $stderr.flush
         $stdout << output
+        $stdout.flush
         $stderr << "\r\n"
+        $stderr.flush
       end
 
       output

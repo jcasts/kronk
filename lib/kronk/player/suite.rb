@@ -55,7 +55,8 @@ class Kronk
 
 
     def complete
-      player_time   = (Time.now - @start_time).to_f
+      suite_time    = Time.now - @start_time
+      player_time   = @stop_time - @start_time
       total_time    = 0
       bad_count     = 0
       failure_count = 0
@@ -85,7 +86,7 @@ class Kronk
       avg_time = non_error_count > 0 ? total_time / non_error_count  : "n/a"
       avg_qps  = non_error_count > 0 ? non_error_count / player_time : "n/a"
 
-      $stdout.puts "\nFinished in #{player_time} seconds.\n"
+      $stdout.puts "\nFinished in #{suite_time} seconds.\n"
       $stderr.puts err_buffer unless err_buffer.empty?
       $stdout.puts "\n#{@results.length} cases, " +
                    "#{failure_count} failures, #{error_count} errors"

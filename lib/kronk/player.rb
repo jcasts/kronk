@@ -55,14 +55,15 @@ class Kronk
 
       on(:input, &@on_input)
       on(:interrupt){
-        completed if respond_to?(:complete)
+        complete if respond_to?(:complete)
         exit 2
       }
       on(:start){
-        @start_time = Time.now
         start if respond_to?(:start)
       }
-      on(:complete){ complete if respond_to?(:complete) }
+      on(:complete){
+        complete if respond_to?(:complete)
+      }
     end
 
 
