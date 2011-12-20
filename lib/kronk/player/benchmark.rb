@@ -13,18 +13,19 @@ class Kronk
   # * Percentage of requests within a certain time
   # * Slowest endpoints
 
-  class Player::Benchmark < Player::Output
+  class Player::Benchmark < Player
 
     class ResultSet
 
       attr_reader :byterate, :count, :fastest, :precision,
-                  :slowest, :total_bytes
+                  :slowest, :total_bytes, :err_count
 
       def initialize start_time
-        @times = Hash.new(0)
-        @count = 0
-        @r5XX  = 0
-        @r4XX  = 0
+        @times     = Hash.new(0)
+        @count     = 0
+        @r5XX      = 0
+        @r4XX      = 0
+        @err_count = 0
 
         @precision = 3
 
@@ -147,9 +148,11 @@ class Kronk
 
       def to_s
         out = <<-STR
+
 Completed:     #{@count}
 400s:          #{@r4XX}
 500s:          #{@r5XX}
+Errors:        #{@err_count}
 Req/Sec:       #{self.req_per_sec}
 Total Bytes:   #{@total_bytes}
 Transfer Rate: #{self.transfer_rate} Kbytes/sec
@@ -175,7 +178,7 @@ Request Percentages (ms)
 
         unless slowest_reqs.empty?
           out << "
-Avg. Slowest Requests (ms, #)
+Avg. Slowest Requests (ms, count)
 #{slowest_reqs.map{|arr| "  #{arr[1].inspect}  #{arr[0]}"}.join "\n" }"
         end
 
@@ -184,44 +187,39 @@ Avg. Slowest Requests (ms, #)
     end
 
 
-    def initialize player
-      @player  = player
-      @results = []
-      @count   = 0
-
-      @div = nil
-      @div = @player.number / 10 if @player.number
-      @div = 100 if !@div || @div < 10
-    end
-
-
     def start
+      @res_count = 0
+      @results   = []
+      @div       = @number / 10 if @number
+      @div       = 100 if !@div || @div < 10
       puts "Benchmarking..."
-      super
     end
 
 
-    def result kronk, mutex
-      kronk.responses.each_with_index do |resp, i|
-        mutex.synchronize do
-          @count += 1
+    def result kronk
+      @mutex.synchronize do
+        kronk.responses.each_with_index do |resp, i|
           @results[i] ||= ResultSet.new(@start_time)
           @results[i].add_result resp
+        end
 
-          puts "#{@count} requests" if @count % @div == 0
+        @res_count += 1
+        puts "#{@res_count} requests" if @res_count % @div == 0
+      end
+    end
+
+
+    def error err, kronk
+      @mutex.synchronize do
+        @res_count += 1
+        @results.each do |res|
+          res.err_count += 1
         end
       end
     end
 
 
-    def error err, kronk, mutex
-      mutex.synchronize do
-        @count += 1
-      end
-    end
-
-
-    def completed
+    def complete
       puts "Finished!"
 
       render_head
@@ -245,7 +243,7 @@ Avg. Slowest Requests (ms, #)
 
 Benchmark Time:      #{(Time.now - @start_time).to_f} sec
 Number of Requests:  #{@count}
-Concurrency:         #{@player.concurrency}
+Concurrency:         #{@qps ? "#{@qps} qps" : @concurrency}
       STR
     end
   end

@@ -302,7 +302,7 @@ Parse and run diffs against data from live and cached http responses.
 
         opt.on('-o', '--replay-out [FORMAT]',
                'Output format used by --replay; default: stream') do |output|
-          options[:player][:output] = output || :stream
+          options[:player][:type] = output || :stream
         end
 
 
@@ -310,7 +310,6 @@ Parse and run diffs against data from live and cached http responses.
                 'Replay the given file or STDIN against URIs') do |file|
           options[:player][:io]   = File.open(file, "r") if file
           options[:player][:io] ||= $stdin if !$stdin.tty?
-          options[:player][:output] ||= :suite
         end
 
 
@@ -323,14 +322,14 @@ Parse and run diffs against data from live and cached http responses.
         opt.on('--benchmark [FILE]', 'Same as -p [FILE] -o benchmark') do |file|
           options[:player][:io]   = File.open(file, "r") if file
           options[:player][:io] ||= $stdin if !$stdin.tty?
-          options[:player][:output] = :benchmark
+          options[:player][:type] = :benchmark
         end
 
 
         opt.on('--stream [FILE]', 'Same as -p [FILE] -o stream') do |file|
           options[:player][:io]   = File.open(file, "r") if file
           options[:player][:io] ||= $stdin if !$stdin.tty?
-          options[:player][:output] = :stream
+          options[:player][:type] = :stream
         end
 
 
@@ -430,15 +429,14 @@ Parse and run diffs against data from live and cached http responses.
       opts.parse! argv
 
       unless options[:player].empty?
-        options[:player] = Player.new options[:player]
+        player_type      = options[:player][:type] || :suite
+        options[:player] = Player.new_type player_type, options[:player]
       else
         options.delete :player
       end
 
       if !$stdin.tty? && !(options[:player] && options[:player].input.io)
-        io = BufferedIO.new $stdin
-        #io = StringIO.new $stdin.read
-        options[:uris] << io
+        options[:uris] << BufferedIO.new($stdin)
       end
 
       options[:uris].concat argv

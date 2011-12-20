@@ -274,10 +274,10 @@ class TestCmd < Test::Unit::TestCase
     opts = Kronk::Cmd.parse_args %w{uri -c 2 -n 100 -o}
     assert_equal 2,   opts[:player].concurrency
     assert_equal 100, opts[:player].number
-    assert_equal Kronk::Player::Stream, opts[:player].output.class
+    assert_equal Kronk::Player::Stream, opts[:player].class
 
     opts = Kronk::Cmd.parse_args %w{uri -o benchmark}
-    assert_equal Kronk::Player::Benchmark, opts[:player].output.class
+    assert_equal Kronk::Player::Benchmark, opts[:player].class
   end
 
 
@@ -291,12 +291,12 @@ class TestCmd < Test::Unit::TestCase
     opts = Kronk::Cmd.parse_args %w{uri --benchmark}
     assert_equal $stdin, opts[:player].input.io
     assert_equal %w{uri}, opts[:uris]
-    assert_equal Kronk::Player::Benchmark, opts[:player].output.class
+    assert_equal Kronk::Player::Benchmark, opts[:player].class
 
     opts = Kronk::Cmd.parse_args %w{uri --stream}
     assert_equal $stdin, opts[:player].input.io
     assert_equal %w{uri}, opts[:uris]
-    assert_equal Kronk::Player::Stream, opts[:player].output.class
+    assert_equal Kronk::Player::Stream, opts[:player].class
   end
 
 
@@ -309,11 +309,11 @@ class TestCmd < Test::Unit::TestCase
 
     opts = Kronk::Cmd.parse_args %w{uri --benchmark mock_file}
     assert_equal mock_file, opts[:player].input.io
-    assert_equal Kronk::Player::Benchmark, opts[:player].output.class
+    assert_equal Kronk::Player::Benchmark, opts[:player].class
 
     opts = Kronk::Cmd.parse_args %w{uri --stream mock_file}
     assert_equal mock_file, opts[:player].input.io
-    assert_equal Kronk::Player::Stream, opts[:player].output.class
+    assert_equal Kronk::Player::Stream, opts[:player].class
   end
 
 

@@ -20,7 +20,6 @@ class Kronk
   require 'kronk/constants'
   require 'kronk/queue_runner'
   require 'kronk/player'
-  require 'kronk/player/output'
   require 'kronk/player/suite'
   require 'kronk/player/stream'
   require 'kronk/player/benchmark'

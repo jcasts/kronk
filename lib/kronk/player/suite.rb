@@ -3,16 +3,15 @@ class Kronk
   ##
   # Outputs Player requests and results in a test-suite like format.
 
-  class Player::Suite < Player::Output
+  class Player::Suite < Player
 
     def start
-      @results = []
+      @results    = []
       $stdout.puts "Started"
-      super
     end
 
 
-    def result kronk, mutex=nil
+    def result kronk
       status = "."
 
       result =
@@ -29,7 +28,7 @@ class Kronk
             # Make sure response is parsable
             kronk.response.parsed_body if kronk.response.parser
           rescue => e
-            error e, kronk, mutex
+            error e, kronk
             return
           end if kronk.response.success?
 
@@ -38,24 +37,24 @@ class Kronk
           [status, kronk.response.time, text]
         end
 
-      mutex.synchronize{ @results << result }
+      @mutex.synchronize{ @results << result }
 
       $stdout << status
       $stdout.flush
     end
 
 
-    def error err, kronk=nil, mutex=nil
+    def error err, kronk=nil
       status = "E"
       result = [status, 0, error_text(err, kronk)]
-      mutex.synchronize{ @results << result }
+      @mutex.synchronize{ @results << result }
 
       $stdout << status
       $stdout.flush
     end
 
 
-    def completed
+    def complete
       player_time   = (Time.now - @start_time).to_f
       total_time    = 0
       bad_count     = 0

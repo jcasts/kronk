@@ -4,16 +4,15 @@ class TestPlayer < Test::Unit::TestCase
 
   class MockPipe < StringIO; end
 
-  class MockOutput < Kronk::Player::Output
+  class MockPlayer < Kronk::Player
     attr_accessor :result_calls
 
-    def initialize *args
+    def start
       @result_calls = 0
-      super
     end
 
-    def result kronk, mutex
-      mutex.synchronize do
+    def result kronk
+      @mutex.synchronize do
         @result_calls += 1
       end
     end
@@ -29,18 +28,16 @@ class TestPlayer < Test::Unit::TestCase
   def setup
     @io        = MockPipe.new
     @parser    = MockParser
-    @output    = MockOutput
-    @player    = Kronk::Player.new :io     => @io,
-                                   :parser => @parser,
-                                   :output => @output
+    @player    = MockPlayer.new :io     => @io,
+                                :parser => @parser
 
     @player.on(:result){|(kronk, err)| @player.trigger_result(kronk, err) }
   end
 
 
   def test_init_defaults
-    player = Kronk::Player.new
-    assert_equal Kronk::Player::Suite,       player.output.class
+    player = Kronk::Player.new_type 'suite'
+    assert_equal Kronk::Player::Suite,       player.class
     assert_equal Kronk::Player::InputReader, player.input.class
     assert_equal Mutex,                      player.mutex.class
     assert_equal 1,                          player.concurrency
@@ -63,29 +60,30 @@ class TestPlayer < Test::Unit::TestCase
 
 
   def test_init_opts
-    player = Kronk::Player.new :number      => 1000,
-                               :concurrency => 10,
-                               :output      => :stream
+    player = Kronk::Player.new_type :stream,
+                               :number      => 1000,
+                               :concurrency => 10
 
-    assert_equal Kronk::Player::Stream,        player.output.class
+    assert_equal Kronk::Player::Stream,        player.class
     assert_equal Kronk::Player::RequestParser, player.input.parser
     assert_equal 10,                           player.concurrency
     assert_equal 1000,                         player.number
   end
 
 
-  def test_output
-    @player.output_from :benchmark
-    assert_equal Kronk::Player::Benchmark, @player.output.class
+  def test_new_type
+    @player = Kronk::Player.new_type :benchmark
+    assert_equal Kronk::Player::Benchmark, @player.class
 
-    @player.output_from :stream
-    assert_equal Kronk::Player::Stream, @player.output.class
+    @player = Kronk::Player.new_type :stream
+    assert_equal Kronk::Player::Stream, @player.class
 
-    @player.output_from :suite
-    assert_equal Kronk::Player::Suite, @player.output.class
+    @player = Kronk::Player.new_type :suite
+    assert_equal Kronk::Player::Suite, @player.class
 
-    @player.output_from Kronk::Player::Benchmark
-    assert_equal Kronk::Player::Benchmark, @player.output.class
+    assert_raises NameError do
+      @player = Kronk::Player.new_type :foo
+    end
   end
 
 
@@ -164,9 +162,6 @@ class TestPlayer < Test::Unit::TestCase
 
 
   def test_compare
-    @player.output.expects :start
-    @player.output.expects :completed
-
     @player.input.parser = Kronk::Player::RequestParser
     @player.input.io << "/req3\n/req4\n/req5\n"
     @player.input.io.rewind
@@ -191,7 +186,7 @@ class TestPlayer < Test::Unit::TestCase
 
     @player.compare "example.com", "beta-example.com", :query => "foo=bar"
 
-    assert_equal 5, @player.output.result_calls
+    assert_equal 5, @player.result_calls
   end
 
 
@@ -242,9 +237,6 @@ class TestPlayer < Test::Unit::TestCase
 
   def test_run_interrupted
     @player.concurrency = 0
-
-    @player.output.expects :start
-    @player.output.expects :completed
 
     thread = Thread.new do
       @player.run do |item, mutex|
@@ -438,9 +430,8 @@ class TestPlayer < Test::Unit::TestCase
 
     @got_results = nil
 
-    @player.output.expects(:result).with do |kronk, mutex|
+    @player.expects(:result).with do |kronk|
       @got_results = true
-      assert_equal @player.mutex, mutex
       assert_equal Kronk::Diff.new(resp1.stringify, resp2.stringify).formatted,
                     kronk.diff.formatted
       true
@@ -455,7 +446,7 @@ class TestPlayer < Test::Unit::TestCase
       kronk.compare "example.com", "beta-example.com"
     end
 
-    assert @got_results, "Expected output to get results but didn't"
+    assert @got_results, "Expected player to get results but didn't"
   end
 
 
@@ -464,10 +455,9 @@ class TestPlayer < Test::Unit::TestCase
     @player.number = 1
     @player.concurrency = 1
 
-    @player.output.expects(:error).times(3).with do |error, kronk, mutex|
+    @player.expects(:error).times(3).with do |error, kronk|
       @got_results << error.class
-      assert_equal @player.mutex, mutex
-      assert_equal Kronk,         kronk.class
+      assert_equal Kronk, kronk.class
       true
     end
 
@@ -484,7 +474,7 @@ class TestPlayer < Test::Unit::TestCase
       end
     end
 
-    assert_equal errs, @got_results, "Expected output to get errors but didn't"
+    assert_equal errs, @got_results, "Expected player to get errors but didn't"
   end
 
 

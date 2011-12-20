@@ -12,7 +12,6 @@ lib/kronk/data_string.rb
 lib/kronk/diff.rb
 lib/kronk/diff/ascii_format.rb
 lib/kronk/diff/color_format.rb
-lib/kronk/diff/output.rb
 lib/kronk/http.rb
 lib/kronk/buffered_io.rb
 lib/kronk/path.rb

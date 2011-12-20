@@ -1,10 +1,6 @@
 = TODO
 
-* Revisit how QueueRunner handles SIGINT.
-
 * Consider getting off of net/http.
-
-* Refactor player Output to inherit Player.
 
 * Consider allowing Output-specific cmd options.
 
@@ -15,6 +11,10 @@
 * Use persistent connection pools.
 
 == Done
+
+* Refactor player Output to inherit Player.
+
+* Revisit how QueueRunner handles SIGINT.
 
 * QPS option for player.
 

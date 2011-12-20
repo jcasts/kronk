@@ -21,9 +21,9 @@ class Kronk
   #
   # Note: This output class will not render errors.
 
-  class Player::Stream < Player::Output
+  class Player::Stream < Player
 
-    def result kronk, mutex=nil
+    def result kronk
       output =
         if kronk.diff
           kronk.diff.formatted
@@ -34,7 +34,7 @@ class Kronk
 
       return unless output && !output.empty?
 
-      mutex.synchronize do
+      @mutex.synchronize do
         $stderr << "#{"%X" % output.length}\r\n"
         $stdout << output
         $stderr << "\r\n"

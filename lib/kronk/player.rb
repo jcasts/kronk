@@ -2,19 +2,37 @@ class Kronk
 
   ##
   # The Player class is used for running multiple requests and comparisons and
-  # providing useful output through Player::Output classes.
-  # Kronk includes a Suite (test-like) output, a Stream (chunked) output,
+  # providing useful output through inherited Player classes.
+  # Kronk includes a Suite (test-like), a Stream (chunked),
   # and a Benchmark output.
 
   class Player < QueueRunner
 
-    attr_accessor :input, :output, :qps, :concurrency, :mutex
+    ##
+    # Instantiate a new type of player, typically :suite, :stream, or
+    # :benchmark.
+
+    def self.new_type type, opts={}
+      klass =
+        case type.to_s
+        when /^(Player::)?benchmark$/i then Benchmark
+        when /^(Player::)?stream$/i    then Stream
+        when /^(Player::)?suite$/i     then Suite
+        else
+          Kronk.find_const type.to_s
+        end
+
+      klass.new opts
+    end
+
+
+
+    attr_accessor :input, :qps, :concurrency, :mutex
 
     ##
     # Create a new Player for batch diff or response validation.
     # Supported options are:
     # :io:: IO - The IO instance to read from
-    # :output:: Class - The output class to use (see Player::Output)
     # :parser:: Class - The IO parser to use.
     # :concurrency:: Fixnum - Maximum number of concurrent items to process
     # :qps::  Fixnum - Number of queries to process per second
@@ -26,10 +44,7 @@ class Kronk
       @concurrency = 1 if !@concurrency || @concurrency <= 0
       @qps         = opts[:qps]
 
-      self.output_from opts[:output] || Suite
-
       @input      = InputReader.new opts[:io], opts[:parser]
-      @use_output = true
       @last_req   = nil
       @mutex      = Mutex.new
 
@@ -38,18 +53,16 @@ class Kronk
         @last_req = @input.get_next || @queue.last || @last_req || {}
       end
 
-      @on_result  = Proc.new do |kronk, err, mutex|
-        err ? @output.error(err, kronk, mutex) :
-              @output.result(kronk, mutex)
-      end
-
       on(:input, &@on_input)
       on(:interrupt){
-        @output.completed if @use_output
+        completed if respond_to?(:complete)
         exit 2
       }
-      on(:start){ @output.start if @use_output }
-      on(:complete){ @output.completed if @use_output }
+      on(:start){
+        @start_time = Time.now
+        start if respond_to?(:start)
+      }
+      on(:complete){ complete if respond_to?(:complete) }
     end
 
 
@@ -63,26 +76,6 @@ class Kronk
       @input.io     = io
       @input.parser = parser if parser
       @input
-    end
-
-
-    ##
-    # The kind of output to use. Typically Player::Suite or Player::Stream.
-    # Takes an output class or a string that represents a class constant.
-
-    def output_from new_output
-      return @output = new_output.new(self) if Class === new_output
-
-      klass =
-        case new_output.to_s
-        when /^(Player::)?benchmark$/i then Benchmark
-        when /^(Player::)?stream$/i    then Stream
-        when /^(Player::)?suite$/i     then Suite
-        else
-          Kronk.find_const new_output
-        end
-
-      @output = klass.new self if klass
     end
 
 
@@ -147,14 +140,20 @@ class Kronk
     # Trigger a single kronk result callback.
 
     def trigger_result kronk, err, &block
-      block ||= @on_result
-
-      if block.arity > 2 || block.arity < 0
-        block.call kronk, err, @mutex
-      else
-        @mutex.synchronize do
-          block.call kronk, err
+      if block_given?
+        if block.arity > 2 || block.arity < 0
+          block.call kronk, err, @mutex
+        else
+          @mutex.synchronize do
+            block.call kronk, err
+          end
         end
+
+      elsif err && respond_to?(:error)
+        error err, kronk
+
+      elsif respond_to?(:result)
+        result kronk
       end
     end
 
@@ -167,8 +166,5 @@ class Kronk
       @queue << trigger(:input) if @queue.empty? && (!@number || @number <= 1)
       @queue.length == 1 && @triggers[:input] == @on_input && @input.eof?
     end
-
-
-    private :on
   end
 end
