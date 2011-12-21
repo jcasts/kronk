@@ -137,7 +137,7 @@ class Kronk
 
       @read = true
 
-      try_force_encoding @raw
+      try_force_encoding @raw unless gzip? || deflated?
       try_force_encoding @body
     end
 
