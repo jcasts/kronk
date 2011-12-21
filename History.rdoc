@@ -6,6 +6,8 @@
 
 * Enhancements:
 
+  * Parsed Response headers now also parses cookies.
+
   * Many Player performance improvements.
 
   * Support for setting player qps.

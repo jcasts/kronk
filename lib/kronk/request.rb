@@ -60,6 +60,8 @@ class Kronk
         uri.query = [uri.query, query].compact.join "&"
       end
 
+      uri.path = "/" if uri.path.empty?
+
       uri
     end
 
@@ -350,6 +352,7 @@ class Kronk
 
     def retrieve opts={}, &block
       start_time = nil
+      opts = opts.merge :request => self
 
       @response = connection.start do |http|
         start_time = Time.now
@@ -359,9 +362,6 @@ class Kronk
         res.request = self
         res
       end
-
-      Kronk.cookie_jar.set_cookies_from_headers @uri.to_s, @response.to_hash if
-        self.use_cookies
 
       @response
     end
@@ -377,12 +377,10 @@ class Kronk
     #   request.connection.finish
 
     def stream opts={}
+      opts = opts.merge :request => self
       http = connection.started? ? connection : connection.start
       @response = http.request http_request, @body, opts
       @response.request = self
-
-      Kronk.cookie_jar.set_cookies_from_headers @uri.to_s, @response.to_hash if
-        self.use_cookies
 
       @response
     end

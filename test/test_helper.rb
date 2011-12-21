@@ -172,7 +172,9 @@ def expect_request req_method, url, options={}
 
   Kronk::HTTP.expects(:new).with(uri.host, uri.port).returns req
 
-  http.expects(:request).with(req, data, {}).returns resp
+  http.expects(:request).
+    with(req, data, has_entry(:request => instance_of(Kronk::Request))).
+    returns resp
 
   yield http, req, resp if block_given?
 

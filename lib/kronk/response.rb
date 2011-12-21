@@ -24,7 +24,7 @@ class Kronk
     end
 
 
-    attr_reader :code, :io
+    attr_reader :code, :io, :cookies, :headers
     attr_accessor :read, :request, :stringify_opts, :time
 
     ##
@@ -61,6 +61,18 @@ class Kronk
                         headless_ok?(@io.io)
 
       response_from_io @io, allow_headless
+
+      @cookies = []
+
+      if URI::HTTP === uri
+        jar = CookieJar::Jar.new
+        jar.set_cookies_from_headers uri, @headers
+
+        jar.to_a.each do |cookie|
+          @cookies << cookie.to_hash
+          Kronk.cookie_jar.add_cookie cookie unless opts[:no_cookies]
+        end
+      end
 
       @gzip_io     = StringIO.new
       self.gzip    = opts[:force_gzip]
@@ -257,13 +269,6 @@ class Kronk
     end
 
 
-    ##
-    # Accessor for downcased headers.
-
-    def headers
-      @headers
-    end
-
     alias to_hash headers
 
 
@@ -356,8 +361,10 @@ class Kronk
 
     def parsed_header include_headers=true
       out_headers = headers.dup
-      out_headers['status']       = @code
-      out_headers['http-version'] = http_version
+      out_headers['status']        = @code
+      out_headers['http-version']  = http_version
+      out_headers['set-cookie']  &&= @cookies.select{|c| c['version'].nil? }
+      out_headers['set-cookie2'] &&= @cookies.select{|c| c['version'] == 1 }
 
       case include_headers
       when nil, false
@@ -804,14 +811,22 @@ class Kronk
           value << ' ' unless value.empty?
           value << line.strip
         else
-          res_headers[key] = value if key
+          assign_header(res_headers, key, value) if key
           key, value = line.strip.split(/\s*:\s*/, 2)
           key = key.downcase
           raise Kronk::HTTPBadResponse, 'wrong header line format' if value.nil?
         end
       end
-      res_headers[key] = value
+      assign_header(res_headers, key, value) if key
       res_headers
+    end
+
+
+    def assign_header res_headers, key, value
+      res_headers[key] = Array(res_headers[key]) if res_headers[key]
+      Array === res_headers[key] ?
+        res_headers[key] << value :
+        res_headers[key] = value
     end
 
 
@@ -824,5 +839,31 @@ class Kronk
       str.force_encoding encoding if str.respond_to? :force_encoding
       str
     end
+  end
+end
+
+
+class CookieJar::Cookie
+  def to_hash
+    result = {
+      'name'       => @name,
+      'value'      => @value,
+      'domain'     => @domain,
+      'path'       => @path,
+    }
+    {
+      'expiry'      => @expiry,
+      'secure'      => (true if @secure),
+      'http_only'   => (true if @http_only),
+      'version'     => (@version if version != 0),
+      'comment'     => @comment,
+      'comment_url' => @comment_url,
+      'discard'     => (true if @discard),
+      'ports'       => @ports
+    }.each do |name, value|
+      result[name] = value if value
+    end
+
+    result
   end
 end

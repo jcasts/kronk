@@ -21,6 +21,67 @@ class TestResponse < Test::Unit::TestCase
   end
 
 
+  def test_init_no_cookies_from_file
+    assert @html_resp.cookies.empty?
+  end
+
+
+  def test_init_cookies
+    Kronk.cookie_jar.expects(:add_cookie).twice
+
+    html_resp = Kronk::Response.new File.read("test/mocks/200_response.txt"),
+                  :request    => Kronk::Request.new("http://google.com"),
+                  :no_cookies => false
+
+    expected_cookies =
+      [{"name"=>"PREF",
+        "value"=>
+         "ID=99d644506f26d85e:FF=0:TM=1290788168:LM=1290788168:S=VSMemgJxlmlToFA3",
+        "domain"=>".google.com",
+        "path"=>"/",
+        "expiry"=>Time.parse("2012-11-25 08:16:08 -0800")},
+       {"name"=>"NID",
+        "value"=>
+         "41=CcmNDE4SfDu5cdTOYVkrCVjlrGO-oVbdo1awh_p8auk2gI4uaX1vNznO0QN8nZH4Mh9WprRy3yI2yd_Fr1WaXVru6Xq3adlSLGUTIRW8SzX58An2nH3D2PhAY5JfcJrl",
+        "domain"=>".google.com",
+        "path"=>"/",
+        "expiry"=>Time.parse("2011-05-28 09:16:08 -0700"),
+        "http_only"=>true
+      }]
+
+    assert_equal expected_cookies, html_resp.cookies
+  end
+
+
+  def test_init_no_cookies_opt
+    Kronk.cookie_jar.expects(:add_cookie).never
+
+    req = Kronk::Request.new("http://google.com")
+
+    html_resp = Kronk::Response.new File.read("test/mocks/200_response.txt"),
+                  :request    => req,
+                  :no_cookies => true
+
+    expected_cookies =
+      [{"name"=>"PREF",
+        "value"=>
+         "ID=99d644506f26d85e:FF=0:TM=1290788168:LM=1290788168:S=VSMemgJxlmlToFA3",
+        "domain"=>".google.com",
+        "path"=>"/",
+        "expiry"=>Time.parse("2012-11-25 08:16:08 -0800")},
+       {"name"=>"NID",
+        "value"=>
+         "41=CcmNDE4SfDu5cdTOYVkrCVjlrGO-oVbdo1awh_p8auk2gI4uaX1vNznO0QN8nZH4Mh9WprRy3yI2yd_Fr1WaXVru6Xq3adlSLGUTIRW8SzX58An2nH3D2PhAY5JfcJrl",
+        "domain"=>".google.com",
+        "path"=>"/",
+        "expiry"=>Time.parse("2011-05-28 09:16:08 -0700"),
+        "http_only"=>true
+      }]
+
+    assert_equal expected_cookies, html_resp.cookies
+  end
+
+
   def test_bytes
     png = Kronk::Response.read_file "test/mocks/200_response.png"
     assert_equal 8469, png.bytes

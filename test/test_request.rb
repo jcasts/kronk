@@ -94,7 +94,7 @@ class TestRequest < Test::Unit::TestCase
 
   def test_build_uri_string
     uri = Kronk::Request.build_uri "example.com"
-    assert_equal "http://example.com", uri.to_s
+    assert_equal "http://example.com/", uri.to_s
   end
 
 
@@ -150,11 +150,7 @@ class TestRequest < Test::Unit::TestCase
 
 
   def test_retrieve_cookies
-    Kronk.cookie_jar.expects(:get_cookie_header).
-      with("http://example.com/request/path?foo=bar").returns "mock_cookie"
-
-    Kronk.cookie_jar.expects(:set_cookies_from_headers).
-      with("http://example.com/request/path?foo=bar", {})
+    Kronk.cookie_jar.expects(:get_cookie_header).returns "mock_cookie"
 
     expect_request "GET", "http://example.com/request/path?foo=bar",
       :headers => {'Cookie' => "mock_cookie", 'User-Agent' => "kronk"}
@@ -180,7 +176,7 @@ class TestRequest < Test::Unit::TestCase
     Kronk.cookie_jar.expects(:get_cookie_header).
       with("http://example.com/request/path?foo=bar").never
 
-    Kronk.cookie_jar.expects(:set_cookies_from_headers).never
+    Kronk.cookie_jar.expects(:add_cookie).never
 
     expect_request "GET", "http://example.com/request/path?foo=bar",
       :headers => {'User-Agent' => "kronk"}
@@ -216,8 +212,6 @@ class TestRequest < Test::Unit::TestCase
 
     Kronk.cookie_jar.expects(:get_cookie_header).
       with("http://example.com/request/path?foo=bar").returns ""
-
-    Kronk.cookie_jar.expects(:set_cookies_from_headers)
 
     expect_request "GET", "http://example.com/request/path?foo=bar",
       :headers => {'User-Agent' => "kronk"}
