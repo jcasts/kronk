@@ -1,22 +1,24 @@
 = TODO
 
+* GNU-Plot support.
+
+== Maybe Later
+
+* Animate Suite player cursor when waiting for input.
+
 * Consider getting off of net/http.
 
 * Consider allowing Output-specific cmd options.
 
 * Investigate Kronk console.
 
-* Parsed cookie diffing.
-
-* GNU-Plot support.
-
-* Animate Suite player cursor when waiting for input.
-
 == Not Viable
 
 * Use persistent connection pools.
 
 == Done
+
+* Parsed cookie diffing.
 
 * Refactor player Output to inherit Player.
 
