@@ -152,7 +152,7 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
-        opt.on('--config STR', String,
+        opt.on('--config FILE', String,
                'Load the given Kronk config file') do |value|
           Kronk.load_config value
         end
@@ -170,7 +170,7 @@ Parse and run diffs against data from live and cached http responses.
 
 
         opt.on('--format STR', String,
-               'Use a custom diff formatter') do |value|
+               'Use a custom diff formatter class') do |value|
           Kronk.config[:diff_format] = value
         end
 
@@ -180,7 +180,7 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
-        opt.on('--gzip', 'Decode body with gzip') do
+        opt.on('--gzip', 'Decode body with gZip') do
           options[:force_gzip] = true
         end
 
@@ -256,24 +256,24 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
-        opt.on('-R', '--raw', 'Run diff on the raw data returned') do
+        opt.on('-R', '--raw', 'Don\'t parse the response') do
           options[:raw] = true
         end
 
 
         opt.on('-r', '--require LIB1,LIB2', Array,
-               'Require a library or gem') do |value|
+               'Load a file or gem before execution') do |value|
           options[:requires] ||= []
           options[:requires].concat value
         end
 
 
-        opt.on('--ruby', 'Use legacy Ruby renderer') do
+        opt.on('--ruby', 'Output Ruby instead of JSON') do
           Kronk.config[:render_lang] = 'ruby'
         end
 
 
-        opt.on('--struct', 'Run diff on the data structure') do
+        opt.on('--struct', 'Return data types instead of values') do
           options[:struct] = true
         end
 
@@ -289,7 +289,7 @@ Parse and run diffs against data from live and cached http responses.
         STR
 
         opt.on('-c', '--concurrency NUM', Integer,
-               'Number of concurrent requests to make; default: 1') do |num|
+               'Number of simultaneous connections; default: 1') do |num|
           options[:player][:concurrency] = num
         end
 
@@ -413,7 +413,7 @@ Parse and run diffs against data from live and cached http responses.
 
 
         opt.on('-X', '--request STR', String,
-               'The request method to use') do |value|
+               'The HTTP request method to use') do |value|
           options[:http_method] = value
         end
 
