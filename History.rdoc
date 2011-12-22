@@ -8,6 +8,8 @@
 
 * Enhancements:
 
+  * Parse multiple piped responses using -n and content-length.
+
   * Parsed Response headers now also return parsed cookies.
 
   * Many Player performance improvements.
