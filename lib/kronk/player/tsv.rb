@@ -8,7 +8,7 @@ class Kronk
     def start
       @total_bytes = 0
 
-      $stderr.puts %w{
+      $stdout.puts %w{
         time
         resp_time(ms)
         bytes
