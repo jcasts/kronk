@@ -307,29 +307,36 @@ Parse and run diffs against data from live and cached http responses.
 
 
         opt.on('-p', '--replay [FILE]',
-                'Replay the given file or STDIN against URIs') do |file|
+               'Replay the given file or STDIN against URIs') do |file|
           options[:player][:io]   = File.open(file, "r") if file
           options[:player][:io] ||= $stdin if !$stdin.tty?
         end
 
 
         opt.on('--qps NUM', Integer,
-                'Number of queries per second to make; overrides -c') do |num|
+               'Number of queries per second to make; overrides -c') do |num|
           options[:player][:qps] = num
         end
 
 
-        opt.on('--benchmark [FILE]', 'Same as -p [FILE] -o benchmark') do |file|
+        opt.on('--benchmark [FILE]',
+               'Print benchmark data; same as -p [FILE] -o benchmark') do |file|
           options[:player][:io]   = File.open(file, "r") if file
-          options[:player][:io] ||= $stdin if !$stdin.tty?
           options[:player][:type] = :benchmark
         end
 
 
-        opt.on('--stream [FILE]', 'Same as -p [FILE] -o stream') do |file|
+        opt.on('--stream [FILE]',
+               'Print response stream; same as -p [FILE] -o stream') do |file|
           options[:player][:io]   = File.open(file, "r") if file
-          options[:player][:io] ||= $stdin if !$stdin.tty?
           options[:player][:type] = :stream
+        end
+
+
+        opt.on('--tsv [FILE]',
+               'Print TSV metrics; same as -p [FILE] -o tsv') do |file|
+          options[:player][:io]   = File.open(file, "r") if file
+          options[:player][:type] = :tsv
         end
 
 
@@ -429,6 +436,7 @@ Parse and run diffs against data from live and cached http responses.
       opts.parse! argv
 
       unless options[:player].empty?
+        options[:player][:io] ||= $stdin if !$stdin.tty?
         player_type      = options[:player][:type] || :suite
         options[:player] = Player.new_type player_type, options[:player]
       else

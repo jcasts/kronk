@@ -18,6 +18,7 @@ class Kronk
         when /^(Player::)?benchmark$/i then Benchmark
         when /^(Player::)?stream$/i    then Stream
         when /^(Player::)?suite$/i     then Suite
+        when /^(Player::)?tsv$/i       then TSV
         else
           Kronk.find_const type.to_s
         end

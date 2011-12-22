@@ -6,7 +6,7 @@
 
 * Enhancements:
 
-  * Parsed Response headers now also parses cookies.
+  * Parsed Response headers now also return parsed cookies.
 
   * Many Player performance improvements.
 

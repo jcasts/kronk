@@ -282,7 +282,7 @@ class TestCmd < Test::Unit::TestCase
 
 
   def test_parse_args_player_stdin
-    $stdin.expects(:tty?).returns(false).times(6)
+    $stdin.expects(:tty?).returns(false).times(7)
 
     opts = Kronk::Cmd.parse_args %w{uri -p}
     assert_equal $stdin, opts[:player].input.io
