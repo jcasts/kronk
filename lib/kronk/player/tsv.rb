@@ -9,7 +9,7 @@ class Kronk
       @total_bytes = 0
 
       $stdout.puts %w{
-        time(ms)
+        timestamp(ms)
         resp_time(ms)
         bytes
         bps
