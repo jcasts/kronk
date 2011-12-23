@@ -9,7 +9,7 @@ class Kronk
       @total_bytes = 0
 
       $stdout.puts %w{
-        time
+        time(ms)
         resp_time(ms)
         bytes
         bps
@@ -28,21 +28,23 @@ class Kronk
       qps = (@count / suite_time).round(3)
 
       kronk.responses.each do |resp|
-        @mutex.synchronize{ @total_bytes += resp.total_bytes }
-        req_time = (Time.now - resp.time).to_i
+        @mutex.synchronize do
+          @total_bytes += resp.total_bytes
+          req_time = ((Time.now - resp.time).to_f * 1000).to_i
 
-        $stdout.puts [
-          req_time,
-          (resp.time * 1000).round,
-          resp.bytes,
-          (@total_bytes / suite_time).round,
-          qps,
-          resp.code,
-          resp.uri.scheme,
-          resp.uri.host,
-          resp.uri.port,
-          resp.uri.path
-        ].join("\t")
+          $stdout.puts [
+            req_time,
+            (resp.time * 1000).round,
+            resp.bytes,
+            (@total_bytes / suite_time).round,
+            qps,
+            resp.code,
+            resp.uri.scheme,
+            resp.uri.host,
+            resp.uri.port,
+            resp.uri.path
+          ].join("\t")
+        end
       end
     end
   end
