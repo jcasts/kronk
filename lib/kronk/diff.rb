@@ -124,9 +124,7 @@ class Kronk
 
       common = []
 
-#i = 0
       common_sequences(arr1, arr2) do |seq|
-#i += 1
         next if used1[seq[1]] || used2[seq[2]]
 
         next if used1[seq[1]+seq[0]] || used2[seq[2]+seq[0]]
@@ -148,7 +146,6 @@ class Kronk
         common[seq[1]] = seq
       end
 
-#p i
       common
     end
 
