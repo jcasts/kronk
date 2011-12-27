@@ -181,10 +181,10 @@ class Kronk
 
             line1 = arr1[k]
             line2 = arr2[j]
-
-            len = j - start_j
-            (sequences[len] ||= []) << [len, i, start_j]
           end
+
+          len = j - start_j
+          (sequences[len] ||= []) << [len, i, start_j]
         end
       end
 
@@ -236,7 +236,13 @@ class Kronk
       while sequences.length > 0
         item = sequences.pop
         next unless item
-        item.each(&block)
+        item.each do |seq|
+          resp = yield seq
+          if !resp && seq[0] > 1
+            seq[0] = seq[0] - 1
+            (sequences[seq[0]] ||= []) << seq
+          end
+        end
       end
     end
   end
