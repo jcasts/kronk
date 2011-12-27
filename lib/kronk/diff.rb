@@ -127,8 +127,6 @@ class Kronk
       common_sequences(arr1, arr2) do |seq|
         next if used1[seq[1]] || used2[seq[2]]
 
-        next if used1[seq[1]+seq[0]] || used2[seq[2]+seq[0]]
-
         next if Array(used1[seq[1], seq[0]]).index(true) ||
                 Array(used2[seq[2], seq[0]]).index(true)
 
@@ -185,7 +183,6 @@ class Kronk
             line2 = arr2[j]
 
             len = j - start_j
-
             (sequences[len] ||= []) << [len, i, start_j]
           end
         end
