@@ -14,11 +14,15 @@
 
   * Many Player performance improvements.
 
+  * Player outputs are now Player subclasses.
+
   * Support for setting player qps.
 
   * Support for response streaming.
 
   * Support for gzip and inflate decoding.
+
+  * Diff accuracy improvements.
 
 * Bugfixes:
 
