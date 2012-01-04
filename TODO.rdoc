@@ -1,5 +1,7 @@
 = TODO
 
+* Should raw option return unzipped body or should there be a zraw option?
+
 == Maybe Later
 
 * Animate Suite player cursor when waiting for input.

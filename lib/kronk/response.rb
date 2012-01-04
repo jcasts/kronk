@@ -36,7 +36,7 @@ class Kronk
     # :force_gzip::    Force decoding body with gzip.
     # :force_inflate:: Force decoding body with gzip.
 
-    def initialize io, opts={}, &block
+    def initialize input, opts={}, &block
       @request = opts[:request]
       @headers = {}
       @encoding = @parser = @body = nil
@@ -48,10 +48,11 @@ class Kronk
       @raw  = ""
       @time = 0
 
-      @io = io || ""
-      @io = String === @io ? StringIO.new(@io) : @io
-      @io = BufferedIO.new @io unless BufferedIO === @io
-      @io.io.rewind if StringIO === @io.io && @io.io.eof?
+      input ||= ""
+      input = StringIO.new(input) if String === input
+
+      @io = BufferedIO === input ? input : BufferedIO.new(input)
+
       @io.raw_output   = @raw
       @io.response     = self
       @io.read_timeout = opts[:timeout] if opts[:timeout]
@@ -682,7 +683,7 @@ class Kronk
     # to the constructor.
 
     def headless_ok? io
-      File === io || String === io || StringIO === io #|| !@request
+      File === io || String === io || StringIO === io
     end
 
 
