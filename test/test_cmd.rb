@@ -399,8 +399,14 @@ class TestCmd < Test::Unit::TestCase
 
   def test_parse_args_uris_with_io
     $stdin.expects(:tty?).returns(false)
-    $stdin.stubs(:read_nonblock).raises(EOFError)
-    $stdin.expects(:read_nonblock).returns("MOCK RESPONSE")
+
+    if "1.9".respond_to?(:encoding)
+      $stdin.stubs(:read_nonblock).raises(EOFError)
+      $stdin.expects(:read_nonblock).returns("MOCK RESPONSE")
+    else
+      $stdin.stubs(:sysread).raises(EOFError)
+      $stdin.expects(:sysread).returns("MOCK RESPONSE")
+    end
 
     opts = Kronk::Cmd.parse_args %w{uri1 uri2}
     assert_equal 2, opts[:uris].length
