@@ -56,6 +56,7 @@ class Kronk
 
       on(:input, &@on_input)
       on(:interrupt){
+        interrupt and return if respond_to?(:interrupt)
         complete if respond_to?(:complete)
         exit 2
       }

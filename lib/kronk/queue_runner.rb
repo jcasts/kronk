@@ -232,9 +232,11 @@ class Kronk
     # Shifts one item off the queue and yields it to the given block.
 
     def yield_queue_item
-      until item = @qmutex.synchronize{ @queue.shift }
+      until item = @qmutex.synchronize{ @queue.shift } or !@reader_thread.alive?
         Thread.pass
       end
+
+      return unless item
 
       @threads << Thread.new(item) do |q_item|
         yield q_item if block_given?

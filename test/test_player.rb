@@ -16,6 +16,10 @@ class TestPlayer < Test::Unit::TestCase
         @result_calls += 1
       end
     end
+
+    def interrupt
+      raise "Interrupted"
+    end
   end
 
   class MockParser
@@ -237,6 +241,7 @@ class TestPlayer < Test::Unit::TestCase
 
   def test_run_interrupted
     @player.concurrency = 0
+    @player.instance_eval "undef interrupt"
 
     thread = Thread.new do
       @player.run do |item, mutex|
