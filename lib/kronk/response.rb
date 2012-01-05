@@ -40,7 +40,7 @@ class Kronk
     def initialize input, opts={}, &block
       @request = opts[:request]
       @headers = {}
-      @encoding = @parser = @body = nil
+      @encoding = @parser = @body = @gzip = @gzip_io = nil
 
       @headless = false
 
