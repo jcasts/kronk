@@ -76,7 +76,6 @@ class Kronk
         end
       end
 
-      @gzip_io     = StringIO.new
       self.gzip    = opts[:force_gzip]
       self.inflate = opts[:force_inflate]
       gzip?
@@ -118,7 +117,7 @@ class Kronk
     #     # handle stream
     #   end
 
-    def body
+    def body &block
       return @body if @read
 
       raise IOError, 'Socket closed.' if @io.closed?
@@ -137,14 +136,14 @@ class Kronk
 
       rescue IOError, EOFError => e
         error    = e
-        last_pos = @body.to_s.length #TODO: Test this
+        last_pos = @body.to_s.size
 
         @io.read_all
         @body = headless? ? @raw : @raw.split("\r\n\r\n", 2)[1]
-        @body = unzip @body if gzip?
+        @body = unzip @body, true if gzip?
       end
 
-      @body = Zlib::Inflate.inflate(@body) if deflated?
+      @body = Zlib::Inflate.new(-Zlib::MAX_WBITS).inflate(@body) if deflated?
 
       try_force_encoding @raw unless gzip? || deflated?
       try_force_encoding @body
@@ -515,10 +514,10 @@ class Kronk
     # :headers:: Bool/String/Array - Return headers; default true
 
     def to_s opts={}
-      return raw unless opts[:body] == false ||
-                        !opts[:headers].nil? && opts[:headers] != true
+      return raw if opts[:raw] &&
+        (opts[:headers].nil? || opts[:headers] == true)
 
-      str = self.body unless opts[:body] == false
+      str = opts[:raw] ? self.raw_body : self.body unless opts[:body] == false
 
       if opts[:headers] || opts[:headers].nil?
         hstr = raw_header(opts[:headers] || true)
@@ -598,13 +597,15 @@ class Kronk
 
       else
         self.to_s :body    => !opts[:no_body],
-                  :headers => (opts[:show_headers] || false)
+                  :headers => (opts[:show_headers] || false),
+                  :raw     => opts[:raw]
       end
 
     rescue MissingParser
       Cmd.verbose "Warning: No parser for #{@headers['content-type']} [#{uri}]"
       self.to_s :body    => !opts[:no_body],
-                :headers => (opts[:show_headers] || false)
+                :headers => (opts[:show_headers] || false),
+                :raw     => opts[:raw]
     end
 
 
@@ -769,14 +770,15 @@ class Kronk
     ##
     # Unzip a chunk of the body being read.
 
-    def unzip str
+    def unzip str, force_new=false
       return str if str.empty?
 
+      @gzip_io = StringIO.new if !@gzip_io || force_new
       pos = @gzip_io.pos
       @gzip_io << str
       @gzip_io.pos = pos
 
-      @gzip ||= Zlib::GzipReader.new @gzip_io
+      @gzip = Zlib::GzipReader.new @gzip_io if !@gzip || force_new
 
       @gzip.read rescue ""
     end

@@ -82,6 +82,138 @@ class TestResponse < Test::Unit::TestCase
   end
 
 
+  def test_body
+    expected = File.read("test/mocks/200_response.json").split("\r\n\r\n")[1]
+    assert_equal expected,
+                 @json_resp.body
+  end
+
+
+  def test_body_yield
+    count    = 0
+    expected = File.read("test/mocks/200_response.json").split("\r\n\r\n")[1]
+    body     = ""
+
+    json_file = File.open "test/mocks/200_response.json", "r"
+
+    with_buffer_size 64 do
+      json_resp = Kronk::Response.new json_file
+      json_resp.content_length = nil
+      json_resp.body do |chunk|
+        count += 1
+        body << chunk
+      end
+    end
+
+    json_file.close
+
+    assert_equal 15, count
+    assert_equal expected, body
+  end
+
+
+  def test_body_yield_exception
+    count    = 0
+    expected = File.read("test/mocks/200_response.json").split("\r\n\r\n")[1]
+    body     = ""
+
+    json_file = File.open "test/mocks/200_response.json", "r"
+
+    with_buffer_size 64 do
+      json_resp = Kronk::Response.new json_file
+      json_resp.content_length = nil
+      json_resp.body do |chunk|
+        count += 1
+        body << chunk
+        raise IOError if count == 2
+      end
+    end
+
+    json_file.close
+
+    assert_equal 3, count
+    assert_equal expected, body
+  end
+
+
+  def test_body_yield_inflate
+    count    = 0
+    expected = File.read("test/mocks/200_inflate.txt")
+    expected.force_encoding('binary') if expected.respond_to?(:force_encoding)
+    expected = expected.split("\r\n\r\n")[1]
+    expected = Zlib::Inflate.new(-Zlib::MAX_WBITS).inflate(expected)
+    body     = ""
+
+    json_file = File.open "test/mocks/200_inflate.txt", "r"
+
+    with_buffer_size 64 do
+      json_resp = Kronk::Response.new json_file
+      json_resp.content_length = nil
+      json_resp.body do |chunk|
+        count += 1
+        body << chunk
+      end
+    end
+
+    json_file.close
+
+    assert_equal 1, count
+    assert_equal expected, body
+  end
+
+
+  def test_body_yield_gzip
+    count    = 0
+    expected = File.read("test/mocks/200_gzip.txt")
+    expected.force_encoding('binary') if expected.respond_to?(:force_encoding)
+    expected = expected.split("\r\n\r\n")[1]
+    expected = Zlib::GzipReader.new(StringIO.new(expected)).read
+    body     = ""
+
+    json_file = File.open "test/mocks/200_gzip.txt", "r"
+
+    with_buffer_size 64 do
+      json_resp = Kronk::Response.new json_file
+      json_resp.content_length = nil
+      json_resp.body do |chunk|
+        count += 1
+        body << chunk
+      end
+    end
+
+    json_file.close
+
+    assert_equal 19, count
+    assert_equal expected, body
+  end
+
+
+  def test_body_yield_gzip_exception
+    count    = 0
+    expected = File.read("test/mocks/200_gzip.txt")
+    expected.force_encoding('binary') if expected.respond_to?(:force_encoding)
+    expected = expected.split("\r\n\r\n")[1]
+    expected = Zlib::GzipReader.new(StringIO.new(expected)).read
+    body     = ""
+
+    gzip_file = File.open "test/mocks/200_gzip.txt", "r"
+
+    with_buffer_size 64 do
+      gzip_resp = Kronk::Response.new gzip_file
+      gzip_resp.body do |chunk|
+        count += 1
+        body << chunk
+        raise IOError if count == 3
+      end
+    end
+
+    gzip_file.close
+
+    assert_equal 4, count
+    assert_equal expected, body
+  end
+
+
   def test_bytes
     png = Kronk::Response.read_file "test/mocks/200_response.png"
     assert_equal 8469, png.bytes

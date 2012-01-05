@@ -232,9 +232,9 @@ class Kronk
 
       @headers["Accept-Encoding"] = [
         @headers["Accept-Encoding"].to_s.split(","),
-        Array(opts[:accept_encoding]),
-        "identity;q=0.3"
+        Array(opts[:accept_encoding])
       ].flatten.compact.uniq.join(",")
+      @headers.delete "Accept-Encoding" if @headers["Accept-Encoding"].empty?
 
       @timeout = opts[:timeout] || Kronk.config[:timeout]
 

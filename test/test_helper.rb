@@ -148,6 +148,17 @@ ensure
 end
 
 
+def with_buffer_size size
+  old_size = Net::BufferedIO::BUFSIZE
+  Net::BufferedIO.send :remove_const, :BUFSIZE
+  Net::BufferedIO.const_set :BUFSIZE, size
+  yield
+ensure
+  Net::BufferedIO.send :remove_const, :BUFSIZE
+  Net::BufferedIO.const_set :BUFSIZE, old_size
+end
+
+
 def expect_request req_method, url, options={}
   uri  = URI.parse url
 
@@ -162,8 +173,7 @@ def expect_request req_method, url, options={}
   data &&= Hash === data ? Kronk::Request.build_query(data) : data.to_s
 
   headers = options[:headers] || Hash.new
-  headers['User-Agent']      ||= Kronk::DEFAULT_USER_AGENT
-  headers["Accept-Encoding"] ||= "identity;q=0.3"
+  headers['User-Agent'] ||= Kronk::DEFAULT_USER_AGENT
 
   req.expects(:start).yields(http).returns resp
 
