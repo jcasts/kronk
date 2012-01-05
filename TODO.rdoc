@@ -1,18 +1,34 @@
 = TODO
 
-* QPS for player.
+== Maybe Later
 
-* Support for response streaming.
+* Animate Suite player cursor when waiting for input.
 
-* Support for X-Url-\d and x-alt-location-\d redirects.
+* Consider getting off of net/http.
 
-* Support for gzip.
-
-* Player input IO timeout.
+* Consider allowing Output-specific cmd options.
 
 * Investigate Kronk console.
 
+== Not Viable
+
+* Use persistent connection pools.
+
 == Done
+
+* GNU-Plot support.
+
+* Parsed cookie diffing.
+
+* Refactor player Output to inherit Player.
+
+* Revisit how QueueRunner handles SIGINT.
+
+* QPS option for player.
+
+* Support for gzip.
+
+* Support for response streaming.
 
 * Investigate the use of EM for QueueRunner.
 

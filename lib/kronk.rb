@@ -8,21 +8,22 @@ require 'stringio'
 require 'base64'
 
 require 'net/https'
+require 'zlib'
 require 'optparse'
 require 'yaml'
 
 class Kronk
 
   # This gem's version.
-  VERSION = '1.7.8'
+  VERSION = '1.8.0'
 
   require 'kronk/constants'
   require 'kronk/queue_runner'
   require 'kronk/player'
-  require 'kronk/player/output'
   require 'kronk/player/suite'
   require 'kronk/player/stream'
   require 'kronk/player/benchmark'
+  require 'kronk/player/tsv'
   require 'kronk/player/request_parser'
   require 'kronk/player/input_reader'
   require 'kronk/cmd'
@@ -35,8 +36,10 @@ class Kronk
   require 'kronk/diff/color_format'
   require 'kronk/diff/output'
   require 'kronk/diff'
-  require 'kronk/response'
+  require 'kronk/http'
+  require 'kronk/buffered_io'
   require 'kronk/request'
+  require 'kronk/response'
   require 'kronk/plist_parser'
   require 'kronk/xml_parser'
   require 'kronk/yaml_parser'
@@ -306,6 +309,9 @@ class Kronk
           str2 = res2.stringify
          end
 
+    t1.abort_on_exception = true
+    t2.abort_on_exception = true
+
     t1.join
     t2.join
 
@@ -324,18 +330,18 @@ class Kronk
   def request uri
     options = Kronk.config[:no_uri_options] ? @options : options_for_uri(uri)
 
-    if IO === uri || StringIO === uri
+    if IO === uri || StringIO === uri || BufferedIO === uri
       Cmd.verbose "Reading IO #{uri}"
-      resp = Response.new uri
+      resp = Response.new uri, options
 
     elsif File.file? uri.to_s
       Cmd.verbose "Reading file:  #{uri}\n"
-      resp = Response.read_file uri
+      resp = Response.read_file uri, options
 
     else
       req = Request.new uri, options
       Cmd.verbose "Retrieving URL:  #{req.uri}\n"
-      resp = req.retrieve
+      resp = req.retrieve options
       Kronk.history << uri
     end
 

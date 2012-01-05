@@ -6,7 +6,7 @@ class Kronk
   class Request
 
     # Raised by Request.parse when parsing invalid http request string.
-    class ParseError < Kronk::Exception; end
+    class ParseError < Kronk::Error; end
 
     # Matches the first line of an http request string or a fully
     # qualified URL.
@@ -46,19 +46,21 @@ class Kronk
     # Build the URI to use for the request from the given uri or
     # path and options.
 
-    def self.build_uri uri, options={}
-      uri  ||= options[:host] || Kronk.config[:default_host]
-      suffix = options[:uri_suffix]
+    def self.build_uri uri, opts={}
+      uri  ||= opts[:host] || Kronk.config[:default_host]
+      suffix = opts[:uri_suffix]
 
       uri = "http://#{uri}"   unless uri.to_s =~ %r{^(\w+://|/)}
       uri = "#{uri}#{suffix}" if suffix
       uri = URI.parse uri     unless URI === uri
       uri = URI.parse(Kronk.config[:default_host]) + uri unless uri.host
 
-      if options[:query]
-        query = build_query options[:query]
+      if opts[:query]
+        query = build_query opts[:query]
         uri.query = [uri.query, query].compact.join "&"
       end
+
+      uri.path = "/" if uri.path.empty?
 
       uri
     end
@@ -185,6 +187,18 @@ class Kronk
     end
 
 
+    class << self
+      %w{get post put delete trace head options}.each do |name|
+        class_eval <<-"END"
+          def #{name} uri, opts={}, &block
+            opts[:http_method] = "#{name}"
+            new(uri, opts).retrieve(&block)
+          end  
+        END
+      end
+    end
+
+
     attr_accessor :body, :headers, :proxy, :response, :timeout
 
     attr_reader :http_method, :uri, :use_cookies
@@ -199,34 +213,42 @@ class Kronk
     # :headers:: Hash - extra headers to pass to the request
     # :http_method:: Symbol - the http method to use; defaults to :get
     # :proxy:: Hash/String - http proxy to use; defaults to {}
+    # :accept_encoding:: Array/String - list of encodings the server can return
     #
     # Note: if no http method is specified and data is given, will default
     # to using a post request.
 
-    def initialize uri, options={}
-      @auth = options[:auth]
+    def initialize uri, opts={}
+      @auth = opts[:auth]
 
       @body = nil
-      @body = self.class.build_query options[:data] if options[:data]
+      @body = self.class.build_query opts[:data] if opts[:data]
 
+      @connection = nil
       @response = nil
       @_req     = nil
-      @_res     = nil
 
-      @headers = options[:headers] || {}
-      @timeout = options[:timeout] || Kronk.config[:timeout]
+      @headers = opts[:headers] || {}
 
-      @uri = self.class.build_uri uri, options
+      @headers["Accept-Encoding"] = [
+        @headers["Accept-Encoding"].to_s.split(","),
+        Array(opts[:accept_encoding])
+      ].flatten.compact.uniq.join(",")
+      @headers.delete "Accept-Encoding" if @headers["Accept-Encoding"].empty?
 
-      @proxy = options[:proxy] || {}
+      @timeout = opts[:timeout] || Kronk.config[:timeout]
+
+      @uri = self.class.build_uri uri, opts
+
+      @proxy = opts[:proxy] || {}
       @proxy = {:host => @proxy} unless Hash === @proxy
 
-      self.user_agent ||= options[:user_agent]
+      self.user_agent ||= opts[:user_agent]
 
-      self.http_method = options[:http_method] || (@body ? "POST" : "GET")
+      self.http_method = opts[:http_method] || (@body ? "POST" : "GET")
 
-      self.use_cookies = options.has_key?(:no_cookies) ?
-                          !options[:no_cookies] : Kronk.config[:use_cookies]
+      self.use_cookies = opts.has_key?(:no_cookies) ?
+                          !opts[:no_cookies] : Kronk.config[:use_cookies]
     end
 
 
@@ -247,6 +269,21 @@ class Kronk
 
 
     ##
+    # Reference to the HTTP connection instance.
+
+    def connection
+      return @connection if @connection
+      http_class = http_proxy @proxy[:host], @proxy
+
+      @connection = http_class.new @uri.host, @uri.port
+      @connection.open_timeout = @connection.read_timeout = @timeout if @timeout
+      @connection.use_ssl      = true if @uri.scheme =~ /^https$/
+
+      @connection
+    end
+
+
+    ##
     # Assigns the cookie string.
 
     def cookie= cookie_str
@@ -259,47 +296,6 @@ class Kronk
 
     def http_method= new_verb
       @http_method = new_verb.to_s.upcase
-    end
-
-
-    ##
-    # Returns the HTTP request object.
-
-    def http_request
-      req = VanillaRequest.new @http_method, @uri.request_uri, @headers
-
-      req.basic_auth @auth[:username], @auth[:password] if
-        @auth && @auth[:username]
-
-      req
-    end
-
-
-    ##
-    # Assign the use of a proxy.
-    # The proxy_opts arg can be a uri String or a Hash with the :address key
-    # and optional :username and :password keys.
-
-    def http_proxy addr, opts={}
-      return Net::HTTP unless addr
-
-      host, port = addr.split ":"
-      port ||= opts[:port] || 8080
-
-      user = opts[:username]
-      pass = opts[:password]
-
-      Kronk::Cmd.verbose "Using proxy #{addr}\n" if host
-
-      Net::HTTP::Proxy host, port, user, pass
-    end
-
-
-    ##
-    # Assign the uri and io based on if the uri is a file, io, or url.
-
-    def uri= new_uri
-      @uri = self.class.build_uri new_uri
     end
 
 
@@ -354,38 +350,70 @@ class Kronk
 
 
     ##
-    # Retrieve this requests' response.
+    # Retrieve this requests' response. Returns a Kronk::Response once the
+    # full HTTP response has been read. If a block is given, will yield
+    # the response and body chunks as they get received.
+    #
+    # Note: Block will yield the full body if the response is compressed
+    # using Deflate as the Deflate format does not support streaming.
+    #
+    # Options are passed directly to the Kronk::Response constructor.
 
-    def retrieve
-      http_class = http_proxy @proxy[:host], @proxy
+    def retrieve opts={}, &block
+      start_time = nil
+      opts = opts.merge :request => self
 
-      @_req = http_class.new @uri.host, @uri.port
-
-      @_req.read_timeout = @timeout if @timeout
-      @_req.use_ssl      = true     if @uri.scheme =~ /^https$/
-
-      elapsed_time = nil
-      socket       = nil
-      socket_io    = nil
-
-      @_res = @_req.start do |http|
-        socket = http.instance_variable_get "@socket"
-        socket.debug_output = socket_io = StringIO.new
-
+      @response = connection.start do |http|
         start_time = Time.now
-        res = http.request self.http_request, @body
-        elapsed_time = Time.now - start_time
-
+        res = http.request http_request, @body, opts, &block
+        res.body # make sure to read the full body from io
+        res.time    = Time.now - start_time
+        res.request = self
         res
       end
 
-      Kronk.cookie_jar.set_cookies_from_headers @uri.to_s, @_res.to_hash if
-        self.use_cookies
+      @response
+    end
 
-      @response      = Response.new socket_io, @_res, self
-      @response.time = elapsed_time
+
+    ##
+    # Retrieve this requests' response but only reads HTTP headers before
+    # returning and leaves the connection open.
+    #
+    # Options are passed directly to the Kronk::Response constructor.
+    #
+    # Connection must be closed using:
+    #   request.connection.finish
+
+    def stream opts={}
+      opts = opts.merge :request => self
+      http = connection.started? ? connection : connection.start
+      @response = http.request http_request, @body, opts
+      @response.request = self
 
       @response
+    end
+
+
+    ##
+    # Returns this Request instance as an options hash.
+
+    def to_hash
+      hash = {
+        :host        => "#{@uri.scheme}://#{@uri.host}:#{@uri.port}",
+        :uri_suffix  => @uri.request_uri,
+        :user_agent  => self.user_agent,
+        :timeout     => @timeout,
+        :http_method => self.http_method,
+        :no_cookies  => !self.use_cookies
+      }
+
+      hash[:auth]    = @auth if @auth
+      hash[:data]    = @body if @body
+      hash[:headers] = @headers unless @headers.empty?
+      hash[:proxy]   = @proxy   unless @proxy.empty?
+
+      hash
     end
 
 
@@ -396,7 +424,7 @@ class Kronk
       out = "#{@http_method} #{@uri.request_uri} HTTP/1.1\r\n"
       out << "host: #{@uri.host}:#{@uri.port}\r\n"
 
-      self.http_request.each do |name, value|
+      http_request.each do |name, value|
         out << "#{name}: #{value}\r\n" unless name =~ /host/i
       end
 
@@ -411,6 +439,40 @@ class Kronk
     def inspect
       "#<#{self.class}:#{self.http_method} #{self.uri}>"
     end
+
+
+    ##
+    # Returns the HTTP request object.
+
+    def http_request
+      req = VanillaRequest.new @http_method, @uri.request_uri, @headers
+
+      req.basic_auth @auth[:username], @auth[:password] if
+        @auth && @auth[:username]
+
+      req
+    end
+
+
+    ##
+    # Assign the use of a proxy.
+    # The proxy_opts arg can be a uri String or a Hash with the :address key
+    # and optional :username and :password keys.
+
+    def http_proxy addr, opts={}
+      return Kronk::HTTP unless addr
+
+      host, port = addr.split ":"
+      port ||= opts[:port] || 8080
+
+      user = opts[:username]
+      pass = opts[:password]
+
+      Kronk::Cmd.verbose "Using proxy #{addr}\n" if host
+
+      Kronk::HTTP::Proxy host, port, user, pass
+    end
+
 
 
     ##

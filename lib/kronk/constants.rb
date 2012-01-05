@@ -1,19 +1,19 @@
 class Kronk
 
   # Generic Request exception.
-  class Exception < ::Exception; end
+  class Error < ::StandardError; end
 
   # Raised when parsing fails.
-  class ParserError < Exception; end
+  class ParserError < Error; end
 
   # Raised when the URI was not resolvable.
-  class NotFoundError < Exception; end
+  class NotFoundError < Error; end
 
   # Raised when HTTP times out.
-  class TimeoutError < Exception; end
+  class TimeoutError < Error; end
 
   # Raised when a missing (but non-mandatory) dependency can't be loaded.
-  class MissingDependency < Exception; end
+  class MissingDependency < Error; end
 
 
   # Config directory.
@@ -80,7 +80,6 @@ class Kronk
 
   # Default config to use.
   DEFAULT_CONFIG = {
-    :async          => 'auto',
     :content_types  => DEFAULT_CONTENT_TYPES.dup,
     :cache_file     => DEFAULT_CACHE_FILE,
     :context        => 3,

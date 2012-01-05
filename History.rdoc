@@ -1,3 +1,35 @@
+=== 1.8.0 / 2012-01-05
+
+* Major Enhancements:
+
+  * Support for TSV player output (read gnuplot).
+
+  * Removed evented model support; too costly to maintain.
+
+* Enhancements:
+
+  * Parsed Response headers now also return parsed cookies.
+
+  * Many Player performance improvements.
+
+  * Player outputs are now Player subclasses.
+
+  * Support for setting player qps.
+
+  * Support for response streaming.
+
+  * Support for gzip and inflate decoding.
+
+  * Diff accuracy improvements.
+
+  * Support forwarding HTTP auth information to redirected hosts.
+
+* Bugfixes:
+
+  * Pass request init options to redirects.
+
+  * QueueRunner multithreading fix for Rubys with no GIL.
+
 === 1.7.8 / 2011-11-10
 
 * Enhancements:

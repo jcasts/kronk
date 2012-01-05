@@ -96,6 +96,7 @@ class Kronk
           @meta.last[0] = str1.meta[0] if str1.respond_to?(:meta)
           @meta.last[1] = str2.meta[0] if str2.respond_to?(:meta)
         end
+
         diff_ary.concat arr1[c[1], c[0]]
 
         last_i1 = c[1] + c[0]
@@ -161,8 +162,7 @@ class Kronk
 
       arr2_map = {}
       arr2.each_with_index do |line, j|
-        arr2_map[line] ||= []
-        arr2_map[line] << j
+        (arr2_map[line] ||= []) << j
       end
 
       arr1.each_with_index do |line, i|
@@ -184,14 +184,7 @@ class Kronk
           end
 
           len = j - start_j
-
-          sequences[len] ||= []
-          sequences[len] << [len, i, start_j]
-
-          if len > 1
-            sequences[len-1] ||= []
-            sequences[len-1] << [(len-1), i, start_j]
-          end
+          (sequences[len] ||= []) << [len, i, start_j]
         end
       end
 
@@ -239,11 +232,17 @@ class Kronk
 
     private
 
-    def yield_sequences sequences, dist=0, &block # :nodoc:
-      while sequences.length > dist
+    def yield_sequences sequences, &block # :nodoc:
+      while sequences.length > 0
         item = sequences.pop
         next unless item
-        item.each(&block)
+        item.each do |seq|
+          resp = yield seq
+          if !resp && seq[0] > 1
+            seq[0] = seq[0] - 1
+            (sequences[seq[0]] ||= []) << seq
+          end
+        end
       end
     end
   end

@@ -13,7 +13,8 @@ class TestHelperMethods < Test::Unit::TestCase
     @mock_req   = stub("mock_req", :retrieve => @mock_resp,  :uri => "host.com")
     @mock_req2  = stub("mock_req", :retrieve => @mock_resp2, :uri => "host.com")
 
-    @mock_thread = stub("mock_thread", :join => nil)
+    @mock_thread = stub("mock_thread", :join => true,
+                         :abort_on_exception= => true)
 
     Thread.stubs(:new).yields.returns @mock_thread
     Kronk::Request.any_instance.stubs(:new).returns @mock_req
@@ -97,7 +98,7 @@ class TestHelperMethods < Test::Unit::TestCase
     Kronk::Request.expects(:new).
       with("host.com", :foo => "bar", :test => "thing").returns @mock_req
 
-    @mock_resp.expects(:selective_data).with(:foo => "bar", :test => "thing").
+    @mock_resp.expects(:data).with(:foo => "bar", :test => "thing").
       returns @json
 
     retrieve "host.com", {:foo => "bar"}, :test => "thing"
@@ -119,8 +120,8 @@ class TestHelperMethods < Test::Unit::TestCase
     Kronk::Request.expects(:new).
       with("host2.com", :foo => "bar").returns @mock_req2
 
-    @mock_resp.expects(:selective_data).twice.with(:foo => "bar").returns @json
-    @mock_resp2.expects(:selective_data).twice.with(:foo => "bar").returns @json
+    @mock_resp.expects(:data).twice.with(:foo => "bar").returns @json
+    @mock_resp2.expects(:data).twice.with(:foo => "bar").returns @json
 
     retrieve "host1.com", "host2.com", :foo => "bar"
 

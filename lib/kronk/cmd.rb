@@ -6,7 +6,7 @@ class Kronk
   class Cmd
 
     RESCUABLE = [
-      Kronk::Exception, Timeout::Error,
+      Kronk::Error, Timeout::Error,
       SocketError, SystemCallError, URI::InvalidURIError
     ]
 
@@ -152,7 +152,7 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
-        opt.on('--config STR', String,
+        opt.on('--config FILE', String,
                'Load the given Kronk config file') do |value|
           Kronk.load_config value
         end
@@ -170,13 +170,18 @@ Parse and run diffs against data from live and cached http responses.
 
 
         opt.on('--format STR', String,
-               'Use a custom diff formatter') do |value|
+               'Use a custom diff formatter class') do |value|
           Kronk.config[:diff_format] = value
         end
 
 
         opt.on('--full', 'Show the full diff') do
           options[:context] = false
+        end
+
+
+        opt.on('--gzip', 'Force decode body with gZip') do
+          options[:force_gzip] = true
         end
 
 
@@ -215,6 +220,11 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
+        opt.on('--inflate', 'Force decode body with Zlib Inflate') do
+          options[:force_inflate] = true
+        end
+
+
         opt.on('--irb', 'Start an IRB console with the response') do
           options[:irb] = true
         end
@@ -246,24 +256,24 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
-        opt.on('-R', '--raw', 'Run diff on the raw data returned') do
+        opt.on('-R', '--raw', 'Don\'t parse the response') do
           options[:raw] = true
         end
 
 
         opt.on('-r', '--require LIB1,LIB2', Array,
-               'Require a library or gem') do |value|
+               'Load a file or gem before execution') do |value|
           options[:requires] ||= []
           options[:requires].concat value
         end
 
 
-        opt.on('--ruby', 'Use legacy Ruby renderer') do
+        opt.on('--ruby', 'Output Ruby instead of JSON') do
           Kronk.config[:render_lang] = 'ruby'
         end
 
 
-        opt.on('--struct', 'Run diff on the data structure') do
+        opt.on('--struct', 'Return data types instead of values') do
           options[:struct] = true
         end
 
@@ -279,7 +289,7 @@ Parse and run diffs against data from live and cached http responses.
         STR
 
         opt.on('-c', '--concurrency NUM', Integer,
-               'Number of concurrent requests to make; default: 1') do |num|
+               'Number of simultaneous connections; default: 1') do |num|
           options[:player][:concurrency] = num
         end
 
@@ -292,29 +302,41 @@ Parse and run diffs against data from live and cached http responses.
 
         opt.on('-o', '--replay-out [FORMAT]',
                'Output format used by --replay; default: stream') do |output|
-          options[:player][:output] = output || :stream
+          options[:player][:type] = output || :stream
         end
 
 
         opt.on('-p', '--replay [FILE]',
-                'Replay the given file or STDIN against URIs') do |file|
+               'Replay the given file or STDIN against URIs') do |file|
           options[:player][:io]   = File.open(file, "r") if file
           options[:player][:io] ||= $stdin if !$stdin.tty?
-          options[:player][:output] ||= :suite
         end
 
 
-        opt.on('--benchmark [FILE]', 'Same as -p [FILE] -o benchmark') do |file|
-          options[:player][:io]   = File.open(file, "r") if file
-          options[:player][:io] ||= $stdin if !$stdin.tty?
-          options[:player][:output] = :benchmark
+        opt.on('--qps NUM', Integer,
+               'Number of queries per second to make; overrides -c') do |num|
+          options[:player][:qps] = num
         end
 
 
-        opt.on('--stream [FILE]', 'Same as -p [FILE] -o stream') do |file|
+        opt.on('--benchmark [FILE]',
+               'Print benchmark data; same as -p [FILE] -o benchmark') do |file|
           options[:player][:io]   = File.open(file, "r") if file
-          options[:player][:io] ||= $stdin if !$stdin.tty?
-          options[:player][:output] = :stream
+          options[:player][:type] = :benchmark
+        end
+
+
+        opt.on('--stream [FILE]',
+               'Print response stream; same as -p [FILE] -o stream') do |file|
+          options[:player][:io]   = File.open(file, "r") if file
+          options[:player][:type] = :stream
+        end
+
+
+        opt.on('--tsv [FILE]',
+               'Print TSV metrics; same as -p [FILE] -o tsv') do |file|
+          options[:player][:io]   = File.open(file, "r") if file
+          options[:player][:type] = :tsv
         end
 
 
@@ -325,6 +347,12 @@ Parse and run diffs against data from live and cached http responses.
 
         opt.on('--clear-cookies', 'Delete all saved cookies') do
           Kronk.clear_cookies!
+        end
+
+
+        opt.on('--compressed',
+               'Request compressed response (using deflate or gzip)') do
+          options[:accept_encoding] = %w{gzip;q=1.0 deflate;q=0.6}
         end
 
 
@@ -356,6 +384,13 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
+        opt.on('--location-trusted [NUM]', Integer,
+               'Follow location and send auth to other hosts') do |value|
+          options[:trust_location]   = true
+          options[:follow_redirects] = value || true
+        end
+
+
         opt.on('--no-cookies', 'Don\'t use cookies for this session') do
           options[:no_cookies] = true
         end
@@ -373,7 +408,7 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
-        opt.on('-t', '--timeout INT', Float,
+        opt.on('-t', '--timeout NUM', Float,
                'Timeout for http connection in seconds') do |value|
           Kronk.config[:timeout] = value
         end
@@ -398,7 +433,7 @@ Parse and run diffs against data from live and cached http responses.
 
 
         opt.on('-X', '--request STR', String,
-               'The request method to use') do |value|
+               'The HTTP request method to use') do |value|
           options[:http_method] = value
         end
 
@@ -414,16 +449,15 @@ Parse and run diffs against data from live and cached http responses.
       opts.parse! argv
 
       unless options[:player].empty?
-        options[:player] = Player.new options[:player]
-        set_player_backend Kronk.config[:async]
+        options[:player][:io] ||= $stdin if !$stdin.tty?
+        player_type      = options[:player][:type] || :suite
+        options[:player] = Player.new_type player_type, options[:player]
       else
         options.delete :player
       end
 
       if !$stdin.tty? && !(options[:player] && options[:player].input.io)
-        io = $stdin
-        io = StringIO.new $stdin.read
-        options[:uris] << io
+        options[:uris] << BufferedIO.new($stdin)
       end
 
       options[:uris].concat argv
@@ -613,26 +647,6 @@ Parse and run diffs against data from live and cached http responses.
       verbose "\nResp. Time: #{response.time.to_f}"
 
       response.success?
-    end
-
-
-    ##
-    # Set Player async state.
-
-    def self.set_player_backend async=false
-      return Kronk::Player.async = false unless
-        async == true || async.to_s == 'auto'
-
-      begin
-        require 'kronk/async'
-        Kronk::Player.async = true
-
-      rescue LoadError
-        Kronk::Player.async = false
-
-        raise Kronk::Exception, "Async mode requires the em-http-request gem" if
-          async == true
-      end
     end
 
 

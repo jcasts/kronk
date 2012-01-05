@@ -21,6 +21,199 @@ class TestResponse < Test::Unit::TestCase
   end
 
 
+  def test_init_no_cookies_from_file
+    assert @html_resp.cookies.empty?
+  end
+
+
+  def test_init_cookies
+    Kronk.cookie_jar.expects(:add_cookie).twice
+
+    html_resp = Kronk::Response.new File.read("test/mocks/200_response.txt"),
+                  :request    => Kronk::Request.new("http://google.com"),
+                  :no_cookies => false
+
+    expected_cookies =
+      [{"name"=>"PREF",
+        "value"=>
+         "ID=99d644506f26d85e:FF=0:TM=1290788168:LM=1290788168:S=VSMemgJxlmlToFA3",
+        "domain"=>".google.com",
+        "path"=>"/",
+        "expiry"=>Time.parse("2012-11-25 08:16:08 -0800")},
+       {"name"=>"NID",
+        "value"=>
+         "41=CcmNDE4SfDu5cdTOYVkrCVjlrGO-oVbdo1awh_p8auk2gI4uaX1vNznO0QN8nZH4Mh9WprRy3yI2yd_Fr1WaXVru6Xq3adlSLGUTIRW8SzX58An2nH3D2PhAY5JfcJrl",
+        "domain"=>".google.com",
+        "path"=>"/",
+        "expiry"=>Time.parse("2011-05-28 09:16:08 -0700"),
+        "http_only"=>true
+      }]
+
+    assert_equal expected_cookies, html_resp.cookies
+  end
+
+
+  def test_init_no_cookies_opt
+    Kronk.cookie_jar.expects(:add_cookie).never
+
+    req = Kronk::Request.new("http://google.com")
+
+    html_resp = Kronk::Response.new File.read("test/mocks/200_response.txt"),
+                  :request    => req,
+                  :no_cookies => true
+
+    expected_cookies =
+      [{"name"=>"PREF",
+        "value"=>
+         "ID=99d644506f26d85e:FF=0:TM=1290788168:LM=1290788168:S=VSMemgJxlmlToFA3",
+        "domain"=>".google.com",
+        "path"=>"/",
+        "expiry"=>Time.parse("2012-11-25 08:16:08 -0800")},
+       {"name"=>"NID",
+        "value"=>
+         "41=CcmNDE4SfDu5cdTOYVkrCVjlrGO-oVbdo1awh_p8auk2gI4uaX1vNznO0QN8nZH4Mh9WprRy3yI2yd_Fr1WaXVru6Xq3adlSLGUTIRW8SzX58An2nH3D2PhAY5JfcJrl",
+        "domain"=>".google.com",
+        "path"=>"/",
+        "expiry"=>Time.parse("2011-05-28 09:16:08 -0700"),
+        "http_only"=>true
+      }]
+
+    assert_equal expected_cookies, html_resp.cookies
+  end
+
+
+  def test_body
+    expected = File.read("test/mocks/200_response.json").split("\r\n\r\n")[1]
+    assert_equal expected,
+                 @json_resp.body
+  end
+
+
+  def test_body_yield
+    count    = 0
+    expected = File.read("test/mocks/200_response.json").split("\r\n\r\n")[1]
+    body     = ""
+
+    json_file = File.open "test/mocks/200_response.json", "r"
+
+    with_buffer_size 64 do
+      json_resp = Kronk::Response.new json_file
+      json_resp.content_length = nil
+      json_resp.body do |chunk|
+        count += 1
+        body << chunk
+      end
+    end
+
+    json_file.close
+
+    assert_equal 15, count
+    assert_equal expected, body
+  end
+
+
+  def test_body_yield_exception
+    count    = 0
+    expected = File.read("test/mocks/200_response.json").split("\r\n\r\n")[1]
+    body     = ""
+
+    json_file = File.open "test/mocks/200_response.json", "r"
+
+    with_buffer_size 64 do
+      json_resp = Kronk::Response.new json_file
+      json_resp.content_length = nil
+      json_resp.body do |chunk|
+        count += 1
+        body << chunk
+        raise IOError if count == 2
+      end
+    end
+
+    json_file.close
+
+    assert_equal 3, count
+    assert_equal expected, body
+  end
+
+
+  def test_body_yield_inflate
+    count    = 0
+    expected = File.read("test/mocks/200_inflate.txt")
+    expected.force_encoding('binary') if expected.respond_to?(:force_encoding)
+    expected = expected.split("\r\n\r\n")[1]
+    expected = Zlib::Inflate.new(-Zlib::MAX_WBITS).inflate(expected)
+    body     = ""
+
+    json_file = File.open "test/mocks/200_inflate.txt", "r"
+
+    with_buffer_size 64 do
+      json_resp = Kronk::Response.new json_file
+      json_resp.content_length = nil
+      json_resp.body do |chunk|
+        count += 1
+        body << chunk
+      end
+    end
+
+    json_file.close
+
+    assert_equal 1, count
+    assert_equal expected, body
+  end
+
+
+  def test_body_yield_gzip
+    count    = 0
+    expected = File.read("test/mocks/200_gzip.txt")
+    expected.force_encoding('binary') if expected.respond_to?(:force_encoding)
+    expected = expected.split("\r\n\r\n")[1]
+    expected = Zlib::GzipReader.new(StringIO.new(expected)).read
+    body     = ""
+
+    json_file = File.open "test/mocks/200_gzip.txt", "r"
+
+    with_buffer_size 64 do
+      json_resp = Kronk::Response.new json_file
+      json_resp.content_length = nil
+      json_resp.body do |chunk|
+        count += 1
+        body << chunk
+      end
+    end
+
+    json_file.close
+
+    assert_equal 19, count
+    assert_equal expected, body
+  end
+
+
+  def test_body_yield_gzip_exception
+    count    = 0
+    expected = File.read("test/mocks/200_gzip.txt")
+    expected.force_encoding('binary') if expected.respond_to?(:force_encoding)
+    expected = expected.split("\r\n\r\n")[1]
+    expected = Zlib::GzipReader.new(StringIO.new(expected)).read
+    body     = ""
+
+    gzip_file = File.open "test/mocks/200_gzip.txt", "r"
+
+    with_buffer_size 64 do
+      gzip_resp = Kronk::Response.new gzip_file
+      gzip_resp.body do |chunk|
+        count += 1
+        body << chunk
+        raise IOError if count == 3
+      end
+    end
+
+    gzip_file.close
+
+    assert_equal 4, count
+    assert_equal expected, body
+  end
+
+
   def test_bytes
     png = Kronk::Response.read_file "test/mocks/200_response.png"
     assert_equal 8469, png.bytes
@@ -75,27 +268,8 @@ class TestResponse < Test::Unit::TestCase
 
     expected_header = "#{mock_200_response.split("\r\n\r\n", 2)[0]}\r\n"
 
-    assert Net::HTTPResponse === resp.instance_variable_get("@_res")
     assert_equal mock_200_response, resp.raw
     assert_equal expected_header, resp.raw_header
-  end
-
-
-  def test_read_raw_from
-    resp   = mock_200_response
-    chunks = [resp[0..123], resp[124..200], resp[201..-1]]
-    chunks = chunks.map{|c| "-> #{c.inspect}"}
-    str = [chunks[0], "<- reading 123 bytes", chunks[1], chunks[2]].join "\n"
-    str = "<- \"mock debug request\"\n#{str}\nread 123 bytes"
-
-    io = StringIO.new str
-
-    resp = Kronk::Response.new mock_200_response
-    req, resp, bytes = resp.send :read_raw_from, io
-
-    assert_equal "mock debug request", req
-    assert_equal mock_200_response, resp
-    assert_equal 123, bytes
   end
 
 
@@ -197,81 +371,75 @@ class TestResponse < Test::Unit::TestCase
   end
 
 
-  def test_selective_string
-    body = @json_resp.raw.split("\r\n\r\n")[1]
-    assert_equal body, @json_resp.selective_string
+  def test_to_s
+    body = @json_resp.raw
+    assert_equal body, @json_resp.to_s
   end
 
 
-  def test_selective_string_no_body
+  def test_to_s_no_body
     @json_resp.raw.split("\r\n\r\n")[1]
 
-    assert_nil @json_resp.selective_string(:no_body => true)
+    assert_equal "", @json_resp.to_s(:body => false, :headers => false)
 
     assert_equal "#{@json_resp.raw.split("\r\n\r\n")[0]}\r\n",
-                 @json_resp.selective_string(:no_body => true,
-                  :show_headers => true)
+                 @json_resp.to_s(:body => false)
   end
 
 
-  def test_selective_string_single_header
+  def test_to_s_single_header
     body = @json_resp.raw.split("\r\n\r\n")[1]
 
     expected = "Content-Type: application/json; charset=utf-8\r\n\r\n#{body}"
-    assert_equal expected,
-                 @json_resp.selective_string(:show_headers => "Content-Type")
+    assert_equal expected, @json_resp.to_s(:headers => "Content-Type")
   end
 
 
-  def test_selective_multiple_headers
+  def test_to_s_multiple_headers
     body = @json_resp.raw.split("\r\n\r\n")[1]
 
     expected = "Date: Fri, 03 Dec 2010 21:49:00 GMT\r\nContent-Type: application/json; charset=utf-8\r\n\r\n#{body}"
-    assert_equal expected,
-                 @json_resp.selective_string(
-                    :show_headers => ["Content-Type", "Date"])
+    assert_equal expected, @json_resp.to_s(:headers => ["Content-Type", "Date"])
 
     expected = "Date: Fri, 03 Dec 2010 21:49:00 GMT\r\nContent-Type: application/json; charset=utf-8\r\n"
     assert_equal expected,
-                 @json_resp.selective_string(:no_body => true,
-                    :show_headers => ["Content-Type", "Date"])
+      @json_resp.to_s(:body => false, :headers => ["Content-Type", "Date"])
   end
 
 
-  def test_selective_data
+  def test_data
     body = JSON.parse @json_resp.body
     @json_resp.to_hash
 
-    assert_equal body, @json_resp.selective_data
+    assert_equal body, @json_resp.data
 
-    assert_nil @json_resp.selective_data(:no_body => true)
+    assert_nil @json_resp.data(:no_body => true, :show_headers => false)
 
     assert_equal "#{@json_resp.raw.split("\r\n\r\n")[0]}\r\n",
-                 @json_resp.selective_string(:no_body => true,
-                  :show_headers => true)
+                 @json_resp.to_s(:body => false)
   end
 
 
-  def test_selective_data_parser
+  def test_data_parser
     assert_raises Kronk::ParserError do
-      @json_resp.selective_data :parser => Kronk::PlistParser
+      @json_resp.data :parser => Kronk::PlistParser
     end
 
-    assert @json_resp.selective_data(:parser => JSON)
+    assert @json_resp.data(:parser => JSON)
   end
 
 
-  def test_selective_data_single_header
+  def test_data_single_header
     body = JSON.parse @json_resp.body
     expected =
       [{'content-type' => 'application/json; charset=utf-8'}, body]
 
     assert_equal expected,
-                 @json_resp.selective_data(:show_headers => "Content-Type")
+                 @json_resp.data(:show_headers => "Content-Type")
   end
 
 
-  def test_selective_data_multiple_headers
+  def test_data_multiple_headers
     body = JSON.parse @json_resp.body
     expected =
       [{'content-type' => 'application/json; charset=utf-8',
@@ -279,66 +447,66 @@ class TestResponse < Test::Unit::TestCase
       }, body]
 
     assert_equal expected,
-                 @json_resp.selective_data(
+                 @json_resp.data(
                     :show_headers => ["Content-Type", "Date"])
   end
 
 
-  def test_selective_data_no_body
+  def test_data_no_body
     expected = {
         'content-type' => 'application/json; charset=utf-8',
         'date'         => "Fri, 03 Dec 2010 21:49:00 GMT"
       }
 
     assert_equal expected,
-                 @json_resp.selective_data(:no_body => true,
+                 @json_resp.data(:no_body => true,
                     :show_headers => ["Content-Type", "Date"])
   end
 
 
-  def test_selective_data_only_data
+  def test_data_only_data
     expected = {"business"        => {"id" => "1234"},
                 "original_request"=> {"id"=>"1234"}}
 
     assert_equal expected,
-      @json_resp.selective_data(:only_data => "**/id")
+      @json_resp.data(:only_data => "**/id")
   end
 
 
-  def test_selective_data_multiple_only_data
+  def test_data_multiple_only_data
     expected = {"business"    => {"id" => "1234"},
                 "request_id"  => "mock_rid"}
 
     assert_equal expected,
-      @json_resp.selective_data(:only_data => ["business/id", "request_id"])
+      @json_resp.data(:only_data => ["business/id", "request_id"])
   end
 
 
-  def test_selective_data_ignore_data
+  def test_data_ignore_data
     expected = JSON.parse @json_resp.body
     expected['business'].delete 'id'
     expected['original_request'].delete 'id'
 
     assert_equal expected,
-      @json_resp.selective_data(:ignore_data => "**/id")
+      @json_resp.data(:ignore_data => "**/id")
   end
 
 
-  def test_selective_data_multiple_ignore_data
+  def test_data_multiple_ignore_data
     expected = JSON.parse @json_resp.body
     expected['business'].delete 'id'
     expected.delete 'request_id'
 
     assert_equal expected,
-      @json_resp.selective_data(:ignore_data => ["business/id", "request_id"])
+      @json_resp.data(:ignore_data => ["business/id", "request_id"])
   end
 
 
-  def test_selective_data_collected_and_ignored
+  def test_data_collected_and_ignored
     expected = {"business" => {"id" => "1234"}}
 
     assert_equal expected,
-      @json_resp.selective_data(:only_data => "**/id",
+      @json_resp.data(:only_data => "**/id",
         :ignore_data => "original_request")
   end
 
@@ -462,7 +630,7 @@ STR
 
 
   def test_stringify_missing_parser
-    str = Kronk::Response.read_file("test/mocks/200_response.txt").stringify
+    str = @html_resp.stringify
     expected = File.read("test/mocks/200_response.txt").split("\r\n\r\n")[1]
 
     assert_equal expected, str

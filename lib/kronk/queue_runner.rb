@@ -1,8 +1,7 @@
 class Kronk
 
   ##
-  # A basic queue and input processor that supports both a multi-threaded and
-  # evented backend (using EventMachine).
+  # A basic queue and input processor that runs multi-threaded.
   #
   # Input is optional and specified by creating an input trigger
   # (passing a block to on(:input)).
@@ -32,52 +31,48 @@ class Kronk
   #   # as optional second argument.
   #   qrunner.run do |queue_item|
   #     # Do something with item.
-  #     # When running in evented mode, make sure this section is non-blocking.
+  #   end
+  #
+  # Additionally, the :interrupt trigger may be used to handle behavior when
+  # SIGINT is sent to the process.
+  #
+  #   qrunner.on :interrupt do
+  #     qrunner.kill
+  #     puts "Caught SIGINT"
+  #     exit 1
+  #   end
+  #
+  # The :result trigger may also be used to
+  # perform actions with the return value of the block given to QueueRunner#run.
+  # This is useful for post-processing data without affecting concurrency as
+  # it will be run in a separate thread.
+  #
+  #   qrunner.on :result do |result|
+  #     p result
   #   end
 
   class QueueRunner
 
-    ##
-    # Define whether to use the EventMachine or the threaded behavior.
-
-    def self.async= value
-      @async = !!value
-    end
-
-
-    ##
-    # Returns true if EventMachine is enabled
-
-    def self.async
-      @async
-    end
-
-    self.async = false
-
-
-    attr_accessor :number, :concurrency, :queue, :count,
-                  :mutex, :threads, :reader_thread
+    attr_accessor :number, :queue, :count, :threads, :reader_thread
 
     ##
     # Create a new QueueRunner for batch multi-threaded processing.
     # Supported options are:
-    # :concurrency:: Fixnum - Maximum number of concurrent items to process
     # :number:: Fixnum - Total number of items to process
 
     def initialize opts={}
-      @number      = opts[:number]
-      @concurrency = opts[:concurrency]
-      @concurrency = 1 if !@concurrency || @concurrency <= 0
+      @number   = opts[:number]
+      @count    = 0
+      @queue    = []
+      @threads  = []
+      @rthreads = []
 
-      @count   = 0
-      @queue   = []
-      @threads = []
+      @max_queue_size = 100
 
       @reader_thread = nil
 
       @triggers = {}
 
-      @mutex  = Mutex.new
       @qmutex = Mutex.new
     end
 
@@ -98,9 +93,15 @@ class Kronk
 
     def finish
       stop_input!
-      EM.stop if defined?(EM) && EM.reactor_running?
-      @threads.each{|t| t.join}
+
+      @threads.each do |t|
+        @rthreads << Thread.new(t.value){|value| trigger :result, value }
+      end
+
+      @rthreads.each(&:join)
+
       @threads.clear
+      @rthreads.clear
     end
 
 
@@ -109,9 +110,10 @@ class Kronk
 
     def kill
       stop_input!
-      EM.stop if defined?(EM) && EM.reactor_running?
       @threads.each{|t| t.kill}
+      @rthreads.each{|t| t.kill}
       @threads.clear
+      @rthreads.clear
     end
 
 
@@ -129,107 +131,120 @@ class Kronk
 
 
     ##
-    # Start processing the queue and reading from IO if available.
+    # Process the queue and read from IO if available.
     #
     # Yields queue item until queue and io (if available) are empty and the
     # totaly number of requests to run is met (if number is set).
 
-    def process_queue
-      start_input!
-      @count = 0
+    def concurrently concurrency=1, &block
+      @max_queue_size = concurrency * 2
 
-      until finished?
-        @threads.delete_if{|t| !t.alive? }
-
-        if @threads.length >= @concurrency || @queue.empty?
+      until_finished do |count, active_count|
+        if active_count >= concurrency || @queue.empty?
           Thread.pass
           next
         end
 
-        item = @qmutex.synchronize{ @queue.shift }
+        num_threads = smaller_count(concurrency - active_count)
 
-        @threads << Thread.new(item) do |q_item|
-          yield q_item if block_given?
+        num_threads.times do
+          yield_queue_item(&block)
         end
-
-        @count += 1
       end
-
-      finish
     end
 
 
     ##
-    # Start processing the queue and reading from IO if available.
+    # Process the queue with periodic timer and a given period in seconds.
     #
     # Yields queue item until queue and io (if available) are empty and the
     # totaly number of requests to run is met (if number is set).
-    #
-    # Uses EventMachine to run asynchronously.
-    #
-    # Note: If the block given doesn't use EM, it will be blocking.
 
-    def process_queue_async &block
-      # TODO: Make input use EM from QueueRunner and Player IO.
-      require 'kronk/async' unless defined?(EM::HttpRequest)
-      Cmd.verbose "Running async"
+    def periodically period=0.01, &block
+      @max_queue_size = 0.5 / period
+      @max_queue_size = 2 if @max_queue_size < 2
 
-      start_input!
+      start = Time.now
 
-      @count = 0
+      until_finished do |count, active_count|
+        num_threads    = 1
+        expected_count = ((Time.now - start) / period).ceil
 
-      EM.run do
-        EM.add_periodic_timer do
-          if finished?
-            next if EM.connection_count > 0
-            finish
-            next
-          end
+        if count < expected_count
+          num_threads = smaller_count(expected_count - count)
+        else
+          sleep period
+        end
 
-          if @queue.empty? || EM.connection_count >= @concurrency
-            Thread.pass
-            next
-          end
-
-          yield @qmutex.synchronize{ @queue.shift }
-          @count += 1
+        num_threads.times do
+          yield_queue_item(&block)
         end
       end
     end
 
 
-    ##
-    # Runs the queue and reads from input until it's exhausted or
-    # @number is reached. Yields a queue item and a mutex when to passed
-    # block:
-    #
-    #   runner = QueueRunner.new :concurrency => 10
-    #   runner.queue.concat %w{item1 item2 item3}
-    #
-    #   runner.run do |q_item, mutex|
-    #     # This block is run in its own thread.
-    #     mutex.synchronize{ do_something_with q_item }
-    #   end
-    #
-    # Calls the :start trigger before execution begins, calls :complete
-    # when the execution has ended or is interrupted, also calls :interrupt
-    # when execution is interrupted.
 
-    def run
-      trap 'INT' do
+    ##
+    # Loop and read from input continually until finished.
+    # Yields total_count and active_count if passed a block.
+
+    def until_finished
+      old_trap = trap 'INT' do
+        @stop_time = Time.now
         kill
-        (trigger(:interrupt) || exit(1))
+        trigger(:interrupt)
+        trap 'INT', old_trap
+        Process.kill 'INT', Process.pid
       end
+
+      @start_time = Time.now
 
       trigger :start
 
-      method = self.class.async ? :process_queue_async : :process_queue
+      start_input!
+      @count = 0
 
-      send method do |q_item|
-        yield q_item, @mutex if block_given?
+      until finished?
+        @rthreads.delete_if{|t| !t.alive? && t.join }
+
+        results = []
+        @threads.delete_if do |t|
+          !t.alive? &&
+            results << t.value
+        end
+
+        @rthreads << Thread.new(results) do |values|
+          values.each{|value| trigger :result, value }
+        end unless results.empty?
+
+        yield @count, @threads.count if block_given?
       end
 
+      @stop_time = Time.now
+
+      finish
+
       trigger :complete
+    end
+
+
+    ##
+    # Shifts one item off the queue and yields it to the given block.
+
+    def yield_queue_item
+      until item = @qmutex.synchronize{ @queue.shift } or !@reader_thread.alive?
+        Thread.pass
+      end
+
+      return unless item
+
+      @threads << Thread.new(item) do |q_item|
+        yield q_item if block_given?
+      end
+
+      @threads.last.abort_on_exception = true
+
+      @count += 1
     end
 
 
@@ -237,20 +252,18 @@ class Kronk
     # Attempt to fill the queue by reading from the IO instance.
     # Starts a new thread and returns the thread instance.
 
-    def start_input!
+    def start_input! max_queue=@max_queue_size
       return unless @triggers[:input]
-
-      max_queue_size = @concurrency * 2
 
       @reader_thread = Thread.new do
         begin
           loop do
-            if @queue.length >= max_queue_size
+            if max_queue && @queue.length >= max_queue
               Thread.pass
               next
             end
 
-            while @queue.length < max_queue_size
+            while !max_queue || @queue.length < max_queue
               item = trigger(:input)
               @qmutex.synchronize{ @queue << item }
             end
@@ -277,9 +290,16 @@ class Kronk
     ##
     # Run a previously defined callback. See QueueRunner#on.
 
-    def trigger name
+    def trigger name, *args
       t = @triggers[name]
-      t && t.call
+      t && t.call(*args)
+    end
+
+
+    private
+
+    def smaller_count num
+      @number && (@number - count < num) ? (@number - count) : num
     end
   end
 end

@@ -1,6 +1,6 @@
 require "test/unit"
-require "kronk/async"
 require "mocha"
+require "kronk"
 
 Kronk.config[:context] = nil
 
@@ -148,18 +148,26 @@ ensure
 end
 
 
+def with_buffer_size size
+  old_size = Net::BufferedIO::BUFSIZE
+  Net::BufferedIO.send :remove_const, :BUFSIZE
+  Net::BufferedIO.const_set :BUFSIZE, size
+  yield
+ensure
+  Net::BufferedIO.send :remove_const, :BUFSIZE
+  Net::BufferedIO.const_set :BUFSIZE, old_size
+end
+
+
 def expect_request req_method, url, options={}
   uri  = URI.parse url
 
   resp = Kronk::Response.new(options[:returns] || mock_200_response)
   resp.stubs(:code).returns(options[:status] || '200')
+  resp.stubs(:to_hash).returns Hash.new
 
   http   = mock 'http'
-  socket = mock 'socket'
   req    = mock 'req'
-  res    = mock 'res'
-
-  res.stubs(:to_hash).returns Hash.new
 
   data   = options[:data]
   data &&= Hash === data ? Kronk::Request.build_query(data) : data.to_s
@@ -167,20 +175,16 @@ def expect_request req_method, url, options={}
   headers = options[:headers] || Hash.new
   headers['User-Agent'] ||= Kronk::DEFAULT_USER_AGENT
 
-  req.expects(:start).yields(http).returns res
-
-  http.expects(:instance_variable_get).with("@socket").returns socket
-
-  socket.expects(:debug_output=)
+  req.expects(:start).yields(http).returns resp
 
   Kronk::Request::VanillaRequest.expects(:new).
     with(req_method.to_s.upcase, uri.request_uri, headers).returns req
 
-  Net::HTTP.expects(:new).with(uri.host, uri.port).returns req
+  Kronk::HTTP.expects(:new).with(uri.host, uri.port).returns req
 
-  http.expects(:request).with(req, data).returns res
-
-  Kronk::Response.expects(:new).returns resp
+  http.expects(:request).
+    with(req, data, has_entry(:request => instance_of(Kronk::Request))).
+    returns resp
 
   yield http, req, resp if block_given?
 

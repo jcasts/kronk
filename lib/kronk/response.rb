@@ -1,25 +1,12 @@
 class Kronk
 
   ##
-  # Mock File IO to allow rewinding on Windows platforms.
-
-  class WinFileIO < StringIO
-    attr_accessor :path
-
-    def initialize path, str=""
-      @path = path
-      super str
-    end
-  end
-
-
-  ##
   # Standard Kronk response object.
 
   class Response
 
-    class MissingParser < Kronk::Exception; end
-    class InvalidParser < Kronk::Exception; end
+    class MissingParser < Kronk::Error; end
+    class InvalidParser < Kronk::Error; end
 
 
     ENCODING_MATCHER = /(^|;\s?)charset=(.*?)\s*(;|$)/
@@ -27,68 +14,145 @@ class Kronk
     ##
     # Read http response from a file and return a Kronk::Response instance.
 
-    def self.read_file path
-      file     = File.open(path, "rb")
-      resp     = new file
-      resp.uri = path
+    def self.read_file path, opts={}, &block
+      file = File.open(path, "rb")
+      resp = new(file, opts)
+      resp.body(&block)
       file.close
 
       resp
     end
 
 
-    attr_accessor :body, :code,
-                  :raw, :request, :stringify_opts, :time, :uri
-
-    alias to_s raw
+    attr_reader :code, :io, :cookies, :headers
+    attr_accessor :read, :request, :stringify_opts, :time
 
     ##
     # Create a new Response object from a String or IO.
+    # Options supported are:
+    # :request::        The Kronk::Request instance for this response.
+    # :timeout::        The read timeout value in seconds.
+    # :no_body::        Ignore reading the body of the response.
+    # :force_gzip::     Force decoding body with gzip.
+    # :force_inflate::  Force decoding body with inflate.
+    # :allow_headless:: Allow headless responses (won't raise for invalid HTTP).
 
-    def initialize io=nil, res=nil, request=nil
-      return unless io
-      io = StringIO.new io if String === io
+    def initialize input, opts={}, &block
+      @request = opts[:request]
+      @headers = {}
+      @encoding = @parser = @body = @gzip = @gzip_io = nil
 
-      if io && res
-        @_res, debug_io = res, io
-      else
-        @_res, debug_io = request_from_io(io)
-      end
-
-      @headers = @encoding = @parser = nil
-
-      @time = 0
-
-      raw_req, raw_resp, = read_raw_from debug_io
-      @raw = try_force_encoding raw_resp
-
-      @request = request || raw_req && Request.parse(try_force_encoding raw_req)
-
-      @body   = try_force_encoding(@_res.body) if @_res.body
-      @body ||= @raw.split("\r\n\r\n",2)[1]
-
-      @code = @_res.code
-
-      @uri = @request.uri if @request && @request.uri
-      @uri = URI.parse io.path if File === io
+      @headless = false
 
       @stringify_opts = {}
+
+      @raw  = ""
+      @time = 0
+
+      input ||= ""
+      input = StringIO.new(input) if String === input
+
+      @io = BufferedIO === input ? input : BufferedIO.new(input)
+
+      @io.raw_output   = @raw
+      @io.response     = self
+      @io.read_timeout = opts[:timeout] if opts[:timeout]
+
+      allow_headless = opts.has_key?(:allow_headless) ?
+                        opts[:allow_headless] :
+                        headless_ok?(@io.io)
+
+      response_from_io @io, allow_headless
+
+      @cookies = []
+
+      if URI::HTTP === uri
+        jar = CookieJar::Jar.new
+        jar.set_cookies_from_headers uri, @headers
+
+        jar.to_a.each do |cookie|
+          @cookies << cookie.to_hash
+          Kronk.cookie_jar.add_cookie cookie unless opts[:no_cookies]
+        end
+      end
+
+      self.gzip    = opts[:force_gzip]
+      self.inflate = opts[:force_inflate]
+      gzip?
+      deflated?
+
+      @read = !!opts[:no_body]
+      body(&block) if block_given?
     end
 
 
     ##
-    # Accessor for the HTTPResponse instance []
+    # Accessor for the HTTP headers []
 
     def [] key
-      @_res[key]
+      @headers[key.to_s.downcase]
     end
 
 
     ##
-    # Accessor for the HTTPResponse instance []
+    # Setter for the HTTP headers []
 
     def []= key, value
-      @_res[key] = value
+      @headers[key.to_s.downcase] = value
+    end
+
+
+    ##
+    # Returns the body of the response. Will wait for the socket to finish
+    # reading if the body hasn't finished loading.
+    #
+    # If a block is given and the body hasn't been read yet, will iterate
+    # yielding a chunk of the body as it becomes available.
+    #
+    # Note: Block will yield the full body if the response is compressed
+    # using Deflate as the Deflate format does not support streaming.
+    #
+    #   resp = Kronk::Response.new io
+    #   resp.body do |chunk|
+    #     # handle stream
+    #   end
+
+    def body &block
+      return @body if @read
+
+      raise IOError, 'Socket closed.' if @io.closed?
+
+      error    = false
+      last_pos = 0
+
+      begin
+        read_body do |chunk|
+          chunk = unzip chunk if gzip?
+
+          try_force_encoding chunk
+          (@body ||= "") << chunk
+          yield chunk if block_given? && !deflated?
+        end
+
+      rescue IOError, EOFError => e
+        error    = e
+        last_pos = @body.to_s.size
+
+        @io.read_all
+        @body = headless? ? @raw : @raw.split("\r\n\r\n", 2)[1]
+        @body = unzip @body, true if gzip?
+      end
+
+      @body = Zlib::Inflate.new(-Zlib::MAX_WBITS).inflate(@body) if deflated?
+
+      try_force_encoding @raw unless gzip? || deflated?
+      try_force_encoding @body
+
+      @read = true
+
+      yield @body[last_pos..-1] if block_given? && (deflated? || error)
+
+      @body
     end
 
 
@@ -97,16 +161,72 @@ class Kronk
     # including headers.
 
     def byterate
-      return 0 unless @raw && @time.to_f > 0
+      return 0 unless raw && @time.to_f > 0
       @byterate = self.total_bytes / @time.to_f
     end
 
 
     ##
-    # Size of the body in bytes.
+    # Size of the raw body in bytes.
 
     def bytes
-      (headers["content-length"] || @body.bytes.count).to_i
+      (headers["content-length"] || self.raw_body.bytes.count).to_i
+    end
+
+
+    ##
+    # Is this a chunked streaming response?
+
+    def chunked?
+      return false unless @headers['transfer-encoding']
+      field = @headers['transfer-encoding']
+      (/(?:\A|[^\-\w])chunked(?![\-\w])/i =~ field) ? true : false
+    end
+
+
+    ##
+    # Get the content length header.
+
+    def content_length
+      return nil unless @headers.has_key?('content-length')
+      len = @headers['content-length'].slice(/\d+/) or
+          raise HTTPHeaderSyntaxError, 'wrong Content-Length format'
+      len.to_i
+    end
+
+
+    ##
+    # Assign the expected content length.
+
+    def content_length= len
+      unless len
+        @headers.delete 'content-length'
+        return nil
+      end
+      @headers['content-length'] = len.to_i.to_s
+    end
+
+
+    ##
+    # Returns a Range object which represents the value of the Content-Range:
+    # header field.
+    # For a partial entity body, this indicates where this fragment
+    # fits inside the full entity body, as range of byte offsets.
+
+    def content_range
+      return nil unless @headers['content-range']
+      m = %r<bytes\s+(\d+)-(\d+)/(\d+|\*)>i.match(@headers['content-range']) or
+          raise HTTPHeaderSyntaxError, 'wrong Content-Range format'
+      m[1].to_i .. m[2].to_i
+    end
+
+
+    ##
+    # The length of the range represented in Content-Range: header.
+
+    def range_length
+      r = content_range() or return nil
+      r.end - r.begin + 1
     end
 
 
@@ -114,7 +234,25 @@ class Kronk
     # Cookie header accessor.
 
     def cookie
-      @_res['Cookie']
+      headers['cookie']
+    end
+
+
+    ##
+    # Check if content encoding is deflated.
+
+    def deflated?
+      return !gzip? && @use_inflate unless @use_inflate.nil?
+      @use_inflate = headers["content-encoding"] == "deflate" if
+        headers["content-encoding"]
+    end
+
+
+    ##
+    # Force the use of inflate.
+
+    def inflate= value
+      @use_inflate = value
     end
 
 
@@ -139,31 +277,29 @@ class Kronk
     def force_encoding new_encoding
       new_encoding = Encoding.find new_encoding unless Encoding === new_encoding
       @encoding = new_encoding
-      try_force_encoding @body
+      try_force_encoding self.body
       try_force_encoding @raw
       @encoding
     end
 
-
-    ##
-    # Accessor for downcased headers.
-
-    def headers
-      return @headers if @headers
-      @headers = @_res.to_hash.dup
-      @headers.keys.each{|h| @headers[h] = @headers[h].join(", ")}
-      @headers
-    end
 
     alias to_hash headers
 
 
     ##
     # If there was an error parsing the input as a standard http response,
-    # the input is assumed to be a body and HeadlessResponse is used.
+    # the input is assumed to be a body.
 
     def headless?
-      HeadlessResponse === @_res
+      @headless
+    end
+
+
+    ##
+    # The version of the HTTP protocol returned.
+
+    def http_version
+      @http_version
     end
 
 
@@ -171,8 +307,31 @@ class Kronk
     # Ruby inspect.
 
     def inspect
-      "#<#{self.class}:#{@code} #{self['Content-Type']} #{total_bytes}bytes>"
+      content_type = headers['content-type'] || "text/html"
+      "#<#{self.class}:#{@code} #{content_type} #{total_bytes}bytes>"
     end
+
+
+    ##
+    # Check if connection should be closed or not.
+
+    def close?
+      @headers['connection'].to_s.include?('close') ||
+      @headers['proxy-connection'].to_s.include?('close')
+    end
+
+    alias connection_close? close?
+
+
+    ##
+    # Check if connection should stay alive.
+
+    def keep_alive?
+      @headers['connection'].to_s.include?('keep-alive') ||
+      @headers['proxy-connection'].to_s.include?('keep-alive')
+    end
+
+    alias connection_keep_alive? keep_alive?
 
 
     ##
@@ -181,6 +340,7 @@ class Kronk
     # the Content-Type, or will return the cached parsed body if available.
 
     def parsed_body new_parser=nil
+      return unless body
       @parsed_body ||= nil
 
       return @parsed_body if @parsed_body && !new_parser
@@ -195,16 +355,16 @@ class Kronk
       end if String === new_parser
 
       raise MissingParser,
-        "No parser for Content-Type: #{@_res['Content-Type']}" unless new_parser
+        "No parser for: #{@headers['content-type']}" unless new_parser
 
       begin
         @parsed_body = new_parser.parse(self.body) or raise RuntimeError
 
-      rescue RuntimeError, ::Exception => e
+      rescue => e
         msg = ParserError === e ?
                 e.message : "#{new_parser} failed parsing body"
 
-        msg << " returned by #{@uri}" if @uri
+        msg << " returned by #{uri}" if uri
         raise ParserError, msg
       end
     end
@@ -215,8 +375,10 @@ class Kronk
 
     def parsed_header include_headers=true
       out_headers = headers.dup
-      out_headers['status']  = @code
-      out_headers['http-version'] = @_res.http_version
+      out_headers['status']        = @code
+      out_headers['http-version']  = http_version
+      out_headers['set-cookie']  &&= @cookies.select{|c| c['version'].nil? }
+      out_headers['set-cookie2'] &&= @cookies.select{|c| c['version'] == 1 }
 
       case include_headers
       when nil, false
@@ -257,17 +419,33 @@ class Kronk
 
 
     ##
+    # Returns the full raw HTTP response string after the full response
+    # has been read.
+
+    def raw
+      body
+      @raw
+    end
+
+
+    ##
+    # Returns the body portion of the raw http response.
+
+    def raw_body
+      headless? ? raw : raw.split("\r\n\r\n", 2)[1]
+    end
+
+
+    ##
     # Returns the header portion of the raw http response.
 
-    def raw_header include_headers=true
+    def raw_header show=true
+      return if !show || headless?
       headers = "#{@raw.split("\r\n\r\n", 2)[0]}\r\n"
 
-      case include_headers
-      when nil, false
-        nil
-
+      case show
       when Array, String
-        includes = [*include_headers].join("|")
+        includes = [*show].join("|")
         headers.scan(%r{^((?:#{includes}): [^\n]*\n)}im).flatten.join
 
       when true
@@ -277,12 +455,29 @@ class Kronk
 
 
     ##
+    # Maximum time to wait on IO.
+
+    def read_timeout
+      @io.read_timeout
+    end
+
+
+    ##
+    # Assign maximum time to wait for IO data.
+
+    def read_timeout= val
+      @io.read_timeout = val
+    end
+
+
+    ##
     # Returns the location to redirect to. Prepends request url if location
     # header is relative.
 
     def location
-      return @_res['Location'] if !@request || !@request.uri
-      @request.uri.merge @_res['Location']
+      return unless @headers['location']
+      return @headers['location'] if !@request || !@request.uri
+      @request.uri.merge @headers['location']
     end
 
 
@@ -297,28 +492,39 @@ class Kronk
     ##
     # Follow the redirect and return a new Response instance.
     # Returns nil if not redirect-able.
+    # Supports all Request#new options, plus:
+    # :trust_location:: Forwards HTTP auth to different host when true.
 
-    def follow_redirect opts={}
+    def follow_redirect opts={}, &block
       return if !redirect?
-      Request.new(self.location, opts).retrieve
+      new_opts = @request ? @request.to_hash : {}
+      new_opts[:http_method] = "GET" if @code == "303"
+      new_opts.merge!(opts)
+      new_opts.delete(:auth) if !opts[:trust_location] &&
+        (!@request || self.location.host != self.uri.host)
+
+      Request.new(self.location, new_opts).retrieve(new_opts, &block)
     end
 
 
     ##
     # Returns the raw response with selective headers and/or the body of
     # the response. Supports the following options:
-    # :no_body:: Bool - Don't return the body; default nil
-    # :show_headers:: Bool/String/Array - Return headers; default nil
+    # :body:: Bool - Return the body; default true
+    # :headers:: Bool/String/Array - Return headers; default true
 
-    def selective_string options={}
-      str = @body unless options[:no_body]
+    def to_s opts={}
+      return raw if opts[:raw] &&
+        (opts[:headers].nil? || opts[:headers] == true)
 
-      if options[:show_headers]
-        header = raw_header(options[:show_headers])
-        str = [header, str].compact.join "\r\n"
+      str = opts[:raw] ? self.raw_body : self.body unless opts[:body] == false
+
+      if opts[:headers] || opts[:headers].nil?
+        hstr = raw_header(opts[:headers] || true)
+        str  = [hstr, str].compact.join "\r\n"
       end
 
-      str
+      str.to_s
     end
 
 
@@ -335,32 +541,32 @@ class Kronk
     # :only_data:: String/Array - Extracts the data from given data paths
     #
     # Example:
-    #   response.selective_data :transform => [:delete, ["foo/0", "bar/1"]]
-    #   response.selective_data do |trans|
+    #   response.data :transform => [:delete, ["foo/0", "bar/1"]]
+    #   response.data do |trans|
     #     trans.delete "foo/0", "bar/1"
     #   end
     #
     # See Kronk::Path::Transaction for supported transform actions.
 
-    def selective_data options={}
+    def data opts={}
       data = nil
 
-      unless options[:no_body]
-        data = parsed_body options[:parser]
+      unless opts[:no_body]
+        data = parsed_body opts[:parser]
       end
 
-      if options[:show_headers]
-        header_data = parsed_header(options[:show_headers])
+      if opts[:show_headers]
+        header_data = parsed_header(opts[:show_headers])
         data &&= [header_data, data]
         data ||= header_data
       end
 
-      Path::Transaction.run data, options do |t|
+      Path::Transaction.run data, opts do |t|
         # Backward compatibility support
-        t.select(*options[:only_data])   if options[:only_data]
-        t.delete(*options[:ignore_data]) if options[:ignore_data]
+        t.select(*opts[:only_data])   if opts[:only_data]
+        t.delete(*opts[:ignore_data]) if opts[:ignore_data]
 
-        t.actions.concat options[:transform] if options[:transform]
+        t.actions.concat opts[:transform] if opts[:transform]
 
         yield t if block_given?
       end
@@ -380,45 +586,52 @@ class Kronk
     # :show_headers:: Boolean/String/Array - defines which headers to include
     #
     # If block is given, yields a Kronk::Path::Transaction instance to make
-    # transformations on the data. See Kronk::Response#selective_data
+    # transformations on the data. See Kronk::Response#data
 
-    def stringify options={}, &block
-      options = options.empty? ? @stringify_opts : merge_stringify_opts(options)
+    def stringify opts={}, &block
+      opts = merge_stringify_opts opts
 
-      if !options[:raw] && (options[:parser] || parser || options[:no_body])
-        data = selective_data options, &block
-        DataString.new data, options
+      if !opts[:raw] && (opts[:parser] || parser || opts[:no_body])
+        data = self.data opts, &block
+        DataString.new data, opts
+
       else
-        selective_string options
+        self.to_s :body    => !opts[:no_body],
+                  :headers => (opts[:show_headers] || false),
+                  :raw     => opts[:raw]
       end
 
     rescue MissingParser
-      Cmd.verbose "Warning: No parser for #{@_res['Content-Type']} [#{@uri}]"
-        selective_string options
+      Cmd.verbose "Warning: No parser for #{@headers['content-type']} [#{uri}]"
+      self.to_s :body    => !opts[:no_body],
+                :headers => (opts[:show_headers] || false),
+                :raw     => opts[:raw]
     end
 
 
-    def merge_stringify_opts options # :nodoc:
-      options = options.dup
+    def merge_stringify_opts opts # :nodoc:
+      return @stringify_opts if opts.empty?
+
+      opts = opts.dup
       @stringify_opts.each do |key, val|
         case key
         # Response headers - Boolean, String, or Array
         when :show_headers
-          next if options.has_key?(key) &&
-                  (options[key].class != Array || val == true || val == false)
+          next if opts.has_key?(key) &&
+                  (opts[key].class != Array || val == true || val == false)
 
-          options[key] = (val == true || val == false) ? val :
-                                      [*options[key]] | [*val]
+          opts[key] = (val == true || val == false) ? val :
+                                      [*opts[key]] | [*val]
 
         # String or Array
         when :only_data, :ignore_data
-          options[key] = [*options[key]] | [*val]
+          opts[key] = [*opts[key]] | [*val]
 
         else
-          options[key] = val if options[key].nil?
+          opts[key] = val if opts[key].nil?
         end
       end
-      options
+      opts
     end
 
 
@@ -431,10 +644,46 @@ class Kronk
 
 
     ##
+    # Check if the Response body has been read.
+
+    def read?
+      @read
+    end
+
+
+    ##
     # Number of bytes of the response including the header.
 
     def total_bytes
-      self.raw.bytes.count
+      return raw.bytes.count if @read
+      return raw_header.bytes.count unless body_permitted?
+      raw_header.bytes.count + (content_length || range_length).to_i + 2
+    end
+
+
+    ##
+    # The URI of the request if or the file read if available.
+
+    def uri
+      @request && @request.uri || File === @io.io && URI.parse(@io.io.path)
+    end
+
+
+    ##
+    # Require the use of gzip for reading the body.
+
+    def gzip= value
+      @use_gzip = value
+    end
+
+
+    ##
+    # Check if gzip should be used.
+
+    def gzip?
+      return @use_gzip unless @use_gzip.nil?
+      @use_gzip = headers["content-encoding"] == "gzip" if
+        headers["content-encoding"]
     end
 
 
@@ -442,75 +691,164 @@ class Kronk
 
 
     ##
-    # Creates a Net::HTTPRequest instance from an IO instance.
+    # Check if the response should have a body or not.
 
-    def request_from_io resp_io
-      # On windows, read the full file and insert contents into
-      # a StringIO to avoid failures with IO#read_nonblock
-      if Kronk::Cmd.windows? && File === resp_io
-        resp_io = WinFileIO.new resp_io.path, io.read
-      end
-
-      io = Net::BufferedIO === resp_io ? resp_io : Net::BufferedIO.new(resp_io)
-      io.debug_output = debug_io = StringIO.new
-
-      begin
-        resp = Net::HTTPResponse.read_new io
-        resp.reading_body io, true do;end
-
-      rescue Net::HTTPBadResponse
-        ext = "text/html"
-        ext = File.extname(resp_io.path)[1..-1] if
-          WinFileIO === resp_io || File === resp_io
-
-        resp_io.rewind
-        resp = HeadlessResponse.new resp_io.read, ext
-
-      rescue EOFError
-        # If no response was read because it's too short
-        unless resp
-          resp_io.rewind
-          resp = HeadlessResponse.new resp_io.read, "html"
-        end
-      end
-
-      resp.instance_eval do
-        @socket ||= true
-        @read   ||= true
-      end
-
-      [resp, debug_io]
+    def body_permitted?
+      Net::HTTPResponse::CODE_TO_OBJ[@code].const_get(:HAS_BODY) rescue true
     end
 
 
     ##
-    # Read the raw response from a debug_output instance and return an array
-    # containing the raw request, response, and number of bytes received.
+    # Check if a headless response is allowable based on the IO given
+    # to the constructor.
 
-    def read_raw_from debug_io
-      req = nil
-      resp = ""
-      bytes = nil
+    def headless_ok? io
+      File === io || String === io || StringIO === io
+    end
 
-      debug_io.rewind
-      output = debug_io.read.split "\n"
 
-      if output.first =~ %r{<-\s(.*)}
-        req = instance_eval $1
-        output.delete_at 0
+    ##
+    # Get response status and headers from BufferedIO instance.
+
+    def response_from_io buff_io, allow_headless=false
+      begin
+        @http_version, @code, @msg = read_status_line buff_io
+        @headers = read_headers buff_io
+
+      rescue EOFError, Kronk::HTTPBadResponse
+        raise unless allow_headless
+        @http_version, @code, @msg = ["1.0", "200", "OK"]
+
+        ext = File === buff_io.io ?
+                File.extname(buff_io.io.path)[1..-1] : "html"
+
+        encoding = buff_io.io.respond_to?(:external_encoding) ?
+                    buff_io.io.external_encoding : "UTF-8"
+        @headers = {
+          'content-type' => "text/#{ext}; charset=#{encoding}",
+        }
+
+        @headless = true
       end
 
-      if output.last =~ %r{read (\d+) bytes}
-        bytes = $1.to_i
-        output.delete_at(-1)
+      @read = true unless body_permitted?
+    end
+
+
+    ##
+    # Read the body from IO.
+
+    def read_body target=nil
+      block = lambda do |str|
+        if block_given?
+          yield str
+        else
+          target << str
+        end
       end
 
-      output.map do |line|
-        next unless line[0..2] == "-> "
-        resp << instance_eval(line[2..-1])
-      end
+      dest = Net::ReadAdapter.new block
 
-      [req, resp, bytes]
+      if chunked?
+        read_chunked dest
+        return
+      end
+      clen = content_length()
+      if clen
+        @io.read clen, dest, true   # ignore EOF
+        return
+      end
+      clen = range_length()
+      if clen
+        @io.read clen, dest
+        return
+      end
+      @io.read_all dest
+    end
+
+
+    ##
+    # Unzip a chunk of the body being read.
+
+    def unzip str, force_new=false
+      return str if str.empty?
+
+      @gzip_io = StringIO.new if !@gzip_io || force_new
+      pos = @gzip_io.pos
+      @gzip_io << str
+      @gzip_io.pos = pos
+
+      @gzip = Zlib::GzipReader.new @gzip_io if !@gzip || force_new
+
+      @gzip.read rescue ""
+    end
+
+
+    ##
+    # Read a chunked response body.
+
+    def read_chunked dest
+      len = nil
+      total = 0
+      while true
+        line = @io.readline
+        hexlen = line.slice(/[0-9a-fA-F]+/) or
+            raise Kronk::HTTPBadResponse, "wrong chunk size line: #{line}"
+        len = hexlen.hex
+        break if len == 0
+        begin
+          @io.read len, dest
+        ensure
+          total += len
+          @io.read 2   # \r\n
+        end
+      end
+      until @io.readline.empty?
+        # none
+      end
+    end
+
+
+    ##
+    # Read the first line of the response. (Stolen from Net::HTTP)
+
+    def read_status_line sock
+      str = sock.readline until str && !str.empty?
+      m = /\AHTTP(?:\/(\d+\.\d+))?\s+(\d\d\d)\s*(.*)\z/in.match(str) or
+        raise Kronk::HTTPBadResponse, "wrong status line: #{str.dump}"
+      m.captures
+    end
+
+
+    ##
+    # Read response headers. (Stolen from Net::HTTP)
+
+    def read_headers sock
+      res_headers = {}
+      key = value = nil
+      while true
+        line = sock.readuntil("\n", true).sub(/\s+\z/, '')
+        break if line.empty?
+        if line[0] == ?\s or line[0] == ?\t and value
+          value << ' ' unless value.empty?
+          value << line.strip
+        else
+          assign_header(res_headers, key, value) if key
+          key, value = line.strip.split(/\s*:\s*/, 2)
+          key = key.downcase
+          raise Kronk::HTTPBadResponse, 'wrong header line format' if value.nil?
+        end
+      end
+      assign_header(res_headers, key, value) if key
+      res_headers
+    end
+
+
+    def assign_header res_headers, key, value
+      res_headers[key] = Array(res_headers[key]) if res_headers[key]
+      Array === res_headers[key] ?
+        res_headers[key] << value :
+        res_headers[key] = value
     end
 
 
@@ -524,50 +862,30 @@ class Kronk
       str
     end
   end
+end
 
 
-  ##
-  # Mock response object without a header for body-only http responses.
-
-  class HeadlessResponse
-
-    attr_accessor :body, :code
-
-    def initialize body, file_ext=nil
-      @body = body
-      @raw  = body
-      @code = "200"
-
-      encoding = body.respond_to?(:encoding) ? body.encoding : "UTF-8"
-
-      @header = {
-        'Content-Type' => "text/#{file_ext}; charset=#{encoding}"
-      }
+class CookieJar::Cookie
+  def to_hash
+    result = {
+      'name'       => @name,
+      'value'      => @value,
+      'domain'     => @domain,
+      'path'       => @path,
+    }
+    {
+      'expiry'      => @expiry,
+      'secure'      => (true if @secure),
+      'http_only'   => (true if @http_only),
+      'version'     => (@version if version != 0),
+      'comment'     => @comment,
+      'comment_url' => @comment_url,
+      'discard'     => (true if @discard),
+      'ports'       => @ports
+    }.each do |name, value|
+      result[name] = value if value
     end
 
-
-    ##
-    # Interface method only. Returns nil for all but content type.
-
-    def [] key
-      @header[key]
-    end
-
-    def []= key, value
-      @header[key] = value
-    end
-
-
-    ##
-    # Interface method only. Returns empty hash.
-
-    def to_hash
-      head_out = @header.dup
-      head_out.keys.each do |key|
-        head_out[key.downcase] = [head_out.delete(key)]
-      end
-
-      head_out
-    end
+    result
   end
 end

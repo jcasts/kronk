@@ -274,15 +274,15 @@ class TestCmd < Test::Unit::TestCase
     opts = Kronk::Cmd.parse_args %w{uri -c 2 -n 100 -o}
     assert_equal 2,   opts[:player].concurrency
     assert_equal 100, opts[:player].number
-    assert_equal Kronk::Player::Stream, opts[:player].output.class
+    assert_equal Kronk::Player::Stream, opts[:player].class
 
     opts = Kronk::Cmd.parse_args %w{uri -o benchmark}
-    assert_equal Kronk::Player::Benchmark, opts[:player].output.class
+    assert_equal Kronk::Player::Benchmark, opts[:player].class
   end
 
 
   def test_parse_args_player_stdin
-    $stdin.expects(:tty?).returns(false).times(6)
+    $stdin.expects(:tty?).returns(false).times(7)
 
     opts = Kronk::Cmd.parse_args %w{uri -p}
     assert_equal $stdin, opts[:player].input.io
@@ -291,12 +291,12 @@ class TestCmd < Test::Unit::TestCase
     opts = Kronk::Cmd.parse_args %w{uri --benchmark}
     assert_equal $stdin, opts[:player].input.io
     assert_equal %w{uri}, opts[:uris]
-    assert_equal Kronk::Player::Benchmark, opts[:player].output.class
+    assert_equal Kronk::Player::Benchmark, opts[:player].class
 
     opts = Kronk::Cmd.parse_args %w{uri --stream}
     assert_equal $stdin, opts[:player].input.io
     assert_equal %w{uri}, opts[:uris]
-    assert_equal Kronk::Player::Stream, opts[:player].output.class
+    assert_equal Kronk::Player::Stream, opts[:player].class
   end
 
 
@@ -309,11 +309,11 @@ class TestCmd < Test::Unit::TestCase
 
     opts = Kronk::Cmd.parse_args %w{uri --benchmark mock_file}
     assert_equal mock_file, opts[:player].input.io
-    assert_equal Kronk::Player::Benchmark, opts[:player].output.class
+    assert_equal Kronk::Player::Benchmark, opts[:player].class
 
     opts = Kronk::Cmd.parse_args %w{uri --stream mock_file}
     assert_equal mock_file, opts[:player].input.io
-    assert_equal Kronk::Player::Stream, opts[:player].output.class
+    assert_equal Kronk::Player::Stream, opts[:player].class
   end
 
 
@@ -399,13 +399,20 @@ class TestCmd < Test::Unit::TestCase
 
   def test_parse_args_uris_with_io
     $stdin.expects(:tty?).returns(false)
-    $stdin.expects(:read).returns("MOCK RESPONSE")
+
+    if "1.9".respond_to?(:encoding)
+      $stdin.stubs(:read_nonblock).raises(EOFError)
+      $stdin.expects(:read_nonblock).returns("MOCK RESPONSE")
+    else
+      $stdin.stubs(:sysread).raises(EOFError)
+      $stdin.expects(:sysread).returns("MOCK RESPONSE")
+    end
 
     opts = Kronk::Cmd.parse_args %w{uri1 uri2}
     assert_equal 2, opts[:uris].length
     assert_equal "uri1", opts[:uris][1]
-    assert_equal StringIO, opts[:uris][0].class
-    assert_equal "MOCK RESPONSE", opts[:uris][0].read
+    assert_equal Kronk::BufferedIO, opts[:uris][0].class
+    assert_equal "MOCK RESPONSE", opts[:uris][0].read_all
   end
 
 
@@ -490,7 +497,7 @@ class TestCmd < Test::Unit::TestCase
 
   def test_run_caught_errors
     errs = {
-      Kronk::Exception               => "Kronk::Exception",
+      Kronk::Error                   => "Kronk::Error",
       Kronk::Response::MissingParser => "Kronk::Response::MissingParser",
       Errno::ECONNRESET              => "Connection reset by peer"
     }

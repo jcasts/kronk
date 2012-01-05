@@ -81,7 +81,7 @@ class TestAssertions < Test::Unit::TestCase
     Kronk.expects(:request).
       with("host2.com", :foo => "bar").returns mock_resp2
 
-    left  = Kronk::DataString.new mock_resp1.selective_data
+    left  = Kronk::DataString.new mock_resp1.data
     right = mock_resp2.body
 
     assert_not_equal left, right

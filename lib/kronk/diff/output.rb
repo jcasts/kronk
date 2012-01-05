@@ -127,7 +127,7 @@ class Kronk::Diff
       Kronk.find_const name
 
     rescue NameError
-      raise Kronk::Exception, "No such formatter: #{name.inspect}"
+      raise Kronk::Error, "No such formatter: #{name.inspect}"
     end
 
 

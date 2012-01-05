@@ -3,21 +3,18 @@ class Kronk
   ##
   # Outputs Player requests and results in a test-suite like format.
 
-  class Player::Suite < Player::Output
+  class Player::Suite < Player
 
     def start
-      @results = []
-      msg = "Started"
-      msg << (Player.async ? " (async)" : " (threaded)")
-      $stdout.puts msg
-      super
+      @results    = []
+      $stdout.puts "Started"
     end
 
 
-    def result kronk, mutex=nil
+    def result kronk
       status = "."
 
-      @results <<
+      result =
         if kronk.diff
           status = "F"             if kronk.diff.any?
           text   = diff_text kronk if status == "F"
@@ -31,7 +28,7 @@ class Kronk
             # Make sure response is parsable
             kronk.response.parsed_body if kronk.response.parser
           rescue => e
-            error e, kronk, mutex
+            error e, kronk
             return
           end if kronk.response.success?
 
@@ -40,22 +37,26 @@ class Kronk
           [status, kronk.response.time, text]
         end
 
+      @mutex.synchronize{ @results << result }
+
       $stdout << status
       $stdout.flush
     end
 
 
-    def error err, kronk=nil, mutex=nil
+    def error err, kronk=nil
       status = "E"
-      @results << [status, 0, error_text(err, kronk)]
+      result = [status, 0, error_text(err, kronk)]
+      @mutex.synchronize{ @results << result }
 
       $stdout << status
       $stdout.flush
     end
 
 
-    def completed
-      player_time   = (Time.now - @start_time).to_f
+    def complete
+      suite_time    = Time.now - @start_time
+      player_time   = @stop_time - @start_time
       total_time    = 0
       bad_count     = 0
       failure_count = 0
@@ -85,13 +86,13 @@ class Kronk
       avg_time = non_error_count > 0 ? total_time / non_error_count  : "n/a"
       avg_qps  = non_error_count > 0 ? non_error_count / player_time : "n/a"
 
-      $stdout.puts "\nFinished in #{player_time} seconds.\n"
+      $stdout.puts "\nFinished in #{suite_time} seconds.\n"
       $stderr.puts err_buffer unless err_buffer.empty?
       $stdout.puts "\n#{@results.length} cases, " +
                    "#{failure_count} failures, #{error_count} errors"
 
-      $stdout.puts "Avg Time: #{avg_time}"
-      $stdout.puts "Avg QPS: #{avg_qps}"
+      $stdout.puts "Avg Time: #{(avg_time * 1000).round 3}ms"
+      $stdout.puts "Avg QPS:  #{avg_qps.round 3}"
 
       return bad_count == 0
     end

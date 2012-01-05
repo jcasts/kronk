@@ -4,7 +4,6 @@ class TestKronk < Test::Unit::TestCase
 
   def test_default_config
     expected = {
-      :async         => 'auto',
       :content_types => {
         'js'      => 'JSON',
         'json'    => 'JSON',
@@ -34,7 +33,6 @@ class TestKronk < Test::Unit::TestCase
   def test_load_config
     with_config do
       mock_config = {
-        :async         => false,
         :content_types => {
           'soap' => "SOAPParser",
           'js'   => "JsEngine"
@@ -64,7 +62,6 @@ class TestKronk < Test::Unit::TestCase
       Kronk.load_config "foobar"
 
       expected = {
-        :async         => false,
         :content_types => {
           'soap'  => "SOAPParser",
           'js'    => "JsEngine",
@@ -374,8 +371,8 @@ class TestKronk < Test::Unit::TestCase
                              :show_headers => true,
                              :raw => true
 
-    exp_diff = Kronk::Diff.new resp1.selective_string(:show_headers => true),
-                               resp2.selective_string(:show_headers => true),
+    exp_diff = Kronk::Diff.new resp1.to_s,
+                               resp2.to_s,
                                :labels => [
                                  "test/mocks/200_response.json",
                                  "test/mocks/200_response.xml"
@@ -453,8 +450,8 @@ class TestKronk < Test::Unit::TestCase
                              :show_headers => true
 
     exp_diff = Kronk::Diff.new_from_data \
-                  resp1.selective_data(:show_headers => true),
-                  resp2.selective_data(:show_headers => true),
+                  resp1.data(:show_headers => true),
+                  resp2.data(:show_headers => true),
                   :labels => [
                     "test/mocks/200_response.json",
                     "test/mocks/200_response.xml"
@@ -502,7 +499,7 @@ class TestKronk < Test::Unit::TestCase
   def test_follow_redirect_no_redirect
     res = Kronk::Response.new mock_200_response
     req = Kronk::Request.new "http://www.google.com/"
-    req.stubs(:request).returns res
+    req.stubs(:retrieve).returns res
 
     Kronk::Request.expects(:new).with("http://www.google.com/",{}).never
     Kronk::Request.expects(:new).
@@ -515,7 +512,7 @@ class TestKronk < Test::Unit::TestCase
   def test_do_not_follow_redirect
     res = Kronk::Response.new mock_302_response
     req = Kronk::Request.new "http://www.google.com/"
-    req.stubs(:request).returns res
+    req.stubs(:retrieve).returns res
 
     Kronk::Request.expects(:new).with("http://www.google.com/",{}).never
     Kronk::Request.expects(:new).
@@ -548,8 +545,8 @@ class TestKronk < Test::Unit::TestCase
     assert_equal nil,           kronk.diff
 
     exp_diff = Kronk::Diff.new_from_data \
-                  resp2.selective_data(:show_headers => true),
-                  resp1.selective_data(:show_headers => true),
+                  resp2.data(:show_headers => true),
+                  resp1.data(:show_headers => true),
                   :labels => [
                     "test/mocks/200_response.json",
                     "test/mocks/200_response.xml"

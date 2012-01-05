@@ -4,18 +4,21 @@ class TestPlayer < Test::Unit::TestCase
 
   class MockPipe < StringIO; end
 
-  class MockOutput < Kronk::Player::Output
+  class MockPlayer < Kronk::Player
     attr_accessor :result_calls
 
-    def initialize *args
+    def start
       @result_calls = 0
-      super
     end
 
-    def result kronk, mutex
-      mutex.synchronize do
+    def result kronk
+      @mutex.synchronize do
         @result_calls += 1
       end
+    end
+
+    def interrupt
+      raise "Interrupted"
     end
   end
 
@@ -27,20 +30,18 @@ class TestPlayer < Test::Unit::TestCase
 
 
   def setup
-    Kronk::Player.async = false
-
     @io        = MockPipe.new
     @parser    = MockParser
-    @output    = MockOutput
-    @player    = Kronk::Player.new :io     => @io,
-                                   :parser => @parser,
-                                   :output => @output
+    @player    = MockPlayer.new :io     => @io,
+                                :parser => @parser
+
+    @player.on(:result){|(kronk, err)| @player.trigger_result(kronk, err) }
   end
 
 
   def test_init_defaults
-    player = Kronk::Player.new
-    assert_equal Kronk::Player::Suite,       player.output.class
+    player = Kronk::Player.new_type 'suite'
+    assert_equal Kronk::Player::Suite,       player.class
     assert_equal Kronk::Player::InputReader, player.input.class
     assert_equal Mutex,                      player.mutex.class
     assert_equal 1,                          player.concurrency
@@ -63,29 +64,30 @@ class TestPlayer < Test::Unit::TestCase
 
 
   def test_init_opts
-    player = Kronk::Player.new :number      => 1000,
-                               :concurrency => 10,
-                               :output      => :stream
+    player = Kronk::Player.new_type :stream,
+                                    :number      => 1000,
+                                    :concurrency => 10
 
-    assert_equal Kronk::Player::Stream,        player.output.class
+    assert_equal Kronk::Player::Stream,        player.class
     assert_equal Kronk::Player::RequestParser, player.input.parser
     assert_equal 10,                           player.concurrency
     assert_equal 1000,                         player.number
   end
 
 
-  def test_output
-    @player.output_from :benchmark
-    assert_equal Kronk::Player::Benchmark, @player.output.class
+  def test_new_type
+    @player = Kronk::Player.new_type :benchmark
+    assert_equal Kronk::Player::Benchmark, @player.class
 
-    @player.output_from :stream
-    assert_equal Kronk::Player::Stream, @player.output.class
+    @player = Kronk::Player.new_type :stream
+    assert_equal Kronk::Player::Stream, @player.class
 
-    @player.output_from :suite
-    assert_equal Kronk::Player::Suite, @player.output.class
+    @player = Kronk::Player.new_type :suite
+    assert_equal Kronk::Player::Suite, @player.class
 
-    @player.output_from Kronk::Player::Benchmark
-    assert_equal Kronk::Player::Benchmark, @player.output.class
+    assert_raises NameError do
+      @player = Kronk::Player.new_type :foo
+    end
   end
 
 
@@ -164,10 +166,6 @@ class TestPlayer < Test::Unit::TestCase
 
 
   def test_compare
-    @player.output.expects :start
-    @player.output.expects :completed
-
-    @player.concurrency  = 3
     @player.input.parser = Kronk::Player::RequestParser
     @player.input.io << "/req3\n/req4\n/req5\n"
     @player.input.io.rewind
@@ -192,7 +190,7 @@ class TestPlayer < Test::Unit::TestCase
 
     @player.compare "example.com", "beta-example.com", :query => "foo=bar"
 
-    assert_equal 5, @player.output.result_calls
+    assert_equal 5, @player.result_calls
   end
 
 
@@ -243,9 +241,7 @@ class TestPlayer < Test::Unit::TestCase
 
   def test_run_interrupted
     @player.concurrency = 0
-
-    @player.output.expects :start
-    @player.output.expects :completed
+    @player.instance_eval "undef interrupt"
 
     thread = Thread.new do
       @player.run do |item, mutex|
@@ -263,8 +259,7 @@ class TestPlayer < Test::Unit::TestCase
   end
 
 
-  def test_process_queue
-    @player.concurrency = 10
+  def test_concurrently
     requests = (1..20).map{|n| "request #{n}"}
     @player.queue.concat requests.dup
     @player.input.io.close
@@ -272,7 +267,7 @@ class TestPlayer < Test::Unit::TestCase
     start     = Time.now
     processed = []
 
-    @player.process_queue do |req|
+    @player.concurrently 10 do |req|
       processed << req
       sleep 0.5
     end
@@ -287,8 +282,7 @@ class TestPlayer < Test::Unit::TestCase
   end
 
 
-  def test_process_queue_from_io
-    @player.concurrency = 10
+  def test_concurrently_from_io
     @player.input.parser.stubs(:start_new?).returns true
     @player.input.parser.stubs(:start_new?).with("").returns false
 
@@ -300,7 +294,7 @@ class TestPlayer < Test::Unit::TestCase
     @player.from_io StringIO.new(requests.join)
 
     start_time = Time.now
-    @player.process_queue do |req|
+    @player.concurrently 10 do |req|
       processed << req
       sleep 0.5
     end
@@ -348,10 +342,9 @@ class TestPlayer < Test::Unit::TestCase
   def test_start_input_from_input
     @player.input.stubs(:get_next).returns "mock_request"
 
-    @player.concurrency = 5
-    @player.number      = 20
+    @player.number = 30
 
-    thread = @player.start_input!
+    thread = @player.start_input! 10
     assert_equal Thread, thread.class
 
     sleep 0.2
@@ -371,10 +364,9 @@ class TestPlayer < Test::Unit::TestCase
     @player.input.stubs(:get_next).returns nil
     @player.input.stubs(:eof?).returns false
 
-    @player.concurrency = 5
     @player.queue << "mock_request"
 
-    thread = @player.start_input!
+    thread = @player.start_input! 10
     assert_equal Thread, thread.class
 
     sleep 0.2
@@ -427,11 +419,7 @@ class TestPlayer < Test::Unit::TestCase
   end
 
 
-  def test_process_compare_one
-    mock_thread = "mock_thread"
-    Thread.expects(:new).twice.yields.returns mock_thread
-    mock_thread.expects(:join).twice
-
+  def test_run
     resp1 = Kronk::Response.new mock_resp("200_response.json")
     resp1.parser = JSON
     resp2 = Kronk::Response.new mock_resp("200_response.txt")
@@ -447,112 +435,68 @@ class TestPlayer < Test::Unit::TestCase
 
     @got_results = nil
 
-    @player.output.expects(:result).with do |kronk, mutex|
+    @player.expects(:result).with do |kronk|
       @got_results = true
-      assert_equal @player.mutex, mutex
       assert_equal Kronk::Diff.new(resp1.stringify, resp2.stringify).formatted,
                     kronk.diff.formatted
       true
     end
 
     opts = {:uri_suffix => "/test", :include_headers => true}
-    @player.process_one opts, :compare, "example.com", "beta-example.com"
+    @player.number = 1
+    @player.concurrency = 1
+    @player.queue << opts
 
-    assert @got_results, "Expected output to get results but didn't"
+    @player.run do |kronk|
+      kronk.compare "example.com", "beta-example.com"
+    end
+
+    assert @got_results, "Expected player to get results but didn't"
   end
 
 
-  def test_process_one_compare_error
+  def test_run_error
     @got_results = []
+    @player.number = 1
+    @player.concurrency = 1
 
-    @player.output.expects(:error).times(3).with do |error, kronk, mutex|
+    @player.expects(:error).times(3).with do |error, kronk|
       @got_results << error.class
-      assert_equal @player.mutex, mutex
-      assert_equal Kronk,         kronk.class
+      assert_equal Kronk, kronk.class
       true
     end
 
-    errs = [Kronk::Exception, Kronk::Response::MissingParser, Errno::ECONNRESET]
+    errs = [Kronk::Error, Kronk::Response::MissingParser, Errno::ECONNRESET]
     errs.each do |eklass|
       Kronk.any_instance.expects(:compare).
         with("example.com", "beta-example.com").
         raises eklass
 
       opts = {:uri_suffix => "/test", :include_headers => true}
-      @player.process_one opts, :compare, "example.com", "beta-example.com"
+
+      @player.run opts do |kronk|
+        kronk.compare "example.com", "beta-example.com"
+      end
     end
 
-    assert_equal errs, @got_results, "Expected output to get errors but didn't"
+    assert_equal errs, @got_results, "Expected player to get errors but didn't"
   end
 
 
-  def test_process_one_compare_error_not_caught
+  def test_run_error_not_caught
+    @player.number = 1
+    @player.concurrency = 1
+
     Kronk.any_instance.expects(:compare).
       with("example.com", "beta-example.com").
-      raises RuntimeError
+      raises ArgumentError
 
-    assert_raises RuntimeError do
+    assert_raises ArgumentError do
       opts = {:uri_suffix => "/test", :include_headers => true}
-      @player.process_one opts, :compare, "example.com", "beta-example.com"
-    end
-  end
 
-
-  def test_process_one_request
-    resp = Kronk::Response.new mock_resp("200_response.json")
-    resp.parser = JSON
-
-    req = Kronk::Request.new "example.com"
-    req.expects(:retrieve).returns resp
-
-    Kronk::Request.expects(:new).returns req
-
-    @got_results = nil
-
-    @player.output.expects(:result).with do |kronk, mutex|
-      @got_results = true
-      assert_equal @player.mutex, mutex
-      assert_equal resp, kronk.response
-      true
-    end
-
-    opts = {:uri_suffix => "/test", :include_headers => true}
-    @player.process_one opts, :request, "example.com"
-
-    assert @got_results, "Expected output to get results but didn't"
-  end
-
-
-  def test_process_one_request_error
-    @got_results = []
-
-    @player.output.expects(:error).times(3).with do |error, kronk, mutex|
-      @got_results << error.class
-      assert_equal @player.mutex, mutex
-      assert_equal Kronk,         kronk.class
-      true
-    end
-
-    errs = [Kronk::Exception, Kronk::Response::MissingParser, Errno::ECONNRESET]
-    errs.each do |eklass|
-      Kronk.any_instance.expects(:request).with("example.com").
-        raises eklass
-
-      opts = {:uri_suffix => "/test", :include_headers => true}
-      @player.process_one opts, :request, "example.com"
-    end
-
-    assert_equal errs, @got_results, "Expected output to get errors but didn't"
-  end
-
-
-  def test_process_one_request_error_not_caught
-    Kronk.any_instance.expects(:request).with("example.com").
-      raises RuntimeError
-
-    assert_raises RuntimeError do
-      opts = {:uri_suffix => "/test", :include_headers => true}
-      @player.process_one opts, :request, "example.com"
+      @player.run opts do |kronk|
+        kronk.compare "example.com", "beta-example.com"
+      end
     end
   end
 
