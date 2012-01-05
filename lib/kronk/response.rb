@@ -108,12 +108,13 @@ class Kronk
     # reading if the body hasn't finished loading.
     #
     # If a block is given and the body hasn't been read yet, will iterate
-    # yielding the Response instance and a chunk of the body as it becomes
-    # available. Note: Block will not be called if the response is compressed
+    # yielding a chunk of the body as it becomes available.
+    #
+    # Note: Block will yield the full body if the response is compressed
     # using Deflate as the Deflate format does not support streaming.
     #
     #   resp = Kronk::Response.new io
-    #   resp.body do |resp, chunk|
+    #   resp.body do |chunk|
     #     # handle stream
     #   end
 
@@ -122,28 +123,37 @@ class Kronk
 
       raise IOError, 'Socket closed.' if @io.closed?
 
+      error    = false
+      last_pos = 0
+
       begin
         read_body do |chunk|
           chunk = unzip chunk if gzip?
 
           try_force_encoding chunk
           (@body ||= "") << chunk
-          yield self, chunk if block_given? && !deflated?
+          yield chunk if block_given? && !deflated?
         end
 
-      rescue IOError, EOFError
+      rescue IOError, EOFError => e
+        error    = e
+        last_pos = @body.to_s.length #TODO: Test this
+
         @io.read_all
         @body = headless? ? @raw : @raw.split("\r\n\r\n", 2)[1]
         @body = unzip @body if gzip?
-        yield self, try_force_encoding(@body) if block_given?
       end
 
       @body = Zlib::Inflate.inflate(@body) if deflated?
 
-      @read = true
-
       try_force_encoding @raw unless gzip? || deflated?
       try_force_encoding @body
+
+      @read = true
+
+      yield @body[last_pos..-1] if block_given? && (deflated? || error)
+
+      @body
     end
 
 

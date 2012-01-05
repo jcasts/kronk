@@ -354,6 +354,9 @@ class Kronk
     # full HTTP response has been read. If a block is given, will yield
     # the response and body chunks as they get received.
     #
+    # Note: Block will yield the full body if the response is compressed
+    # using Deflate as the Deflate format does not support streaming.
+    #
     # Options are passed directly to the Kronk::Response constructor.
 
     def retrieve opts={}, &block
