@@ -384,6 +384,13 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
+        opt.on('--location-trusted [NUM]', Integer,
+               'Follow location and send auth to other hosts') do |value|
+          options[:trust_location]   = true
+          options[:follow_redirects] = value || true
+        end
+
+
         opt.on('--no-cookies', 'Don\'t use cookies for this session') do
           options[:no_cookies] = true
         end

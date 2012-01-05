@@ -105,9 +105,12 @@ class Kronk
 
     ##
     # Returns the body of the response. Will wait for the socket to finish
-    # reading if the body hasn't finished loading. If a block is given and
-    # the body hasn't been read yet, will iterate yielding the Response
-    # instance and a chunk of the body as it becomes available.
+    # reading if the body hasn't finished loading.
+    #
+    # If a block is given and the body hasn't been read yet, will iterate
+    # yielding the Response instance and a chunk of the body as it becomes
+    # available. Note: Block will not be called if the response is compressed
+    # using Deflate as the Deflate format does not support streaming.
     #
     #   resp = Kronk::Response.new io
     #   resp.body do |resp, chunk|
@@ -125,7 +128,7 @@ class Kronk
 
           try_force_encoding chunk
           (@body ||= "") << chunk
-          yield self, chunk if block_given?
+          yield self, chunk if block_given? && !deflated?
         end
 
       rescue IOError, EOFError
@@ -480,12 +483,17 @@ class Kronk
     ##
     # Follow the redirect and return a new Response instance.
     # Returns nil if not redirect-able.
+    # Supports all Request#new options, plus:
+    # :trust_location:: Forwards HTTP auth to different host when true.
 
     def follow_redirect opts={}, &block
       return if !redirect?
       new_opts = @request ? @request.to_hash : {}
       new_opts[:http_method] = "GET" if @code == "303"
       new_opts.merge!(opts)
+      new_opts.delete(:auth) if !opts[:trust_location] &&
+        (!@request || self.location.host != self.uri.host)
+
       Request.new(self.location, new_opts).retrieve(new_opts, &block)
     end
 

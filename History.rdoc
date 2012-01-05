@@ -8,8 +8,6 @@
 
 * Enhancements:
 
-  * Parse multiple piped responses using -n and content-length.
-
   * Parsed Response headers now also return parsed cookies.
 
   * Many Player performance improvements.
@@ -23,6 +21,8 @@
   * Support for gzip and inflate decoding.
 
   * Diff accuracy improvements.
+
+  * Support forwarding HTTP auth information to redirected hosts.
 
 * Bugfixes:
 
