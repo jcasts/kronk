@@ -180,7 +180,7 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
-        opt.on('--gzip', 'Decode body with gZip') do
+        opt.on('--gzip', 'Force decode body with gZip') do
           options[:force_gzip] = true
         end
 
@@ -220,7 +220,7 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
-        opt.on('--inflate', 'Decode body with Zlib Inflate') do
+        opt.on('--inflate', 'Force decode body with Zlib Inflate') do
           options[:force_inflate] = true
         end
 
@@ -347,6 +347,12 @@ Parse and run diffs against data from live and cached http responses.
 
         opt.on('--clear-cookies', 'Delete all saved cookies') do
           Kronk.clear_cookies!
+        end
+
+
+        opt.on('--compressed',
+               'Request compressed response (using deflate or gzip)') do
+          options[:accept_encoding] = %w{gzip;q=1.0 deflate;q=0.6}
         end
 
 

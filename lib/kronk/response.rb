@@ -30,11 +30,12 @@ class Kronk
     ##
     # Create a new Response object from a String or IO.
     # Options supported are:
-    # :request::       The Kronk::Request instance for this response.
-    # :timeout::       The read timeout value in seconds.
-    # :no_body::       Ignore reading the body of the response.
-    # :force_gzip::    Force decoding body with gzip.
-    # :force_inflate:: Force decoding body with gzip.
+    # :request::        The Kronk::Request instance for this response.
+    # :timeout::        The read timeout value in seconds.
+    # :no_body::        Ignore reading the body of the response.
+    # :force_gzip::     Force decoding body with gzip.
+    # :force_inflate::  Force decoding body with inflate.
+    # :allow_headless:: Allow headless responses (won't raise for invalid HTTP).
 
     def initialize input, opts={}, &block
       @request = opts[:request]

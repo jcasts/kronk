@@ -213,6 +213,7 @@ class Kronk
     # :headers:: Hash - extra headers to pass to the request
     # :http_method:: Symbol - the http method to use; defaults to :get
     # :proxy:: Hash/String - http proxy to use; defaults to {}
+    # :accept_encoding:: Array/String - list of encodings the server can return
     #
     # Note: if no http method is specified and data is given, will default
     # to using a post request.
@@ -228,7 +229,12 @@ class Kronk
       @_req     = nil
 
       @headers = opts[:headers] || {}
-      @headers["Accept-Encoding"] ||= "gzip;q=1.0,deflate;q=0.6,identity;q=0.3"
+
+      @headers["Accept-Encoding"] = [
+        @headers["Accept-Encoding"].to_s.split(","),
+        Array(opts[:accept_encoding]),
+        "identity;q=0.3"
+      ].flatten.compact.uniq.join(",")
 
       @timeout = opts[:timeout] || Kronk.config[:timeout]
 

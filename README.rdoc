@@ -116,13 +116,15 @@ Disabling cookies altogether may be done as so:
 Setting URI-specific config options - useful if you always need to send
 headers or use one-off configs. Each URI option key is dropped in a regexp
 to match against the given URIs so this also works for local files.
-See Kronk::Request.retrieve and Kronk::Response#selective_data
+See Kronk::Request.new, Kronk::Response.new and Kronk::Response#data
 for all options supported:
 
   uri_options:
     example.com:
-      parser:      XMLParser
-      http_method: POST
+      parser:         XMLParser
+      allow_encoding: gzip;q=1.0
+      force_gzip:     true
+      http_method:    POST
 
       follow_redirects: true
 
