@@ -12,6 +12,7 @@ lib/kronk/data_string.rb
 lib/kronk/diff.rb
 lib/kronk/diff/ascii_format.rb
 lib/kronk/diff/color_format.rb
+lib/kronk/diff/output.rb
 lib/kronk/http.rb
 lib/kronk/buffered_io.rb
 lib/kronk/path.rb
@@ -21,7 +22,6 @@ lib/kronk/path/transaction.rb
 lib/kronk/player.rb
 lib/kronk/player/benchmark.rb
 lib/kronk/player/input_reader.rb
-lib/kronk/player/output.rb
 lib/kronk/player/request_parser.rb
 lib/kronk/player/suite.rb
 lib/kronk/player/stream.rb
