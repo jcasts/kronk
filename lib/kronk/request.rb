@@ -307,7 +307,7 @@ class Kronk
         cookie = Kronk.cookie_jar.get_cookie_header @uri.to_s
         @headers['Cookie'] = cookie unless cookie.empty?
 
-      else
+      elsif !bool
         @headers.delete 'Cookie'
       end
 
