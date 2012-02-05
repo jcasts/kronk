@@ -1,3 +1,13 @@
+=== 1.8.1 / 2012-02
+
+* Enhancements:
+
+  * Support max number of history items.
+
+* Bugfixes:
+
+  * Don't override Cookies set via the -H option.
+
 === 1.8.0 / 2012-01-05
 
 * Major Enhancements:

@@ -4,8 +4,6 @@
 
 * Support file/IO uploads
 
-* Only record a limited number of history items.
-
 == Maybe Later
 
 * Animate Suite player cursor when waiting for input.
@@ -21,6 +19,8 @@
 * Use persistent connection pools.
 
 == Done
+
+* Only record a limited number of history items.
 
 * GNU-Plot support.
 

@@ -88,6 +88,7 @@ class Kronk
     :diff_format    => 'ascii',
     :history_file   => DEFAULT_HISTORY_FILE,
     :indentation    => 1,
+    :max_history    => 100,
     :requires       => [],
     :show_lines     => false,
     :uri_options    => {},

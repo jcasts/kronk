@@ -225,7 +225,7 @@ class Kronk
   # Writes the URL history to the history file.
 
   def self.save_history
-    history_str = self.history.uniq.join($/)
+    history_str = self.history.uniq[0..self.config[:max_history]].join($/)
 
     File.open self.config[:history_file], "w" do |file|
       file.write history_str
@@ -342,7 +342,7 @@ class Kronk
       req = Request.new uri, options
       Cmd.verbose "Retrieving URL:  #{req.uri}\n"
       resp = req.retrieve options
-      Kronk.history << uri
+      Kronk.history << req.uri.to_s[0..-req.uri.request_uri.length]
     end
 
     resp.parser         = options[:parser] if options[:parser]

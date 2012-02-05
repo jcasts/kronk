@@ -10,8 +10,10 @@ class TestHelperMethods < Test::Unit::TestCase
     @mock_resp  = Kronk::Response.new io
     @mock_resp2 = Kronk::Response.new \
                     StringIO.new mock_resp("200_response.json")
-    @mock_req   = stub("mock_req", :retrieve => @mock_resp,  :uri => "host.com")
-    @mock_req2  = stub("mock_req", :retrieve => @mock_resp2, :uri => "host.com")
+    @mock_req   = stub("mock_req", :retrieve => @mock_resp,
+                        :uri => URI.parse("http://host.com"))
+    @mock_req2  = stub("mock_req", :retrieve => @mock_resp2,
+                        :uri => URI.parse("http://host.com"))
 
     @mock_thread = stub("mock_thread", :join => true,
                          :abort_on_exception= => true)
@@ -140,7 +142,8 @@ class TestHelperMethods < Test::Unit::TestCase
 
   def test_retrieve_unparsable
     mock_resp = Kronk::Response.new StringIO.new(mock_200_response)
-    mock_req  = stub("mock_req", :retrieve => mock_resp, :uri => "host.com")
+    mock_req  = stub("mock_req", :retrieve => mock_resp,
+                      :uri => URI.parse("http://host.com"))
 
     Kronk::Request.expects(:new).
       with("host.com", :foo => "bar").returns mock_req

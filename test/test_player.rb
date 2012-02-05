@@ -522,11 +522,11 @@ class TestPlayer < Test::Unit::TestCase
     end
 
     req.each_with_index do |r, i|
-      mock_req = "mock request"
       mock_res = Kronk::Response.new resp[i]
+      mock_req = stub("mock_req", :retrieve => mock_res,
+                        :uri => URI.parse("http://host.com"))
+
       Kronk::Request.stubs(:new).with(req[i], opts).returns mock_req
-      mock_req.stubs(:retrieve).returns mock_res
-      mock_req.stubs(:uri).returns nil
     end
   end
 end
