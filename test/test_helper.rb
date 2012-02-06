@@ -176,6 +176,7 @@ def expect_request req_method, url, options={}
   headers['User-Agent'] ||= Kronk::DEFAULT_USER_AGENT
 
   req.expects(:start).yields(http).returns resp
+  req.expects(:body=).with(data)
 
   Kronk::Request::VanillaRequest.expects(:new).
     with(req_method.to_s.upcase, uri.request_uri, headers).returns req
@@ -183,7 +184,7 @@ def expect_request req_method, url, options={}
   Kronk::HTTP.expects(:new).with(uri.host, uri.port).returns req
 
   http.expects(:request).
-    with(req, data, has_entry(:request => instance_of(Kronk::Request))).
+    with(req, nil, has_entry(:request => instance_of(Kronk::Request))).
     returns resp
 
   yield http, req, resp if block_given?

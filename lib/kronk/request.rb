@@ -376,7 +376,7 @@ class Kronk
 
       @response = connection.start do |http|
         start_time = Time.now
-        res = http.request http_request, @body, opts, &block
+        res = http.request http_request, nil, opts, &block
         res.body # make sure to read the full body from io
         res.time    = Time.now - start_time
         res.request = self
@@ -453,13 +453,15 @@ class Kronk
 
 
     ##
-    # Returns the HTTP request object.
+    # Returns the Net::HTTPRequest subclass instance.
 
     def http_request
       req = VanillaRequest.new @http_method, @uri.request_uri, @headers
 
       req.basic_auth @auth[:username], @auth[:password] if
         @auth && @auth[:username]
+
+      @body.respond_to?(:read) ? req.body_stream = @body : req.body = @body
 
       req
     end
