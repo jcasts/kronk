@@ -329,6 +329,26 @@ class TestRequest < Test::Unit::TestCase
   end
 
 
+  def test_form_option
+    req = Kronk::Request.new("http://example.com", :data => "foo",
+                              :form => "bar")
+
+    assert_equal "bar", req.body
+    assert_equal "application/x-www-form-urlencoded",
+                  req.headers['Content-Type']
+  end
+
+
+  def test_form_data
+    req = Kronk::Request.new("http://example.com", :data => "foo",
+                              :form => "bar")
+
+    assert_equal "bar", req.body
+    assert_equal "application/x-www-form-urlencoded",
+                  req.headers['Content-Type']
+  end
+
+
   def test_retrieve_user_agent_default
     expect_request "GET", "http://example.com",
     :headers => {

@@ -243,6 +243,7 @@ class Kronk
 
       @body = nil
       @body = self.class.build_query opts[:data] if opts[:data]
+      self.form_data = opts[:form] if opts[:form]
 
       self.user_agent ||= opts[:user_agent]
 
@@ -289,6 +290,15 @@ class Kronk
 
     def cookie= cookie_str
       @headers['Cookie'] = cookie_str if @use_cookies
+    end
+
+
+    ##
+    # Assigns body of the request with form headers.
+
+    def form_data= data
+      @headers['Content-Type'] = "application/x-www-form-urlencoded"
+      @body = self.class.build_query data
     end
 
 
