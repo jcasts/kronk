@@ -363,6 +363,12 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
+        opt.on('-F', '--form STR', String,
+               'Set request body with form headers; overrides -d') do |value|
+          options[:form] = value
+        end
+
+
         opt.on('-H', '--header STR', String,
                'Header to pass to the server request') do |value|
           options[:headers] ||= {}

@@ -207,6 +207,7 @@ class Kronk
     # Build an http request to the given uri and return a Response instance.
     # Supports the following options:
     # :data:: Hash/String - the data to pass to the http request
+    # :form:: Hash/String - similar to :data but sets content-type header
     # :query:: Hash/String - the data to append to the http request path
     # :user_agent:: String - user agent string or alias; defaults to 'kronk'
     # :auth:: Hash - must contain :username and :password; defaults to nil
@@ -221,12 +222,9 @@ class Kronk
     def initialize uri, opts={}
       @auth = opts[:auth]
 
-      @body = nil
-      @body = self.class.build_query opts[:data] if opts[:data]
-
       @connection = nil
-      @response = nil
-      @_req     = nil
+      @response   = nil
+      @_req       = nil
 
       @headers = opts[:headers] || {}
 
@@ -242,6 +240,9 @@ class Kronk
 
       @proxy = opts[:proxy] || {}
       @proxy = {:host => @proxy} unless Hash === @proxy
+
+      @body = nil
+      @body = self.class.build_query opts[:data] if opts[:data]
 
       self.user_agent ||= opts[:user_agent]
 
