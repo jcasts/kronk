@@ -224,6 +224,7 @@ class Kronk
 
       @connection = nil
       @response   = nil
+      @body       = nil
       @_req       = nil
 
       @headers = opts[:headers] || {}
@@ -240,8 +241,6 @@ class Kronk
 
       @proxy = opts[:proxy] || {}
       @proxy = {:host => @proxy} unless Hash === @proxy
-
-      @body = nil
 
       self.body      = opts[:data] if opts[:data]
       self.form_data = opts[:form] if opts[:form]
@@ -284,9 +283,14 @@ class Kronk
         dont_chunk!
         @body = data
 
-      when IO, StringIO
-        @headers['Transfer-Encoding'] = 'chunked'
-        @body = data
+      else
+        if data.respond_to?(:read)
+          @headers['Transfer-Encoding'] = 'chunked'
+          @body = data
+        else
+          dont_chunk!
+          @body = data.to_s
+        end
       end
     end
 
