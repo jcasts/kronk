@@ -1,15 +1,12 @@
-require 'rubygems'
+require 'rubygems' if RUBY_VERSION =~ /1.8/
 
 require 'json'
 require 'cookiejar'
 
 require 'thread'
 require 'stringio'
-require 'base64'
 
-require 'net/https'
-require 'zlib'
-require 'optparse'
+require 'net/http'
 require 'yaml'
 
 class Kronk
@@ -26,7 +23,6 @@ class Kronk
   require 'kronk/player/tsv'
   require 'kronk/player/request_parser'
   require 'kronk/player/input_reader'
-  require 'kronk/cmd'
   require 'kronk/path'
   require 'kronk/path/match'
   require 'kronk/path/matcher'

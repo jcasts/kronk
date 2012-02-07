@@ -199,14 +199,14 @@ class Kronk
     end
 
 
-    attr_accessor :body, :headers, :proxy, :response, :timeout
+    attr_accessor :headers, :proxy, :response, :timeout
 
-    attr_reader :http_method, :uri, :use_cookies
+    attr_reader :body, :http_method, :uri, :use_cookies
 
     ##
     # Build an http request to the given uri and return a Response instance.
     # Supports the following options:
-    # :data:: Hash/String - the data to pass to the http request
+    # :data:: Hash/String - the data to pass to the http request body
     # :form:: Hash/String - similar to :data but sets content-type header
     # :query:: Hash/String - the data to append to the http request path
     # :user_agent:: String - user agent string or alias; defaults to 'kronk'
@@ -242,7 +242,8 @@ class Kronk
       @proxy = {:host => @proxy} unless Hash === @proxy
 
       @body = nil
-      @body = self.class.build_query opts[:data] if opts[:data]
+
+      self.body      = opts[:data] if opts[:data]
       self.form_data = opts[:form] if opts[:form]
 
       self.user_agent ||= opts[:user_agent]
@@ -261,12 +262,32 @@ class Kronk
       @auth ||= Hash.new
 
       if !@auth[:username] && @headers['Authorization']
+        require 'base64'
         str = Base64.decode64 @headers['Authorization'].split[1]
         username, password = str.split(":", 2)
         @auth = {:username => username, :password => password}.merge @auth
       end
 
       @auth
+    end
+
+
+    ##
+    # Assign request body. Supports String, Hash, and IO.
+
+    def body= data
+      case data
+      when Hash
+        self.form_data = data
+
+      when String
+        dont_chunk!
+        @body = data
+
+      when IO, StringIO
+        @headers['Transfer-Encoding'] = 'chunked'
+        @body = data
+      end
     end
 
 
@@ -279,7 +300,11 @@ class Kronk
 
       @connection = http_class.new @uri.host, @uri.port
       @connection.open_timeout = @connection.read_timeout = @timeout if @timeout
-      @connection.use_ssl      = true if @uri.scheme =~ /^https$/
+
+      if @uri.scheme =~ /^https$/
+        require 'net/https'
+        @connection.use_ssl = true
+      end
 
       @connection
     end
@@ -297,6 +322,7 @@ class Kronk
     # Assigns body of the request with form headers.
 
     def form_data= data
+      dont_chunk!
       @headers['Content-Type'] = "application/x-www-form-urlencoded"
       @body = self.class.build_query data
     end
@@ -486,6 +512,13 @@ class Kronk
       Kronk::HTTP::Proxy host, port, user, pass
     end
 
+    private
+
+
+    def dont_chunk!
+      @headers.delete('Transfer-Encoding') if
+        @headers['Transfer-Encoding'].to_s.downcase == 'chunked'
+    end
 
 
     ##

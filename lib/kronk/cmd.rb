@@ -1,3 +1,6 @@
+require 'kronk'
+require 'optparse'
+
 class Kronk
 
   ##
@@ -417,6 +420,13 @@ Parse and run diffs against data from live and cached http responses.
         opt.on('-t', '--timeout NUM', Float,
                'Timeout for http connection in seconds') do |value|
           Kronk.config[:timeout] = value
+        end
+
+
+        opt.on('-T', '--upload-file FILE', String,
+               'Transfer file in HTTP body') do |file|
+          options[:data] = File.open(file, 'rb')
+          options[:http_method] ||= 'POST'
         end
 
 

@@ -2,5 +2,5 @@
 
 $: << File.join(File.dirname(__FILE__), "../lib") if $0 == "bin/kronk"
 
-require 'kronk'
+require 'kronk/cmd'
 Kronk::Cmd.run

@@ -122,6 +122,8 @@ class Kronk
 
       raise IOError, 'Socket closed.' if @io.closed?
 
+      require 'zlib' if gzip? || deflated?
+
       error    = false
       last_pos = 0
 
