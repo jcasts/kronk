@@ -1,9 +1,5 @@
 = TODO
 
-* Support --form option and set Content-Type to application/x-www-form-urlencoded
-
-* Support file/IO uploads
-
 == Maybe Later
 
 * Animate Suite player cursor when waiting for input.
@@ -19,6 +15,10 @@
 * Use persistent connection pools.
 
 == Done
+
+* Support --form option and set Content-Type to application/x-www-form-urlencoded
+
+* Support file/IO uploads
 
 * Only record a limited number of history items.
 

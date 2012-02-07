@@ -4,6 +4,10 @@
 
   * Support max number of history items.
 
+  * Support --form option to set form-encoded content type.
+
+  * Support file uploads.
+
 * Bugfixes:
 
   * Don't override Cookies set via the -H option.
