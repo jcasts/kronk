@@ -188,6 +188,12 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
+        opt.on('-h', '--help', 'Print this help screen') do
+          puts opt
+          exit
+        end
+
+
         opt.on('-i', '--include [HEADER1,HEADER2]', Array,
                'Include all or given headers in response') do |value|
           options[:show_headers] ||= []
@@ -286,6 +292,12 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
+        opt.on('-v', '--version', 'Output Kronk version and exit') do
+          puts Kronk::VERSION
+          exit
+        end
+
+
         opt.separator <<-STR
 
   Player Options:
@@ -381,12 +393,6 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
-        opt.on('-A', '--user-agent STR', String,
-               'User-Agent to send to server or a valid alias') do |value|
-          options[:user_agent] = value
-        end
-
-
         opt.on('-L', '--location [NUM]', Integer,
                'Follow the location header always or num times') do |value|
           options[:follow_redirects] = value || true
@@ -405,9 +411,24 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
+        opt.on('-U', '--proxy-user STR', String,
+               'Set proxy user and/or password: usr[:pass]') do |value|
+          options[:proxy][:username], options[:proxy][:password] =
+            value.split ":", 2
+
+          options[:proxy][:password] ||= query_password "Proxy password:"
+        end
+
+
         opt.on('-?', '--query STR', String,
                'Append query to URLs') do |value|
           options[:query] = value
+        end
+
+
+        opt.on('-X', '--request STR', String,
+               'The HTTP request method to use') do |value|
+          options[:http_method] = value
         end
 
 
@@ -430,15 +451,6 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
-        opt.on('-U', '--proxy-user STR', String,
-               'Set proxy user and/or password: usr[:pass]') do |value|
-          options[:proxy][:username], options[:proxy][:password] =
-            value.split ":", 2
-
-          options[:proxy][:password] ||= query_password "Proxy password:"
-        end
-
-
         opt.on('-u', '--user STR', String,
                'Set server auth user and/or password: usr[:pass]') do |value|
           options[:auth][:username], options[:auth][:password] =
@@ -448,9 +460,9 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
-        opt.on('-X', '--request STR', String,
-               'The HTTP request method to use') do |value|
-          options[:http_method] = value
+        opt.on('-A', '--user-agent STR', String,
+               'User-Agent to send to server or a valid alias') do |value|
+          options[:user_agent] = value
         end
 
 
