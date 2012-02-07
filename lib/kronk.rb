@@ -338,7 +338,10 @@ class Kronk
       req = Request.new uri, options
       Cmd.verbose "Retrieving URL:  #{req.uri}\n"
       resp = req.retrieve options
-      Kronk.history << req.uri.to_s[0..-req.uri.request_uri.length]
+
+      hist_uri = req.uri.to_s[0..-req.uri.request_uri.length]
+      hist_uri = hist_uri[(req.uri.scheme.length + 3)..-1]
+      Kronk.history << hist_uri
     end
 
     resp.parser         = options[:parser] if options[:parser]
