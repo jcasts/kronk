@@ -1,4 +1,5 @@
 require 'test/test_helper'
+require 'zlib'
 
 class TestResponse < Test::Unit::TestCase
 
