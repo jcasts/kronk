@@ -166,7 +166,7 @@ class TestRequest < Test::Unit::TestCase
 
   def test_body_io
     req = Kronk::Request.new "foo.com"
-    req.body = str_io = StringIO.new "foo=bar"
+    req.body = str_io = StringIO.new("foo=bar")
 
     assert_equal str_io,    req.body
     assert_equal 'chunked', req.headers['Transfer-Encoding']
