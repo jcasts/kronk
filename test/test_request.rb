@@ -140,6 +140,51 @@ class TestRequest < Test::Unit::TestCase
   end
 
 
+  def test_body_hash
+    req = Kronk::Request.new "foo.com"
+    req.headers['Transfer-Encoding'] = "chunked"
+    req.body = {:foo => :bar}
+
+    assert_equal "foo=bar", req.body
+    assert_equal nil, req.headers['Transfer-Encoding']
+    assert_equal "application/x-www-form-urlencoded",
+                 req.headers['Content-Type']
+  end
+
+
+  def test_body_string
+    req = Kronk::Request.new "foo.com", :form => "blah"
+    req.headers['Transfer-Encoding'] = "chunked"
+    req.body = "foo=bar"
+
+    assert_equal "foo=bar", req.body
+    assert_equal nil, req.headers['Transfer-Encoding']
+    assert_equal "application/x-www-form-urlencoded",
+                 req.headers['Content-Type']
+  end
+
+
+  def test_body_io
+    req = Kronk::Request.new "foo.com"
+    req.body = str_io = StringIO.new "foo=bar"
+
+    assert_equal str_io,    req.body
+    assert_equal 'chunked', req.headers['Transfer-Encoding']
+    assert_equal nil,       req.headers['Content-Type']
+  end
+
+
+  def test_body_other
+    req = Kronk::Request.new "foo.com"
+    req.headers['Transfer-Encoding'] = "chunked"
+    req.body = 12345
+
+    assert_equal "12345", req.body
+    assert_equal nil,     req.headers['Transfer-Encoding']
+    assert_equal nil,     req.headers['Content-Type']
+  end
+
+
   def test_retrieve_get
     expect_request "GET", "http://example.com/request/path?foo=bar"
     resp =

@@ -4,15 +4,23 @@ export COMP_WORDBREAKS=${COMP_WORDBREAKS/\:/}
 
 _kronk() 
 {
-  local cur kronk_keys
+  local cur kronk_keys kronk_words
 
   cur="${COMP_WORDS[COMP_CWORD]}"
 
   kronk_keys="$HOME/.kronk/history"
   test -f "$kronk_keys" || kronk_keys="$HOME/.kronk_history"
 
+  kronk_words="$(cat $kronk_keys | sed 's/^http*:\/\///')"
+
+  if [[ ${cur:0:1} == "h" ]]; then
+    kronk_words="$(echo "$kronk_words" | sed 's/^/http:\/\//')
+$(echo "$kronk_words" | sed 's/^/https:\/\//')
+$(echo "$kronk_words")"
+  fi
+
   if [ -f "$kronk_keys" ]; then
-    COMPREPLY=( $(compgen -W "$(cat $kronk_keys $old_kronk_keys)" -- ${cur}) )
+    COMPREPLY=( $(compgen -W "$kronk_words" -- ${cur}) )
     return 0
   fi
 
