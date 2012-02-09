@@ -1,5 +1,13 @@
 = TODO
 
+* Request bursts by combining -c and --qps, and/or special option.
+  --burst 10:0.1 (burst 10 reqs every 0.1 seconds)
+  --burst rand(5-10):rand(1-2)
+
+* Ctrl-T (Sig INFO) to show current results in Suite Player.
+
+* Suite Player full response/diff view option.
+
 == Maybe Later
 
 * Animate Suite player cursor when waiting for input.
