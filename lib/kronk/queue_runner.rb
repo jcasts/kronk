@@ -168,8 +168,6 @@ class Kronk
       @max_queue_size = 0.5 / period
       @max_queue_size = clump * 2 if @max_queue_size < (clump * 2)
 
-      sleep_period = period * clump if clump
-
       start = Time.now
 
       until_finished do |count, active_count|
@@ -179,7 +177,8 @@ class Kronk
         if count < expected_count
           num_threads = smaller_count(expected_count - count)
         else
-          sleep sleep_period
+          sleep_time = period * smaller_count(clump)
+          sleep sleep_time
         end
 
         num_threads.times do
