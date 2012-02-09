@@ -281,6 +281,20 @@ class TestCmd < Test::Unit::TestCase
   end
 
 
+  def test_parse_args_concur_player_options
+    opts = Kronk::Cmd.parse_args %w{uri --qps 10}
+    assert_equal 1,   opts[:player].concurrency
+    assert_equal 10,  opts[:player].qps
+    assert_equal nil, opts[:player].number
+    assert_equal Kronk::Player::Suite, opts[:player].class
+
+    opts = Kronk::Cmd.parse_args %w{uri --qps 10 --rpm 1200}
+    assert_equal 1,   opts[:player].concurrency
+    assert_equal 20,  opts[:player].qps
+    assert_equal nil, opts[:player].number
+  end
+
+
   def test_parse_args_player_stdin
     $stdin.expects(:tty?).returns(false).times(7)
 

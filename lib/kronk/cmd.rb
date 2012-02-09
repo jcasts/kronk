@@ -329,8 +329,14 @@ Parse and run diffs against data from live and cached http responses.
 
 
         opt.on('--qps NUM', Float,
-               'Number of queries per second to make; overrides -c') do |num|
+               'Number of queries per second; overrides -c') do |num|
           options[:player][:qps] = num
+        end
+
+
+        opt.on('--rpm NUM', Float,
+               'Number of requests per minute; overrides --qps') do |num|
+          options[:player][:qps] = num/60.0
         end
 
 
@@ -411,6 +417,12 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
+        opt.on('-x', '--proxy STR', String,
+               'Use HTTP proxy on given port: host[:port]') do |value|
+          options[:proxy][:host], options[:proxy][:port] = value.split ":", 2
+        end
+
+
         opt.on('-U', '--proxy-user STR', String,
                'Set proxy user and/or password: usr[:pass]') do |value|
           options[:proxy][:username], options[:proxy][:password] =
@@ -463,12 +475,6 @@ Parse and run diffs against data from live and cached http responses.
         opt.on('-A', '--user-agent STR', String,
                'User-Agent to send to server or a valid alias') do |value|
           options[:user_agent] = value
-        end
-
-
-        opt.on('-x', '--proxy STR', String,
-               'Use HTTP proxy on given port: host[:port]') do |value|
-          options[:proxy][:host], options[:proxy][:port] = value.split ":", 2
         end
 
         opt.separator nil
