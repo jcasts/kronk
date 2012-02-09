@@ -329,7 +329,7 @@ Parse and run diffs against data from live and cached http responses.
 
 
         opt.on('--qps NUM', Float,
-               'Number of queries per second; overrides -c') do |num|
+               'Number of queries per second; burst requests with -c') do |num|
           options[:player][:qps] = num
         end
 

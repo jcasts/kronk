@@ -159,10 +159,16 @@ class Kronk
     #
     # Yields queue item until queue and io (if available) are empty and the
     # totaly number of requests to run is met (if number is set).
+    #
+    # If clump is given, will fire clump number of requests at a time, which
+    # can modify how often requests are send. The overall period should however
+    # be close to the one specified.
 
-    def periodically period=0.01, &block
+    def periodically period=0.01, clump=1, &block
       @max_queue_size = 0.5 / period
-      @max_queue_size = 2 if @max_queue_size < 2
+      @max_queue_size = clump * 2 if @max_queue_size < (clump * 2)
+
+      sleep_period = period * clump if clump
 
       start = Time.now
 
@@ -173,7 +179,7 @@ class Kronk
         if count < expected_count
           num_threads = smaller_count(expected_count - count)
         else
-          sleep period
+          sleep sleep_period
         end
 
         num_threads.times do

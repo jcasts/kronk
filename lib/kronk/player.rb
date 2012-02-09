@@ -118,13 +118,13 @@ class Kronk
     def run opts={}
       if @qps
         method = :periodically
-        arg    = 1.0 / @qps.to_f
+        args   = [(1.0 / @qps.to_f), @concurrency]
       else
         method = :concurrently
-        arg    = @concurrency
+        args   = [@concurrency]
       end
 
-      send method, arg do |kronk_opts|
+      send(method, *args) do |kronk_opts|
         err = nil
         kronk = Kronk.new kronk_opts.merge(opts)
 
