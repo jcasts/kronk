@@ -1,3 +1,17 @@
+=== 1.8.2 / 2012-02
+
+* Enhacements:
+
+  * Support -c and --qps options in tandem for clustered requests.
+
+  * Convenience --rpm option.
+
+* Bugfixes:
+
+  * Indentation option no longer ignored.
+
+  * Remove Cmd call from Player on single request.
+
 === 1.8.1 / 2012-02-07
 
 * Enhancements:

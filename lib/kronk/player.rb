@@ -87,8 +87,6 @@ class Kronk
     # If options are given, they are merged into every request.
 
     def compare uri1, uri2, opts={}, &block
-      return Cmd.compare uri1, uri2, @queue.shift.merge(opts) if single_request?
-
       on(:result){|(kronk, err)| trigger_result(kronk, err, &block) }
 
       run opts do |kronk|
@@ -102,8 +100,6 @@ class Kronk
     # If options are given, they are merged into every request.
 
     def request uri, opts={}, &block
-      return Cmd.request uri, @queue.shift.merge(opts) if single_request?
-
       on(:result){|(kronk, err)| trigger_result(kronk, err, &block) }
 
       run opts do |kronk|
@@ -158,16 +154,6 @@ class Kronk
       elsif respond_to?(:result)
         result kronk
       end
-    end
-
-
-    ##
-    # Check if we're only processing a single case.
-    # If so, yield a single item and return immediately.
-
-    def single_request?
-      @queue << trigger(:input) if @queue.empty? && (!@number || @number <= 1)
-      @queue.length == 1 && @triggers[:input] == @on_input && @input.eof?
     end
   end
 end

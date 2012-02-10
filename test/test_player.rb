@@ -156,15 +156,6 @@ class TestPlayer < Test::Unit::TestCase
   end
 
 
-  def test_compare_single
-    io1  = StringIO.new(mock_200_response)
-    io2  = StringIO.new(mock_302_response)
-    expect_compare_output mock_200_response, mock_302_response
-
-    @player.compare io1, io2
-  end
-
-
   def test_compare
     @player.input.parser = Kronk::Player::RequestParser
     @player.input.io << "/req3\n/req4\n/req5\n"
@@ -191,14 +182,6 @@ class TestPlayer < Test::Unit::TestCase
     @player.compare "example.com", "beta-example.com", :query => "foo=bar"
 
     assert_equal 5, @player.result_calls
-  end
-
-
-  def test_request_single
-    io = StringIO.new(mock_200_response)
-    expect_request_output mock_200_response
-
-    @player.request io
   end
 
 
@@ -310,32 +293,6 @@ class TestPlayer < Test::Unit::TestCase
     end
 
     assert_equal requests, processed
-  end
-
-
-  def test_single_request_from_io
-    @player.input.io = StringIO.new "mock request"
-    @player.input.parser.stubs(:start_new?).returns true
-    assert @player.single_request?, "Expected player to have one request"
-  end
-
-
-  def test_single_request_from_queue
-    @player.input.io = nil
-    assert @player.single_request?, "Expected player to have one request"
-  end
-
-
-  def test_not_single_request
-    @player.input.io = nil
-    @player.queue.concat Array.new(10, "mock request")
-    assert !@player.single_request?, "Expected player to have many requests"
-
-    @player.input.io = StringIO.new Array.new(5, "mock request").join("\n")
-    @player.queue.clear
-    @player.input.parser.expects(:start_new?).returns(true)
-
-    assert !@player.single_request?, "Expected player to have many requests"
   end
 
 
