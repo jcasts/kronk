@@ -126,7 +126,7 @@ class Kronk
 
         begin
           yield kronk
-        rescue *Kronk::Cmd::RESCUABLE => e
+        rescue *RESCUABLE => e
           err = e
         end
 

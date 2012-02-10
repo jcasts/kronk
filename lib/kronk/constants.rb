@@ -95,4 +95,11 @@ class Kronk
     :use_cookies    => true,
     :user_agents    => USER_AGENTS.dup
   }
+
+
+  # Errors to rescue from the Cmd or from Player.
+  RESCUABLE = [
+    Kronk::Error, Timeout::Error,
+    SocketError, SystemCallError, URI::InvalidURIError
+  ]
 end

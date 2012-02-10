@@ -8,11 +8,6 @@ class Kronk
 
   class Cmd
 
-    RESCUABLE = [
-      Kronk::Error, Timeout::Error,
-      SocketError, SystemCallError, URI::InvalidURIError
-    ]
-
     ##
     # Saves the raw http response to a cache file.
 
