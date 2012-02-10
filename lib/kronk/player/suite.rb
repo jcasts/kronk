@@ -111,7 +111,7 @@ class Kronk
 
 
     def diff_text kronk
-      <<-STR
+      output = <<-STR
   Request: #{kronk.responses[0].code} - \
 #{kronk.responses[0].request.http_method} \
 #{kronk.responses[0].uri}
@@ -121,6 +121,8 @@ class Kronk
   Options: #{kronk.options.inspect}
   Diffs: #{kronk.diff.count}
       STR
+      output << "#{kronk.diff.to_s}\n" unless Kronk.config[:brief]
+      output
     end
 
 

@@ -6,6 +6,9 @@
 
   * Convenience --rpm option.
 
+  * Suite player compare output includes diff with --full and --brief
+    options support.
+
 * Bugfixes:
 
   * Indentation option no longer ignored.
