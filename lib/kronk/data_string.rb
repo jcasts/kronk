@@ -85,7 +85,7 @@ class Kronk
 
     def initialize data=nil, opts={}, &block
       @struct_only = opts[:struct]
-      @indentation = opts[:indentation] || 1
+      @indentation = opts[:indentation] || Kronk.config[:indentation] || 1
       @meta        = []
 
       if String === data
