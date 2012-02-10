@@ -1,4 +1,4 @@
-=== 1.8.2 / 2012-02
+=== 1.8.2 / 2012-02-10
 
 * Enhacements:
 
@@ -10,6 +10,8 @@
     options support.
 
 * Bugfixes:
+
+  * Set Content-Length and Content-Type on file uploads.
 
   * Indentation option no longer ignored.
 

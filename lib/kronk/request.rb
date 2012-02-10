@@ -285,13 +285,22 @@ class Kronk
 
       else
         if data.respond_to?(:read)
-          @headers['Transfer-Encoding'] = 'chunked'
+          ext = data.respond_to?(:path) ?
+                  File.extname(data.path)[1..-1] : "binary"
+
+          @headers['Content-Type'] = "application/#{ext}"
+
           @body = data
         else
           dont_chunk!
           @body = data.to_s
         end
       end
+
+      @headers['Content-Length'] = @body.size.to_s if @body.respond_to?(:size)
+      @headers['Transfer-Encoding'] = 'chunked' if !@headers['Content-Length']
+
+      @body
     end
 
 

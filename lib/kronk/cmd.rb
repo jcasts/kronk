@@ -454,7 +454,7 @@ Parse and run diffs against data from live and cached http responses.
         opt.on('-T', '--upload-file FILE', String,
                'Transfer file in HTTP body') do |file|
           options[:data] = File.open(file, 'rb')
-          options[:http_method] ||= 'POST'
+          options[:http_method] ||= 'PUT'
         end
 
 

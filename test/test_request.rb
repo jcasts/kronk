@@ -76,7 +76,8 @@ class TestRequest < Test::Unit::TestCase
 
   def test_retrieve_post
     expect_request "POST", "http://example.com/request/path?foo=bar",
-      :data => {'test' => 'thing'}, :headers => {'X-THING' => 'thing'}
+      :data    => {'test' => 'thing'},
+      :headers => {'X-THING' => 'thing', 'Content-Length' => '10'}
 
     resp = Kronk::Request.new("http://example.com/request/path?foo=bar",
             :data => 'test=thing', :headers => {'X-THING' => 'thing'},
@@ -159,18 +160,47 @@ class TestRequest < Test::Unit::TestCase
 
     assert_equal "foo=bar", req.body
     assert_equal nil, req.headers['Transfer-Encoding']
+    assert_equal '7', req.headers['Content-Length']
     assert_equal "application/x-www-form-urlencoded",
                  req.headers['Content-Type']
   end
 
 
-  def test_body_io
+  def test_body_string_io
     req = Kronk::Request.new "foo.com"
     req.body = str_io = StringIO.new("foo=bar")
 
-    assert_equal str_io,    req.body
-    assert_equal 'chunked', req.headers['Transfer-Encoding']
-    assert_equal nil,       req.headers['Content-Type']
+    assert_equal str_io,               req.body
+    assert_equal nil,                  req.headers['Transfer-Encoding']
+    assert_equal 'application/binary', req.headers['Content-Type']
+    assert_equal '7',                  req.headers['Content-Length']
+  end
+
+
+  def test_body_io
+    req = Kronk::Request.new "foo.com"
+    io, = IO.pipe
+    req.body = io
+
+    assert_equal io,                   req.body
+    assert_equal 'chunked',            req.headers['Transfer-Encoding']
+    assert_equal 'application/binary', req.headers['Content-Type']
+    assert_equal nil,                  req.headers['Content-Length']
+  end
+
+
+  def test_body_file_io
+    io  = File.open 'TODO.rdoc', 'r'
+    req = Kronk::Request.new "foo.com"
+    req.body = io
+
+    assert_equal io,                   req.body
+    assert_equal nil,                  req.headers['Transfer-Encoding']
+    assert_equal 'application/rdoc',   req.headers['Content-Type']
+    assert_equal io.size.to_s,         req.headers['Content-Length']
+
+  ensure
+    io.close
   end
 
 
