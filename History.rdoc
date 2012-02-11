@@ -11,6 +11,8 @@
 
   * Support for Ctrl-T in Suite Player.
 
+  * Support for colorized values in data output.
+
 * Bugfixes:
 
   * Set Content-Length and Content-Type on file uploads.

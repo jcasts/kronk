@@ -104,6 +104,10 @@ resolve to a constant:
 
   diff_format: ascii
 
+Output parsed data with color-coded values:
+
+  color_data: true
+
 Adding User-Agent aliases is useful and simple!
 
   user_agents:
