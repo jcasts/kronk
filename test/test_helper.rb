@@ -2,7 +2,8 @@ require "test/unit"
 require "mocha"
 require "kronk/cmd"
 
-Kronk.config[:context] = nil
+Kronk.config[:context]    = nil
+Kronk.config[:color_data] = false
 
 
 def mock_resp name

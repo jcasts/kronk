@@ -26,6 +26,19 @@ class Kronk
 
 
     ##
+    # Make sure color output is supported on Windows.
+
+    def self.ensure_color
+      return unless Kronk::Cmd.windows?
+      begin
+        require 'Win32/Console/ANSI'
+      rescue LoadError
+        Cmd.warn "You must gem install win32console to use color"
+      end
+    end
+
+
+    ##
     # Start an IRB console with the given Kronk::Response object.
 
     def self.irb resp
@@ -131,12 +144,14 @@ Parse and run diffs against data from live and cached http responses.
   Options:
         STR
 
-        opt.on('--ascii', 'Return ascii formatted diff') do
+        opt.on('--ascii', 'Print plain ascii output') do
+          Kronk.config[:color_data]  = false
           Kronk.config[:diff_format] = 'ascii'
         end
 
 
-        opt.on('--color', 'Return color formatted diff') do
+        opt.on('--color', 'Print color output') do
+          Kronk.config[:color_data]  = true
           Kronk.config[:diff_format] = 'color'
         end
 
@@ -589,6 +604,11 @@ Parse and run diffs against data from live and cached http responses.
       Kronk.load_cookie_jar
 
       options = parse_args argv
+
+      ensure_color if Kronk.config[:color_data] ||
+                      Kronk.config[:diff_format].to_s =~ /color/ ||
+                      options[:color]
+
       load_requires options.delete(:requires)
 
       set_exit_behavior

@@ -7,31 +7,17 @@ class Kronk
 
     class ColorFormat
 
-      def self.ensure_color
-        return unless Kronk::Cmd.windows?
-        begin
-          require 'Win32/Console/ANSI'
-        rescue LoadError
-          Cmd.warn "You must gem install win32console to use color"
-        end
-      end
-
-
       def self.head left, right
-        ensure_color
         ["\033[1;33m--- #{left}", "+++ #{right}\033[0m"]
       end
 
 
       def self.context left, right, info=nil
-        ensure_color
         "\033[1;35m@@ -#{left} +#{right} @@\033[0m #{info}"
       end
 
 
       def self.lines line_nums, col_width
-        ensure_color
-
         out =
           [*line_nums].map do |lnum|
             lnum.to_s.rjust col_width
@@ -42,19 +28,24 @@ class Kronk
 
 
       def self.deleted str
-        ensure_color
+        rm_color str
         "\033[1;31m- #{str}\033[0m"
       end
 
 
       def self.added str
-        ensure_color
+        rm_color str
         "\033[1;32m+ #{str}\033[0m"
       end
 
 
       def self.common str
         "  #{str}"
+      end
+
+
+      def self.rm_color str
+        str.gsub!(/\e\[[^m]+m/, '')
       end
     end
   end

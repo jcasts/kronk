@@ -67,7 +67,7 @@ class Kronk
     end
 
 
-    attr_accessor :data, :meta, :struct_only
+    attr_accessor :color, :data, :meta, :struct_only
 
 
     ##
@@ -78,6 +78,7 @@ class Kronk
     # :indentation:: Integer - how many spaces to indent by; default 1
     # :render_lang:: String - output to 'ruby' or 'json'; default 'json'
     # :struct:: Boolean - class names used instead of values; default nil
+    # :color:: Boolean - render values with ANSI colors; default false
     #
     # If block is given, will yield the type of object to render and
     # an optional object to render. Types given are :key_assign, :key, :value,
@@ -85,6 +86,7 @@ class Kronk
 
     def initialize data=nil, opts={}, &block
       @struct_only = opts[:struct]
+      @color       = opts[:color]       || Kronk.config[:color_data]
       @indentation = opts[:indentation] || Kronk.config[:indentation] || 1
       @meta        = []
 
@@ -100,6 +102,25 @@ class Kronk
       end
 
       render data, &block if data && block
+    end
+
+
+    ##
+    # Assign ANSI colors based on data type.
+
+    def colorize string, data
+      case data
+      when String
+        "\033[0;36m#{string}\033[0m"
+      when Numeric
+        "\033[0;33m#{string}\033[0m"
+      when TrueClass, FalseClass
+        "\033[1;35m#{string}\033[0m"
+      when NilClass
+        "\033[1;31m#{string}\033[0m"
+      else
+        string
+      end
     end
 
 
@@ -148,6 +169,7 @@ class Kronk
 
       else
         output = @struct_only ? yield(:struct, data) : yield(:value, data)
+        output = colorize output, data if @color
         append output.to_s, path
       end
     end
