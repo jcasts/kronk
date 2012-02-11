@@ -21,6 +21,8 @@
 
   * Remove Cmd call from Player on single request.
 
+  * No more abort_on_exception for child threads.
+
 === 1.8.1 / 2012-02-07
 
 * Enhancements:
