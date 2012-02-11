@@ -285,8 +285,8 @@ class Kronk
 
       else
         if data.respond_to?(:read)
-          ext = data.respond_to?(:path) ?
-                  File.extname(data.path)[1..-1] : "binary"
+          ext   = File.extname(data.path.to_s)[1..-1] if data.respond_to?(:path)
+          ext ||= "binary"
 
           @headers['Content-Type'] = "application/#{ext}"
 
@@ -550,3 +550,10 @@ class Kronk
   end
 end
 
+unless File.instance_methods.include? "size"
+  class File
+    def size
+      FileTest.size self.path
+    end
+  end
+end
