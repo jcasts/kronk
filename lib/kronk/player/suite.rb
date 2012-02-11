@@ -6,8 +6,27 @@ class Kronk
   class Player::Suite < Player
 
     def start
-      @results    = []
+      @results = []
+      @current = nil
       $stdout.puts "Started"
+
+      @old_info_trap =
+        trap "INFO" do
+          @stop_time = Time.now
+          @mutex.synchronize do
+            render
+            $stdout.puts "Elapsed:  #{(Time.now - @start_time).round 3}s"
+
+            req = @current.responses[-1].request ||
+                  @current.responses[0].request  if @current
+
+            if req
+              meth = req.http_method
+              path = req.uri.request_uri
+              $stdout.puts "Current Req: #{meth} #{path}"
+            end
+          end
+        end
     end
 
 
@@ -37,7 +56,10 @@ class Kronk
           [status, kronk.response.time, text]
         end
 
-      @mutex.synchronize{ @results << result }
+      @mutex.synchronize do
+        @current = kronk
+        @results << result
+      end
 
       $stdout << status
       $stdout.flush
@@ -55,7 +77,13 @@ class Kronk
 
 
     def complete
-      suite_time    = Time.now - @start_time
+      trap "INFO", @old_info_trap
+      $stdout.puts "\nFinished in #{Time.now - @start_time} seconds.\n"
+      render
+    end
+
+
+    def render
       player_time   = @stop_time - @start_time
       total_time    = 0
       bad_count     = 0
@@ -86,7 +114,6 @@ class Kronk
       avg_time = non_error_count > 0 ? total_time / non_error_count  : "n/a"
       avg_qps  = non_error_count > 0 ? non_error_count / player_time : "n/a"
 
-      $stdout.puts "\nFinished in #{suite_time} seconds.\n"
       $stderr.puts err_buffer unless err_buffer.empty?
       $stdout.puts "\n#{@results.length} cases, " +
                    "#{failure_count} failures, #{error_count} errors"

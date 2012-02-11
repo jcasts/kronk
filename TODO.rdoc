@@ -2,8 +2,6 @@
 
 * Color-coded data output.
 
-* Ctrl-T (Sig INFO) to show current results in Suite Player.
-
 == Maybe Later
 
 * Animate Suite player cursor when waiting for input.
@@ -19,6 +17,8 @@
 * Use persistent connection pools.
 
 == Done
+
+* Ctrl-T (Sig INFO) to show current results in Suite Player.
 
 * Suite Player full response/diff view option.
 

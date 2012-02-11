@@ -9,6 +9,8 @@
   * Suite player compare output includes diff with --full and --brief
     options support.
 
+  * Support for Ctrl-T in Suite Player.
+
 * Bugfixes:
 
   * Set Content-Length and Content-Type on file uploads.
