@@ -550,7 +550,7 @@ class Kronk
   end
 end
 
-unless File.instance_methods.include? "size"
+unless File.instance_methods.include? :size
   class File
     def size
       FileTest.size self.path
