@@ -130,8 +130,12 @@ class Kronk
 
 
     def resp_text kronk
+      http_method = kronk.response.request ?
+                    kronk.response.request.http_method :
+                    "(FILE)"
+
       <<-STR
-  Request: #{kronk.response.code} - #{kronk.response.request.http_method} \
+  Request: #{kronk.response.code} - #{http_method} \
 #{kronk.response.uri}
   Options: #{kronk.options.inspect}
       STR
