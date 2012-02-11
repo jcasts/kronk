@@ -305,9 +305,6 @@ class Kronk
           str2 = res2.stringify
          end
 
-    t1.abort_on_exception = true
-    t2.abort_on_exception = true
-
     t1.join
     t2.join
 

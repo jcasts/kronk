@@ -247,8 +247,6 @@ class Kronk
         yield q_item if block_given?
       end
 
-      @threads.last.abort_on_exception = true
-
       @count += 1
     end
 
