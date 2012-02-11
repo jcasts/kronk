@@ -23,7 +23,8 @@ class Kronk
             if req
               meth = req.http_method
               path = req.uri.request_uri
-              $stdout.puts "Current Req: #{meth} #{path}"
+              time = req.response.time.round 3
+              $stdout.puts "Current Req: #{meth} #{path} (#{time}s)"
             end
           end
         end
