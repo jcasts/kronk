@@ -604,7 +604,11 @@ class Kronk
       end
 
     rescue MissingParser
-      Cmd.verbose "Warning: No parser for #{@headers['content-type']} [#{uri}]"
+      if defined?(Cmd)
+        ctype = @headers['content-type']
+        Cmd.verbose "Warning: No parser for #{ctype} [#{uri}]"
+      end
+
       self.to_s :body    => !opts[:no_body],
                 :headers => (opts[:show_headers] || false),
                 :raw     => opts[:raw]

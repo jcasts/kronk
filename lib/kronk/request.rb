@@ -520,7 +520,7 @@ class Kronk
       user = opts[:username]
       pass = opts[:password]
 
-      Kronk::Cmd.verbose "Using proxy #{addr}\n" if host
+      Kronk::Cmd.verbose "Using proxy #{addr}\n" if host && defined?(Cmd)
 
       Kronk::HTTP::Proxy host, port, user, pass
     end
