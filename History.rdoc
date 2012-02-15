@@ -1,3 +1,11 @@
+=== 1.8.2 / 2012-02-15
+
+* Bugfixes:
+
+  * Fix for SIGINFO not supported on linux.
+
+  * Don't write to Cmd.verbose if Cmd isn't defined.
+
 === 1.8.2 / 2012-02-11
 
 * Enhacements:
