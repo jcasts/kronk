@@ -11,7 +11,7 @@ class Kronk
       $stdout.puts "Started"
 
       @old_info_trap =
-        trap "INFO" do
+        trap 29 do
           @stop_time = Time.now
           @mutex.synchronize do
             render
@@ -78,7 +78,7 @@ class Kronk
 
 
     def complete
-      trap "INFO", @old_info_trap
+      trap 29, @old_info_trap
       $stdout.puts "\nFinished in #{Time.now - @start_time} seconds.\n"
       render
     end
