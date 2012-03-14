@@ -42,10 +42,10 @@ class TestRequest < Test::Unit::TestCase
 
 
   def test_parse_to_hash
-    expected = {:uri_suffix => "/foobar"}
+    expected = {:path => "/foobar"}
     assert_equal expected, Kronk::Request.parse_to_hash("/foobar")
 
-    expected = {:http_method => "GET", :uri_suffix => "/foobar"}
+    expected = {:http_method => "GET", :path => "/foobar"}
     assert_equal expected, Kronk::Request.parse_to_hash("GET /foobar")
 
     expected.merge! :host => "example.com"
@@ -62,7 +62,7 @@ class TestRequest < Test::Unit::TestCase
 
 
   def test_parse_to_hash_url
-    expected = {:host => "http://example.com", :uri_suffix => "/foobar?foo=bar"}
+    expected = {:host => "http://example.com", :path => "/foobar?foo=bar"}
     assert_equal expected,
       Kronk::Request.parse_to_hash("http://example.com/foobar?foo=bar")
   end
@@ -127,6 +127,15 @@ class TestRequest < Test::Unit::TestCase
              :uri_suffix => "/to/resource"
 
     assert_equal "http://example.com/path/to/resource", uri.to_s
+  end
+
+
+  def test_build_path
+    uri = Kronk::Request.build_uri "http://example.com/",
+             :path       => "/path",
+             :uri_suffix => "/to/resource"
+
+    assert_equal "http://example.com//path/to/resource", uri.to_s
   end
 
 

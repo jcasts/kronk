@@ -500,8 +500,11 @@ class Kronk
     def follow_redirect opts={}, &block
       return if !redirect?
       new_opts = @request ? @request.to_hash : {}
+
       new_opts[:http_method] = "GET" if @code == "303"
       new_opts.merge!(opts)
+
+      new_opts.delete(:path)
       new_opts.delete(:auth) if !opts[:trust_location] &&
         (!@request || self.location.host != self.uri.host)
 

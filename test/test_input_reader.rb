@@ -25,7 +25,7 @@ class TestInputReader < Test::Unit::TestCase
   def test_get_next
     (1..3).each do |num|
       expected = {
-        :uri_suffix  => "/path#{num}"
+        :path  => "/path#{num}"
       }
       assert_equal expected, @input.get_next
     end
@@ -43,7 +43,7 @@ class TestInputReader < Test::Unit::TestCase
         "Authorization" => "Basic Ym9iOmZvb2Jhcg=="
       },
       :http_method => "GET",
-      :uri_suffix  => "/path",
+      :path        => "/path",
       :host        => "example.com:80",
     }
 
@@ -65,7 +65,7 @@ class TestInputReader < Test::Unit::TestCase
         "Authorization" => "Basic Ym9iOmZvb2Jhcg=="
       },
       :http_method => "GET",
-      :uri_suffix  => "/path",
+      :path        => "/path",
       :host        => "example.com:80",
     }
 

@@ -47,12 +47,15 @@ class Kronk
     # path and options.
 
     def self.build_uri uri, opts={}
-      uri  ||= opts[:host] || Kronk.config[:default_host]
-      suffix = opts[:uri_suffix]
+      if uri
+        uri = "#{uri}#{opts[:path]}#{opts[:uri_suffix]}"
+      else
+        uri = [opts[:host], opts[:path], opts[:uri_suffix]].join
+      end
 
-      uri = "http://#{uri}"   unless uri.to_s =~ %r{^(\w+://|/)}
-      uri = "#{uri}#{suffix}" if suffix
-      uri = URI.parse uri     unless URI === uri
+      uri = "http://#{uri}" unless uri.to_s =~ %r{^(\w+://|/)}
+
+      uri = URI.parse uri unless URI === uri
       uri = URI.parse(Kronk.config[:default_host]) + uri unless uri.host
 
       if opts[:query]
@@ -94,7 +97,7 @@ class Kronk
       lines.shift.strip =~ REQUEST_LINE_MATCHER
       opts.merge! :http_method => $1,
                   :host        => $2,
-                  :uri_suffix  => ($3 || $4)
+                  :path        => ($3 || $4)
 
       lines.each_with_index do |line, i|
         case line
@@ -114,7 +117,7 @@ class Kronk
       opts[:data] = lines[body_start..-1].join("\n") if body_start
 
       opts.delete(:host)        if !opts[:host]
-      opts.delete(:uri_suffix)  if !opts[:uri_suffix]
+      opts.delete(:path)        if !opts[:path]
       opts.delete(:headers)     if opts[:headers].empty?
       opts.delete(:http_method) if !opts[:http_method]
       opts.delete(:data)        if opts[:data] && opts[:data].strip.empty?
@@ -451,7 +454,7 @@ class Kronk
     def to_hash
       hash = {
         :host        => "#{@uri.scheme}://#{@uri.host}:#{@uri.port}",
-        :uri_suffix  => @uri.request_uri,
+        :path        => @uri.request_uri,
         :user_agent  => self.user_agent,
         :timeout     => @timeout,
         :http_method => self.http_method,

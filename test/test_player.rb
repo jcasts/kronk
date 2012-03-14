@@ -162,21 +162,21 @@ class TestPlayer < Test::Unit::TestCase
     @player.input.io.rewind
     @player.input.io.close_write
 
-    @player.queue.concat [{:uri_suffix => "/req1"}, {:uri_suffix => "/req2"}]
+    @player.queue.concat [{:path => "/req1"}, {:path => "/req2"}]
 
     part1 = (1..2).map{|n| "/req#{n}"}
     part2 = (3..5).map{|n| "/req#{n}"}
 
     part1.each do |path|
       mock_requests "example.com", "beta-example.com",
-        :uri_suffix => path,
-        :query      => "foo=bar"
+        :path  => path,
+        :query => "foo=bar"
     end
 
     part2.each do |path|
       mock_requests "example.com", "beta-example.com",
-        :uri_suffix  => path,
-        :query       => "foo=bar"
+        :path  => path,
+        :query => "foo=bar"
     end
 
     @player.compare "example.com", "beta-example.com", :query => "foo=bar"
