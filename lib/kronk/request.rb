@@ -47,16 +47,18 @@ class Kronk
     # path and options.
 
     def self.build_uri uri, opts={}
-      if uri
-        uri = "#{uri}#{opts[:path]}#{opts[:uri_suffix]}"
-      else
-        uri = [opts[:host], opts[:path], opts[:uri_suffix]].join
-      end
+      uri ||= opts[:host]
 
+      uri = "#{uri}#{opts[:path]}#{opts[:uri_suffix]}"
       uri = "http://#{uri}" unless uri.to_s =~ %r{^(\w+://|/)}
 
       uri = URI.parse uri unless URI === uri
-      uri = URI.parse(Kronk.config[:default_host]) + uri unless uri.host
+
+      unless uri.host
+        host = Kronk.config[:default_host]
+        host = "http://#{host}" unless host.to_s =~ %r{^\w+://}
+        uri  = URI.parse(host) + uri
+      end
 
       if opts[:query]
         query = build_query opts[:query]

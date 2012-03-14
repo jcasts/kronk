@@ -394,6 +394,12 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
+        opt.on('--default-host STR', String,
+               'Default host to use if missing') do |value|
+          Kronk.config[:default_host] = value
+        end
+
+
         opt.on('-F', '--form STR', String,
                'Set request body with form headers; overrides -d') do |value|
           options[:form] = value
