@@ -204,21 +204,6 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
-        opt.on('-i', '--include [HEADER1,HEADER2]', Array,
-               'Include all or given headers in response') do |value|
-          options[:show_headers] ||= []
-
-          if value
-            options[:show_headers].concat value if
-              Array === options[:show_headers]
-          else
-            options[:show_headers] = true
-          end
-
-          options[:no_body] = false
-        end
-
-
         opt.on('-I', '--head [HEADER1,HEADER2]', Array,
                'Use all or given headers only in the response') do |value|
           options[:show_headers] ||= []
@@ -231,6 +216,21 @@ Parse and run diffs against data from live and cached http responses.
           end
 
           options[:no_body] = true
+        end
+
+
+        opt.on('-i', '--include [HEADER1,HEADER2]', Array,
+               'Include all or given headers in response') do |value|
+          options[:show_headers] ||= []
+
+          if value
+            options[:show_headers].concat value if
+              Array === options[:show_headers]
+          else
+            options[:show_headers] = true
+          end
+
+          options[:no_body] = false
         end
 
 
