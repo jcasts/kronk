@@ -1,4 +1,14 @@
-=== 1.8.2 / 2012-02-15
+=== 1.8.4 / 2012-03-20
+
+* Enhancements:
+
+  * Allow setting a fallback host when retrieving mixed full and partial URLs.
+
+* Bugfixes:
+
+  * Fix redirect issue in player.
+
+=== 1.8.3 / 2012-02-15
 
 * Bugfixes:
 
