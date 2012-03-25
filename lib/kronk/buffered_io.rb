@@ -15,12 +15,18 @@ class Kronk
     end
 
 
+    def rewind
+      @rbuf.replace @raw_output if @raw_output
+    end
+
+
     private
 
-    def rbuf_consume len
-      str = super
-      @raw_output << str if @raw_output
-      str
+    def rbuf_fill
+      rbuf_size = @rbuf.length
+      super
+    ensure
+      @raw_output << @rbuf[rbuf_size..-1] if @raw_output
     end
   end
 end

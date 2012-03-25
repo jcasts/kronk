@@ -1,3 +1,9 @@
+=== 1.8.5 / 2012-03-25
+
+* Bugfixes:
+
+  * Re-enable parsing headless responses from stdin.
+
 === 1.8.4 / 2012-03-20
 
 * Enhancements:

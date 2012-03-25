@@ -666,7 +666,7 @@ class Kronk
     def total_bytes
       return raw.bytes.count if @read
       return raw_header.bytes.count unless body_permitted?
-      raw_header.bytes.count + (content_length || range_length).to_i + 2
+      raw_header.to_s.bytes.count + (content_length || range_length).to_i + 2
     end
 
 
@@ -712,7 +712,7 @@ class Kronk
     # to the constructor.
 
     def headless_ok? io
-      File === io || String === io || StringIO === io
+      File === io || String === io || StringIO === io || $stdin == io
     end
 
 
@@ -727,6 +727,8 @@ class Kronk
       rescue EOFError, Kronk::HTTPBadResponse
         raise unless allow_headless
         @http_version, @code, @msg = ["1.0", "200", "OK"]
+
+        buff_io.rewind
 
         ext = File === buff_io.io ?
                 File.extname(buff_io.io.path)[1..-1] : "html"
@@ -772,6 +774,7 @@ class Kronk
         @io.read clen, dest
         return
       end
+
       @io.read_all dest
     end
 
