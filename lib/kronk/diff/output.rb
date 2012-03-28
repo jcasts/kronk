@@ -55,11 +55,11 @@ class Kronk::Diff
 
 
       ##
-      # Create a Kronk::Path String from an Array. Used when the meta data
+      # Create a Path String from an Array. Used when the meta data
       # given for either side of the diff is an Array.
 
       def ary_to_path ary
-        "#{Kronk::Path::DCH}#{Kronk::Path.join ary}"
+        "#{Path::DCH}#{Path.join ary}"
       end
 
 

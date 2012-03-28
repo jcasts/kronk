@@ -96,7 +96,7 @@ class Kronk
 
       else
         super ""
-        data    = Kronk::Path.pathed(data) if Kronk.config[:render_paths]
+        data    = Path.pathed(data) if Kronk.config[:render_paths]
         @data   = data
         block ||= Kronk.config[:render_lang].to_s == 'ruby' ? TO_RUBY : TO_JSON
       end

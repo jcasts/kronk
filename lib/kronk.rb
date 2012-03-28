@@ -2,6 +2,7 @@ require 'rubygems' if RUBY_VERSION =~ /1.8/
 
 require 'json'
 require 'cookiejar'
+require 'path'
 
 require 'thread'
 require 'stringio'
@@ -23,10 +24,6 @@ class Kronk
   require 'kronk/player/tsv'
   require 'kronk/player/request_parser'
   require 'kronk/player/input_reader'
-  require 'kronk/path'
-  require 'kronk/path/match'
-  require 'kronk/path/matcher'
-  require 'kronk/path/transaction'
   require 'kronk/data_string'
   require 'kronk/diff/ascii_format'
   require 'kronk/diff/color_format'

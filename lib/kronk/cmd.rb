@@ -569,7 +569,7 @@ Parse and run diffs against data from live and cached http responses.
 
 
     ##
-    # Determine the cmd-given path's action and Kronk::Path representation.
+    # Determine the cmd-given path's action and Path representation.
 
     def self.process_path path
       case path

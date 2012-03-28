@@ -551,7 +551,7 @@ class Kronk
     #     trans.delete "foo/0", "bar/1"
     #   end
     #
-    # See Kronk::Path::Transaction for supported transform actions.
+    # See Path::Transaction for supported transform actions.
 
     def data opts={}
       data = nil
@@ -590,7 +590,7 @@ class Kronk
     # :keep_indicies:: Boolean - indicies of modified arrays display as hashes.
     # :show_headers:: Boolean/String/Array - defines which headers to include
     #
-    # If block is given, yields a Kronk::Path::Transaction instance to make
+    # If block is given, yields a Path::Transaction instance to make
     # transformations on the data. See Kronk::Response#data
 
     def stringify opts={}, &block

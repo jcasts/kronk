@@ -12,7 +12,7 @@ class Kronk
         msg ||= "No data found at #{path.inspect} for #{data.inspect}"
         found = false
 
-        Kronk::Path.find path, data do |d,k,p|
+        Path.find path, data do |d,k,p|
           found = true
           break
         end
@@ -29,7 +29,7 @@ class Kronk
         msg ||= "Data found at #{path.inspect} for #{data.inspect}"
         found = false
 
-        Kronk::Path.find path, data do |d,k,p|
+        Path.find path, data do |d,k,p|
           found = true
           break
         end
@@ -47,7 +47,7 @@ class Kronk
         last_data = nil
         found     = false
 
-        Kronk::Path.find path, data do |d,k,p|
+        Path.find path, data do |d,k,p|
           found     = true
           last_data = d[k]
           break if d[k] == match
@@ -68,7 +68,7 @@ class Kronk
       def assert_data_at_not_equal data, path, match, msg=nil
         last_data = nil
 
-        Kronk::Path.find path, data do |d,k,p|
+        Path.find path, data do |d,k,p|
           last_data = d[k]
           break if d[k] == match
         end
