@@ -51,7 +51,7 @@ class Kronk
                     resp.body
                   end
 
-      $stdout.puts "\nHTTP Response is in $http_response"
+      $stdout.puts "\nKronk Response is in $http_response"
       $stdout.puts "Response data is in $response\n\n"
 
       IRB.start
