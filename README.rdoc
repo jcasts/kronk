@@ -1,10 +1,15 @@
 = Kronk
 
-* https://github.com/yaksnrainbows/kronk
+* http://kronk.me
 
 == DESCRIPTION:
 
-Kronk runs diffs against data from live and cached http responses.
+Kronk is a command line swiss-army-knife for HTTP services.
+
+With Kronk, you easily parse and segregate data, run diffs between
+the parsed data from different queries, and easily replay logs and loadtest
+your HTTP applications.
+
 Kronk was made possible by the sponsoring of AT&T Interactive.
 
 == FEATURES:
