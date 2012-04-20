@@ -112,15 +112,18 @@ class Kronk
 
       non_error_count = @results.length - error_count
 
-      avg_time = non_error_count > 0 ? total_time / non_error_count  : "n/a"
-      avg_qps  = non_error_count > 0 ? non_error_count / player_time : "n/a"
+      avg_time = non_error_count > 0 ?
+                  ((total_time / non_error_count)* 1000).round(3)  : "n/a "
+
+      avg_qps  = non_error_count > 0 ?
+                  (non_error_count / player_time).round(3) : "n/a"
 
       $stderr.puts err_buffer unless err_buffer.empty?
       $stdout.puts "\n#{@results.length} cases, " +
                    "#{failure_count} failures, #{error_count} errors"
 
-      $stdout.puts "Avg Time: #{(avg_time * 1000).round 3}ms"
-      $stdout.puts "Avg QPS:  #{avg_qps.round 3}"
+      $stdout.puts "Avg Time: #{avg_time}ms"
+      $stdout.puts "Avg QPS:  #{avg_qps}"
 
       return bad_count == 0
     end
@@ -130,13 +133,8 @@ class Kronk
 
 
     def resp_text kronk
-      http_method = kronk.response.request ?
-                    kronk.response.request.http_method :
-                    "(FILE)"
-
       <<-STR
-  Request: #{kronk.response.code} - #{http_method} \
-#{kronk.response.uri}
+  Request: #{req_text kronk.response}
   Options: #{kronk.options.inspect}
       STR
     end
@@ -144,17 +142,23 @@ class Kronk
 
     def diff_text kronk
       output = <<-STR
-  Request: #{kronk.responses[0].code} - \
-#{kronk.responses[0].request.http_method} \
-#{kronk.responses[0].uri}
-           #{kronk.responses[1].code} - \
-#{kronk.responses[0].request.http_method} \
-#{kronk.responses[1].uri}
+  Request: #{req_text kronk.responses[0]}
+           #{req_text kronk.responses[1]}
   Options: #{kronk.options.inspect}
   Diffs: #{kronk.diff.count}
       STR
       output << "#{kronk.diff.to_s}\n" unless Kronk.config[:brief]
       output
+    end
+
+
+    def req_text resp
+      if resp.headless?
+        "(FILE) #{resp.uri}"
+      else
+        http_method = resp.request ? resp.request.http_method : "(FILE)"
+        "#{resp.code} - #{http_method} #{resp.uri}"
+      end
     end
 
 
