@@ -212,6 +212,7 @@ class Kronk
     # Build an http request to the given uri and return a Response instance.
     # Supports the following options:
     # :data:: Hash/String - the data to pass to the http request body
+    # :file:: String - the path to a file to upload; overrides :data
     # :form:: Hash/String - similar to :data but sets content-type header
     # :query:: Hash/String - the data to append to the http request path
     # :user_agent:: String - user agent string or alias; defaults to 'kronk'
@@ -247,8 +248,14 @@ class Kronk
       @proxy = opts[:proxy] || {}
       @proxy = {:host => @proxy} unless Hash === @proxy
 
-      self.body      = opts[:data] if opts[:data]
-      self.form_data = opts[:form] if opts[:form]
+
+      if opts[:file]
+        self.body = File.open(opts[:file], 'rb')
+      elsif opts[:data]
+        self.body = opts[:data] if opts[:data]
+      elsif opts[:form]
+        self.form_data = opts[:form] if opts[:form]
+      end
 
       self.user_agent ||= opts[:user_agent]
 
