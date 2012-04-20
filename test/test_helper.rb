@@ -123,7 +123,7 @@ IRB = Module.new
 def with_irb_mock
   mock_require "irb"
 
-  $stdout.expects(:puts).with "\nHTTP Response is in $http_response"
+  $stdout.expects(:puts).with "\nKronk Response is in $http_response"
   $stdout.expects(:puts).with "Response data is in $response\n\n"
   ::IRB.expects :start
 

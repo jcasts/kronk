@@ -251,10 +251,10 @@ class Kronk
 
       if opts[:file]
         self.body = File.open(opts[:file], 'rb')
-      elsif opts[:data]
-        self.body = opts[:data] if opts[:data]
       elsif opts[:form]
-        self.form_data = opts[:form] if opts[:form]
+        self.form_data = opts[:form]
+      elsif opts[:data]
+        self.body = opts[:data]
       end
 
       self.user_agent ||= opts[:user_agent]
