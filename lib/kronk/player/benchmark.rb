@@ -68,6 +68,7 @@ class Kronk
         uri.query = nil
         uri = "#{req.http_method} #{uri.to_s}"
 
+        # TODO: Keep the number in @paths to 10.
         @paths[uri] ||= [0, 0]
         pcount = @paths[uri][1] + 1
         @paths[uri][0] = (@paths[uri][0] * @paths[uri][1] + time) / pcount
