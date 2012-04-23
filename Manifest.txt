@@ -7,7 +7,6 @@ bin/kronk
 lib/kronk.rb
 lib/kronk/cmd.rb
 lib/kronk/constants.rb
-lib/kronk/core_ext.rb
 lib/kronk/data_string.rb
 lib/kronk/diff.rb
 lib/kronk/diff/ascii_format.rb
@@ -15,10 +14,6 @@ lib/kronk/diff/color_format.rb
 lib/kronk/diff/output.rb
 lib/kronk/http.rb
 lib/kronk/buffered_io.rb
-lib/kronk/path.rb
-lib/kronk/path/matcher.rb
-lib/kronk/path/match.rb
-lib/kronk/path/transaction.rb
 lib/kronk/player.rb
 lib/kronk/player/benchmark.rb
 lib/kronk/player/input_reader.rb
@@ -58,5 +53,4 @@ test/test_player.rb
 test/test_request.rb
 test/test_request_parser.rb
 test/test_response.rb
-test/test_transaction.rb
 test/test_xml_parser.rb
