@@ -1,3 +1,15 @@
+=== 1.8.6 / 2012-04-23
+
+* Enhancements:
+
+  * Split out path logic into the ruby-path gem.
+
+* Bugfixes:
+
+  * Support file uploads with Player.
+
+  * Allow using files in the Suite Player.
+
 === 1.8.5 / 2012-03-26
 
 * Bugfixes:
