@@ -227,6 +227,22 @@ class Kronk
 
 
   ##
+  # Returns an array of middleware to use around requests.
+
+  def self.middleware
+    @middleware ||= []
+  end
+
+
+  ##
+  # Assign middleware to use.
+
+  def self.use mware
+    self.middleware.unshift mware
+  end
+
+
+  ##
   # See Kronk#compare. Short for:
   #   Kronk.new(opts).compare(uri1, uri2)
 
@@ -278,6 +294,9 @@ class Kronk
     @diff      = nil
     @responses = []
     @response  = nil
+
+    meth = method(:request_explicit)
+    @app = Kronk.middleware.inject(meth){|app, mware| mware.new(app) }
   end
 
 
@@ -319,24 +338,9 @@ class Kronk
 
   def request uri
     options = Kronk.config[:no_uri_options] ? @options : options_for_uri(uri)
+    options.merge!(:uri => uri)
 
-    if IO === uri || StringIO === uri || BufferedIO === uri
-      Cmd.verbose "Reading IO #{uri}"
-      resp = Response.new uri, options
-
-    elsif File.file? uri.to_s
-      Cmd.verbose "Reading file:  #{uri}\n"
-      resp = Response.read_file uri, options
-
-    else
-      req = Request.new uri, options
-      Cmd.verbose "Retrieving URL:  #{req.uri}\n"
-      resp = req.retrieve options
-
-      hist_uri = req.uri.to_s[0..-req.uri.request_uri.length]
-      hist_uri = hist_uri[(req.uri.scheme.length + 3)..-1]
-      Kronk.history << hist_uri
-    end
+    resp = @app.call options
 
     rdir = options[:follow_redirects]
     while resp.redirect? && (rdir == true || rdir.to_s.to_i > 0)
@@ -363,6 +367,34 @@ class Kronk
   end
 
   alias retrieve request
+
+
+  ##
+  # Request without autofilling options.
+
+  def request_explicit opts
+    uri = opts.delete(:uri)
+
+    if IO === uri || StringIO === uri || BufferedIO === uri
+      Cmd.verbose "Reading IO #{uri}"
+      Response.new uri, options
+
+    elsif File.file? uri.to_s
+      Cmd.verbose "Reading file:  #{uri}\n"
+      Response.read_file uri, options
+
+    else
+      req = Request.new uri, options
+      Cmd.verbose "Retrieving URL:  #{req.uri}\n"
+      resp = req.retrieve options
+
+      hist_uri = req.uri.to_s[0..-req.uri.request_uri.length]
+      hist_uri = hist_uri[(req.uri.scheme.length + 3)..-1]
+      Kronk.history << hist_uri
+
+      resp
+    end
+  end
 
 
   ##
