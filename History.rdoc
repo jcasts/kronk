@@ -1,3 +1,11 @@
+=== 1.8.7 / 2012-04-27
+
+* Bugfixes:
+
+  * Follow browser conventions and redirect 302s like 303s.
+
+  * Fix response stringify options with redirects.
+
 === 1.8.6 / 2012-04-23
 
 * Enhancements:
