@@ -338,9 +338,6 @@ class Kronk
       Kronk.history << hist_uri
     end
 
-    resp.parser         = options[:parser] if options[:parser]
-    resp.stringify_opts = options
-
     rdir = options[:follow_redirects]
     while resp.redirect? && (rdir == true || rdir.to_s.to_i > 0)
       uri = resp.location
@@ -348,6 +345,9 @@ class Kronk
       resp = resp.follow_redirect options_for_uri(resp.location)
       rdir = rdir - 1 if Fixnum === rdir
     end
+
+    resp.parser         = options[:parser] if options[:parser]
+    resp.stringify_opts = options
 
     @responses = [resp]
     @response  = resp
