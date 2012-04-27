@@ -4,6 +4,8 @@
 
   * Follow browser conventions and redirect 302s like 303s.
 
+  * Fix passing previous request options to redirects.
+
   * Fix response stringify options with redirects.
 
 === 1.8.6 / 2012-04-23
