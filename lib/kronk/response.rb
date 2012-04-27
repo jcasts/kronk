@@ -501,12 +501,20 @@ class Kronk
       return if !redirect?
       new_opts = @request ? @request.to_hash : {}
 
-      new_opts[:http_method] = "GET" if @code == "303"
-      new_opts.merge!(opts)
+      if @code == "303" || @code == "302"
+        new_opts[:http_method] = "GET"
+        new_opts.delete(:form)
+        new_opts.delete(:data)
+      end
 
+      new_opts.delete(:headers)
+      new_opts.delete(:host)
       new_opts.delete(:path)
+
       new_opts.delete(:auth) if !opts[:trust_location] &&
         (!@request || self.location.host != self.uri.host)
+
+      new_opts.merge!(opts)
 
       Request.new(self.location, new_opts).retrieve(new_opts, &block)
     end

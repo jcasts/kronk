@@ -198,7 +198,7 @@ class Kronk
           def #{name} uri, opts={}, &block
             opts[:http_method] = "#{name}"
             new(uri, opts).retrieve(&block)
-          end  
+          end
         END
       end
     end
