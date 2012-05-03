@@ -213,7 +213,7 @@ Avg. Slowest Requests (ms, count)
       @mutex.synchronize do
         @res_count += 1
         @results.each do |res|
-          res.err_count += 1
+          @err_count += 1
         end
       end
     end
