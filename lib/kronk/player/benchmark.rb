@@ -17,10 +17,10 @@ class Kronk
 
     class ResultSet
 
-      attr_accessor :total_time
+      attr_accessor :total_time, :err_count
 
       attr_reader :byterate, :count, :fastest, :precision,
-                  :slowest, :total_bytes, :err_count
+                  :slowest, :total_bytes
 
       def initialize
         @times     = Hash.new(0)
@@ -213,7 +213,7 @@ Avg. Slowest Requests (ms, count)
       @mutex.synchronize do
         @res_count += 1
         @results.each do |res|
-          @err_count += 1
+          res.err_count += 1
         end
       end
     end
