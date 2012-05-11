@@ -554,7 +554,7 @@ class Kronk
     # :only_data:: String/Array - Extracts the data from given data paths
     #
     # Example:
-    #   response.data :transform => [:delete, ["foo/0", "bar/1"]]
+    #   response.data :transform => [[:delete, ["foo/0", "bar/1"]]]
     #   response.data do |trans|
     #     trans.delete "foo/0", "bar/1"
     #   end
