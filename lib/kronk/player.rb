@@ -58,7 +58,6 @@ class Kronk
       on(:interrupt){
         interrupt and return if respond_to?(:interrupt)
         complete if respond_to?(:complete)
-        kill
         exit 2
       }
       on(:start){
