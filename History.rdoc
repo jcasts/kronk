@@ -1,3 +1,11 @@
+=== 1.9.0 / 2012
+
+* Bugfixes:
+
+  * Exit immediately when sending SIGINT to the player.
+
+  * Fix the benchmark player error assignment.
+
 === 1.8.7 / 2012-04-30
 
 * Enhancements:
