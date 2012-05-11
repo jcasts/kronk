@@ -350,23 +350,26 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
-        opt.on('--benchmark [FILE]',
-               'Print benchmark data; same as -p [FILE] -o benchmark') do |file|
-          options[:player][:io]   = File.open(file, "r") if file
+        opt.on('--benchmark',
+               'Print benchmark data; same as -p -o benchmark') do
           options[:player][:type] = :benchmark
         end
 
 
-        opt.on('--stream [FILE]',
-               'Print response stream; same as -p [FILE] -o stream') do |file|
-          options[:player][:io]   = File.open(file, "r") if file
+        opt.on('--download [PATH]',
+               'Write responses to files; same as -p -o download') do |path|
+          options[:player][:type] = :download
+        end
+
+
+        opt.on('--stream',
+               'Print response stream; same as -p -o stream') do
           options[:player][:type] = :stream
         end
 
 
-        opt.on('--tsv [FILE]',
-               'Print TSV metrics; same as -p [FILE] -o tsv') do |file|
-          options[:player][:io]   = File.open(file, "r") if file
+        opt.on('--tsv',
+               'Print TSV metrics; same as -p -o tsv') do
           options[:player][:type] = :tsv
         end
 

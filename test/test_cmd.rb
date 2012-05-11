@@ -321,11 +321,11 @@ class TestCmd < Test::Unit::TestCase
     opts = Kronk::Cmd.parse_args %w{uri -p mock_file}
     assert_equal mock_file, opts[:player].input.io
 
-    opts = Kronk::Cmd.parse_args %w{uri --benchmark mock_file}
+    opts = Kronk::Cmd.parse_args %w{uri --benchmark -p mock_file}
     assert_equal mock_file, opts[:player].input.io
     assert_equal Kronk::Player::Benchmark, opts[:player].class
 
-    opts = Kronk::Cmd.parse_args %w{uri --stream mock_file}
+    opts = Kronk::Cmd.parse_args %w{uri --stream -p mock_file}
     assert_equal mock_file, opts[:player].input.io
     assert_equal Kronk::Player::Stream, opts[:player].class
   end

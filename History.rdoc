@@ -1,5 +1,9 @@
 === 1.9.0 / 2012
 
+* Enhancements:
+
+  * Command API change to allow for player-specific options.
+
 * Bugfixes:
 
   * Exit immediately when sending SIGINT to the player.
