@@ -234,7 +234,8 @@ class Kronk
 
     ##
     # The extension or file type corresponding to the body,
-    # based on the Content-Type.
+    # based on the Content-Type. Defaults to 'txt' if none can be determined
+    # or Content-Type is text/plain.
     #   application/json    => 'json'
     #   text/html           => 'html'
     #   application/foo+xml => 'xml'
@@ -331,7 +332,7 @@ class Kronk
     # Ruby inspect.
 
     def inspect
-      content_type = headers['content-type'] || "text/html"
+      content_type = headers['content-type'] || "text/plain"
       "#<#{self.class}:#{@code} #{content_type} #{total_bytes}bytes>"
     end
 
