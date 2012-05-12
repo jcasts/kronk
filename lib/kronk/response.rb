@@ -233,6 +233,28 @@ class Kronk
 
 
     ##
+    # The extension or file type corresponding to the body,
+    # based on the Content-Type.
+    #   application/json    => 'json'
+    #   text/html           => 'html'
+    #   application/foo+xml => 'xml'
+
+    def ext
+      file_ext =
+        if headers['content-type']
+          type = headers['content-type'].to_s.split(";").first.downcase
+          type == "text/plain" ? "txt" : type.split(%r{[/+]}).last
+
+        elsif uri
+          File.extname(uri.path)[1..-1]
+        end
+
+      file_ext = "txt" if !file_ext || file_ext.strip.empty?
+      file_ext
+    end
+
+
+    ##
     # Cookie header accessor.
 
     def cookie
@@ -406,7 +428,7 @@ class Kronk
     # The parser to use on the body.
 
     def parser
-      @parser ||= Kronk.parser_for headers["content-type"]
+      @parser ||= Kronk.parser_for self.ext
     end
 
 
@@ -744,7 +766,7 @@ class Kronk
         encoding = buff_io.io.respond_to?(:external_encoding) ?
                     buff_io.io.external_encoding : "UTF-8"
         @headers = {
-          'content-type' => "text/#{ext}; charset=#{encoding}",
+          'content-type' => "text/#{ext || 'plain'}; charset=#{encoding}",
         }
 
         @headless = true

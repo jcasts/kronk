@@ -11,6 +11,38 @@ class TestResponse < Test::Unit::TestCase
   end
 
 
+  def test_ext
+    assert_equal "html",    @html_resp.ext
+    assert_equal "json",    @json_resp.ext
+    assert_equal "x-plist", @plist_resp.ext
+    assert_equal "xml",     @xml_resp.ext
+  end
+
+
+  def test_ext_file
+    yml = Kronk::Response.
+        read_file("test/mocks/cookies.yml", :allow_headless => true)
+
+    assert_equal "text/yml; charset=ASCII-8BIT", yml.headers['content-type']
+    assert_equal "yml", yml.ext
+
+    yml.headers.delete('content-type')
+    assert_equal "yml", yml.ext
+  end
+
+
+  def test_ext_default
+    bin = Kronk::Response.
+        read_file("bin/kronk", :allow_headless => true)
+
+    assert_equal "text/plain; charset=ASCII-8BIT", bin.headers['content-type']
+    assert_equal "txt", bin.ext
+
+    bin.headers.delete('content-type')
+    assert_equal "txt", bin.ext
+  end
+
+
   def test_init_encoding
     assert_equal "ISO-8859-1", @html_resp.encoding.to_s
     assert_equal "ISO-8859-1", @html_resp.body.encoding.to_s if
