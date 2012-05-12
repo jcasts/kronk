@@ -10,7 +10,7 @@ With Kronk, you easily parse and segregate data, run diffs between
 the parsed data from different queries, and easily replay logs and loadtest
 your HTTP applications.
 
-Kronk was made possible by the sponsoring of AT&T Interactive.
+Kronk was made possible by the sponsoring of YP.com.
 
 == FEATURES:
 
