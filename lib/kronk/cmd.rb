@@ -356,9 +356,10 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
-        opt.on('--download [PATH]',
-               'Write responses to files; same as -p -o download') do |path|
+        opt.on('--download [DIR]',
+               'Write responses to files; same as -p -o download') do |dir|
           options[:player][:type] = :download
+          options[:player][:dir]  = dir
         end
 
 

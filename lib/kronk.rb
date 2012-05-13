@@ -21,6 +21,7 @@ class Kronk
   require 'kronk/player/suite'
   require 'kronk/player/stream'
   require 'kronk/player/benchmark'
+  require 'kronk/player/download'
   require 'kronk/player/tsv'
   require 'kronk/player/request_parser'
   require 'kronk/player/input_reader'

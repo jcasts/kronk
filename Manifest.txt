@@ -16,6 +16,7 @@ lib/kronk/http.rb
 lib/kronk/buffered_io.rb
 lib/kronk/player.rb
 lib/kronk/player/benchmark.rb
+lib/kronk/player/download.rb
 lib/kronk/player/input_reader.rb
 lib/kronk/player/request_parser.rb
 lib/kronk/player/suite.rb

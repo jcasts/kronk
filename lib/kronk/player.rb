@@ -16,6 +16,7 @@ class Kronk
       klass =
         case type.to_s
         when /^(Player::)?benchmark$/i then Benchmark
+        when /^(Player::)?download$/i  then Download
         when /^(Player::)?stream$/i    then Stream
         when /^(Player::)?suite$/i     then Suite
         when /^(Player::)?tsv$/i       then TSV
