@@ -2,6 +2,8 @@
 
 * Enhancements:
 
+  * Download player added to write output to files.
+
   * Command API change to allow for player-specific options.
 
 * Bugfixes:
