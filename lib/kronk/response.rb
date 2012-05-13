@@ -352,8 +352,8 @@ class Kronk
     # Check if connection should stay alive.
 
     def keep_alive?
-      @headers['connection'].to_s.include?('keep-alive') ||
-      @headers['proxy-connection'].to_s.include?('keep-alive')
+      @headers['connection'].to_s.include?('Keep-Alive') ||
+      @headers['proxy-connection'].to_s.include?('Keep-Alive')
     end
 
     alias connection_keep_alive? keep_alive?
