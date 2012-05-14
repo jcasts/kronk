@@ -461,7 +461,7 @@ class Kronk
 
         @response
 
-      rescue EOFError
+      rescue EOFError, Errno::EPIPE
         raise if retried
         @connection = nil
         retried = true
