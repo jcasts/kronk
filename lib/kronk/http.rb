@@ -8,16 +8,19 @@ class Kronk
   class HTTP < Net::HTTP
 
     class << self
+      # Total number of http connections ever created.
       attr_accessor :total_conn
     end
+
     self.total_conn = 0
 
-    # Pool of open connections
+    # Pool of open connections.
     CONN_POOL = Hash.new{|h,k| h[k] = []}
 
+    # Connections currently in use
     CONN_USED = {}
 
-    # Max time a pool should hold onto an open connection
+    # Max time a pool should hold onto an open connection.
     MAX_CONN_AGE = 10
 
     C_MUTEX    = Mutex.new
@@ -25,8 +28,15 @@ class Kronk
     POOL_MUTEX = Hash.new{|h,k| M_MUTEX.synchronize{ h[k] = Mutex.new} }
 
 
+    # Last time this http connection was used
     attr_accessor :last_used
 
+
+    ##
+    # Create a new http connection or get an existing, unused keep-alive
+    # connection. Supports the following options:
+    # :poxy:: String or Hash with proxy settings (see Kronk::Request)
+    # :ssl::  Boolean specifying whether to use SSL or not
 
     def self.new(address, port=nil, opts={})
       port ||= HTTP.default_port
@@ -46,7 +56,7 @@ class Kronk
           conn.use_ssl = true
         end
 
-        C_MUTEX.synchronize{@total_conn += 1}
+        C_MUTEX.synchronize{ @total_conn += 1 }
       end
 
       CONN_USED[conn] = true
@@ -55,12 +65,20 @@ class Kronk
     end
 
 
+    ##
+    # Total number of currently active connections.
+
     def self.conn_count
       M_MUTEX.synchronize do
         CONN_USED.length + CONN_POOL.values.flatten.length
       end
     end
 
+
+    ##
+    # Get a connection from the pool based on a connection id.
+    # Connection ids are an Array with the following values:
+    #   [addr, port, ssl, proxy_addr, proxy_port, proxy_username]
 
     def self.get_conn(conn_id)
       conn = nil
@@ -76,6 +94,9 @@ class Kronk
     end
 
 
+    ##
+    # Put this http connection in the pool for use by another request.
+
     def add_to_pool
       return if closed? || outdated?
       conn_id = [@address, @port, @use_ssl,
@@ -87,15 +108,26 @@ class Kronk
     end
 
 
+    ##
+    # Returns true if this connection was last used more than
+    # MAX_CONN_AGE seconds ago.
+
     def outdated?
       Time.now - @last_used > MAX_CONN_AGE
     end
 
 
+    ##
+    # Check if the socket for this http connection can be read and written to.
+
     def closed?
       !@socket || @socket.closed?
     end
 
+
+    ##
+    # Make an http request on the connection. Takes a Net::HTTP request instance
+    # for the `req' argument.
 
     def request(req, body=nil, opts={}, &block)  # :yield: +response+
       unless started?
