@@ -242,6 +242,8 @@ class Kronk
       ].flatten.compact.uniq.join(",")
       @headers.delete "Accept-Encoding" if @headers["Accept-Encoding"].empty?
 
+      @headers['Connection'] ||= 'Keep-Alive'
+
       @timeout = opts[:timeout] || Kronk.config[:timeout]
 
       @uri = self.class.build_uri uri, opts
