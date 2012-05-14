@@ -427,11 +427,12 @@ class Kronk
     # Options are passed directly to the Kronk::Response constructor.
 
     def retrieve opts={}, &block
+      start_time = Time.now
+
       @response = stream opts
 
-      start_time = Time.now
       @response.body(&block) # make sure to read the full body from io
-      @response.time = Time.now - start_time
+      @response.time = Time.now - start_time - @response.conn_time
 
       @response
     end
