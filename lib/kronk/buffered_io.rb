@@ -20,6 +20,13 @@ class Kronk
     end
 
 
+    def clear
+      @rbuf = ""
+      @raw_output = nil
+      @response = nil
+    end
+
+
     private
 
     def rbuf_fill

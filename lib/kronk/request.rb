@@ -13,6 +13,7 @@ class Kronk
     REQUEST_LINE_MATCHER =
  %r{(?:^|[\s'"])(?:([a-z]+)\s)?(?:(https?://[^/]+)(/[^\s'";]*)?|(/[^\s'";]*))}i
 
+
     ##
     # Creates a query string from data.
 
@@ -422,17 +423,11 @@ class Kronk
     # Options are passed directly to the Kronk::Response constructor.
 
     def retrieve opts={}, &block
-      start_time = nil
-      opts = opts.merge :request => self
+      @response = stream opts
 
-      @response = connection.start do |http|
-        start_time = Time.now
-        res = http.request http_request, nil, opts, &block
-        res.body # make sure to read the full body from io
-        res.time    = Time.now - start_time
-        res.request = self
-        res
-      end
+      start_time = Time.now
+      @response.body(&block) # make sure to read the full body from io
+      @response.time = Time.now - start_time
 
       @response
     end
@@ -449,11 +444,20 @@ class Kronk
 
     def stream opts={}
       opts = opts.merge :request => self
-      http = connection.started? ? connection : connection.start
-      @response = http.request http_request, @body, opts
-      @response.request = self
+
+      start_time = Time.now
+      connection.start unless connection.started?
+      conn_time  = Time.now - start_time
+
+      @response = connection.request http_request, @body, opts
+      @response.conn_time = conn_time
+      @response.request   = self
 
       @response
+
+    rescue EOFError
+      @connection = nil
+      retry
     end
 
 

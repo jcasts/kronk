@@ -15,7 +15,7 @@ class Kronk
           @stop_time = Time.now
           @mutex.synchronize do
             render
-            $stdout.puts "Elapsed:  #{(Time.now - @start_time).round 3}s"
+            $stdout.puts "Elapsed:       #{(Time.now - @start_time).round 3}s"
 
             req = @current.responses[-1].request ||
                   @current.responses[0].request  if @current
@@ -24,7 +24,8 @@ class Kronk
               meth = req.http_method
               path = req.uri.request_uri
               time = req.response.time.round 3
-              $stdout.puts "Current Req: #{meth} #{path} (#{time}s)"
+              $stdout.puts "Current Conns: #{Kronk::HTTP.conn_count}"
+              $stdout.puts "Current Req:   #{meth} #{path} (#{time}s)"
             end
           end
         end
@@ -40,8 +41,11 @@ class Kronk
           text   = diff_text kronk if status == "F"
           time   =
             (kronk.responses[0].time.to_f + kronk.responses[1].time.to_f) / 2
+          ctime  =
+            (kronk.responses[0].conn_time.to_f +
+              kronk.responses[1].conn_time.to_f) / 2
 
-          [status, time, text]
+          [status, time, ctime, text]
 
         elsif kronk.response
           begin
@@ -54,7 +58,7 @@ class Kronk
 
           status = "F"             if !kronk.response.success?
           text   = resp_text kronk if status == "F"
-          [status, kronk.response.time, text]
+          [status, kronk.response.time, kronk.response.conn_time, text]
         end
 
       @mutex.synchronize do
@@ -87,15 +91,17 @@ class Kronk
     def render
       player_time   = @stop_time - @start_time
       total_time    = 0
+      total_ctime   = 0
       bad_count     = 0
       failure_count = 0
       error_count   = 0
       err_buffer    = ""
 
-      @results.each do |(status, time, text)|
+      @results.each do |(status, time, ctime, text)|
         case status
         when "F"
           total_time    += time.to_f
+          total_ctime   += ctime.to_f
           bad_count     += 1
           failure_count += 1
           err_buffer << "\n  #{bad_count}) Failure:\n#{text}"
@@ -106,24 +112,30 @@ class Kronk
           err_buffer << "\n  #{bad_count}) Error:\n#{text}"
 
         else
-          total_time += time.to_f
+          total_time  += time.to_f
+          total_ctime += ctime.to_f
         end
       end
 
       non_error_count = @results.length - error_count
 
-      avg_time = non_error_count > 0 ?
+      avg_time  = non_error_count > 0 ?
                   ((total_time / non_error_count)* 1000).round(3)  : "n/a "
 
-      avg_qps  = non_error_count > 0 ?
+      avg_ctime = non_error_count > 0 ?
+                  ((total_ctime / non_error_count)* 1000).round(3)  : "n/a "
+
+      avg_qps   = non_error_count > 0 ?
                   (non_error_count / player_time).round(3) : "n/a"
 
       $stderr.puts err_buffer unless err_buffer.empty?
       $stdout.puts "\n#{@results.length} cases, " +
                    "#{failure_count} failures, #{error_count} errors"
 
-      $stdout.puts "Avg Time: #{avg_time}ms"
-      $stdout.puts "Avg QPS:  #{avg_qps}"
+      $stdout.puts "Total Conns:   #{Kronk::HTTP.total_conn}"
+      $stdout.puts "Avg Conn Time: #{avg_ctime}ms"
+      $stdout.puts "Avg Time:      #{avg_time}ms"
+      $stdout.puts "Avg QPS:       #{avg_qps}"
 
       return bad_count == 0
     end

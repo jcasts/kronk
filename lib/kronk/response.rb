@@ -25,7 +25,7 @@ class Kronk
 
 
     attr_reader :code, :io, :cookies, :headers
-    attr_accessor :read, :request, :stringify_opts, :time
+    attr_accessor :read, :request, :stringify_opts, :time, :conn_time
 
     ##
     # Create a new Response object from a String or IO.
