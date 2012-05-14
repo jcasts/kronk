@@ -437,6 +437,12 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
+        opt.on('--no-keepalive', 'Don\'t use persistent connections') do
+          options[:headers] ||= {}
+          options[:headers]['Connection'] = 'close'
+        end
+
+
         opt.on('-x', '--proxy STR', String,
                'Use HTTP proxy on given port: host[:port]') do |value|
           options[:proxy][:host], options[:proxy][:port] = value.split ":", 2

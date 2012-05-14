@@ -6,6 +6,8 @@
 
   * Command API change to allow for player-specific options.
 
+  * Support for Keep-Alive connections, used by default.
+
 * Bugfixes:
 
   * Exit immediately when sending SIGINT to the player.
