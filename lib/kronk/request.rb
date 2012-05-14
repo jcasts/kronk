@@ -443,21 +443,27 @@ class Kronk
     #   request.connection.finish
 
     def stream opts={}
-      opts = opts.merge :request => self
+      retried = false
 
-      start_time = Time.now
-      connection.start unless connection.started?
-      conn_time  = Time.now - start_time
+      begin
+        opts = opts.merge :request => self
 
-      @response = connection.request http_request, @body, opts
-      @response.conn_time = conn_time
-      @response.request   = self
+        start_time = Time.now
+        connection.start unless connection.started?
+        conn_time  = Time.now - start_time
 
-      @response
+        @response = connection.request http_request, @body, opts
+        @response.conn_time = conn_time
+        @response.request   = self
 
-    rescue EOFError
-      @connection = nil
-      retry
+        @response
+
+      rescue EOFError
+        raise if retried
+        @connection = nil
+        retried = true
+        retry
+      end
     end
 
 
