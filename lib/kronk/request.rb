@@ -248,9 +248,14 @@ class Kronk
 
       @uri = self.class.build_uri uri, opts
 
-      @proxy = opts[:proxy] || {}
-      @proxy = {:host => @proxy} unless Hash === @proxy
+      @proxy = {}
 
+      if opts[:proxy] && !opts[:proxy].empty?
+        @proxy = opts[:proxy]
+        @proxy = {:host => @proxy.to_s} unless Hash === @proxy
+        @proxy[:host], port = @proxy[:host].split ":"
+        @proxy[:port] ||= port || 8080
+      end
 
       if opts[:file]
         self.body = File.open(opts[:file], 'rb')
@@ -324,15 +329,12 @@ class Kronk
 
     def connection
       return @connection if @connection
-      http_class = http_proxy @proxy[:host], @proxy
 
-      @connection = http_class.new @uri.host, @uri.port
+      @connection = Kronk::HTTP.new @uri.host, @uri.port,
+                      :proxy => @proxy,
+                      :ssl   => (@uri.scheme =~ /^https$/)
+
       @connection.open_timeout = @connection.read_timeout = @timeout if @timeout
-
-      if @uri.scheme =~ /^https$/
-        require 'net/https'
-        @connection.use_ssl = true
-      end
 
       @connection
     end
@@ -529,25 +531,6 @@ class Kronk
       req
     end
 
-
-    ##
-    # Assign the use of a proxy.
-    # The proxy_opts arg can be a uri String or a Hash with the :address key
-    # and optional :username and :password keys.
-
-    def http_proxy addr, opts={}
-      return Kronk::HTTP unless addr
-
-      host, port = addr.split ":"
-      port ||= opts[:port] || 8080
-
-      user = opts[:username]
-      pass = opts[:password]
-
-      Kronk::Cmd.verbose "Using proxy #{addr}\n" if host && defined?(Cmd)
-
-      Kronk::HTTP::Proxy host, port, user, pass
-    end
 
     private
 

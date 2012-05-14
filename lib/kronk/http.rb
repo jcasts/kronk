@@ -24,13 +24,28 @@ class Kronk
     M_MUTEX    = Mutex.new
     POOL_MUTEX = Hash.new{|h,k| M_MUTEX.synchronize{ h[k] = Mutex.new} }
 
+
     attr_accessor :last_used
 
-    def self.new(address, port=nil, p_addr=nil, p_port=nil, p_user=nil, p_pass=nil)
-      # TODO: Make this work with https and proxies
-      conn = get_conn(address, port)
+
+    def self.new(address, port=nil, opts={})
+      port ||= HTTP.default_port
+      proxy  = opts[:proxy] || {}
+
+      conn_id = [address, port, !!opts[:ssl],
+                  proxy[:host], proxy[:port], proxy[:username]]
+
+      conn = get_conn(conn_id)
+
       if !conn
-        conn = super
+        conn  = super(address, port, proxy[:host], proxy[:port],
+                        proxy[:username], proxy[:password])
+
+        if opts[:ssl]
+          require 'net/https'
+          conn.use_ssl = true
+        end
+
         C_MUTEX.synchronize{@total_conn += 1}
       end
 
@@ -47,12 +62,11 @@ class Kronk
     end
 
 
-    def self.get_conn(address, port)
+    def self.get_conn(conn_id)
       conn = nil
-      host = "#{address}:#{port}"
-      pool = CONN_POOL[host]
+      pool = CONN_POOL[conn_id]
 
-      POOL_MUTEX[host].synchronize do
+      POOL_MUTEX[conn_id].synchronize do
         while !pool.empty? && (!conn || conn.closed? || conn.outdated?)
           conn = pool.shift
         end
@@ -64,10 +78,11 @@ class Kronk
 
     def add_to_pool
       return if closed? || outdated?
-      host = "#{@address}:#{@port}" # TODO: ADD PROTOCOL AND PROXY
+      conn_id = [@address, @port, @use_ssl,
+                  proxy_address, proxy_port, proxy_user]
 
-      POOL_MUTEX[host].synchronize do
-        CONN_POOL[host] << self
+      POOL_MUTEX[conn_id].synchronize do
+        CONN_POOL[conn_id] << self
       end
     end
 
