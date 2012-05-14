@@ -332,7 +332,7 @@ class Kronk
 
       @connection = Kronk::HTTP.new @uri.host, @uri.port,
                       :proxy => @proxy,
-                      :ssl   => (@uri.scheme =~ /^https$/)
+                      :ssl   => !!(@uri.scheme =~ /^https$/)
 
       @connection.open_timeout = @connection.read_timeout = @timeout if @timeout
 
@@ -451,8 +451,6 @@ class Kronk
       retried = false
 
       begin
-        opts = opts.merge :request => self
-
         start_time = Time.now
         connection.start unless connection.started?
         conn_time  = Time.now - start_time

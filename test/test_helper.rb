@@ -160,33 +160,37 @@ ensure
 end
 
 
-def expect_request req_method, url, options={}
+def expect_request req_method, url, opts={}
   uri  = URI.parse url
 
-  resp = Kronk::Response.new(options[:returns] || mock_200_response)
-  resp.stubs(:code).returns(options[:status] || '200')
+  resp = Kronk::Response.new(opts[:returns] || mock_200_response)
+  resp.stubs(:code).returns(opts[:status] || '200')
   resp.stubs(:to_hash).returns Hash.new
 
   http   = mock 'http'
   req    = mock 'req'
 
-  data   = options[:data]
+  data   = opts[:data]
   data &&= Hash === data ? Kronk::Request.build_query(data) : data.to_s
 
-  headers = options[:headers] || Hash.new
+  headers = opts[:headers] || Hash.new
   headers['User-Agent'] ||= Kronk::DEFAULT_USER_AGENT
+  headers['Connection'] ||= 'Keep-Alive'
 
-  req.expects(:start).yields(http).returns resp
+  http.expects(:started?).returns false
+  http.expects(:start)
   req.expects(:body=).with(data)
 
   Kronk::Request::VanillaRequest.expects(:new).
     with(req_method.to_s.upcase, uri.request_uri, headers).returns req
 
-  Kronk::HTTP.expects(:new).with(uri.host, uri.port).returns req
+  proxy = opts[:proxy] || {}
 
-  http.expects(:request).
-    with(req, nil, has_entry(:request => instance_of(Kronk::Request))).
-    returns resp
+  Kronk::HTTP.expects(:new).
+    with(uri.host, uri.port, {:proxy => proxy, :ssl => !!opts[:ssl]}).
+    returns http
+
+  http.expects(:request).with(req, data, {}).returns resp
 
   yield http, req, resp if block_given?
 

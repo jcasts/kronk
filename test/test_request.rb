@@ -392,9 +392,7 @@ class TestRequest < Test::Unit::TestCase
 
 
   def test_retrieve_ssl
-    expect_request "GET", "https://example.com" do |http, req, resp|
-      req.expects(:use_ssl=).with true
-    end
+    expect_request "GET", "https://example.com", :ssl => true
 
     resp = Kronk::Request.new("https://example.com").retrieve
 
@@ -479,10 +477,7 @@ class TestRequest < Test::Unit::TestCase
       :password => "smith"
     }
 
-    expect_request "GET", "http://example.com"
-
-    Kronk::HTTP.expects(:Proxy).with("proxy.com", 8080, "john", "smith").
-      returns Kronk::HTTP
+    expect_request "GET", "http://example.com", :proxy => proxy
 
     Kronk::Request.new("http://example.com", :proxy => proxy).retrieve
   end
@@ -491,22 +486,16 @@ class TestRequest < Test::Unit::TestCase
   def test_retrieve_proxy_string
     proxy = "proxy.com:8888"
 
-    expect_request "GET", "http://example.com"
-
-    Kronk::HTTP.expects(:Proxy).with("proxy.com", "8888", nil, nil).
-      returns Kronk::HTTP
+    expect_request "GET", "http://example.com",
+      :proxy => {:host => 'proxy.com', :port => "8888"}
 
     Kronk::Request.new("http://example.com", :proxy => proxy).retrieve
   end
 
 
-  def test_proxy_nil
-    assert_equal Kronk::HTTP, Kronk::Request.new("host.com").http_proxy(nil)
-  end
-
-
   def test_proxy_string
-    proxy_class = Kronk::Request.new("host.com").http_proxy("myproxy.com:80")
+    proxy_class = Kronk::Request.new("host.com", :proxy => "myproxy.com:80").
+                    connection.class
 
     assert_equal "myproxy.com",
       proxy_class.instance_variable_get("@proxy_address")
@@ -519,7 +508,8 @@ class TestRequest < Test::Unit::TestCase
 
 
   def test_proxy_no_port
-    proxy_class = Kronk::Request.new("host.com").http_proxy("myproxy.com")
+    proxy_class = Kronk::Request.new("host.com", :proxy => "myproxy.com").
+                    connection.class
 
     assert_equal "myproxy.com",
       proxy_class.instance_variable_get("@proxy_address")
@@ -538,7 +528,7 @@ class TestRequest < Test::Unit::TestCase
                         :username => "john",
                         :password => "smith" }
 
-    proxy_class = req.http_proxy req.proxy[:host], req.proxy
+    proxy_class = req.connection.class
 
     assert_equal "myproxy.com",
       proxy_class.instance_variable_get("@proxy_address")
