@@ -338,6 +338,8 @@ single quotes around some of your paths.
 
 * cookiejar gem
 
+* ruby-path gem
+
 == INSTALL:
 
   $ gem install kronk
