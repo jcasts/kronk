@@ -431,6 +431,10 @@ class Kronk
 
       @response = stream opts
 
+      if block_given?
+        block = lambda{|chunk| yield @response, chunk }
+      end
+
       @response.body(&block) # make sure to read the full body from io
       @response.time = Time.now - start_time - @response.conn_time
 
