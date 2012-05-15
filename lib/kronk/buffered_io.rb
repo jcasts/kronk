@@ -17,13 +17,14 @@ class Kronk
 
     def rewind
       @rbuf.replace @raw_output if @raw_output
+      @raw_output.clear
     end
 
 
     def clear
       @rbuf = ""
       @raw_output = nil
-      @response = nil
+      @response   = nil
     end
 
 
