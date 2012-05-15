@@ -232,7 +232,6 @@ class Kronk
       @connection = nil
       @response   = nil
       @body       = nil
-      @_req       = nil
 
       @headers = opts[:headers] || {}
 
