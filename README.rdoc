@@ -175,7 +175,10 @@ Bash completion is available by sourcing the file returned by:
 == DATA MANIPULATION:
 
 One of Kronk's most powerful features is its ability to segregate data.
-From the command line, this is done by passing data paths after '--'
+From the command line, this is done by passing data paths after '--'.
+
+All data manipulation is handled by the
+{ruby-path gem}[http://github.com/yaksnrainbows/ruby-path].
 
 === Selecting and Deleting:
 

@@ -584,7 +584,8 @@ content_length
     #     trans.delete "foo/0", "bar/1"
     #   end
     #
-    # See Path::Transaction for supported transform actions.
+    # See Path::Transaction for supported transform actions in the
+    # {ruby-path gem}[http://github.com/yaksnrainbows/ruby-path].
 
     def data opts={}
       data = nil
