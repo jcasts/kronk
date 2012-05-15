@@ -17,7 +17,6 @@ class Kronk
 
     def rewind
       @rbuf.replace @raw_output if @raw_output
-      @raw_output.clear
     end
 
 

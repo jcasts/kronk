@@ -129,6 +129,7 @@ class Kronk
 
       begin
         read_body do |chunk|
+          chunk = chunk.dup
           chunk = unzip chunk if gzip?
 
           try_force_encoding chunk
@@ -169,10 +170,10 @@ class Kronk
 
 
     ##
-    # Size of the raw body in bytes.
+    # Current size of the http body in bytes.
 
     def bytes
-      (headers["content-length"] || self.raw_body.bytes.count).to_i
+      self.raw_body.bytes.count
     end
 
 
@@ -333,7 +334,8 @@ class Kronk
 
     def inspect
       content_type = headers['content-type'] || "text/plain"
-      "#<#{self.class}:#{@code} #{content_type} #{total_bytes}bytes>"
+      "#<#{self.class}:#{@code} #{content_type} \
+#{total_bytes}/#{expected_bytes}bytes>"
     end
 
 
@@ -457,7 +459,7 @@ class Kronk
     # Returns the body portion of the raw http response.
 
     def raw_body
-      headless? ? raw : raw.split("\r\n\r\n", 2)[1]
+      headless? ? @raw.to_s : @body.to_s
     end
 
 
@@ -552,7 +554,7 @@ class Kronk
     def to_s opts={}
       return raw if opts[:raw] &&
         (opts[:headers].nil? || opts[:headers] == true)
-
+content_length
       str = opts[:raw] ? self.raw_body : self.body unless opts[:body] == false
 
       if opts[:headers] || opts[:headers].nil?
@@ -695,6 +697,16 @@ class Kronk
     # Number of bytes of the response including the header.
 
     def total_bytes
+      return raw.bytes.count if @read
+      return raw_header.bytes.count unless body_permitted?
+      raw_header.to_s.bytes.count + bytes + 2
+    end
+
+
+    ##
+    # Expected number of bytes to read from the server, including the header.
+
+    def expected_bytes
       return raw.bytes.count if @read
       return raw_header.bytes.count unless body_permitted?
       raw_header.to_s.bytes.count + (content_length || range_length).to_i + 2
