@@ -448,7 +448,7 @@ class Kronk
           next if out_opts.has_key?(key) &&
                   (out_opts[key].class != Array || val == true || val == false)
           out_opts[key] = (val == true || val == false) ? val :
-                                      [*out_opts[key]] | [*val]
+                                      Array(out_opts[key]) | Array(val)
 
         # String or Array
         when :only_data, :ignore_data
