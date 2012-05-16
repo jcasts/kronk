@@ -260,9 +260,6 @@ class Kronk
     new(opts).request uri
   end
 
-  class << self
-    alias retrieve request
-  end
 
   attr_accessor :diff, :options, :response, :responses
 
@@ -366,8 +363,6 @@ class Kronk
   rescue Timeout::Error
     raise TimeoutError, "#{uri} took too long to respond"
   end
-
-  alias retrieve request
 
 
   ##
