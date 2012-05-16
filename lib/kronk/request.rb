@@ -194,7 +194,7 @@ class Kronk
 
 
     class << self
-      %w{get post put delete trace head options}.each do |name|
+      %w{GET POST PUT PATCH DELETE TRACE HEAD OPTIONS}.each do |name|
         class_eval <<-"END"
           def #{name} uri, opts={}, &block
             opts[:http_method] = "#{name}"
