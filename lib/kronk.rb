@@ -418,7 +418,7 @@ class Kronk
         case key
 
         # Hash or uri query String
-        when :data, :query
+        when :data, :query, :form
           val = Request.parse_nested_query val if String === val
 
           out_opts[key] = Request.parse_nested_query out_opts[key] if
