@@ -452,7 +452,11 @@ class Kronk
 
         # String or Array
         when :only_data, :ignore_data
-          out_opts[key] = [*out_opts[key]] | [*val]
+          out_opts[key] = Array(out_opts[key]) | Array(val)
+
+        # Array concatination
+        when :transform
+          out_opts[key] = Array(val).concat Array(out_opts[key])
         end
       end
     end
