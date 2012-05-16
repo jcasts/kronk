@@ -291,7 +291,8 @@ class Kronk
 
 
     ##
-    # Assign request body. Supports String, Hash, and IO.
+    # Assign request body. Supports String, Hash, and IO. Will attempt to
+    # correctly assing the Content-Type and Transfer-Encoding headers.
 
     def body= data
       case data
@@ -324,18 +325,16 @@ class Kronk
 
 
     ##
-    # Reference to the HTTP connection instance.
+    # Retrieve or create an HTTP connection instance.
 
     def connection
-      return @connection if @connection
+      conn = Kronk::HTTP.new @uri.host, @uri.port,
+               :proxy => @proxy,
+               :ssl   => !!(@uri.scheme =~ /^https$/)
 
-      @connection = Kronk::HTTP.new @uri.host, @uri.port,
-                      :proxy => @proxy,
-                      :ssl   => !!(@uri.scheme =~ /^https$/)
+      conn.open_timeout = conn.read_timeout = @timeout if @timeout
 
-      @connection.open_timeout = @connection.read_timeout = @timeout if @timeout
-
-      @connection
+      conn
     end
 
 
@@ -455,10 +454,11 @@ class Kronk
 
       begin
         start_time = Time.now
-        connection.start unless connection.started?
+        conn = connection
+        conn.start unless conn.started?
         conn_time  = Time.now - start_time
 
-        @response = connection.request http_request, @body, opts
+        @response           = conn.request http_request, @body, opts
         @response.conn_time = conn_time
         @response.request   = self
 
