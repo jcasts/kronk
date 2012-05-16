@@ -346,7 +346,7 @@ class Kronk
     rdir = options[:follow_redirects]
     while resp.redirect? && (rdir == true || rdir.to_s.to_i > 0)
       uri = resp.location
-      Cmd.verbose "Following redirect to #{resp.location}"
+      Cmd.verbose "Following redirect to #{resp.location}" if defined?(Cmd)
       resp = resp.follow_redirect options_for_uri(resp.location)
       rdir = rdir - 1 if Fixnum === rdir
     end
@@ -377,16 +377,16 @@ class Kronk
     uri = opts.delete(:uri)
 
     if IO === uri || StringIO === uri || BufferedIO === uri
-      Cmd.verbose "Reading IO #{uri}"
+      Cmd.verbose "Reading IO #{uri}" if defined?(Cmd)
       Response.new uri, options
 
     elsif File.file? uri.to_s
-      Cmd.verbose "Reading file:  #{uri}\n"
+      Cmd.verbose "Reading file:  #{uri}\n" if defined?(Cmd)
       Response.read_file uri, options
 
     else
       req = Request.new uri, options
-      Cmd.verbose "Retrieving URL:  #{req.uri}\n"
+      Cmd.verbose "Retrieving URL:  #{req.uri}\n" if defined?(Cmd)
       resp = req.retrieve options
 
       hist_uri = req.uri.to_s[0..-req.uri.request_uri.length]
