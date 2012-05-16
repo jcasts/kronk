@@ -6,15 +6,13 @@
 
 * Consider getting off of net/http.
 
-* Consider allowing Output-specific cmd options.
-
 * Investigate Kronk console.
 
-== Not Viable
+== Done
+
+* Consider allowing Output-specific cmd options.
 
 * Use persistent connection pools.
-
-== Done
 
 * Color-coded data output.
 
