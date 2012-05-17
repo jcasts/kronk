@@ -23,6 +23,7 @@ class Kronk
 
     def close
       @parts.each(&:close)
+      nil
     end
 
 
@@ -32,8 +33,10 @@ class Kronk
 
       buff = ""
 
-      until buff.bytes.count >= bytes || @curr_part.nil?
+      until @curr_part.nil?
+        bytes = bytes - buff.bytes.count
         buff << @parts[@curr_part].read(bytes)
+        break if buff.bytes.count >= bytes
 
         @curr_part += 1
         @curr_part = nil if @curr_part >= @parts.length
