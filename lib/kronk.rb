@@ -32,6 +32,7 @@ class Kronk
   require 'kronk/diff'
   require 'kronk/http'
   require 'kronk/buffered_io'
+  require 'kronk/multipart_io'
   require 'kronk/request'
   require 'kronk/response'
   require 'kronk/plist_parser'
@@ -413,7 +414,7 @@ class Kronk
         case key
 
         # Hash or uri query String
-        when :data, :query, :form
+        when :data, :query, :form, :form_upload
           val = Request.parse_nested_query val if String === val
 
           out_opts[key] = Request.parse_nested_query out_opts[key] if

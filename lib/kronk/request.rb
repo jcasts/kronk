@@ -251,6 +251,8 @@ class Kronk
 
       if opts[:file]
         self.body = File.open(opts[:file], 'rb')
+      elsif opts[:form_upload]
+        # MULTIPART FORM DATA
       elsif opts[:form]
         self.form_data = opts[:form]
       elsif opts[:data]

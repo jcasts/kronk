@@ -410,6 +410,12 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
+        opt.on('-M', '--form-upload STR', String,
+               'Multipart file upload <foo=path.ext&bar=path2.ext>') do |value|
+          options[:form_upload] = value
+        end
+
+
         opt.on('-H', '--header STR', String,
                'Header to pass to the server request') do |value|
           options[:headers] ||= {}

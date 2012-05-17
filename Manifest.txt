@@ -5,6 +5,7 @@ README.rdoc
 Rakefile
 bin/kronk
 lib/kronk.rb
+lib/kronk/buffered_io.rb
 lib/kronk/cmd.rb
 lib/kronk/constants.rb
 lib/kronk/data_string.rb
@@ -13,7 +14,7 @@ lib/kronk/diff/ascii_format.rb
 lib/kronk/diff/color_format.rb
 lib/kronk/diff/output.rb
 lib/kronk/http.rb
-lib/kronk/buffered_io.rb
+lib/kronk/multipart_io.rb
 lib/kronk/player.rb
 lib/kronk/player/benchmark.rb
 lib/kronk/player/download.rb
