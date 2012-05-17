@@ -458,7 +458,7 @@ class Kronk
         conn.start unless conn.started?
         conn_time  = Time.now - start_time
 
-        @response           = conn.request http_request, @body, opts
+        @response           = conn.request http_request, nil, opts
         @response.conn_time = conn_time
         @response.request   = self
 

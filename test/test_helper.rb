@@ -190,7 +190,7 @@ def expect_request req_method, url, opts={}
     with(uri.host, uri.port, {:proxy => proxy, :ssl => !!opts[:ssl]}).
     returns http
 
-  http.expects(:request).with(req, data, {}).returns resp
+  http.expects(:request).with(req, nil, {}).returns resp
 
   yield http, req, resp if block_given?
 
