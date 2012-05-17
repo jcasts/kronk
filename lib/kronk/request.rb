@@ -303,6 +303,7 @@ class Kronk
           ext   = File.extname(data.path.to_s)[1..-1] if data.respond_to?(:path)
           ext ||= "binary"
 
+          # TODO: don't set this for multipart io
           @headers['Content-Type'] = "application/#{ext}"
 
           @body = data
