@@ -46,5 +46,17 @@ class Kronk
     def read_all
       @parts.inject(""){|out, curr| out << curr.read}
     end
+
+
+    def size
+      total = 0
+
+      @parts.each do |part|
+        return nil unless part.respond_to?(:size) && part.size
+        total += part.size
+      end
+
+      total
+    end
   end
 end

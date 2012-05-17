@@ -312,7 +312,9 @@ class Kronk
         end
       end
 
-      @headers['Content-Length'] = @body.size.to_s if @body.respond_to?(:size)
+      @headers['Content-Length'] = @body.size.to_s if
+        @body.respond_to?(:size) && @body.size
+
       @headers['Transfer-Encoding'] = 'chunked' if !@headers['Content-Length']
 
       @body
