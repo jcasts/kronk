@@ -207,7 +207,7 @@ class Kronk
 
     attr_accessor :headers, :proxy, :response, :timeout
 
-    attr_reader :body, :http_method, :uri, :use_cookies
+    attr_reader :body, :http_method, :proxy, :uri, :use_cookies
 
     ##
     # Build an http request to the given uri and return a Response instance.
@@ -247,14 +247,7 @@ class Kronk
 
       @uri = self.class.build_uri uri, opts
 
-      @proxy = {}
-
-      if opts[:proxy] && !opts[:proxy].empty?
-        @proxy = opts[:proxy]
-        @proxy = {:host => @proxy.to_s} unless Hash === @proxy
-        @proxy[:host], port = @proxy[:host].split ":"
-        @proxy[:port] ||= port || 8080
-      end
+      self.proxy = opts[:proxy]
 
       if opts[:file]
         self.body = File.open(opts[:file], 'rb')
@@ -329,7 +322,7 @@ class Kronk
 
     def connection
       conn = Kronk::HTTP.new @uri.host, @uri.port,
-               :proxy => @proxy,
+               :proxy => self.proxy,
                :ssl   => !!(@uri.scheme =~ /^https$/)
 
       conn.open_timeout = conn.read_timeout = @timeout if @timeout
@@ -353,6 +346,23 @@ class Kronk
       dont_chunk!
       @headers['Content-Type'] = "application/x-www-form-urlencoded"
       @body = self.class.build_query data
+    end
+
+
+    ##
+    # Assign proxy options.
+
+    def proxy= prox_opts
+      @proxy = {}
+
+      if prox_opts && !prox_opts.empty?
+        @proxy = prox_opts
+        @proxy = {:host => @proxy.to_s} unless Hash === @proxy
+        @proxy[:host], port = @proxy[:host].split ":"
+        @proxy[:port] ||= port || 8080
+      end
+
+      @proxy
     end
 
 
@@ -488,8 +498,8 @@ class Kronk
 
       hash[:auth]    = @auth if @auth
       hash[:data]    = @body if @body
-      hash[:headers] = @headers unless @headers.empty?
-      hash[:proxy]   = @proxy   unless @proxy.empty?
+      hash[:headers] = @headers   unless @headers.empty?
+      hash[:proxy]   = self.proxy unless self.proxy.empty?
 
       hash
     end
