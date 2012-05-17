@@ -149,7 +149,19 @@ class Kronk
       end
 
 
+      def clear_caches
+        @percentages  = nil
+        @slowest_reqs = nil
+        @sum          = nil
+        @mean         = nil
+        @median       = nil
+        @deviation    = nil
+      end
+
+
       def to_s
+        clear_caches
+
         out = <<-STR
 
 Completed:     #{@count}
@@ -192,11 +204,15 @@ Avg. Slowest Requests (ms, count)
 
 
     def start
-      @res_count = 0
-      @results   = []
-      @div       = @number / 10 if @number
-      @div       = 100 if !@div || @div < 10
-      puts "Benchmarking..."
+      @interactive = $stdout.isatty
+      @res_count   = 0
+      @results     = []
+      @div         = @number / 10 if @number
+      @div         = 100 if !@div || @div < 10
+      @last_print  = Time.now
+      @line_count  = 0
+
+      puts "Benchmarking..." unless @interactive
     end
 
 
@@ -208,8 +224,18 @@ Avg. Slowest Requests (ms, count)
         end
 
         @res_count += 1
-        puts "#{@res_count} requests" if @res_count % @div == 0
+
+        if @interactive
+          render if Time.now - @last_print > 0.5
+        else
+          puts "#{@res_count} requests" if @res_count % @div == 0
+        end
       end
+    end
+
+
+    def clear_screen
+      $stdout.print "\e[2K\e[1A" * @line_count
     end
 
 
@@ -224,33 +250,43 @@ Avg. Slowest Requests (ms, count)
 
 
     def complete
-      puts "Finished!"
+      puts "Finished!" unless @interactive
 
-      render_head
-      render_body
-
+      render
       true
     end
 
 
-    def render_body
-      @results.each{|res| res.total_time = @stop_time - @start_time }
+    def render
+      clear_screen if @interactive
+      out = "#{head}#{body}\n"
+      @line_count = out.to_s.split("\n").length
+      @last_print = Time.now
+      $stdout.print out
+      $stdout.flush
+    end
+
+
+    def body
+      @results.each{|res| res.total_time = Time.now - @start_time }
 
       if @results.length > 1
-        puts Diff.new(@results[0].to_s, @results[1].to_s).formatted
+        Diff.new(@results[0].to_s, @results[1].to_s, :context => false).
+          formatted
       else
-        puts @results.first.to_s
+        @results.first.to_s
       end
     end
 
 
-    def render_head
-      puts <<-STR
+    def head
+      <<-STR
 
 Benchmark Time:      #{(Time.now - @start_time).to_f} sec
 Number of Requests:  #{@count}
 Concurrency:         #{@qps ? "#{@qps} qps" : @concurrency}
-Connections Made:    #{Kronk::HTTP.total_conn}
+#{"Current Connections: #{Kronk::HTTP.conn_count}\n" if @interactive}\
+Total Connections:   #{Kronk::HTTP.total_conn}
       STR
     end
   end
