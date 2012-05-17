@@ -27,6 +27,7 @@ class Kronk
         @count     = 0
         @r5XX      = 0
         @r4XX      = 0
+        @r3XX      = 0
         @err_count = 0
 
         @precision = 3
@@ -49,15 +50,18 @@ class Kronk
         @times[time] += 1
         @count += 1
 
-        @r5XX += 1 if resp.code =~ /^5\d\d$/
-        @r4XX += 1 if resp.code =~ /^4\d\d$/
+        case resp.code[0, 1]
+        when "5" then @r5XX += 1
+        when "4" then @r4XX += 1
+        when "3" then @r3XX += 1
+        end
 
         @slowest = time if !@slowest || @slowest < time
         @fastest = time if !@fastest || @fastest > time
 
         log_req resp.request, time if resp.request
 
-        @total_bytes += resp.raw.bytes.count
+        @total_bytes += resp.total_bytes
 
         @byterate = (@byterate * (@count-1) + resp.byterate) / @count
       end
@@ -68,7 +72,6 @@ class Kronk
         uri.query = nil
         uri = "#{req.http_method} #{uri.to_s}"
 
-        # TODO: Keep the number in @paths to 10.
         @paths[uri] ||= [0, 0]
         pcount = @paths[uri][1] + 1
         @paths[uri][0] = (@paths[uri][0] * @paths[uri][1] + time) / pcount
@@ -150,6 +153,7 @@ class Kronk
         out = <<-STR
 
 Completed:     #{@count}
+300s:          #{@r3XX}
 400s:          #{@r4XX}
 500s:          #{@r5XX}
 Errors:        #{@err_count}
