@@ -246,6 +246,7 @@ Avg. Slowest Requests (ms, count)
 Benchmark Time:      #{(Time.now - @start_time).to_f} sec
 Number of Requests:  #{@count}
 Concurrency:         #{@qps ? "#{@qps} qps" : @concurrency}
+Connections Made:    #{Kronk::HTTP.total_conn}
       STR
     end
   end
