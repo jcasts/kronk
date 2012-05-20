@@ -35,13 +35,14 @@ class Kronk
 
       until @curr_part.nil?
         bytes = bytes - buff.bytes.count
-        buff << @parts[@curr_part].read(bytes)
+        buff << @parts[@curr_part].read(bytes).to_s
         break if buff.bytes.count >= bytes
 
         @curr_part += 1
         @curr_part = nil if @curr_part >= @parts.length
       end
 
+      return if buff.empty?
       buff
     end
 
