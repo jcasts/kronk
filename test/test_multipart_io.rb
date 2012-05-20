@@ -7,7 +7,7 @@ class TestMultipartIo < Test::Unit::TestCase
     @io   = Kronk::MultipartIO.new "foo", "bar", strio
 
     pipe_in, pipe_out = IO.pipe
-    @pio  = Kronk::MultipartIO.new "foo", pipe_out, "bar" 
+    @pio  = Kronk::MultipartIO.new "foo", pipe_out, "bar"
 
     @file = File.open 'test/mocks/200_response.json', "r"
     @fio  = Kronk::MultipartIO.new "foo", @file, "bar"
@@ -33,7 +33,7 @@ class TestMultipartIo < Test::Unit::TestCase
     assert_equal 11, @io.size
     assert_nil @pio.size
     assert_equal((@file.size + 6), @fio.size)
-  end 
+  end
 
 
   def test_read_all
