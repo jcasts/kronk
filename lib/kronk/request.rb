@@ -260,6 +260,7 @@ class Kronk
 
       elsif opts[:form_upload]
         multi = Kronk::Multipart.new self.class.multipart_boundary
+        # TODO: normalize the params and add each one to multi
         self.body = multi
 
       elsif opts[:form]
