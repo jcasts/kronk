@@ -28,8 +28,8 @@ class Kronk
 
 
     def read bytes=nil
-      return if @parts.empty? || @curr_part.nil?
       return read_all if bytes.nil?
+      return if @parts.empty? || eof?
 
       buff = ""
 
@@ -48,7 +48,20 @@ class Kronk
 
 
     def read_all
-      @parts.inject(""){|out, curr| out << curr.read}
+      return "" if eof?
+
+      out = @parts[@curr_part..-1].inject("") do |out, curr|
+        @curr_part += 1
+        out << curr.read
+      end
+
+      @curr_part = nil
+      out
+    end
+
+
+    def eof?
+      @curr_part.nil?
     end
 
 
