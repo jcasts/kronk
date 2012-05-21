@@ -14,6 +14,14 @@ class Kronk
  %r{(?:^|[\s'"])(?:([a-z]+)\s)?(?:(https?://[^/]+)(/[^\s'";]*)?|(/[^\s'";]*))}i
 
 
+    class << self
+      # The boundary to use for multipart requests; default: AS83q4kGFa109FHK
+      attr_accessor :multipart_boundary
+    end
+
+    self.multipart_boundary = 'AS83q4kGFa109FHK'
+
+
     ##
     # Creates a query string from data.
 
