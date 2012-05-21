@@ -12,10 +12,10 @@ class TestResponse < Test::Unit::TestCase
 
 
   def test_ext
-    assert_equal "html",    @html_resp.ext
-    assert_equal "json",    @json_resp.ext
-    assert_equal "x-plist", @plist_resp.ext
-    assert_equal "xml",     @xml_resp.ext
+    assert_equal "html",  @html_resp.ext
+    assert_equal "json",  @json_resp.ext
+    assert_equal "plist", @plist_resp.ext
+    assert_equal "xml",   @xml_resp.ext
   end
 
 
@@ -23,8 +23,8 @@ class TestResponse < Test::Unit::TestCase
     yml = Kronk::Response.
         read_file("test/mocks/cookies.yml", :allow_headless => true)
 
-    assert_equal "text/yml; charset=ASCII-8BIT", yml.headers['content-type']
-    assert_equal "yml", yml.ext
+    assert_equal "text/x-yaml; charset=ASCII-8BIT", yml.headers['content-type']
+    assert_equal "yaml", yml.ext
 
     yml.headers.delete('content-type')
     assert_equal "yml", yml.ext
@@ -292,7 +292,7 @@ class TestResponse < Test::Unit::TestCase
 
     assert_equal "just this one line!", resp.body
     enc = "".encoding rescue "UTF-8"
-    assert_equal "text/html; charset=#{enc}", resp['Content-Type']
+    assert_equal "text/plain; charset=#{enc}", resp['Content-Type']
   end
 
 

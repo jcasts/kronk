@@ -103,4 +103,12 @@ class Kronk
     Kronk::Error, Timeout::Error,
     SocketError, SystemCallError, URI::InvalidURIError
   ]
+
+
+  # Add Plist to MIME types
+  %w{application/plist application/x-plist text/plist text/x-plist}.
+    each do |mime|
+      MIME::Types.add \
+        MIME::Type.new(mime){|t| t.extensions.concat %w{plist xml}}
+    end
 end

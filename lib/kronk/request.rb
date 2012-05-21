@@ -14,14 +14,6 @@ class Kronk
  %r{(?:^|[\s'"])(?:([a-z]+)\s)?(?:(https?://[^/]+)(/[^\s'";]*)?|(/[^\s'";]*))}i
 
 
-    class << self
-      # The boundary to use for multipart requests; default: AS83q4kGFa109FHK
-      attr_accessor :multipart_boundary
-    end
-
-    self.multipart_boundary = 'AS83q4kGFa109FHK'
-
-
     ##
     # Creates a query string from data.
 
@@ -202,6 +194,10 @@ class Kronk
 
 
     class << self
+      # The boundary to use for multipart requests; default: AaB03x
+      attr_accessor :multipart_boundary
+
+
       %w{GET POST PUT PATCH DELETE TRACE HEAD OPTIONS}.each do |name|
         class_eval <<-"END"
           def #{name} uri, opts={}, &block
@@ -211,6 +207,8 @@ class Kronk
         END
       end
     end
+
+    self.multipart_boundary = 'AaB03x'
 
 
     attr_accessor :headers, :proxy, :response, :timeout

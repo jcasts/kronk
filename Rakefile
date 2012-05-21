@@ -22,9 +22,10 @@ Hoe.spec 'kronk' do
   self.history_file     = "History.rdoc"
   self.extra_rdoc_files = FileList['*.rdoc']
 
-  self.extra_deps << ['json',      '~>1.5']
-  self.extra_deps << ['cookiejar', '~>0.3.0']
-  self.extra_deps << ['ruby-path', '~>1.0.0']
+  self.extra_deps << ['json',       '~>1.5']
+  self.extra_deps << ['cookiejar',  '~>0.3.0']
+  self.extra_deps << ['ruby-path',  '~>1.0.0']
+  self.extra_deps << ['mime-types', '~>1.18.0']
 
   self.extra_dev_deps << ['plist',    '~>3.1.0']
   self.extra_dev_deps << ['nokogiri', '~>1.4']

@@ -3,6 +3,7 @@ require 'rubygems' if RUBY_VERSION =~ /1.8/
 require 'json'
 require 'cookiejar'
 require 'path'
+require 'mime/types'
 
 require 'thread'
 require 'stringio'

@@ -244,8 +244,8 @@ class Kronk
     def ext
       file_ext =
         if headers['content-type']
-          type = headers['content-type'].to_s.split(";").first.downcase
-          type == "text/plain" ? "txt" : type.split(%r{[/+]}).last
+          types = MIME::Types[headers['content-type'].sub(%r{/\w+\+}, '/')]
+          types[0].extensions[0] unless types.empty?
 
         elsif uri
           File.extname(uri.path)[1..-1]
@@ -554,7 +554,7 @@ class Kronk
     def to_s opts={}
       return raw if opts[:raw] &&
         (opts[:headers].nil? || opts[:headers] == true)
-content_length
+
       str = opts[:raw] ? self.raw_body : self.body unless opts[:body] == false
 
       if opts[:headers] || opts[:headers].nil?
@@ -774,13 +774,14 @@ content_length
 
         buff_io.rewind
 
-        ext = File === buff_io.io ?
-                File.extname(buff_io.io.path)[1..-1] : "html"
+        ctype = ["text/plain"]
+        ctype = MIME::Types.of(buff_io.io.path).concat ctype if
+          File === buff_io.io
 
         encoding = buff_io.io.respond_to?(:external_encoding) ?
                     buff_io.io.external_encoding : "UTF-8"
         @headers = {
-          'content-type' => "text/#{ext || 'plain'}; charset=#{encoding}",
+          'content-type' => "#{ctype[0]}; charset=#{encoding}",
         }
 
         @headless = true
