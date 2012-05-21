@@ -199,14 +199,14 @@ class TestRequest < Test::Unit::TestCase
 
 
   def test_body_file_io
-    io  = File.open 'TODO.rdoc', 'r'
+    io  = File.open 'Manifest.txt', 'r'
     req = Kronk::Request.new "foo.com"
     req.body = io
 
-    assert_equal io,                   req.body
-    assert_equal nil,                  req.headers['Transfer-Encoding']
-    assert_equal 'application/rdoc',   req.headers['Content-Type']
-    assert_equal io.size.to_s,         req.headers['Content-Length']
+    assert_equal io,           req.body
+    assert_equal nil,          req.headers['Transfer-Encoding']
+    assert_equal 'text/plain', req.headers['Content-Type']
+    assert_equal io.size.to_s, req.headers['Content-Length']
 
   ensure
     io.close

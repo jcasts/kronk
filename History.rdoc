@@ -10,6 +10,8 @@
 
   * Command API change to allow for player-specific options.
 
+  * Better Mime-Type recognition from file extensions.
+
 * Bugfixes:
 
   * Exit immediately when sending SIGINT to the player.

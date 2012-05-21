@@ -306,11 +306,15 @@ class Kronk
 
       else
         if data.respond_to?(:read)
-          ext   = File.extname(data.path.to_s)[1..-1] if data.respond_to?(:path)
-          ext ||= "binary"
+          ctype = "application/binary"
+
+          if data.respond_to?(:path)
+            types = MIME::Types.of File.extname(data.path.to_s)[1..-1]
+            ctype = types[0] unless types.empty?
+          end
 
           # TODO: don't set this for multipart io
-          @headers['Content-Type'] = "application/#{ext}"
+          @headers['Content-Type'] = ctype
 
           @body = data
         else
