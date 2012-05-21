@@ -5,19 +5,28 @@ class Kronk
     attr_reader :parts, :curr_part
 
     def initialize *parts
-      @parts = parts.map do |part|
-        if String === part
-          StringIO.new part
+      @parts     = []
+      @curr_part = 0
 
-        elsif part.respond_to?(:read)
-          part
+      parts.each do |part|
+        add part
+      end
+    end
 
-        else
-          raise ArgumentError, "Invalid part #{part.inspect}"
-        end
+
+    def add part
+      if String === part
+        @parts << StringIO.new(part)
+
+      elsif part.respond_to?(:read)
+        @parts << part
+
+      else
+        raise ArgumentError, "Invalid part #{part.inspect}"
       end
 
-      @curr_part = 0
+      @curr_part ||= @parts.length - 1
+      @parts.last
     end
 
 

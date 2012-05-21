@@ -33,6 +33,7 @@ class Kronk
   require 'kronk/diff'
   require 'kronk/http'
   require 'kronk/buffered_io'
+  require 'kronk/multipart'
   require 'kronk/multipart_io'
   require 'kronk/request'
   require 'kronk/response'

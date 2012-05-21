@@ -14,6 +14,7 @@ lib/kronk/diff/ascii_format.rb
 lib/kronk/diff/color_format.rb
 lib/kronk/diff/output.rb
 lib/kronk/http.rb
+lib/kronk/multipart.rb
 lib/kronk/multipart_io.rb
 lib/kronk/player.rb
 lib/kronk/player/benchmark.rb

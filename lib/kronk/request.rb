@@ -257,10 +257,14 @@ class Kronk
 
       if opts[:file]
         self.body = File.open(opts[:file], 'rb')
+
       elsif opts[:form_upload]
-        # MULTIPART FORM DATA
+        multi = Kronk::Multipart.new self.class.multipart_boundary
+        self.body = multi
+
       elsif opts[:form]
         self.form_data = opts[:form]
+
       elsif opts[:data]
         self.body = opts[:data]
       end
@@ -311,9 +315,11 @@ class Kronk
           if data.respond_to?(:path)
             types = MIME::Types.of File.extname(data.path.to_s)[1..-1]
             ctype = types[0] unless types.empty?
+
+          elsif Kronk::Multipart === data
+            ctype = "multipart/form-data, boundary=#{data.boundary}"
           end
 
-          # TODO: don't set this for multipart io
           @headers['Content-Type'] = ctype
 
           @body = data
@@ -553,7 +559,17 @@ class Kronk
       req.basic_auth @auth[:username], @auth[:password] if
         @auth && @auth[:username]
 
-      @body.respond_to?(:read) ? req.body_stream = @body : req.body = @body
+      # Stream Multipart
+      if Kronk::Multipart === @body
+        req.body_stream = @body.to_io
+
+      # Stream IO
+      elsif @body.respond_to?(:read)
+        req.body_stream = @body
+
+      else
+        req.body = @body
+      end
 
       req
     end
