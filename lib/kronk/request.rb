@@ -38,6 +38,7 @@ class Kronk
         out.join "&"
 
       else
+        yield param, data if block_given?
         "#{param}=#{data}"
       end
     end
@@ -260,7 +261,16 @@ class Kronk
 
       elsif opts[:form_upload]
         multi = Kronk::Multipart.new self.class.multipart_boundary
-        # TODO: normalize the params and add each one to multi
+        scanner = /(?:^|&)([^=&]+)(?:=([^&]+))?/
+
+        build_query(opts[:form]).scan(scanner) do |(name, value)|
+          multi.add name, value
+        end
+
+        build_query(opts[:form_upload]) do |name, value|
+          multi.add name, File.open(value, 'rb')
+        end
+
         self.body = multi
 
       elsif opts[:form]
@@ -529,6 +539,8 @@ class Kronk
 
     ##
     # Returns the raw HTTP request String.
+    # Warning: If the body is an IO instance or a Multipart instance,
+    # the full input will be read.
 
     def to_s
       out = "#{@http_method} #{@uri.request_uri} HTTP/1.1\r\n"
@@ -539,7 +551,14 @@ class Kronk
       end
 
       out << "\r\n"
-      out << @body.to_s
+
+      if @body.respond_to?(:read)
+        out << @body.read
+      elsif Kronk::Multipart === @body
+        out << @body.to_io.read
+      else
+        out << @body.to_s
+      end
     end
 
 
