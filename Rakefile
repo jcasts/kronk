@@ -12,6 +12,10 @@ else
 end
 
 
+require 'kronk'
+puts "kronk-#{Kronk::VERSION}"
+
+
 Hoe.spec 'kronk' do
   developer('Jeremie Castagna', 'yaksnrainbows@gmail.com')
   self.readme_file      = "README.rdoc"
@@ -27,9 +31,6 @@ Hoe.spec 'kronk' do
   self.extra_dev_deps << ['nokogiri', '~>1.4']
   self.extra_dev_deps << ['mocha',    '~>0.9.12']
 end
-
-require 'kronk'
-puts "kronk-#{Kronk::VERSION}"
 
 
 class Object
