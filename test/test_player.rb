@@ -384,8 +384,13 @@ class TestPlayer < Test::Unit::TestCase
     req1 = Kronk::Request.new "example.com"
     req2 = Kronk::Request.new "beta-example.com"
 
-    Kronk::Request.expects(:new).returns req2
-    Kronk::Request.expects(:new).returns req1
+    Kronk::Request.expects(:new).
+      with("example.com", :uri_suffix => '/test', :include_headers => true).
+      returns req1
+
+    Kronk::Request.expects(:new).
+      with("beta-example.com", :uri_suffix => '/test', :include_headers => true).
+      returns req2
 
     req1.expects(:retrieve).returns resp1
     req2.expects(:retrieve).returns resp2
