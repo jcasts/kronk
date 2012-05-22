@@ -73,7 +73,7 @@ class Kronk
 
     def error err, kronk=nil
       status = "E"
-      result = [status, 0, error_text(err, kronk)]
+      result = [status, 0, 0, error_text(err, kronk)]
       @mutex.synchronize{ @results << result }
 
       $stdout << status

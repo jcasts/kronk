@@ -360,7 +360,10 @@ class Kronk
 
     resp
 
-  rescue SocketError, SystemCallError => e
+  rescue Errno::ENOENT => e
+    raise NotFoundError, e.message
+
+  rescue SocketError, Errno::ECONNREFUSED => e
     raise NotFoundError, "#{uri} could not be found (#{e.class})"
 
   rescue Timeout::Error
