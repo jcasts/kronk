@@ -187,6 +187,19 @@ class TestRequest < Test::Unit::TestCase
   end
 
 
+  def test_body_nil
+    req = Kronk::Request.new "foo.com"
+    req.body = nil
+    req = req.http_request
+
+    assert_equal nil, req.body_stream
+    assert_equal "",  req.body
+    assert_equal nil, req['Transfer-Encoding']
+    assert_equal nil, req['Content-Type']
+    assert_equal '0', req['Content-Length']
+  end
+
+
   def test_body_io
     req = Kronk::Request.new "foo.com"
     io, = IO.pipe

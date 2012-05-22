@@ -585,6 +585,8 @@ class Kronk
         req['Content-Length'] = b.bytesize.to_s
       elsif b.respond_to?(:size) && b.size
         req['Content-Length'] = b.size.to_s
+      elsif b.nil?
+        req['Content-Length'] = "0"
       end
 
       req['Transfer-Encoding'] = 'chunked' if !req['Content-Length']
