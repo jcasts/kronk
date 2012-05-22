@@ -52,6 +52,7 @@ test/test_helper.rb
 test/test_helper_methods.rb
 test/test_input_reader.rb
 test/test_kronk.rb
+test/test_multipart.rb
 test/test_multipart_io.rb
 test/test_player.rb
 test/test_request.rb

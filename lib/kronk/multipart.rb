@@ -24,6 +24,7 @@ class Kronk
     def add name, value, headers=nil
       headers ||= {}
 
+      name = name.inspect if name.index(":")
       headers['content-disposition'] = "form-data; name=#{name}"
 
       if value.respond_to?(:path)
