@@ -81,6 +81,7 @@ class Kronk
 
 
       def deviation
+        return 0 if @count == 0
         return @deviation if @deviation
 
         mdiff = @times.to_a.inject(0) do |sum, (time, count)|
@@ -92,11 +93,13 @@ class Kronk
 
 
       def mean
+        return 0 if @count == 0
         @mean ||= (self.sum / @count).round @precision
       end
 
 
       def median
+        return 0 if @count == 0
         @median ||= ((@slowest + @fastest) / 2).round @precision
       end
 
@@ -130,6 +133,7 @@ class Kronk
 
 
       def req_per_sec
+        return 0 if @count == 0
         (@count / @total_time).round @precision
       end
 
@@ -174,11 +178,11 @@ Total Bytes:   #{@total_bytes}
 Transfer Rate: #{self.transfer_rate} Kbytes/sec
 
 Connection Times (ms)
-  Min:       #{self.fastest}
+  Min:       #{self.fastest || 0}
   Mean:      #{self.mean}
   [+/-sd]:   #{self.deviation}
   Median:    #{self.median}
-  Max:       #{self.slowest}
+  Max:       #{self.slowest || 0}
 
 Request Percentages (ms)
    50%    #{self.percentages[50]}
@@ -206,7 +210,7 @@ Avg. Slowest Requests (ms, count)
     def start
       @interactive = $stdout.isatty
       @res_count   = 0
-      @results     = []
+      @results     = [ResultSet.new]
       @div         = @number / 10 if @number
       @div         = 100 if !@div || @div < 10
       @last_print  = Time.now
