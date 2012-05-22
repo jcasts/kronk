@@ -32,6 +32,7 @@ class Kronk
           "; filename=#{File.basename value.path}"
 
         headers['Content-Type'] ||= MIME::Types.of(value.path)[0]
+        headers['Content-Type'] &&= headers['Content-Type'].to_s
       end
 
       if value.respond_to?(:read)

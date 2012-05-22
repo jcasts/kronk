@@ -592,11 +592,111 @@ class TestRequest < Test::Unit::TestCase
 
 
   def test_multipart_hash
+    file1 = File.open("test/mocks/200_gzip.txt", "rb")
+    file2 = File.open("test/mocks/200_response.json", "rb")
+    File.stubs(:open).with("test/mocks/200_gzip.txt", "rb").returns file1
+    File.stubs(:open).with("test/mocks/200_response.json", "rb").returns file2
+
     req = Kronk::Request.new "host.com",
             :form => {:foo => ["bar"]},
             :form_upload => {:foo => ["test/mocks/200_gzip.txt"],
               :bar => "test/mocks/200_response.json"}
 
     assert_equal Kronk::Multipart, req.body.class
+    assert_equal 3, req.body.parts.length
+
+    expected = [{"content-disposition"=>"form-data; name=foo[]"}, "bar"]
+    assert req.body.parts.include?(expected),
+      "Request body should include foo[]=bar"
+
+    expected = [{
+      'content-disposition' =>
+        "form-data; name=foo[]; filename=#{File.basename file1.path}",
+      'Content-Type'        => "text/plain",
+      'Content-Transfer-Encoding' => 'binary'
+    }, file1]
+    assert req.body.parts.include?(expected),
+      "Request body should include foo[]=#{file1.inspect}"
+
+    expected = [{
+      'content-disposition' =>
+        "form-data; name=bar; filename=#{File.basename file2.path}",
+      'Content-Type'        => "application/json",
+      'Content-Transfer-Encoding' => 'binary'
+    }, file2]
+    assert req.body.parts.include?(expected),
+      "Request body should include bar=#{file2.inspect}"
+
+  ensure
+    file1.close
+    file2.close
+  end
+
+
+  def test_multipart_string
+    file1 = File.open("test/mocks/200_gzip.txt", "rb")
+    file2 = File.open("test/mocks/200_response.json", "rb")
+    File.stubs(:open).with("test/mocks/200_gzip.txt", "rb").returns file1
+    File.stubs(:open).with("test/mocks/200_response.json", "rb").returns file2
+
+    req = Kronk::Request.new "host.com",
+            :form        => "foo[]=bar",
+            :form_upload =>
+              "foo[]=test/mocks/200_gzip.txt&bar=test/mocks/200_response.json"
+
+    assert_equal Kronk::Multipart, req.body.class
+    assert_equal 3, req.body.parts.length
+
+    expected = [{"content-disposition"=>"form-data; name=foo[]"}, "bar"]
+    assert req.body.parts.include?(expected),
+      "Request body should include foo[]=bar"
+
+    expected = [{
+      'content-disposition' =>
+        "form-data; name=foo[]; filename=#{File.basename file1.path}",
+      'Content-Type'        => "text/plain",
+      'Content-Transfer-Encoding' => 'binary'
+    }, file1]
+    assert req.body.parts.include?(expected),
+      "Request body should include foo[]=#{file1.inspect}"
+
+    expected = [{
+      'content-disposition' =>
+        "form-data; name=bar; filename=#{File.basename file2.path}",
+      'Content-Type'        => "application/json",
+      'Content-Transfer-Encoding' => 'binary'
+    }, file2]
+    assert req.body.parts.include?(expected),
+      "Request body should include bar=#{file2.inspect}"
+
+  ensure
+    file1.close
+    file2.close
+  end
+
+
+  def test_http_request_multipart
+    file1 = File.open("test/mocks/200_gzip.txt", "rb")
+    file2 = File.open("test/mocks/200_response.json", "rb")
+    File.stubs(:open).with("test/mocks/200_gzip.txt", "rb").returns file1
+    File.stubs(:open).with("test/mocks/200_response.json", "rb").returns file2
+
+    req = Kronk::Request.new "host.com",
+            :form        => "foo[]=bar",
+            :form_upload =>
+              "foo[]=test/mocks/200_gzip.txt&bar=test/mocks/200_response.json"
+
+    hreq = req.http_request
+    assert_equal Kronk::MultipartIO, hreq.body_stream.class
+    assert_equal req.body.to_io.size.to_s, hreq['Content-Length']
+    assert_equal 5, hreq.body_stream.parts.length
+    assert hreq.body_stream.parts.include?(file1),
+      "HTTPRequest body stream should include #{file1.inspect}"
+    assert hreq.body_stream.parts.include?(file2),
+      "HTTPRequest body stream should include #{file2.inspect}"
+
+  ensure
+    file1.close
+    file2.close
   end
 end

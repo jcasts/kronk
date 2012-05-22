@@ -257,22 +257,11 @@ class Kronk
       self.proxy = opts[:proxy]
 
       if opts[:file]
-        self.body = File.open(opts[:file], 'rb')
+        self.body = opts[:file].respond_to?(:read) ?
+                     opts[:file] : File.open(opts[:file], 'rb')
 
       elsif opts[:form_upload]
-        multi = Kronk::Multipart.new self.class.multipart_boundary
-        scanner = /(?:^|&)([^=&]+)(?:=([^&]+))?/
-
-        self.class.build_query(opts[:form]).scan(scanner) do |(name, value)|
-          multi.add name, value
-        end
-
-        self.class.build_query(opts[:form_upload]) do |name, value|
-          value = File.open(value, 'rb') if String === value
-          multi.add name, value
-        end
-
-        self.body = multi
+        self.body = build_multipart opts
 
       elsif opts[:form]
         self.form_data = opts[:form]
@@ -596,6 +585,31 @@ class Kronk
 
 
     private
+
+
+    QUERY_SCANNER = /(?:^|&)([^=&]+)(?:=([^&]+))?/
+
+    def build_multipart opts
+      multi = Kronk::Multipart.new self.class.multipart_boundary
+
+      process_query_or_hash(opts[:form]){|name, value| multi.add name, value }
+
+      process_query_or_hash(opts[:form_upload]) do |name, value|
+        value = File.open(value, 'rb') unless value.respond_to?(:read)
+        multi.add name, value
+      end
+
+      multi
+    end
+
+
+    def process_query_or_hash qr, &block
+      if Hash === qr
+        self.class.build_query(qr){|name, value| yield name, value }
+      else
+        qr.to_s.scan(QUERY_SCANNER){|(name, value)| yield name, value }
+      end
+    end
 
 
     ##
