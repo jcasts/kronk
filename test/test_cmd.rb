@@ -366,7 +366,8 @@ class TestCmd < Test::Unit::TestCase
 
   def test_parse_args_http_options
     opts = Kronk::Cmd.parse_args %w{uri -A foo -L --no-cookies -? bar
-            --suff /tail -X PUT -x example.com:2000 --form foo=bar}
+            --suff /tail -X PUT -x example.com:2000 --form foo=bar
+            --form-upload file=test/mocks/200_response.json}
 
     assert_equal "foo",     opts[:user_agent]
     assert_equal true,      opts[:follow_redirects]
@@ -375,6 +376,7 @@ class TestCmd < Test::Unit::TestCase
     assert_equal "/tail",   opts[:uri_suffix]
     assert_equal "PUT",     opts[:http_method]
     assert_equal "foo=bar", opts[:form]
+    assert_equal "file=test/mocks/200_response.json", opts[:form_upload]
     assert_equal({:host => "example.com", :port => "2000"}, opts[:proxy])
 
     opts = Kronk::Cmd.parse_args %w{uri -L 3}
