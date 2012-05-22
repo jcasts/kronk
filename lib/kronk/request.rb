@@ -311,35 +311,31 @@ class Kronk
     # correctly assing the Content-Type and Transfer-Encoding headers.
 
     def body= data
-      case data
-      when Hash
-        self.form_data = data
+      if data.respond_to?(:read)
+        ctype = "application/binary"
 
-      when String
-        dont_chunk!
+        if data.respond_to?(:path)
+          types = MIME::Types.of File.extname(data.path.to_s)[1..-1]
+          ctype = types[0] unless types.empty?
+
+        elsif Kronk::Multipart === data
+          ctype = "multipart/form-data, boundary=#{data.boundary}"
+        end
+
+        @headers['Content-Type'] = ctype
+
         @body = data
 
+      elsif Hash === data
+        self.form_data = data
+
       else
-        if data.respond_to?(:read)
-          ctype = "application/binary"
-
-          if data.respond_to?(:path)
-            types = MIME::Types.of File.extname(data.path.to_s)[1..-1]
-            ctype = types[0] unless types.empty?
-
-          elsif Kronk::Multipart === data
-            ctype = "multipart/form-data, boundary=#{data.boundary}"
-          end
-
-          @headers['Content-Type'] = ctype
-
-          @body = data
-        else
-          dont_chunk!
-          @body = data.to_s
-        end
+        dont_chunk!
+        @body = data.to_s
       end
 
+
+      # TODO: Maybe assign these in http_request to support multipart body
       @headers['Content-Length'] = @body.size.to_s if
         @body.respond_to?(:size) && @body.size
 
