@@ -268,7 +268,8 @@ class Kronk
         end
 
         build_query(opts[:form_upload]) do |name, value|
-          multi.add name, File.open(value, 'rb')
+          value = File.open(value, 'rb') if String === value
+          multi.add name, value
         end
 
         self.body = multi
