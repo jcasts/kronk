@@ -65,7 +65,7 @@ class Kronk
         if value.respond_to?(:read)
           io.add buff.dup
           io.add value
-          buff.clear
+          buff.replace ""
         else
           buff << value.to_s
         end

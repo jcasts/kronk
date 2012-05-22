@@ -291,7 +291,7 @@ class TestResponse < Test::Unit::TestCase
     resp = Kronk::Response.new io
 
     assert_equal "just this one line!", resp.body
-    enc = "".encoding rescue "UTF-8"
+    enc = "".encoding rescue "ASCII-8BIT"
     assert_equal "text/plain; charset=#{enc}", resp['Content-Type']
   end
 

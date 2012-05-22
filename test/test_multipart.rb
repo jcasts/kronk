@@ -104,7 +104,9 @@ STR
     assert_equal file, io.parts[1]
     assert_equal StringIO, io.parts.last.class
 
-    expected = <<-STR
+    file_content = File.read("test/mocks/200_response.json")
+
+    head = <<-STR
 --foobar\r
 content-disposition: form-data; name="key1"\r
 \r
@@ -115,12 +117,28 @@ content-disposition: form-data; name="key2"\r
 some value\r
 --foobar\r
 content-disposition: form-data; name="my_file"; filename="200_response.json"\r
-Content-Type: application/json\r
-Content-Transfer-Encoding: binary\r
-\r
-#{ File.read("test/mocks/200_response.json") }\r
---foobar--
-STR
-    assert_equal expected.strip, io.read
+    STR
+
+    ctype_line = "Content-Type: application/json\r\n"
+    ctran_line = "Content-Transfer-Encoding: binary\r\n"
+    tail       = "\r\n#{file_content}\r\n--foobar--"
+
+    output = io.read head.bytes.count
+    assert_equal head, output
+
+    output = ""
+    output << io.read(1) while output[-1..-1] != "\n"
+
+    comp1, comp2 = output.length == ctype_line.length ?
+      [ctype_line, ctran_line] : [ctran_line, ctype_line]
+
+    assert_equal comp1, output
+
+    output = ""
+    output << io.read(1) while output[-1..-1] != "\n"
+
+    assert_equal comp2, output
+
+    assert_equal tail, io.read
   end
 end

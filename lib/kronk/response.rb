@@ -10,6 +10,7 @@ class Kronk
 
 
     ENCODING_MATCHER = /(^|;\s?)charset=(.*?)\s*(;|$)/
+    DEFAULT_ENCODING = "ASCII-8BIT"
 
     ##
     # Read http response from a file and return a Kronk::Response instance.
@@ -288,10 +289,9 @@ class Kronk
 
     def encoding
       return @encoding if @encoding
-      @encoding = "utf-8" unless headers["content-type"]
-      c_type = headers["content-type"] =~ ENCODING_MATCHER
+      c_type = headers["content-type"].to_s =~ ENCODING_MATCHER
       @encoding = $2 if c_type
-      @encoding ||= "ASCII-8BIT"
+      @encoding ||= DEFAULT_ENCODING
       @encoding = Encoding.find(@encoding) if defined?(Encoding)
       @encoding
     end
@@ -779,7 +779,7 @@ class Kronk
           File === buff_io.io
 
         encoding = buff_io.io.respond_to?(:external_encoding) ?
-                    buff_io.io.external_encoding : "UTF-8"
+                    buff_io.io.external_encoding : DEFAULT_ENCODING
         @headers = {
           'content-type' => "#{ctype[0]}; charset=#{encoding}",
         }

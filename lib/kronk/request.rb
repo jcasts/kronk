@@ -305,7 +305,7 @@ class Kronk
         ctype = "application/binary"
 
         if data.respond_to?(:path)
-          types = MIME::Types.of File.extname(data.path.to_s)[1..-1]
+          types = MIME::Types.of File.extname(data.path.to_s)[1..-1].to_s
           ctype = types[0].to_s unless types.empty?
 
         elsif Kronk::Multipart === data
