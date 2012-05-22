@@ -589,4 +589,14 @@ class TestRequest < Test::Unit::TestCase
     assert_equal "some/path", req.path
     assert_equal "vanilla kronk", req['User-Agent']
   end
+
+
+  def test_multipart_hash
+    req = Kronk::Request.new "host.com",
+            :form => {:foo => ["bar"]},
+            :form_upload => {:foo => ["test/mocks/200_gzip.txt"],
+              :bar => "test/mocks/200_response.json"}
+
+    assert_equal Kronk::Multipart, req.body.class
+  end
 end

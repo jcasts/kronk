@@ -17,14 +17,14 @@ class Kronk
     ##
     # Creates a query string from data.
 
-    def self.build_query data, param=nil
+    def self.build_query data, param=nil, &block
       return data.to_s unless param || Hash === data
 
       case data
       when Array
         out = data.map do |value|
           key = "#{param}[]"
-          build_query value, key
+          build_query value, key, &block
         end
 
         out.join "&"
@@ -32,13 +32,13 @@ class Kronk
       when Hash
         out = data.map do |key, value|
           key = param.nil? ? key : "#{param}[#{key}]"
-          build_query value, key
+          build_query value, key, &block
         end
 
         out.join "&"
 
       else
-        yield param, data if block_given?
+        yield param.to_s, data if block_given?
         "#{param}=#{data}"
       end
     end
@@ -263,11 +263,11 @@ class Kronk
         multi = Kronk::Multipart.new self.class.multipart_boundary
         scanner = /(?:^|&)([^=&]+)(?:=([^&]+))?/
 
-        build_query(opts[:form]).scan(scanner) do |(name, value)|
+        self.class.build_query(opts[:form]).scan(scanner) do |(name, value)|
           multi.add name, value
         end
 
-        build_query(opts[:form_upload]) do |name, value|
+        self.class.build_query(opts[:form_upload]) do |name, value|
           value = File.open(value, 'rb') if String === value
           multi.add name, value
         end
@@ -312,7 +312,7 @@ class Kronk
     # correctly assing the Content-Type and Transfer-Encoding headers.
 
     def body= data
-      if data.respond_to?(:read)
+      if data.respond_to?(:read) || Kronk::Multipart === data
         ctype = "application/binary"
 
         if data.respond_to?(:path)
