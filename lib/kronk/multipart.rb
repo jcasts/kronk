@@ -24,12 +24,11 @@ class Kronk
     def add name, value, headers=nil
       headers ||= {}
 
-      name = name.inspect if name.index(":")
-      headers['content-disposition'] = "form-data; name=#{name}"
+      headers['content-disposition'] = "form-data; name=\"#{name}\""
 
       if value.respond_to?(:path)
         headers['content-disposition'] <<
-          "; filename=#{File.basename value.path}"
+          "; filename=\"#{File.basename value.path}\""
 
         headers['Content-Type'] ||= MIME::Types.of(value.path)[0]
         headers['Content-Type'] &&= headers['Content-Type'].to_s
@@ -66,6 +65,7 @@ class Kronk
         if value.respond_to?(:read)
           io.add buff.dup
           io.add value
+p buff
           buff.clear
         else
           buff << value.to_s

@@ -14,14 +14,14 @@ class TestMultipart < Test::Unit::TestCase
 
   def test_add
     @multi.add "foo", "bar"
-    expected = [{'content-disposition' => 'form-data; name=foo'}, "bar"]
+    expected = [{'content-disposition' => 'form-data; name="foo"'}, "bar"]
     assert_equal expected, @multi.parts.last
   end
 
 
   def test_add_headers
     @multi.add "foo", "bar", "X-Header" => "blah"
-    expected = [{'content-disposition' => 'form-data; name=foo',
+    expected = [{'content-disposition' => 'form-data; name="foo"',
       "X-Header" => "blah"}, "bar"]
     assert_equal expected, @multi.parts.last
   end
@@ -32,7 +32,8 @@ class TestMultipart < Test::Unit::TestCase
     @multi.add "foo", file
 
     expected = [{
-      "content-disposition"       => 'form-data; name=foo; filename=200_response.json',
+      "content-disposition"       =>
+        'form-data; name="foo"; filename="200_response.json"',
       "Content-Type"              => "application/json",
       "Content-Transfer-Encoding" => "binary"
     }, file]
@@ -46,7 +47,7 @@ class TestMultipart < Test::Unit::TestCase
     @multi.add "foo", prd
 
     expected = [{
-      "content-disposition"       => 'form-data; name=foo',
+      "content-disposition"       => 'form-data; name="foo"',
       "Content-Type"              => "application/octet-stream",
       "Content-Transfer-Encoding" => "binary"
     }, prd]
@@ -74,15 +75,15 @@ class TestMultipart < Test::Unit::TestCase
 
     expected = <<-STR
 --foobar\r
-content-disposition: form-data; name=key1\r
+content-disposition: form-data; name="key1"\r
 \r
 bar\r
 --foobar\r
-content-disposition: form-data; name=key2\r
+content-disposition: form-data; name="key2"\r
 \r
 some value\r
 --foobar\r
-content-disposition: form-data; name=key3\r
+content-disposition: form-data; name="key3"\r
 \r
 other thing\r
 --foobar--
@@ -105,15 +106,15 @@ STR
 
     expected = <<-STR
 --foobar\r
-content-disposition: form-data; name=key1\r
+content-disposition: form-data; name="key1"\r
 \r
 bar\r
 --foobar\r
-content-disposition: form-data; name=key2\r
+content-disposition: form-data; name="key2"\r
 \r
 some value\r
 --foobar\r
-content-disposition: form-data; name=my_file; filename=200_response.json\r
+content-disposition: form-data; name="my_file"; filename="200_response.json"\r
 Content-Type: application/json\r
 Content-Transfer-Encoding: binary\r
 \r

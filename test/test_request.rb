@@ -605,13 +605,13 @@ class TestRequest < Test::Unit::TestCase
     assert_equal Kronk::Multipart, req.body.class
     assert_equal 3, req.body.parts.length
 
-    expected = [{"content-disposition"=>"form-data; name=foo[]"}, "bar"]
+    expected = [{"content-disposition"=>"form-data; name=\"foo[]\""}, "bar"]
     assert req.body.parts.include?(expected),
       "Request body should include foo[]=bar"
 
     expected = [{
       'content-disposition' =>
-        "form-data; name=foo[]; filename=#{File.basename file1.path}",
+        "form-data; name=\"foo[]\"; filename=\"#{File.basename file1.path}\"",
       'Content-Type'        => "text/plain",
       'Content-Transfer-Encoding' => 'binary'
     }, file1]
@@ -620,7 +620,7 @@ class TestRequest < Test::Unit::TestCase
 
     expected = [{
       'content-disposition' =>
-        "form-data; name=bar; filename=#{File.basename file2.path}",
+        "form-data; name=\"bar\"; filename=\"#{File.basename file2.path}\"",
       'Content-Type'        => "application/json",
       'Content-Transfer-Encoding' => 'binary'
     }, file2]
@@ -647,13 +647,13 @@ class TestRequest < Test::Unit::TestCase
     assert_equal Kronk::Multipart, req.body.class
     assert_equal 3, req.body.parts.length
 
-    expected = [{"content-disposition"=>"form-data; name=foo[]"}, "bar"]
+    expected = [{"content-disposition"=>"form-data; name=\"foo[]\""}, "bar"]
     assert req.body.parts.include?(expected),
       "Request body should include foo[]=bar"
 
     expected = [{
       'content-disposition' =>
-        "form-data; name=foo[]; filename=#{File.basename file1.path}",
+        "form-data; name=\"foo[]\"; filename=\"#{File.basename file1.path}\"",
       'Content-Type'        => "text/plain",
       'Content-Transfer-Encoding' => 'binary'
     }, file1]
@@ -662,7 +662,7 @@ class TestRequest < Test::Unit::TestCase
 
     expected = [{
       'content-disposition' =>
-        "form-data; name=bar; filename=#{File.basename file2.path}",
+        "form-data; name=\"bar\"; filename=\"#{File.basename file2.path}\"",
       'Content-Type'        => "application/json",
       'Content-Transfer-Encoding' => 'binary'
     }, file2]
