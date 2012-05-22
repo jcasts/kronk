@@ -4,6 +4,8 @@
 
   * Support for Keep-Alive connections, used by default.
 
+  * Support for multipart form file uploads.
+
   * Benchmark player is more interactive.
 
   * Download player added to write output to files.
