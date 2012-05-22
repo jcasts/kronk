@@ -258,7 +258,8 @@ class Kronk
 
       if opts[:file]
         self.body = opts[:file].respond_to?(:read) ?
-                     opts[:file] : File.open(opts[:file], 'rb')
+                      opts[:file] :
+                      File.open(File.expand_path(opts[:file]), 'rb')
 
       elsif opts[:form_upload]
         self.body = build_multipart opts
@@ -595,7 +596,8 @@ class Kronk
       process_query_or_hash(opts[:form]){|name, value| multi.add name, value }
 
       process_query_or_hash(opts[:form_upload]) do |name, value|
-        value = File.open(value, 'rb') unless value.respond_to?(:read)
+        value = File.open(File.expand_path(value), 'rb') unless
+          value.respond_to?(:read)
         multi.add name, value
       end
 
