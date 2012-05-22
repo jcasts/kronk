@@ -173,6 +173,12 @@ def expect_request req_method, url, opts={}
   data   = opts[:data]
   data &&= Hash === data ? Kronk::Request.build_query(data) : data.to_s
 
+  req.stubs(:body).returns(data)
+  req.stubs(:body_stream).returns(StringIO.new(data.to_s))
+
+  req.stubs(:[]).with('Content-Length').returns(data)
+  req.stubs(:[]=)
+
   headers = opts[:headers] || Hash.new
   headers['User-Agent'] ||= Kronk::DEFAULT_USER_AGENT
   headers['Connection'] ||= 'Keep-Alive'

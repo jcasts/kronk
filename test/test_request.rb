@@ -77,7 +77,7 @@ class TestRequest < Test::Unit::TestCase
   def test_retrieve_post
     expect_request "POST", "http://example.com/request/path?foo=bar",
       :data    => {'test' => 'thing'},
-      :headers => {'X-THING' => 'thing', 'Content-Length' => '10'}
+      :headers => {'X-THING' => 'thing'}
 
     resp = Kronk::Request.new("http://example.com/request/path?foo=bar",
             :data => 'test=thing', :headers => {'X-THING' => 'thing'},
@@ -154,11 +154,11 @@ class TestRequest < Test::Unit::TestCase
     req = Kronk::Request.new "foo.com"
     req.headers['Transfer-Encoding'] = "chunked"
     req.body = {:foo => :bar}
+    req = req.http_request
 
     assert_equal "foo=bar", req.body
-    assert_equal nil, req.headers['Transfer-Encoding']
-    assert_equal "application/x-www-form-urlencoded",
-                 req.headers['Content-Type']
+    assert_equal 'chunked', req['Transfer-Encoding']
+    assert_equal "application/x-www-form-urlencoded", req['Content-Type']
   end
 
 
@@ -166,23 +166,24 @@ class TestRequest < Test::Unit::TestCase
     req = Kronk::Request.new "foo.com", :form => "blah"
     req.headers['Transfer-Encoding'] = "chunked"
     req.body = "foo=bar"
+    req = req.http_request
 
     assert_equal "foo=bar", req.body
-    assert_equal nil, req.headers['Transfer-Encoding']
-    assert_equal '7', req.headers['Content-Length']
-    assert_equal "application/x-www-form-urlencoded",
-                 req.headers['Content-Type']
+    assert_equal 'chunked', req['Transfer-Encoding']
+    assert_equal '7', req['Content-Length']
+    assert_equal "application/x-www-form-urlencoded", req['Content-Type']
   end
 
 
   def test_body_string_io
     req = Kronk::Request.new "foo.com"
     req.body = str_io = StringIO.new("foo=bar")
+    req = req.http_request
 
-    assert_equal str_io,               req.body
-    assert_equal nil,                  req.headers['Transfer-Encoding']
-    assert_equal 'application/binary', req.headers['Content-Type']
-    assert_equal '7',                  req.headers['Content-Length']
+    assert_equal str_io,               req.body_stream
+    assert_equal nil,                  req['Transfer-Encoding']
+    assert_equal 'application/binary', req['Content-Type']
+    assert_equal '7',                  req['Content-Length']
   end
 
 
@@ -190,11 +191,12 @@ class TestRequest < Test::Unit::TestCase
     req = Kronk::Request.new "foo.com"
     io, = IO.pipe
     req.body = io
+    req = req.http_request
 
-    assert_equal io,                   req.body
-    assert_equal 'chunked',            req.headers['Transfer-Encoding']
-    assert_equal 'application/binary', req.headers['Content-Type']
-    assert_equal nil,                  req.headers['Content-Length']
+    assert_equal io,                   req.body_stream
+    assert_equal 'chunked',            req['Transfer-Encoding']
+    assert_equal 'application/binary', req['Content-Type']
+    assert_equal nil,                  req['Content-Length']
   end
 
 
@@ -202,11 +204,12 @@ class TestRequest < Test::Unit::TestCase
     io  = File.open 'Manifest.txt', 'r'
     req = Kronk::Request.new "foo.com"
     req.body = io
+    req = req.http_request
 
-    assert_equal io,           req.body
-    assert_equal nil,          req.headers['Transfer-Encoding']
-    assert_equal 'text/plain', req.headers['Content-Type']
-    assert_equal io.size.to_s, req.headers['Content-Length']
+    assert_equal io,           req.body_stream
+    assert_equal nil,          req['Transfer-Encoding']
+    assert_equal 'text/plain', req['Content-Type']
+    assert_equal io.size.to_s, req['Content-Length']
 
   ensure
     io.close
@@ -217,10 +220,11 @@ class TestRequest < Test::Unit::TestCase
     req = Kronk::Request.new "foo.com"
     req.headers['Transfer-Encoding'] = "chunked"
     req.body = 12345
+    req = req.http_request
 
-    assert_equal "12345", req.body
-    assert_equal nil,     req.headers['Transfer-Encoding']
-    assert_equal nil,     req.headers['Content-Type']
+    assert_equal "12345",   req.body
+    assert_equal "chunked", req['Transfer-Encoding']
+    assert_equal nil,       req['Content-Type']
   end
 
 

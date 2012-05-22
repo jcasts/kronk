@@ -316,7 +316,7 @@ class Kronk
 
         if data.respond_to?(:path)
           types = MIME::Types.of File.extname(data.path.to_s)[1..-1]
-          ctype = types[0] unless types.empty?
+          ctype = types[0].to_s unless types.empty?
 
         elsif Kronk::Multipart === data
           ctype = "multipart/form-data, boundary=#{data.boundary}"
@@ -330,16 +330,8 @@ class Kronk
         self.form_data = data
 
       else
-        dont_chunk!
         @body = data.to_s
       end
-
-
-      # TODO: Maybe assign these in http_request to support multipart body
-      @headers['Content-Length'] = @body.size.to_s if
-        @body.respond_to?(:size) && @body.size
-
-      @headers['Transfer-Encoding'] = 'chunked' if !@headers['Content-Length']
 
       @body
     end
@@ -371,7 +363,6 @@ class Kronk
     # Assigns body of the request with form headers.
 
     def form_data= data
-      dont_chunk!
       @headers['Content-Type'] = "application/x-www-form-urlencoded"
       @body = self.class.build_query data
     end
@@ -587,17 +578,21 @@ class Kronk
         req.body = @body
       end
 
+      b = req.body || req.body_stream
+
+      if b.respond_to?(:bytesize)
+        req['Content-Length'] = b.bytesize.to_s
+      elsif b.respond_to?(:size) && b.size
+        req['Content-Length'] = b.size.to_s
+      end
+
+      req['Transfer-Encoding'] = 'chunked' if !req['Content-Length']
+
       req
     end
 
 
     private
-
-
-    def dont_chunk!
-      @headers.delete('Transfer-Encoding') if
-        @headers['Transfer-Encoding'].to_s.downcase == 'chunked'
-    end
 
 
     ##
