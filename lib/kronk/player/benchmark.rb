@@ -75,7 +75,6 @@ class Kronk
         @paths[uri] ||= [0, 0]
         pcount = @paths[uri][1] + 1
         @paths[uri][0] = (@paths[uri][0] * @paths[uri][1] + time) / pcount
-        @paths[uri][0] = @paths[uri][0].round @precision
         @paths[uri][1] = pcount
 
         clean_req_log
