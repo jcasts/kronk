@@ -14,7 +14,7 @@ require 'yaml'
 class Kronk
 
   # This gem's version.
-  VERSION = '1.9.1'
+  VERSION = '1.9.2'
 
   require 'kronk/constants'
   require 'kronk/queue_runner'
