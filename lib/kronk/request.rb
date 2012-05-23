@@ -448,11 +448,7 @@ class Kronk
 
       @response = stream opts
 
-      if block_given?
-        block = lambda{|chunk| yield @response, chunk }
-      end
-
-      @response.body(&block) # make sure to read the full body from io
+      @response.body # make sure to read the full body from io
       @response.time = Time.now - start_time - @response.conn_time
 
       @response
@@ -468,7 +464,7 @@ class Kronk
     # Connection must be closed using:
     #   request.connection.finish
 
-    def stream opts={}
+    def stream opts={}, &block
       retried = false
 
       begin
@@ -477,7 +473,7 @@ class Kronk
         conn.start unless conn.started?
         conn_time  = Time.now - start_time
 
-        @response           = conn.request http_request, nil, opts
+        @response           = conn.request http_request, nil, opts, &block
         @response.conn_time = conn_time
         @response.request   = self
 
