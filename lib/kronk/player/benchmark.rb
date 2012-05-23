@@ -77,6 +77,15 @@ class Kronk
         @paths[uri][0] = (@paths[uri][0] * @paths[uri][1] + time) / pcount
         @paths[uri][0] = @paths[uri][0].round @precision
         @paths[uri][1] = pcount
+
+        clean_req_log
+      end
+
+
+      def clean_req_log
+        if @paths.length > 500
+          order_reqs[500..-1].each{|(uri, vals)| @paths.delete uri }
+        end
       end
 
 
@@ -148,8 +157,13 @@ class Kronk
       end
 
 
+      def order_reqs
+        @paths.to_a.sort{|x,y| y[1] <=> x[1]}
+      end
+
+
       def slowest_reqs
-        @slowest_reqs ||= @paths.to_a.sort{|x,y| y[1] <=> x[1]}[0..9]
+        @slowest_reqs ||= order_reqs[0..9]
       end
 
 
