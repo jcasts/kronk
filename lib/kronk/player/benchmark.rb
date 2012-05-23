@@ -158,7 +158,7 @@ class Kronk
 
 
       def order_reqs
-        @paths.to_a.sort{|x,y| y[1] <=> x[1]}
+        @paths.to_a.sort{|x,y| y[1][0] <=> x[1][0]}
       end
 
 
