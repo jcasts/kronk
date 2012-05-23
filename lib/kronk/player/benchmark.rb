@@ -262,10 +262,11 @@ Avg. Slowest Requests (ms, count)
 
 
     def render
-      out = "#{head}#{body}\n"
-      @line_count = out.to_s.split("\n").length
+      out         = "#{head}#{body}\n"
+      new_count   = out.to_s.split("\n").length
       @last_print = Time.now
       clear_screen if @interactive
+      @line_count = new_count
       $stdout.print out
       $stdout.flush
     end
