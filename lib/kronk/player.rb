@@ -51,7 +51,7 @@ class Kronk
       @mutex      = Mutex.new
 
       @on_input   = Proc.new do
-        stop_input! if !@number && @input.eof?
+        stop_input! if !@number && @input.eof? && !@input.io.nil?
         @last_req = @input.get_next || @queue.last || @last_req || {}
       end
 

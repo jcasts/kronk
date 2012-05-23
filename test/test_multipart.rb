@@ -43,7 +43,7 @@ class TestMultipart < Test::Unit::TestCase
 
 
   def test_add_io
-    prd, pwr = IO.pipe
+    prd, = IO.pipe
     @multi.add "foo", prd
 
     expected = [{

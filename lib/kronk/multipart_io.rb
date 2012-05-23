@@ -59,13 +59,13 @@ class Kronk
     def read_all
       return "" if eof?
 
-      out = @parts[@curr_part..-1].inject("") do |out, curr|
+      output = @parts[@curr_part..-1].inject("") do |out, curr|
         @curr_part += 1
         out << curr.read
       end
 
       @curr_part = nil
-      out
+      output
     end
 
 

@@ -333,8 +333,9 @@ Parse and run diffs against data from live and cached http responses.
 
         opt.on('-p', '--replay [FILE]',
                'Replay the given file or STDIN against URIs') do |file|
-          options[:player][:io]   = File.open(file, "r") if file
-          options[:player][:io] ||= $stdin if !$stdin.tty?
+          options[:player][:io]     = File.open(file, "r") if file
+          options[:player][:io]   ||= $stdin if !$stdin.tty?
+          options[:player][:type] ||= :suite
         end
 
 

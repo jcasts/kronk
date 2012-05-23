@@ -212,7 +212,7 @@ class Kronk
     self.multipart_boundary = 'AaB03x'
 
 
-    attr_accessor :headers, :proxy, :response, :timeout
+    attr_accessor :headers, :response, :timeout
 
     attr_reader :body, :http_method, :proxy, :uri, :use_cookies
 
