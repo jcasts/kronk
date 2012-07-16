@@ -379,16 +379,17 @@ class Kronk
 
     if IO === uri || StringIO === uri || BufferedIO === uri
       Cmd.verbose "Reading IO #{uri}" if defined?(Cmd)
-      Response.new uri, options
+      Response.new uri, opts
 
     elsif File.file? uri.to_s
       Cmd.verbose "Reading file:  #{uri}\n" if defined?(Cmd)
-      Response.read_file uri, options
+      Response.read_file uri, opts
 
     else
-      req = Request.new uri, options
+
+      req = Request.new uri, opts
       Cmd.verbose "Retrieving URL:  #{req.uri}\n" if defined?(Cmd)
-      resp = req.retrieve options
+      resp = req.retrieve opts
 
       hist_uri = req.uri.to_s[0..-req.uri.request_uri.length]
       hist_uri = hist_uri[(req.uri.scheme.length + 3)..-1]

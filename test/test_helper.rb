@@ -170,7 +170,7 @@ def expect_request req_method, url, opts={}
   http   = mock 'http'
   req    = mock 'req'
 
-  data   = opts[:data]
+  data   = opts.delete(:data)
   data &&= Hash === data ? Kronk::Request.build_query(data) : data.to_s
 
   req.stubs(:body).returns(data)
@@ -179,7 +179,7 @@ def expect_request req_method, url, opts={}
   req.stubs(:[]).with('Content-Length').returns(data)
   req.stubs(:[]=)
 
-  headers = opts[:headers] || Hash.new
+  headers = opts.delete(:headers) || Hash.new
   headers['User-Agent'] ||= Kronk::DEFAULT_USER_AGENT
   headers['Connection'] ||= 'Keep-Alive'
 
@@ -190,13 +190,13 @@ def expect_request req_method, url, opts={}
   Kronk::Request::VanillaRequest.expects(:new).
     with(req_method.to_s.upcase, uri.request_uri, headers).returns req
 
-  proxy = opts[:proxy] || {}
+  proxy = opts.delete(:proxy) || {}
 
   Kronk::HTTP.expects(:new).
-    with(uri.host, uri.port, {:proxy => proxy, :ssl => !!opts[:ssl]}).
+    with(uri.host, uri.port, {:proxy => proxy, :ssl => !!opts.delete(:ssl)}).
     returns http
 
-  http.expects(:request).with(req, nil, {}).returns resp
+  http.expects(:request).with(req, nil, opts).returns resp
 
   yield http, req, resp if block_given?
 

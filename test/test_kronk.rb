@@ -100,13 +100,14 @@ class TestKronk < Test::Unit::TestCase
 
 
   def test_load_config_uri_options
-    old_config = Kronk.config.dup
-    Kronk.load_config 'test/mocks/mock_config.yml'
-    expected = {'example.com' => {:query => {'foo' => 'bar'}}}
-    assert_equal expected, Kronk.config[:uri_options]
+    with_config do
+      Kronk.load_config 'test/mocks/mock_config.yml'
+      expected = {'example.com' => {:query => {'foo' => 'bar'}}}
+      assert_equal expected, Kronk.config[:uri_options]
 
-  ensure
-    Kronk.instance_variable_set("@config", old_config)
+      expect_request :get, "http://example.com/path?foo=bar", :query => {"foo"=>"bar"}
+      Kronk.request "http://example.com/path"
+    end
   end
 
 
