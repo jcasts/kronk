@@ -2,6 +2,10 @@
 
 * Bugfixes:
 
+  * Don't override missing dependency errors.
+
+  * Fix for passing uri options to request initializer.
+
   * Enable colors by default.
 
   * Keep only 500 URIs in the benchmark player.
