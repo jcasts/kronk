@@ -387,6 +387,9 @@ class Kronk
       begin
         @parsed_body = new_parser.parse(self.body) or raise RuntimeError
 
+      rescue MissingDependency
+        raise
+
       rescue => e
         msg = ParserError === e ?
                 e.message : "#{new_parser} failed parsing body"
