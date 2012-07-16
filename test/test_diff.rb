@@ -4,6 +4,7 @@ class TestDiff < Test::Unit::TestCase
 
   def setup
     @diff = Kronk::Diff.new mock_302_response, mock_301_response
+    @diff.output.format = Kronk::Diff::AsciiFormat
   end
 
 

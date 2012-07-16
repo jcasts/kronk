@@ -19,7 +19,7 @@ class TestKronk < Test::Unit::TestCase
       :history_file => Kronk::DEFAULT_HISTORY_FILE,
       :indentation  => 1,
       :default_host => "http://localhost:3000",
-      :diff_format  => 'ascii',
+      :diff_format  => 'color',
       :max_history  => 100,
       :show_lines   => false,
       :use_cookies  => true,
@@ -77,7 +77,7 @@ class TestKronk < Test::Unit::TestCase
         },
         :context     => 3,
         :default_host => "http://localhost:3000",
-        :diff_format => 'ascii',
+        :diff_format => 'color',
         :cache_file  => Kronk::DEFAULT_CACHE_FILE,
         :color_data  => false,
         :cookies_file => Kronk::DEFAULT_COOKIES_FILE,
@@ -96,6 +96,17 @@ class TestKronk < Test::Unit::TestCase
 
       assert_equal expected, Kronk.config
     end
+  end
+
+
+  def test_load_config_uri_options
+    old_config = Kronk.config.dup
+    Kronk.load_config 'test/mocks/mock_config.yml'
+    expected = {'example.com' => {:query => {'foo' => 'bar'}}}
+    assert_equal expected, Kronk.config[:uri_options]
+
+  ensure
+    Kronk.instance_variable_set("@config", old_config)
   end
 
 

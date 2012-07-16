@@ -6,3 +6,4 @@ tmp/
 pkg/
 log/
 .DS_Store
+.rbenv-version
