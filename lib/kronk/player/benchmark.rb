@@ -83,7 +83,7 @@ class Kronk
 
       def clean_req_log
         if @paths.length > 500
-          order_reqs[500..-1].each{|(uri, vals)| @paths.delete uri }
+          order_reqs[500..-1].each{|(uri,_)| @paths.delete uri }
         end
       end
 

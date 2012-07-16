@@ -44,6 +44,7 @@ test/mocks/301_response.txt
 test/mocks/302_response.txt
 test/mocks/cookies.yml
 test/mocks/get_request.txt
+test/mocks/mock_config.yml
 test/test_assertions.rb
 test/test_cmd.rb
 test/test_data_string.rb

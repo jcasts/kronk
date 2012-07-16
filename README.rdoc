@@ -178,7 +178,7 @@ One of Kronk's most powerful features is its ability to segregate data.
 From the command line, this is done by passing data paths after '--'.
 
 All data manipulation is handled by the
-{ruby-path gem}[http://github.com/yaksnrainbows/ruby-path].
+{ruby-path gem}[http://rubygems.org/gems/ruby-path].
 
 === Selecting and Deleting:
 
