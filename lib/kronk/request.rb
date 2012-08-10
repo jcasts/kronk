@@ -466,7 +466,7 @@ class Kronk
     def retrieve opts={}, &block
       start_time = Time.now
 
-      @response = stream opts
+      @response = stream opts, &block
 
       @response.body # make sure to read the full body from io
       @response.time = Time.now - start_time - @response.conn_time
