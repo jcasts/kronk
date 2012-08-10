@@ -225,7 +225,7 @@ class Kronk
     # :query:: Hash/String - the data to append to the http request path
     # :user_agent:: String - user agent string or alias; defaults to 'kronk'
     # :auth:: Hash - must contain :username and :password; defaults to nil
-    # :oauth:: Hash - must contain :consumer_key and :token; defaults to nil
+    # :oauth:: Hash - :consumer_key, :token, :consumer_secret, :token_secret
     # :headers:: Hash - extra headers to pass to the request
     # :http_method:: Symbol - the http method to use; defaults to :get
     # :proxy:: Hash/String - http proxy to use; defaults to {}
