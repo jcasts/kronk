@@ -2,6 +2,8 @@
 
 == Maybe Later
 
+* Investigate streaming and Yajl.
+
 * Animate Suite player cursor when waiting for input.
 
 * Consider getting off of net/http.
