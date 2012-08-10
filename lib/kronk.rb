@@ -281,6 +281,7 @@ class Kronk
   # :http_method:: Symbol - the http method to use; defaults to :get
   # :user_agent:: String - user agent string or alias; defaults to 'kronk'
   # :auth:: Hash - must contain :username and :password; defaults to nil
+  # :oauth:: Hash - :consumer_key, :token, :consumer_secret, :token_secret
   # :proxy:: Hash/String - http proxy to use; defaults to nil
   # :keep_indicies:: Boolean - indicies of modified arrays display as hashes
   # :show_headers:: Boolean/String/Array - which headers to show in output
@@ -431,7 +432,7 @@ class Kronk
           out_opts[key] = val.merge out_opts[key], &DEEP_MERGE
 
         # Hashes
-        when :headers, :auth
+        when :headers, :auth, :oauth
           out_opts[key] = val.merge out_opts[key]
 
         # Proxy hash or String

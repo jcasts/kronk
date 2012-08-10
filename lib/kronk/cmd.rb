@@ -106,7 +106,6 @@ class Kronk
 
     def self.parse_args argv
       options = {
-        :auth         => {},
         :no_body      => false,
         :player       => {},
         :proxy        => {},
@@ -450,6 +449,11 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
+        opt.on('--oauth', String, 'Yaml file with Oauth credentials') do |file|
+          options[:oauth] = YAML.load_file file
+        end
+
+
         opt.on('-x', '--proxy STR', String,
                'Use HTTP proxy on given port: host[:port]') do |value|
           options[:proxy][:host], options[:proxy][:port] = value.split ":", 2
@@ -498,6 +502,7 @@ Parse and run diffs against data from live and cached http responses.
 
         opt.on('-u', '--user STR', String,
                'Set server auth user and/or password: usr[:pass]') do |value|
+          options[:auth] ||= {}
           options[:auth][:username], options[:auth][:password] =
             value.split ":", 2
 
