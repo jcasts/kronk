@@ -28,7 +28,7 @@ Kronk was made possible by the sponsoring of YP.com.
 
 * Launch IRB console with the retrieved response data.
 
-* Support for proxies, ssl, and basic auth.
+* Support for proxies, ssl, oauth, and basic auth.
 
 * Cookie/session handling.
 
