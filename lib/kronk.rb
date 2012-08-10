@@ -4,11 +4,13 @@ require 'json'
 require 'cookiejar'
 require 'path'
 require 'mime/types'
+require 'simple_oauth'
 
 require 'thread'
 require 'stringio'
 
 require 'net/http'
+require 'base64'
 require 'yaml'
 
 class Kronk

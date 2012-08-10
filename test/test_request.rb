@@ -360,6 +360,103 @@ class TestRequest < Test::Unit::TestCase
   end
 
 
+  def test_oauth
+    oauth = {
+      :token => "blah",
+      :token_secret => "tsecret",
+      :consumer_key => "ckey",
+      :consumer_secret => "csecret"
+    }
+
+    req = Kronk::Request.new "foo.com", :oauth => oauth
+    auth = req.http_request['Authorization']
+
+    assert auth =~ /^OAuth\s/,
+      ":oauth option should have triggered Authorization header"
+
+    assert auth =~ / oauth_consumer_key="ckey"/,
+      "Authorization should have the consumer key"
+    assert auth =~ / oauth_token="blah"/,
+      "Authorization should have token"
+  end
+
+
+  def test_oauth_basic_auth_collision
+    oauth = {
+      :token => "blah",
+      :token_secret => "tsecret",
+      :consumer_key => "ckey",
+      :consumer_secret => "csecret"
+    }
+
+    req = Kronk::Request.new "foo.com", :oauth => oauth,
+            :auth => {:username => "foo", :password => "bar"}
+
+    assert_equal({:username => "foo", :password => "bar"}, req.auth)
+    assert_equal(oauth, req.oauth)
+
+    auth = req.http_request['Authorization']
+
+    assert auth =~ /^OAuth\s/,
+      ":oauth option should have triggered Authorization header"
+
+    assert auth =~ / oauth_consumer_key="ckey"/,
+      "Authorization should have the consumer key"
+    assert auth =~ / oauth_token="blah"/,
+      "Authorization should have token"
+  end
+
+
+  def test_oauth_from_headers
+    oauth = "OAuth oauth_consumer_key=\"ckey\", \
+      oauth_nonce=\"e95a6580533f4b122dc1b67bf28ea320\", \
+      oauth_signature=\"NLYgre5962QIYBQFjCQdt5nymBc%3D\", \
+      oauth_signature_method=\"HMAC-SHA1\", \
+      oauth_timestamp=\"1344556946\", \
+      oauth_token=\"blah\", \
+      oauth_version=\"1.0\""
+
+    req = Kronk::Request.new "foo.com", :headers => {'Authorization' => oauth}
+    auth = req.http_request['Authorization']
+
+    assert auth =~ /^OAuth\s/,
+      ":oauth option should have triggered Authorization header"
+
+    assert auth =~ / oauth_consumer_key="ckey"/,
+      "Authorization should have the consumer key"
+    assert auth =~ / oauth_token="blah"/,
+      "Authorization should have token"
+  end
+
+
+  def test_oauth_from_headers_and_opts
+    oauth = "OAuth oauth_consumer_key=\"ckey\", \
+      oauth_nonce=\"e95a6580533f4b122dc1b67bf28ea320\", \
+      oauth_signature=\"NLYgre5962QIYBQFjCQdt5nymBc%3D\", \
+      oauth_signature_method=\"HMAC-SHA1\", \
+      oauth_timestamp=\"1344556946\", \
+      oauth_token=\"blah\", \
+      oauth_version=\"1.0\""
+
+    oath_opt = {
+    }
+
+    req = Kronk::Request.new "foo.com/bar",
+      :oauth   => {:token => "newtoken"},
+      :headers => {'Authorization' => oauth}
+
+    auth = req.http_request['Authorization']
+
+    assert auth =~ /^OAuth\s/,
+      ":oauth option should have triggered Authorization header"
+
+    assert auth =~ / oauth_consumer_key="ckey"/,
+      "Authorization should have the consumer key"
+    assert auth =~ / oauth_token="newtoken"/,
+      "Authorization should have token"
+  end
+
+
   def test_auth_from_headers
     req = Kronk::Request.parse File.read("test/mocks/get_request.txt")
     assert_equal "bob",    req.auth[:username]

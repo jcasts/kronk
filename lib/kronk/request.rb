@@ -225,6 +225,7 @@ class Kronk
     # :query:: Hash/String - the data to append to the http request path
     # :user_agent:: String - user agent string or alias; defaults to 'kronk'
     # :auth:: Hash - must contain :username and :password; defaults to nil
+    # :oauth:: Hash - must contain :consumer_key and :token; defaults to nil
     # :headers:: Hash - extra headers to pass to the request
     # :http_method:: Symbol - the http method to use; defaults to :get
     # :proxy:: Hash/String - http proxy to use; defaults to {}
@@ -234,7 +235,8 @@ class Kronk
     # to using a post request.
 
     def initialize uri, opts={}
-      @auth = opts[:auth]
+      @auth  = opts[:auth]
+      @oauth = opts[:oauth]
 
       @connection = nil
       @response   = nil
@@ -283,16 +285,34 @@ class Kronk
     # Returns the basic auth credentials if available.
 
     def auth
-      @auth ||= Hash.new
+      if (!@auth || !@auth[:username]) && @headers['Authorization'] &&
+          @headers['Authorization'] !~ /^OAuth\s/
 
-      if !@auth[:username] && @headers['Authorization']
-        require 'base64'
         str = Base64.decode64 @headers['Authorization'].split[1]
         username, password = str.split(":", 2)
-        @auth = {:username => username, :password => password}.merge @auth
+        @auth = {
+          :username => username,
+          :password => password
+        }.merge(@auth || {})
       end
 
       @auth
+    end
+
+
+    ##
+    # Returns the oauth credentials if available.
+
+    def oauth
+      if (!@oauth || !@oauth[:token] || !@oauth[:consumer_key]) &&
+          @headers['Authorization'].to_s =~ /^OAuth\s/
+
+        @oauth =
+          SimpleOAuth::Header.parse(@headers['Authorization']).
+            merge(@oauth || {})
+      end
+
+      @oauth
     end
 
 
@@ -501,8 +521,9 @@ class Kronk
         :no_cookies  => !self.use_cookies
       }
 
-      hash[:auth]    = @auth if @auth
-      hash[:data]    = @body if @body
+      hash[:auth]    = @auth  if @auth
+      hash[:oauth]   = @oauth if @oauth
+      hash[:data]    = @body  if @body
       hash[:headers] = @headers   unless @headers.empty?
       hash[:proxy]   = self.proxy unless self.proxy.empty?
 
@@ -549,8 +570,12 @@ class Kronk
     def http_request
       req = VanillaRequest.new @http_method, @uri.request_uri, @headers
 
-      req.basic_auth @auth[:username], @auth[:password] if
-        @auth && @auth[:username]
+      if @oauth
+        req['Authorization'] =
+          SimpleOAuth::Header.new(@http_method, @uri, {}, self.oauth).to_s
+      elsif @auth && @auth[:username]
+        req.basic_auth @auth[:username], @auth[:password]
+      end
 
       # Stream Multipart
       if Kronk::Multipart === @body
