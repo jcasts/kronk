@@ -590,7 +590,7 @@ class Kronk
     # See Path::Transaction for supported transform actions in the
     # {ruby-path gem}[http://github.com/yaksnrainbows/ruby-path].
 
-    def data opts={}
+    def data opts={}, &block
       data = nil
 
       unless opts[:no_body]

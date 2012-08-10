@@ -392,7 +392,7 @@ class Kronk
 
       req = Request.new uri, opts
       Cmd.verbose "Retrieving URL:  #{req.uri}\n" if defined?(Cmd)
-      resp = req.retrieve opts
+      resp = req.stream opts
 
       hist_uri = req.uri.to_s[0..-req.uri.request_uri.length]
       hist_uri = hist_uri[(req.uri.scheme.length + 3)..-1]
