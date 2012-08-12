@@ -392,8 +392,8 @@ class TestPlayer < Test::Unit::TestCase
       with("beta-example.com", :uri_suffix => '/test', :include_headers => true).
       returns req2
 
-    req1.expects(:retrieve).returns resp1
-    req2.expects(:retrieve).returns resp2
+    req1.expects(:stream).returns resp1
+    req2.expects(:stream).returns resp2
 
     @got_results = nil
 
@@ -485,7 +485,7 @@ class TestPlayer < Test::Unit::TestCase
 
     req.each_with_index do |r, i|
       mock_res = Kronk::Response.new resp[i]
-      mock_req = stub("mock_req", :retrieve => mock_res,
+      mock_req = stub("mock_req", :stream => mock_res,
                         :uri => URI.parse("http://host.com"))
 
       Kronk::Request.stubs(:new).with(req[i], opts).returns mock_req

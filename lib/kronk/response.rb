@@ -544,7 +544,7 @@ class Kronk
 
       new_opts.merge!(opts)
 
-      Request.new(self.location, new_opts).retrieve(new_opts, &block)
+      Request.new(self.location, new_opts).stream(new_opts, &block)
     end
 
 

@@ -10,9 +10,9 @@ class TestHelperMethods < Test::Unit::TestCase
     @mock_resp  = Kronk::Response.new io
     @mock_resp2 = Kronk::Response.new \
                     StringIO.new mock_resp("200_response.json")
-    @mock_req   = stub("mock_req", :retrieve => @mock_resp,
+    @mock_req   = stub("mock_req", :stream => @mock_resp,
                         :uri => URI.parse("http://host.com"))
-    @mock_req2  = stub("mock_req", :retrieve => @mock_resp2,
+    @mock_req2  = stub("mock_req", :stream => @mock_resp2,
                         :uri => URI.parse("http://host.com"))
 
     @mock_thread = stub("mock_thread", :join => true,
@@ -142,7 +142,7 @@ class TestHelperMethods < Test::Unit::TestCase
 
   def test_retrieve_unparsable
     mock_resp = Kronk::Response.new StringIO.new(mock_200_response)
-    mock_req  = stub("mock_req", :retrieve => mock_resp,
+    mock_req  = stub("mock_req", :stream => mock_resp,
                       :uri => URI.parse("http://host.com"))
 
     Kronk::Request.expects(:new).
@@ -163,8 +163,8 @@ class TestHelperMethods < Test::Unit::TestCase
   def test_retrieve_two_unparsable
     mock_resp = Kronk::Response.new StringIO.new(mock_200_response)
 
-    Kronk::Request.any_instance.expects(:retrieve).returns mock_resp
-    Kronk::Request.any_instance.expects(:retrieve).returns mock_resp
+    Kronk::Request.any_instance.expects(:stream).returns mock_resp
+    Kronk::Request.any_instance.expects(:stream).returns mock_resp
 
     retrieve "host1.com", "host2.com", :foo => "bar"
 

@@ -482,7 +482,7 @@ class TestKronk < Test::Unit::TestCase
   def test_follow_redirect_infinite
     res = Kronk::Response.new mock_301_response
     req = Kronk::Request.new "http://www.google.com/"
-    req.stubs(:retrieve).returns res
+    req.stubs(:stream).returns res
 
     Kronk::Request.stubs(:new).
       with("http://www.google.com/",{:follow_redirects => true}).returns req
@@ -501,7 +501,7 @@ class TestKronk < Test::Unit::TestCase
   def test_num_follow_redirect
     res = Kronk::Response.new mock_301_response
     req = Kronk::Request.new "http://www.google.com/"
-    req.stubs(:retrieve).returns res
+    req.stubs(:stream).returns res
 
     Kronk::Request.expects(:new).
       with("http://www.google.com/",{:follow_redirects => 3}).returns(req).
@@ -517,7 +517,7 @@ class TestKronk < Test::Unit::TestCase
   def test_follow_redirect_no_redirect
     res = Kronk::Response.new mock_200_response
     req = Kronk::Request.new "http://www.google.com/"
-    req.stubs(:retrieve).returns res
+    req.stubs(:stream).returns res
 
     Kronk::Request.expects(:new).with("http://www.google.com/",{}).never
     Kronk::Request.expects(:new).
@@ -530,7 +530,7 @@ class TestKronk < Test::Unit::TestCase
   def test_do_not_follow_redirect
     res = Kronk::Response.new mock_302_response
     req = Kronk::Request.new "http://www.google.com/"
-    req.stubs(:retrieve).returns res
+    req.stubs(:stream).returns res
 
     Kronk::Request.expects(:new).with("http://www.google.com/",{}).never
     Kronk::Request.expects(:new).

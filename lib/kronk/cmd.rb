@@ -684,17 +684,20 @@ Parse and run diffs against data from live and cached http responses.
     # to $stdout.
 
     def self.render kronk, options={}
+      status =
+        if options[:irb]
+          irb kronk.response
+
+        elsif kronk.diff
+          render_diff kronk.diff
+
+        elsif kronk.response
+          render_response kronk.response, kronk.options
+        end
+
       cache_response kronk.response
 
-      if options[:irb]
-        irb kronk.response
-
-      elsif kronk.diff
-        render_diff kronk.diff
-
-      elsif kronk.response
-        render_response kronk.response, kronk.options
-      end
+      status
     end
 
 
