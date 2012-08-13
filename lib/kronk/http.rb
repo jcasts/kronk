@@ -198,8 +198,7 @@ class Kronk
         D 'Conn socket closed'
       elsif keep_alive?(req, res)
         D 'Conn keep-alive'
-        res.body
-        add_to_pool
+        res.after_read{ add_to_pool }
       elsif not res.body and @close_on_empty_response
         D 'Conn close'
         @socket.close

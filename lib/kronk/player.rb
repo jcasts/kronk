@@ -140,6 +140,9 @@ class Kronk
     # Trigger a single kronk result callback.
 
     def trigger_result kronk, err, &block
+      # Make sure body is read from IO to free the connection.
+      kronk.responses.each{|r| r.body }
+
       if block_given?
         if block.arity > 2 || block.arity < 0
           block.call kronk, err, @mutex

@@ -250,6 +250,8 @@ class TestPlayer < Test::Unit::TestCase
     start     = Time.now
     processed = []
 
+    @player.on(:result){|resp| nil }
+
     @player.concurrently 10 do |req|
       processed << req
       sleep 0.5
@@ -275,6 +277,7 @@ class TestPlayer < Test::Unit::TestCase
 
     requests = (1..20).map{|n| "request #{n}\n"}
     @player.from_io StringIO.new(requests.join)
+    @player.on(:result){|resp| nil }
 
     start_time = Time.now
     @player.concurrently 10 do |req|

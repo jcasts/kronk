@@ -82,6 +82,8 @@ class Kronk
       gzip?
       deflated?
 
+      @after_read = []
+
       @read = !!opts[:no_body]
       body(&block) if block_given?
     end
@@ -100,6 +102,14 @@ class Kronk
 
     def []= key, value
       @headers[key.to_s.downcase] = value
+    end
+
+
+    ##
+    # Set callback for when body read is complete.
+
+    def after_read &block
+      @after_read << block
     end
 
 
@@ -155,6 +165,8 @@ class Kronk
       @read = true
 
       yield @body[last_pos..-1] if block_given? && (deflated? || error)
+
+      @after_read.each{|callback| callback.call }
 
       @body
     end
