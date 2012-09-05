@@ -548,8 +548,7 @@ class TestRequest < Test::Unit::TestCase
   def test_retrieve_user_agent_default
     expect_request "GET", "http://example.com",
     :headers => {
-      'User-Agent' =>
-        "Kronk/#{Kronk::VERSION} (http://github.com/yaksnrainbows/kronk)"
+      'User-Agent' => Kronk::DEFAULT_USER_AGENT
     }
 
     Kronk::Request.new("http://example.com").retrieve
