@@ -1,3 +1,13 @@
+=== 1.9.4 / 2012-09-04
+
+* Enhancements:
+
+  * Support for oauth authentication.
+
+* Bugfixes:
+
+  * Updated Cookie parsing to display correctly when loading from cache.
+
 === 1.9.3 / 2012-07-16
 
 * Bugfixes:
