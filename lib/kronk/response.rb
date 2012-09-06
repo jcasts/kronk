@@ -67,15 +67,21 @@ class Kronk
 
       @cookies = []
 
-      if URI::HTTP === uri
-        jar = CookieJar::Jar.new
-        jar.set_cookies_from_headers uri, @headers
-
-        jar.to_a.each do |cookie|
-          @cookies << cookie.to_hash
-          Kronk.cookie_jar.add_cookie cookie unless opts[:no_cookies]
-        end
+      Array(@headers['set-cookie']).each do |cvalue|
+        cookie = CookieJar::CookieValidation.parse_set_cookie(cvalue).to_hash
+        cookie.delete :version
+        cookie.keys.each{|k| cookie[k.to_s] = cookie.delete(k) }
+        @cookies << cookie
       end
+
+      Array(@headers['set-cookie2']).each do |cvalue|
+        cookie = CookieJar::CookieValidation.parse_set_cookie2(cvalue).to_hash
+        cookie.keys.each{|k| cookie[k.to_s] = cookie.delete(k) }
+        @cookies << cookie
+      end
+
+      Kronk.cookie_jar.set_cookies_from_headers uri, @headers unless
+        opts[:no_cookies] || !(URI::HTTP === uri)
 
       self.gzip    = opts[:force_gzip]
       self.inflate = opts[:force_inflate]
@@ -921,31 +927,5 @@ class Kronk
       str.force_encoding encoding if str.respond_to? :force_encoding
       str
     end
-  end
-end
-
-
-class CookieJar::Cookie
-  def to_hash
-    result = {
-      'name'       => @name,
-      'value'      => @value,
-      'domain'     => @domain,
-      'path'       => @path,
-    }
-    {
-      'expiry'      => @expiry,
-      'secure'      => (true if @secure),
-      'http_only'   => (true if @http_only),
-      'version'     => (@version if version != 0),
-      'comment'     => @comment,
-      'comment_url' => @comment_url,
-      'discard'     => (true if @discard),
-      'ports'       => @ports
-    }.each do |name, value|
-      result[name] = value if value
-    end
-
-    result
   end
 end

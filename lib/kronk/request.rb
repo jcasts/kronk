@@ -486,6 +486,7 @@ class Kronk
 
     def stream opts={}, &block
       retried = false
+      opts    = opts.merge(:request => self)
 
       begin
         start_time = Time.now
@@ -495,7 +496,6 @@ class Kronk
 
         @response           = conn.request http_request, nil, opts, &block
         @response.conn_time = conn_time
-        @response.request   = self
 
         @response
 
@@ -538,7 +538,7 @@ class Kronk
 
     def to_s
       out = "#{@http_method} #{@uri.request_uri} HTTP/1.1\r\n"
-      out << "host: #{@uri.host}:#{@uri.port}\r\n"
+      out << "Host: #{@uri.host}:#{@uri.port}\r\n"
 
       http_request.each do |name, value|
         out << "#{name}: #{value}\r\n" unless name =~ /host/i
