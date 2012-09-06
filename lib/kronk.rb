@@ -366,6 +366,9 @@ class Kronk
   rescue Errno::ENOENT => e
     raise NotFoundError, e.message
 
+  rescue OpenSSL::SSL::SSLError
+    raise InvalidCertificate, "The remote SSL certificate could not be trusted"
+
   rescue SocketError, Errno::ECONNREFUSED => e
     raise NotFoundError, "#{uri} could not be found (#{e.class})"
 

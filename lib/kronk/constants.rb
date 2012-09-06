@@ -9,6 +9,9 @@ class Kronk
   # Raised when the URI was not resolvable.
   class NotFoundError < Error; end
 
+  # Raised when SSL fails.
+  class InvalidCertificate < Error; end
+
   # Raised when HTTP times out.
   class TimeoutError < Error; end
 

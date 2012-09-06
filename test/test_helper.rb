@@ -183,6 +183,7 @@ def expect_request req_method, url, opts={}
   headers['User-Agent'] ||= Kronk::DEFAULT_USER_AGENT
   headers['Connection'] ||= 'Keep-Alive'
 
+  http.stubs(:use_ssl?).returns false
   http.expects(:started?).returns false
   http.expects(:start)
   req.expects(:body=).with(data)

@@ -212,7 +212,7 @@ class Kronk
     self.multipart_boundary = 'AaB03x'
 
 
-    attr_accessor :headers, :response, :timeout
+    attr_accessor :headers, :response, :timeout, :insecure_ssl
 
     attr_reader :body, :http_method, :proxy, :uri, :use_cookies
 
@@ -230,6 +230,7 @@ class Kronk
     # :http_method:: Symbol - the http method to use; defaults to :get
     # :proxy:: Hash/String - http proxy to use; defaults to {}
     # :accept_encoding:: Array/String - list of encodings the server can return
+    # :insecure_ssl:: Boolean - Allow SSL for sites with bad or missing certs
     #
     # Note: if no http method is specified and data is given, will default
     # to using a post request.
@@ -253,6 +254,8 @@ class Kronk
       @headers['Connection'] ||= 'Keep-Alive'
 
       @timeout = opts[:timeout] || Kronk.config[:timeout]
+
+      @insecure_ssl = opts[:insecure_ssl]
 
       @uri = self.class.build_uri uri, opts
 
@@ -354,6 +357,9 @@ class Kronk
       conn = Kronk::HTTP.new @uri.host, @uri.port,
                :proxy => self.proxy,
                :ssl   => !!(@uri.scheme =~ /^https$/)
+
+      conn.verify_mode = OpenSSL::SSL::VERIFY_NONE if
+        conn.use_ssl? && @insecure_ssl
 
       conn.open_timeout = conn.read_timeout = @timeout if @timeout
 

@@ -425,6 +425,11 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
+        opt.on('-k', '--insecure', 'Allow insecure SSL connections') do
+          options[:insecure_ssl] = true
+        end
+
+
         opt.on('-L', '--location [NUM]', Integer,
                'Follow the location header always or num times') do |value|
           options[:follow_redirects] = value || true
