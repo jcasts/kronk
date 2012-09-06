@@ -49,6 +49,8 @@ class Kronk
       Hash === v1 && Hash === v2 ? v1.merge(v2,&DEEP_MERGE) : v2
     end
 
+  RUBY_ENGINE = 'ruby' unless defined?(RUBY_ENGINE)
+
   # The default Kronk user agent.
   DEFAULT_USER_AGENT =
     "Kronk/#{VERSION} (#{RUBY_PLATFORM}; U; en-US; http://kronk.me) \
