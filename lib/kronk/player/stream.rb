@@ -38,6 +38,7 @@ class Kronk
         $stdout << "#{"%X" % output.length}\r\n"
         $stdout << output
         $stdout << "\r\n"
+        $stdout.flush
       end
 
       output
