@@ -62,7 +62,7 @@ class Kronk
 
   # The default Kronk user agent.
   DEFAULT_USER_AGENT =
-    "Kronk/#{VERSION} (#{RUBY_PLATFORM}; U; en-US; http://kronk.me) \
+    "Kronk/#{VERSION} (#{RUBY_PLATFORM}; U; en-US; http://jcasts.me/kronk) \
 #{RUBY_ENGINE}/#{RUBY_VERSION}p#{RUBY_PATCHLEVEL}"
 
   # Aliases for various user-agents. Thanks Mechanize! :)
