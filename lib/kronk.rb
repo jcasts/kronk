@@ -16,7 +16,7 @@ require 'yaml'
 class Kronk
 
   # This gem's version.
-  VERSION = '1.9.4'
+  VERSION = '1.9.5'
 
   require 'kronk/constants'
   require 'kronk/queue_runner'
@@ -36,7 +36,8 @@ class Kronk
   require 'kronk/http'
   require 'kronk/buffered_io'
   require 'kronk/multipart'
-  require 'kronk/multipart_io'
+  require 'kronk/multipart_io'  
+  require 'kronk/oauth_config'
   require 'kronk/request'
   require 'kronk/response'
   require 'kronk/plist_parser'
@@ -49,6 +50,14 @@ class Kronk
 
   def self.config
     @config ||= DEFAULT_CONFIG
+  end
+
+
+  ##
+  # Returns the Kronk::OAuthConfig instance
+
+  def self.oauth_config
+    @oauth_config ||= Kronk::OAuthConfig.new
   end
 
 
@@ -78,6 +87,8 @@ class Kronk
         self.config[skey] = value
       end
     end
+
+    @oauth_config = Kronk::OAuthConfig.load_file(DEFAULT_OAUTH_FILE)
   end
 
 
@@ -281,9 +292,8 @@ class Kronk
   # :http_method:: Symbol - the http method to use; defaults to :get
   # :user_agent:: String - user agent string or alias; defaults to 'kronk'
   # :auth:: Hash - must contain :username and :password; defaults to nil
-  # :oauth:: Hash - :consumer_key, :token, :consumer_secret, :token_secret
+  # :oauth:: Hash - :consumer_key, :token :consumer_secret, :token_secret
   # :proxy:: Hash/String - http proxy to use; defaults to nil
-  # :keep_indicies:: Boolean - indicies of modified arrays display as hashes
   # :show_headers:: Boolean/String/Array - which headers to show in output
   # :parser:: Object/String - the parser to use for the body; default nil
   # :raw:: Boolean - run diff on raw strings
@@ -407,6 +417,16 @@ class Kronk
 
 
   ##
+  # Returns oauth config for the given uri
+
+  def oauth_options_for_uri uri
+    uri = "http://#{uri}" unless uri.start_with?("http")
+    uri_host = URI.parse(uri.to_s).host
+    return self.class.oauth_config.get_active_for_host(uri_host)
+  end
+
+
+  ##
   # Returns merged config-defined options for a given uri.
   # Values in cmd_opts take precedence.
   # Returns cmd_opts Hash if none found.
@@ -467,6 +487,11 @@ class Kronk
           out_opts[key] = Array(val).concat Array(out_opts[key])
         end
       end
+    end
+
+    if !out_opts[:oauth]
+      oauth = oauth_options_for_uri(uri)
+      out_opts[:oauth] = oauth if oauth
     end
 
     out_opts

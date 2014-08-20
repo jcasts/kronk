@@ -27,7 +27,19 @@ class Kronk::OAuthConfig
 
   def get name, host
     config = config_for_host(host)
-    config && config[ACCOUNTS_KEY] && config[ACCOUNTS_KEY][name]
+    config && config[ACCOUNTS_KEY] && config[ACCOUNTS_KEY][name] && config[ACCOUNTS_KEY][name].dup
+  end
+
+
+  def get_symbolized name, host
+    data = get(name, host)
+    return unless data
+    
+    data[:consumer_key]     = data.delete('consumer_key')
+    data[:consumer_secret]  = data.delete('consumer_secret')
+    data[:token]            = data.delete('token')
+    data[:token_secret]     = data.delete('token_secret')
+    return data
   end
 
 
@@ -64,7 +76,7 @@ class Kronk::OAuthConfig
 
   def get_active_for_host host
     name = active_name_for_host(host)
-    return config[ACCOUNTS_KEY] && config[ACCOUNTS_KEY][name]
+    return get_symbolized(name, host)
   end
 
 

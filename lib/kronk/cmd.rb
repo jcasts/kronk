@@ -1,5 +1,4 @@
 require 'kronk'
-require 'kronk/oauth_config'
 require 'optparse'
 
 class Kronk
@@ -455,8 +454,8 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
-        opt.on('--oauth', String, 'OAuth config name - see kronk-oauth') do |file|
-          options[:oauth] = YAML.load_file file
+        opt.on('--oauth [NAME]', String, 'OAuth config name - see kronk-oauth') do |name|
+          options[:oauth_config] = name
         end
 
 
@@ -547,6 +546,10 @@ Parse and run diffs against data from live and cached http responses.
         options[:uris] << Kronk.config[:cache_file]
       end
 
+      if options[:oauth_config]
+        options[:oauth] = load_oauth_profile(options.delete(:oauth_config))
+      end
+
       argv.clear
 
       raise "You must enter at least one URI" if options[:uris].empty? &&
@@ -593,6 +596,17 @@ Parse and run diffs against data from live and cached http responses.
       end
 
       options
+    end
+
+
+    ##
+    # Retrieve the config for the given oauth profile
+
+    def self.load_oauth_profile profile
+      host, name = profile.split("@", 2).reverse
+      config = OAuthConfig.load_file(Kronk::DEFAULT_OAUTH_FILE)
+      return unless config.has_name_for_host?(name, host)
+      return config.get_symbolized(name, host)
     end
 
 

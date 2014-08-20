@@ -1,5 +1,8 @@
 = TODO
 
+* Support for using oauth keys in kronk command
+
+
 == Maybe Later
 
 * Investigate streaming and Yajl.

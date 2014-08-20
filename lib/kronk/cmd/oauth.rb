@@ -123,6 +123,8 @@ class Kronk::Cmd::OAuth
       autocomplete << "#{name}@#{host}"
     end
 
+    autocomplete.concat(@config.hosts)
+
     File.open(Kronk::DEFAULT_OAUTH_LIST_FILE, "w+") {|f| f.write( autocomplete.join("\n") << "\n" ) }
   end
 
@@ -191,7 +193,7 @@ class Kronk::Cmd::OAuth
     config = {
       'consumer_key'    => query("Consumer Key: "),
       'consumer_secret' => query("Consumer Secret: "),
-      'token_key'       => query("Token Key: "),
+      'token'           => query("Token: "),
       'token_secret'    => query("Token Secret: ")
     }
 
@@ -328,7 +330,6 @@ class Kronk::Cmd::OAuth
 
   def add_twurl_config name, config
     config.delete('username')
-    config['token_key'] = config.delete('token')
     config['token_secret'] = config.delete('secret')
 
     @config.set(name, TWITTER_HOST, config)
