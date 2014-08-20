@@ -4,9 +4,12 @@ Manifest.txt
 README.rdoc
 Rakefile
 bin/kronk
+bin/kronk-oauth
 lib/kronk.rb
+lib/kronk/oauth_config.rb
 lib/kronk/buffered_io.rb
 lib/kronk/cmd.rb
+lib/kronk/cmd/oauth.rb
 lib/kronk/constants.rb
 lib/kronk/data_string.rb
 lib/kronk/diff.rb

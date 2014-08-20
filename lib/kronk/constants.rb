@@ -34,6 +34,9 @@ class Kronk
   # Default file with history of unique URIs. (Used for autocomplete)
   DEFAULT_HISTORY_FILE = File.join CONFIG_DIR, "history"
 
+  # Default file where oauth credentials are stored.
+  DEFAULT_OAUTH_FILE = File.join CONFIG_DIR, "oauth"
+
 
   # Default Content-Type header to parser mapping.
   DEFAULT_CONTENT_TYPES = {

@@ -1,4 +1,5 @@
 require 'kronk'
+require 'kronk/oauth_config'
 require 'optparse'
 
 class Kronk

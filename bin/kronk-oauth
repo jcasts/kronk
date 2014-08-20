@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+
+$: << File.join(File.dirname(__FILE__), "../lib") if $0 == "bin/kronk-oauth"
+
+require 'kronk/cmd/oauth'
+Kronk::Cmd::OAuth.run
