@@ -537,6 +537,11 @@ Parse and run diffs against data from live and cached http responses.
         options[:uris] << BufferedIO.new($stdin)
       end
 
+      unless $stdout.tty?
+        Kronk.config[:color_data]  = false
+        Kronk.config[:diff_format] = 'ascii'
+      end
+
       options[:uris].concat argv
       options[:uris].slice!(2..-1)
 
