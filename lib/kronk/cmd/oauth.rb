@@ -3,6 +3,8 @@ require 'yaml'
 
 class Kronk::Cmd::OAuth
 
+  TWITTER_HOST = 'api.twitter.com'
+
   ##
   # Parse ARGV into options and Kronk config.
 
@@ -54,6 +56,14 @@ class Kronk::Cmd::OAuth
 
       opt.on('-d', '--disable HOST', 'Stop using OAuth config for a given host') do |host|
         return :disable_config, host
+      end
+
+      opt.on('-n', '--rename TARGET', 'Rename an OAuth config for a given host') do |target|
+        return :rename_config, *parse_target(target)
+      end
+
+      opt.on('--twurl [FILE]', 'Import twurl configs') do |file|
+        return :import_twurl, file
       end
 
       opt.on('-h', '--help', 'Print this help screen') do
@@ -252,5 +262,69 @@ class Kronk::Cmd::OAuth
     save_file!
 
     $stderr.puts("Disabled config #{name}@#{host}")
+  end
+
+
+  def rename_config host, name=nil
+    assert_has_host!(host)
+    name ||= select_name(host)
+
+    new_name = prompt("Enter new name: ")
+
+    config = @config.get(name, host)
+    @config.remove(host, name)
+    @config.set(new_name, host, config)
+
+    save_file!
+
+    $stderr.puts("Renamed #{name}@#{host} to #{new_name}@#{host}")
+  end
+
+
+  def import_twurl file=nil
+    file ||= File.expand_path('~/.twurlrc')
+
+    if !File.file?( file )
+      $stderr.puts("Could not find file: #{file}")
+      exit 1
+    end
+
+    config = YAML.load_file(file) rescue nil
+
+    is_valid = Hash === config &&
+                config['profiles'] &&
+                Hash === config['profiles']
+
+    unless is_valid
+      $stderr.puts("Invalid file format: #{file}")
+      exit 1
+    end
+
+    host = 'api.twitter.com'
+    profiles = config['profiles']
+
+    profiles.each do |name, consumers|
+      name = "#{name}-twurl" if @config.has_name_for_host?(name, TWITTER_HOST)
+      if consumers.length == 1
+        add_twurl_config(name, consumers[consumers.keys.first])
+      else
+        consumers.each do |key, config|
+          add_twurl_config("#{name}-#{key}", config)
+        end
+      end
+    end
+
+    save_file!
+
+    $stderr.puts("Successfully imported twurl config")
+  end
+
+
+  def add_twurl_config name, config
+    config.delete('username')
+    config['token_key'] = config.delete('token')
+    config['token_secret'] = config.delete('secret')
+
+    @config.set(name, TWITTER_HOST, config)
   end
 end
