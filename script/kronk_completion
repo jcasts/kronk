@@ -4,9 +4,15 @@ export COMP_WORDBREAKS=${COMP_WORDBREAKS/\:/}
 
 _kronk() 
 {
-  local cur kronk_keys kronk_words
+  local cur prev kronk_keys kronk_words
 
   cur="${COMP_WORDS[COMP_CWORD]}"
+  prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+  if [[ $prev == "--oauth" ]]; then
+    _kronk_oauth
+    return $?
+  fi
 
   kronk_keys="$HOME/.kronk/history"
   test -f "$kronk_keys" || kronk_keys="$HOME/.kronk_history"
@@ -27,4 +33,24 @@ $(echo "$kronk_words")"
   return 1
 }
 
+_kronk_oauth()
+{
+  local cur prev matcher kronk_keys kronk_words
+
+  cur="${COMP_WORDS[COMP_CWORD]}"
+  prev="${COMP_WORDS[COMP_CWORD-1]}"
+  matcher="^(--?[lrsdn]|--oauth)"
+
+  kronk_keys="$HOME/.kronk/oauth-list"
+  kronk_words="$(cat $kronk_keys)"
+
+  if [[ -f "$kronk_keys" && $prev =~ $matcher ]]; then
+    COMPREPLY=( $(compgen -W "$kronk_words" -- ${cur}) )
+    return 0
+  fi
+
+  return 1
+}
+
 complete -o default -F _kronk kronk
+complete -o default -F _kronk_oauth kronk-oauth

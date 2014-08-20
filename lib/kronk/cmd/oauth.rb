@@ -99,6 +99,7 @@ class Kronk::Cmd::OAuth
 
 	def self.run argv=ARGV
     trap 'INT' do
+      puts "\n"
       exit 2
     end
 
@@ -116,6 +117,13 @@ class Kronk::Cmd::OAuth
 
   def save_file!
     @config.save_file(@file)
+
+    autocomplete = []
+    @config.each do |host, name, config|
+      autocomplete << "#{name}@#{host}"
+    end
+
+    File.open(Kronk::DEFAULT_OAUTH_LIST_FILE, "w+") {|f| f.write( autocomplete.join("\n") << "\n" ) }
   end
 
 

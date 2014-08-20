@@ -109,4 +109,14 @@ class Kronk::OAuthConfig
   def save_file yaml_file
     File.open(yaml_file, "w+") {|f| f.write @config.to_yaml }
   end
+
+
+  def each &block
+    @config.each do |host, data|
+      configs = data[ACCOUNTS_KEY]
+      configs.each do |name, config|
+        block.call(host, name, config)
+      end
+    end
+  end
 end

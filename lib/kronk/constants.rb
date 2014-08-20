@@ -37,6 +37,9 @@ class Kronk
   # Default file where oauth credentials are stored.
   DEFAULT_OAUTH_FILE = File.join CONFIG_DIR, "oauth"
 
+  # Default file of oauth names. (Used for autocomplete)
+  DEFAULT_OAUTH_LIST_FILE = File.join CONFIG_DIR, "oauth-list"
+
 
   # Default Content-Type header to parser mapping.
   DEFAULT_CONTENT_TYPES = {

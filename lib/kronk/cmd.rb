@@ -455,7 +455,7 @@ Parse and run diffs against data from live and cached http responses.
         end
 
 
-        opt.on('--oauth', String, 'Yaml file with Oauth credentials') do |file|
+        opt.on('--oauth', String, 'OAuth config name - see kronk-oauth') do |file|
           options[:oauth] = YAML.load_file file
         end
 
