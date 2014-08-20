@@ -29,7 +29,7 @@ class Kronk::Cmd::OAuth
       #{opt.program_name} --list
       #{opt.program_name} --list api.twitter.com
       #{opt.program_name} --add api.twitter.com
-      #{opt.program_name} --rm myusername@api.twitter.com
+      #{opt.program_name} --rm my-config-name@api.twitter.com
 
       Option targets may be a in the form of a host or user@host.
 
@@ -71,7 +71,7 @@ class Kronk::Cmd::OAuth
 
     opts.parse! argv
 
-  rescue OptionParser::MissingArgument => e
+  rescue OptionParser::ParseError => e
     $stderr.puts("\nError: #{e.message}")
     $stderr.puts("See 'kronk-oauth --help' for usage\n\n")
     exit 1
@@ -134,7 +134,7 @@ class Kronk::Cmd::OAuth
 
 
   def query_name host
-    return query("Username for #{host}: ")
+    return query("Config name for #{host}: ")
   end
 
 
@@ -145,15 +145,17 @@ class Kronk::Cmd::OAuth
   end
 
 
-  def select_name host
+  def select_name host, allow_all=false
     names = @config.names_for_host(host)
     names.each_with_index do |name, i|
       mark = name == @config.active_name_for_host(host) ? "* " : "  "
       $stderr.puts("#{i+1}) #{mark}#{name}")
     end
+    $stderr.puts("#{names.length+1})   All")
 
     num = 0
-    until num > 0 && num <= names.length
+    len = names.length + (allow_all ? 1 : 0)
+    until num > 0 && num <= len
       num = query("Enter number: ").to_i
     end
 
@@ -182,7 +184,13 @@ class Kronk::Cmd::OAuth
 
   def remove_config host, name=nil
     assert_has_host!(host)
-    name ||= select_name(host)
+    name ||= select_name(host, true)
+
+    @config.remove(host, name)
+
+    save_file!
+
+    $stderr.puts("Removed config #{name && "#{name}@"}#{host}")
   end
 
 
