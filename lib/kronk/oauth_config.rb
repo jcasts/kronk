@@ -53,6 +53,15 @@ class Kronk::OAuthConfig
   end
 
 
+  def rename host, name, new_name
+    selected = active_name_for_host(host) == name
+    config = get(name, host)
+    remove(host, name)
+    set(new_name, host, config)
+    set_active_for_host(new_name, host) if selected
+  end
+
+
   def get_active_for_host host
     name = active_name_for_host(host)
     return config[ACCOUNTS_KEY] && config[ACCOUNTS_KEY][name]

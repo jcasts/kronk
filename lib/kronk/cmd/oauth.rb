@@ -159,12 +159,12 @@ class Kronk::Cmd::OAuth
 
 
   def select_name host, allow_all=false
-    names = @config.names_for_host(host)
+    names = @config.names_for_host(host).sort
     names.each_with_index do |name, i|
       mark = name == @config.active_name_for_host(host) ? "* " : "  "
       $stderr.puts("#{i+1}) #{mark}#{name}")
     end
-    $stderr.puts("#{names.length+1})   All")
+    $stderr.puts("#{names.length+1})   All") if allow_all
 
     num = 0
     len = names.length + (allow_all ? 1 : 0)
@@ -269,11 +269,9 @@ class Kronk::Cmd::OAuth
     assert_has_host!(host)
     name ||= select_name(host)
 
-    new_name = prompt("Enter new name: ")
+    new_name = query("Enter new name: ")
 
-    config = @config.get(name, host)
-    @config.remove(host, name)
-    @config.set(new_name, host, config)
+    @config.rename(host, name, new_name)
 
     save_file!
 
