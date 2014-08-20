@@ -1,3 +1,17 @@
+=== 1.9.6 / 2014-08-20
+
+* Bugfixes:
+
+  * Fix for first time kronk-oauth run
+
+  * Don't colorize responses when writing to non-tty stdout
+
+=== 1.9.5 / 2014-08-20
+
+* Enhancements:
+
+  * Add kronk-oauth CLI for oauth config management
+
 === 1.9.4 / 2012-09-04
 
 * Enhancements:
