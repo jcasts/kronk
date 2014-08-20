@@ -29,7 +29,7 @@ class Kronk::Cmd::OAuth
       #{opt.program_name} --list
       #{opt.program_name} --list api.twitter.com
       #{opt.program_name} --add api.twitter.com
-      #{opt.program_name} --rm my-config-name@api.twitter.com
+      #{opt.program_name} --remove my-config-name@api.twitter.com
 
       Option targets may be a in the form of a host or user@host.
 
@@ -70,6 +70,9 @@ class Kronk::Cmd::OAuth
     end
 
     opts.parse! argv
+
+    puts opts.to_s
+    exit 0
 
   rescue OptionParser::ParseError => e
     $stderr.puts("\nError: #{e.message}")
