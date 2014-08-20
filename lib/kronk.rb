@@ -88,7 +88,7 @@ class Kronk
       end
     end
 
-    @oauth_config = Kronk::OAuthConfig.load_file(DEFAULT_OAUTH_FILE)
+    @oauth_config = Kronk::OAuthConfig.load_file(DEFAULT_OAUTH_FILE) if File.file?(DEFAULT_OAUTH_FILE)
   end
 
 

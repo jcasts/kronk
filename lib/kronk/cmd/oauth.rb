@@ -103,6 +103,8 @@ class Kronk::Cmd::OAuth
       exit 2
     end
 
+    Kronk::Cmd.load_config_file
+
     new(Kronk::DEFAULT_OAUTH_FILE).send(*parse_args(argv))
 	end
 
